@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 
+import { SessionProvider } from "@/features/auth/context/SessionProvider";
 import { TooltipProvider } from "@/components/ui/Tooltip";
 import { MswProvider } from "@/providers/msw-provider";
 import { NuqsProvider } from "@/providers/nuqs-provider";
@@ -19,10 +20,12 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider delayDuration={200}>
           <QueryProvider>
-            <NuqsProvider>
-              {children}
-              <ToastProvider />
-            </NuqsProvider>
+            <SessionProvider>
+              <NuqsProvider>
+                {children}
+                <ToastProvider />
+              </NuqsProvider>
+            </SessionProvider>
           </QueryProvider>
         </TooltipProvider>
       </ThemeProvider>

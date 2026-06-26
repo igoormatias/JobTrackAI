@@ -2,6 +2,7 @@ export * from "./auth";
 export * from "./dashboard";
 export * from "./jobs";
 export * from "./notifications";
+export * from "./onboarding";
 export * from "./pipeline";
 export * from "./profile";
 export * from "./settings";

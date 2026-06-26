@@ -1,10 +1,10 @@
+import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { LoginPlaceholderPage } from "@/features/auth/pages/LoginPlaceholderPage";
 
-export default function LoginPage() {
+export default function LoginRoutePage() {
   return (
     <PublicLayout>
-      <LoginPlaceholderPage />
+      <LoginPage />
     </PublicLayout>
   );
 }

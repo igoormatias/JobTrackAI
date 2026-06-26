@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronLeft, LogOut } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
+import { useCurrentUser, useLogoutMutation } from "@/features/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { MAIN_NAV, SECONDARY_NAV } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
@@ -14,9 +15,18 @@ export type SidebarProps = {
   className?: string;
 };
 
+const getInitials = (name: string): string =>
+  name
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+
 export const Sidebar = ({ className }: SidebarProps) => {
   const pathname = usePathname();
   const { isSidebarCollapsed, toggleSidebarCollapsed } = useAppStore();
+  const { user } = useCurrentUser();
+  const logoutMutation = useLogoutMutation();
 
   return (
     <aside
@@ -93,16 +103,23 @@ export const Sidebar = ({ className }: SidebarProps) => {
           )}
         >
           <Avatar className="h-9 w-9">
-            <AvatarFallback>JD</AvatarFallback>
+            {user?.avatar ? <AvatarImage src={user.avatar} alt={user.name} /> : null}
+            <AvatarFallback>{getInitials(user?.name ?? "User")}</AvatarFallback>
           </Avatar>
           {!isSidebarCollapsed ? (
             <div className="flex-1 overflow-hidden">
-              <p className="truncate text-sm font-medium text-foreground">João Dev</p>
-              <p className="truncate text-xs text-muted-foreground">joao@email.com</p>
+              <p className="truncate text-sm font-medium text-foreground">{user?.name ?? "Usuário"}</p>
+              <p className="truncate text-xs text-muted-foreground">{user?.email ?? ""}</p>
             </div>
           ) : null}
           {!isSidebarCollapsed ? (
-            <Button variant="ghost" size="icon" aria-label="Sair">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Sair"
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+            >
               <LogOut className="h-4 w-4" />
             </Button>
           ) : null}
