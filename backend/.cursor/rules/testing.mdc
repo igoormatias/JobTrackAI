@@ -1,0 +1,27 @@
+---
+description: Backend testing conventions (Vitest)
+---
+
+## Ferramentas
+
+- Runner: **Vitest**
+- Arquivos: `src/**/*.test.ts`
+
+## Estilo
+
+- Use sempre:
+  - `describe("X", () => { ... })`
+  - `it("should ...", async () => { ... })`
+- Testes unitários preferidos em `service/` (TDD).
+
+## Mocks
+
+- Mock de repositório deve ser explícito (sem acessar DB).
+- Use `vi.fn()` e `expect(...).toHaveBeenCalledWith(...)`.
+
+## Boas práticas
+
+- Arrange / Act / Assert quando ficar mais legível.
+- Evitar números mágicos: prefira constantes nomeadas quando necessário.
+- Teste falhas importantes: `NotFoundError`, validação e regras de negócio.
+
