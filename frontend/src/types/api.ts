@@ -3,11 +3,18 @@ export type ApiResponse<T> = {
   message?: string;
 };
 
-export type PaginatedResponse<T> = {
-  data: T[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-  };
+export type CursorPaginationMeta = {
+  limit: number;
+  total: number;
+  nextCursor: string | null;
+  hasMore: boolean;
 };
+
+export type CursorPaginatedResponse<T> = {
+  data: T[];
+  meta: CursorPaginationMeta;
+};
+
+export type SortDirection = "asc" | "desc";
+
+export type JobSortField = "match" | "date" | "salary" | "title";
