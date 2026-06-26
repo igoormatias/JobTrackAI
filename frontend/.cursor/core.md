@@ -27,4 +27,4 @@
 ## Geral
 
 * Evitar arquivos genéricos (`utils.ts`, `helpers.ts`)
-* Tailwind v4: classes canônicas — ver `rules.md`
+* Tailwind v4: classes canônicas — ver `rules.md` (data-state-*, data-disabled:, min-w-32, h-(--var), etc.)

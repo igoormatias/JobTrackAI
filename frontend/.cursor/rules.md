@@ -220,9 +220,11 @@ pnpm build
 
 ### Classes canônicas (Tailwind v4 — `suggestCanonicalClasses`)
 
-O IntelliSense do Tailwind v4 sugere **classes canônicas** em vez de valores arbitrários entre colchetes. Siga esse padrão para evitar warnings no editor.
+O IntelliSense/linter do Tailwind v4 sugere **classes canônicas** em vez de valores arbitrários entre colchetes. **Sempre siga esse padrão** para evitar warnings no editor (Problems panel).
 
-**Opacidade em cores** — use o modificador `/N` da escala (0–100), não `/[0.0N]`:
+#### Opacidade em cores
+
+Use o modificador `/N` da escala (0–100), não `/[0.0N]`:
 
 | ❌ Evitar | ✅ Preferir |
 |----------|------------|
@@ -232,14 +234,70 @@ O IntelliSense do Tailwind v4 sugere **classes canônicas** em vez de valores ar
 | `border-white/[0.08]` | `border-white/8` |
 | `text-primary/[0.80]` | `text-primary/80` |
 
+#### Data attributes (Radix / shadcn)
+
+Use a forma curta `data-<attr>-<value>:` em vez de `data-[attr=value]:`:
+
+| ❌ Evitar | ✅ Preferir |
+|----------|------------|
+| `data-[disabled]:pointer-events-none` | `data-disabled:pointer-events-none` |
+| `data-[disabled]:opacity-50` | `data-disabled:opacity-50` |
+| `data-[state=open]:animate-in` | `data-state-open:animate-in` |
+| `data-[state=closed]:animate-out` | `data-state-closed:animate-out` |
+| `data-[state=active]:bg-background` | `data-state-active:bg-background` |
+| `data-[state=checked]:bg-primary` | `data-state-checked:bg-primary` |
+| `data-[state=unchecked]:translate-x-0` | `data-state-unchecked:translate-x-0` |
+| `data-[side=bottom]:translate-y-1` | `data-side-bottom:translate-y-1` |
+| `[&[data-state=open]>svg]:rotate-180` | `data-state-open:[&>svg]:rotate-180` |
+
+#### Largura / espaçamento na escala
+
+| ❌ Evitar | ✅ Preferir |
+|----------|------------|
+| `min-w-[8rem]` | `min-w-32` |
+| `left-[7px]` | `left-1.75` |
+| `translate-y-[-3px]` | `-translate-y-0.75` |
+
+#### Posicionamento centralizado
+
+| ❌ Evitar | ✅ Preferir |
+|----------|------------|
+| `left-[50%] top-[50%]` | `left-1/2 top-1/2` |
+| `translate-x-[-50%] translate-y-[-50%]` | `-translate-x-1/2 -translate-y-1/2` |
+
+#### CSS variables (Radix)
+
+| ❌ Evitar | ✅ Preferir |
+|----------|------------|
+| `h-[var(--radix-select-trigger-height)]` | `h-(--radix-select-trigger-height)` |
+| `min-w-[var(--radix-select-trigger-width)]` | `min-w-(--radix-select-trigger-width)` |
+
+#### Seletores descendentes (cmdk, filhos genéricos)
+
+Use o variant `**:` (qualquer descendente) em vez de `[&_selector]:`:
+
+| ❌ Evitar | ✅ Preferir |
+|----------|------------|
+| `[&_[cmdk-group-heading]]:px-2` | `**:[cmdk-group-heading]:px-2` |
+| `[&_svg]:size-4` | `**:[svg]:size-4` |
+| `[&_p]:leading-relaxed` | `**:[p]:leading-relaxed` |
+
+#### Variants de suporte
+
+| ❌ Evitar | ✅ Preferir |
+|----------|------------|
+| `supports-[backdrop-filter]:bg-background/60` | `supports-backdrop-filter:bg-background/60` |
+
 **Regra prática:** se a opacidade for um percentual inteiro (2%, 5%, 10%, 20%…), escreva `cor/N` diretamente.
 
-**Quando usar colchetes `[...]`:** apenas quando **não** houver equivalente na escala (ex.: `max-w-[380px]`, `tracking-[0.18em]`, sombras custom com valores únicos do design).
+**Quando usar colchetes `[...]`:** apenas quando **não** houver equivalente na escala (ex.: `max-w-[380px]`, `tracking-[0.18em]`, sombras custom com valores únicos do design, seletores arbitrários complexos).
 
 **Ordem de preferência:**
-1. Tokens do projeto (`bg-primary`, `border-white/10`, `text-profile-bg`)
-2. Modificadores canônicos (`/2`, `/10`, `/80`)
-3. Valores arbitrários `[...]` só se inevitáveis
+1. Tokens do projeto (`bg-primary`, `border-white/10`, `text-muted-foreground`)
+2. Modificadores canônicos (`data-state-open:`, `/2`, `/10`, `/80`)
+3. Escala Tailwind (`min-w-32`, `left-1/2`, `-translate-x-1/2`)
+4. CSS variables canônicas (`h-(--custom-var)`)
+5. Valores arbitrários `[...]` só se inevitáveis
 
 ---
 

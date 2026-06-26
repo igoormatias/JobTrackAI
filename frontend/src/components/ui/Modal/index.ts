@@ -1,10 +1,18 @@
 export {
   Dialog as Modal,
+  Dialog as Dialog,
   DialogClose as ModalClose,
+  DialogClose as DialogClose,
   DialogContent as ModalContent,
+  DialogContent as DialogContent,
   DialogDescription as ModalDescription,
+  DialogDescription as DialogDescription,
   DialogFooter as ModalFooter,
+  DialogFooter as DialogFooter,
   DialogHeader as ModalHeader,
+  DialogHeader as DialogHeader,
   DialogTitle as ModalTitle,
+  DialogTitle as DialogTitle,
   DialogTrigger as ModalTrigger,
+  DialogTrigger as DialogTrigger,
 } from "./Modal";

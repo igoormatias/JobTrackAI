@@ -1,6 +1,6 @@
-import { Loader2 } from "lucide-react";
 import { type HTMLAttributes } from "react";
 
+import { Spinner } from "@/components/feedback/Spinner";
 import { cn } from "@/lib/utils";
 
 export type LoadingProps = HTMLAttributes<HTMLDivElement> & {
@@ -15,7 +15,7 @@ export const Loading = ({ className, label = "Carregando...", ...props }: Loadin
       className={cn("flex flex-col items-center justify-center gap-3 py-8", className)}
       {...props}
     >
-      <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+      <Spinner size="lg" />
       <span className="text-sm text-muted-foreground">{label}</span>
     </div>
   );
