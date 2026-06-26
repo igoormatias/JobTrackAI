@@ -17,6 +17,7 @@ export const PROFESSIONAL_AREAS = [
   "frontend",
   "backend",
   "full_stack",
+  "mobile",
   "qa",
   "devops",
   "product_owner",
@@ -26,6 +27,9 @@ export const PROFESSIONAL_AREAS = [
   "data_engineer",
   "data_analyst",
   "tech_lead",
+  "business_analyst",
+  "agile_coach",
+  "other",
 ] as const;
 
 export const SENIORITIES = ["intern", "junior", "mid", "senior", "lead", "staff"] as const;
@@ -98,6 +102,10 @@ export const JOB_TITLES_BY_AREA: Record<(typeof PROFESSIONAL_AREAS)[number], str
   data_engineer: ["Data Engineer", "Engenheiro de Dados", "Analytics Engineer"],
   data_analyst: ["Data Analyst", "Analista de Dados", "Business Intelligence Analyst"],
   tech_lead: ["Tech Lead", "Engineering Lead", "Lead Developer"],
+  mobile: ["Desenvolvedor Mobile", "Mobile Engineer", "React Native Developer", "iOS Developer"],
+  business_analyst: ["Business Analyst", "Analista de Negócios", "BA Digital"],
+  agile_coach: ["Agile Coach", "Coach Ágil", "Agile Specialist"],
+  other: ["Analista de Sistemas", "Consultor de TI", "Especialista de Produto"],
 };
 
 export const MATCH_REASONS = [

@@ -2,6 +2,7 @@ import type { Response } from "express";
 
 import { env } from "../../../config/env.js";
 import { UnauthorizedError } from "../../../shared/errors/unauthorized-error.js";
+import { profileRepository } from "../../profiles/repositories/profile.repository.js";
 import type { AuthResponseDto, OnboardingCompleteResponseDto } from "../dto/auth-response.dto.js";
 import { userRepository } from "../repositories/user.repository.js";
 import type { OnboardingCompleteInput } from "../schemas/auth.schemas.js";
@@ -127,12 +128,45 @@ export class AuthService {
       location: input.location,
       skills: input.skills,
       blockedSkills: input.blockedSkills,
+      modality: input.modality,
+      locationPreference: input.locationPreference,
+      salaryBand: input.salaryBand,
     };
 
     const updated = this.users.updateProfile(userId, profile, true);
 
     if (!updated) {
       throw new UnauthorizedError("User not found");
+    }
+
+    const existingProfile = profileRepository.findByUserId(userId);
+
+    if (existingProfile) {
+      profileRepository.update(userId, {
+        area: input.professionalArea as import("../../profiles/types/profile.types.js").ProfessionalArea,
+        seniority: input.seniority as import("../../profiles/types/profile.types.js").Seniority,
+        modality: input.modality ?? null,
+        location: input.location,
+        locationPreference: input.locationPreference ?? null,
+        salaryBand: input.salaryBand ?? null,
+        salaryExpectation: input.salaryExpectation,
+        skillNames: input.skills,
+        blockedSkills: input.blockedSkills,
+        onboardingCompleted: true,
+      });
+    } else {
+      profileRepository.create(userId, {
+        area: input.professionalArea as import("../../profiles/types/profile.types.js").ProfessionalArea,
+        seniority: input.seniority as import("../../profiles/types/profile.types.js").Seniority,
+        modality: input.modality ?? null,
+        location: input.location,
+        locationPreference: input.locationPreference ?? null,
+        salaryBand: input.salaryBand ?? null,
+        salaryExpectation: input.salaryExpectation,
+        skillNames: input.skills,
+        blockedSkills: input.blockedSkills,
+        onboardingCompleted: true,
+      });
     }
 
     const { profile: savedProfile, ...user } = updated;

@@ -66,8 +66,11 @@ export const completeOnboardingAuthStore = (payload: OnboardingCompletePayload):
     profile: {
       professionalArea: payload.professionalArea,
       seniority: payload.seniority,
+      modality: payload.modality,
       salaryExpectation: payload.salaryExpectation,
+      salaryBand: payload.salaryBand,
       location: payload.location,
+      locationPreference: payload.locationPreference,
       skills: payload.skills,
       blockedSkills: payload.blockedSkills,
     },

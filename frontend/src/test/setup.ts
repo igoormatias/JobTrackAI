@@ -4,6 +4,7 @@ import { afterAll, afterEach, beforeAll } from "vitest";
 
 import { resetAuthStore } from "@/mocks/fixtures/auth-store";
 import { resetFixtureStore } from "@/mocks/fixtures";
+import { resetProfileStore } from "@/mocks/fixtures/profile-store";
 import { server } from "@/mocks/server";
 
 beforeAll(() => {
@@ -15,6 +16,7 @@ afterEach(() => {
   server.resetHandlers();
   resetFixtureStore();
   resetAuthStore();
+  resetProfileStore();
 });
 
 afterAll(() => {

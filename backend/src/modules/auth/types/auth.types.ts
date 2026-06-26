@@ -20,9 +20,17 @@ export type AuthProfile = {
   professionalArea?: string;
   seniority?: string;
   salaryExpectation?: SalaryExpectation;
+  salaryBand?: string;
   location?: string;
+  locationPreference?: {
+    scope: "country" | "state" | "city";
+    state?: string;
+    city?: string;
+    acceptsRelocation: boolean;
+  };
   skills?: string[];
   blockedSkills?: string[];
+  modality?: string;
 };
 
 export type AuthPermissions = {

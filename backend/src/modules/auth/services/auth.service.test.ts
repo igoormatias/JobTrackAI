@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach } from "vitest";
 
 import { userRepository } from "../repositories/user.repository.js";
+import { profileRepository } from "../../profiles/repositories/profile.repository.js";
 import { AuthService } from "./auth.service.js";
 import { MockGoogleAuthService } from "./google-auth.service.js";
 import { TokenService } from "./token.service.js";
@@ -22,6 +23,7 @@ const createMockResponse = () => {
 describe("AuthService", () => {
   beforeEach(() => {
     userRepository.reset();
+    profileRepository.reset();
   });
 
   it("logs in with mock google user and sets session data", async () => {
@@ -44,8 +46,16 @@ describe("AuthService", () => {
     const completed = service.completeOnboarding(login.data.user.id, {
       professionalArea: "frontend",
       seniority: "senior",
-      salaryExpectation: { min: 10000, max: 15000, currency: "BRL" },
+      modality: "remote",
+      salaryBand: "8k_12k",
+      salaryExpectation: { min: 8000, max: 12000, currency: "BRL" },
       location: "São Paulo, SP",
+      locationPreference: {
+        scope: "city",
+        city: "São Paulo",
+        state: "SP",
+        acceptsRelocation: false,
+      },
       skills: ["React", "TypeScript"],
       blockedSkills: ["PHP"],
     });

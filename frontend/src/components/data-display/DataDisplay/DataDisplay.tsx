@@ -1,9 +1,19 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { ChevronsUpDown } from "lucide-react";
+import { type ReactNode, useState } from "react";
 
 import { Chip } from "@/components/ui/Chip";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/Command";
 import { Label } from "@/components/ui/Label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
 import {
   Select,
   SelectContent,
@@ -24,7 +34,11 @@ export type MultiSelectProps = {
   onChange: (value: string[]) => void;
   placeholder?: string;
   label?: string;
+  helpText?: string;
+  error?: string;
   className?: string;
+  searchable?: boolean;
+  id?: string;
 };
 
 export const MultiSelect = ({
@@ -33,8 +47,15 @@ export const MultiSelect = ({
   onChange,
   placeholder = "Selecionar...",
   label,
+  helpText,
+  error,
   className,
+  searchable = false,
+  id,
 }: MultiSelectProps) => {
+  const [open, setOpen] = useState(false);
+  const fieldId = id ?? "multiselect-field";
+
   const available = options.filter((option) => !value.includes(option.value));
 
   const handleAdd = (selected: string) => {
@@ -47,32 +68,84 @@ export const MultiSelect = ({
     onChange(value.filter((item) => item !== removed));
   };
 
+  const selectedChips = value.map((item) => {
+    const option = options.find((opt) => opt.value === item);
+    return (
+      <Chip key={item} onDismiss={() => handleRemove(item)}>
+        {option?.label ?? item}
+      </Chip>
+    );
+  });
+
   return (
     <div className={cn("space-y-2", className)}>
-      {label ? <Label>{label}</Label> : null}
-      <Select onValueChange={handleAdd} value="">
-        <SelectTrigger>
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {available.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {value.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {value.map((item) => {
-            const option = options.find((opt) => opt.value === item);
-            return (
-              <Chip key={item} onDismiss={() => handleRemove(item)}>
-                {option?.label ?? item}
-              </Chip>
-            );
-          })}
-        </div>
+      {label ? <Label htmlFor={fieldId}>{label}</Label> : null}
+      {helpText ? (
+        <p id={`${fieldId}-help`} className="text-sm text-muted-foreground">
+          {helpText}
+        </p>
+      ) : null}
+
+      {searchable ? (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <button
+              id={fieldId}
+              type="button"
+              aria-describedby={error ? `${fieldId}-error` : helpText ? `${fieldId}-help` : undefined}
+              className={cn(
+                "flex min-h-10 w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm",
+                error && "border-destructive",
+              )}
+            >
+              <span className="text-muted-foreground">{placeholder}</span>
+              <ChevronsUpDown className="h-4 w-4 opacity-50" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Pesquisar..." />
+              <CommandList>
+                <CommandEmpty>Nenhuma opção encontrada.</CommandEmpty>
+                <CommandGroup>
+                  {available.map((option) => (
+                    <CommandItem
+                      key={option.value}
+                      value={option.label}
+                      onSelect={() => {
+                        handleAdd(option.value);
+                        setOpen(false);
+                      }}
+                    >
+                      {option.label}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      ) : (
+        <Select onValueChange={handleAdd} value="">
+          <SelectTrigger id={fieldId} aria-invalid={Boolean(error)}>
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {available.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
+      {value.length > 0 ? <div className="flex flex-wrap gap-2">{selectedChips}</div> : null}
+
+      {error ? (
+        <p id={`${fieldId}-error`} className="text-sm text-destructive" role="alert">
+          {error}
+        </p>
       ) : null}
     </div>
   );

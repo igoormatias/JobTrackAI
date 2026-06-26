@@ -10,6 +10,13 @@ export type AuthUser = {
   onboardingCompleted: boolean;
 };
 
+export type AuthProfileLocation = {
+  scope: "country" | "state" | "city";
+  state?: string;
+  city?: string;
+  acceptsRelocation: boolean;
+};
+
 export type AuthProfile = {
   professionalArea?: string;
   seniority?: string;
@@ -18,9 +25,12 @@ export type AuthProfile = {
     max: number;
     currency: "BRL";
   };
+  salaryBand?: string;
   location?: string;
+  locationPreference?: AuthProfileLocation;
   skills?: string[];
   blockedSkills?: string[];
+  modality?: "remote" | "hybrid" | "onsite" | "any";
 };
 
 export type AuthPermissions = {
@@ -49,13 +59,15 @@ export type AuthResponse = {
 export type OnboardingCompletePayload = {
   professionalArea: string;
   seniority: string;
+  modality: "remote" | "hybrid" | "onsite" | "any";
+  location: string;
+  locationPreference: AuthProfileLocation;
+  salaryBand: string;
   salaryExpectation: {
     min: number;
     max: number;
     currency: "BRL";
   };
-  location: string;
   skills: string[];
   blockedSkills: string[];
-  modality?: "remote" | "hybrid" | "onsite";
 };

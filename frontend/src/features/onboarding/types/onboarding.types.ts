@@ -1,60 +1,66 @@
-import type { OnboardingCompletePayload } from "@/features/auth/types";
+import type {
+  OnboardingStepId,
+  ProfessionalArea,
+  ProfileLocation,
+  SalaryBand,
+  Seniority,
+  WorkModality,
+} from "@/types";
 
-export type OnboardingStep =
-  | "area"
-  | "seniority"
-  | "modality"
-  | "location"
-  | "salary"
-  | "skills";
-
-export type OnboardingFormState = OnboardingCompletePayload;
+export type OnboardingStep = OnboardingStepId;
 
 export const ONBOARDING_STEPS: OnboardingStep[] = [
   "area",
+  "skills",
   "seniority",
   "modality",
   "location",
   "salary",
-  "skills",
+  "blockedSkills",
+  "summary",
 ];
 
-export const AREA_OPTIONS = [
-  { value: "frontend", label: "Frontend", icon: "monitor" },
-  { value: "backend", label: "Backend", icon: "server" },
-  { value: "full_stack", label: "Full Stack", icon: "layers" },
-  { value: "qa", label: "QA", icon: "bug" },
-  { value: "devops", label: "DevOps", icon: "cloud" },
-  { value: "ux_ui", label: "UX/UI", icon: "palette" },
-  { value: "product_owner", label: "Product Owner", icon: "clipboard" },
-  { value: "product_manager", label: "Product Manager", icon: "chart" },
-  { value: "tech_lead", label: "Tech Lead", icon: "crown" },
-] as const;
+export type OnboardingFormState = {
+  area: ProfessionalArea | "";
+  skills: string[];
+  seniority: Seniority | "";
+  modality: WorkModality | "";
+  locationPreference: ProfileLocation;
+  salaryBand: SalaryBand | "";
+  blockedSkills: string[];
+};
 
-export const SENIORITY_OPTIONS = [
-  { value: "intern", label: "Estágio" },
-  { value: "junior", label: "Júnior" },
-  { value: "mid", label: "Pleno" },
-  { value: "senior", label: "Sênior" },
-  { value: "lead", label: "Lead" },
-  { value: "staff", label: "Staff" },
-] as const;
+export const createInitialFormState = (): OnboardingFormState => ({
+  area: "",
+  skills: [],
+  seniority: "",
+  modality: "",
+  locationPreference: {
+    scope: "country",
+    acceptsRelocation: false,
+  },
+  salaryBand: "",
+  blockedSkills: [],
+});
 
-export const MODALITY_OPTIONS = [
-  { value: "remote", label: "Remoto" },
-  { value: "hybrid", label: "Híbrido" },
-  { value: "onsite", label: "Presencial" },
-] as const;
+export const STEP_TITLES: Record<OnboardingStep, string> = {
+  area: "Qual sua área profissional?",
+  skills: "Quais são suas competências principais?",
+  seniority: "Qual sua senioridade?",
+  modality: "Qual modelo de trabalho prefere?",
+  location: "Onde você deseja trabalhar?",
+  salary: "Qual sua pretensão salarial?",
+  blockedSkills: "Competências que NÃO deseja",
+  summary: "Revise seu perfil profissional",
+};
 
-export const SKILL_OPTIONS = [
-  "React",
-  "Next.js",
-  "TypeScript",
-  "Node.js",
-  "Python",
-  "Docker",
-  "AWS",
-  "PostgreSQL",
-  "GraphQL",
-  "Figma",
-] as const;
+export const STEP_HELP: Record<OnboardingStep, string> = {
+  area: "Selecione apenas uma área. Isso personaliza as opções dos próximos passos.",
+  skills: "Escolha as competências que você domina. Você pode pesquisar na lista.",
+  seniority: "Informe seu nível de experiência na área selecionada.",
+  modality: "Escolha a modalidade de trabalho que você prefere ou aceita.",
+  location: "Defina onde você busca oportunidades e se aceita mudança.",
+  salary: "Selecione a faixa salarial que representa sua pretensão.",
+  blockedSkills: "Opcional: marque tecnologias ou competências que não deseja trabalhar.",
+  summary: "Confira todas as informações antes de finalizar seu perfil.",
+};

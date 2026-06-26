@@ -1,0 +1,66 @@
+import type { ProfessionalArea } from "@/types";
+
+export const SKILLS_BY_AREA: Record<ProfessionalArea, string[]> = {
+  frontend: [
+    "React",
+    "Next.js",
+    "Vue",
+    "Angular",
+    "TypeScript",
+    "JavaScript",
+    "Styled Components",
+    "Tailwind",
+    "React Query",
+    "Redux",
+    "HTML",
+    "CSS",
+    "Webpack",
+    "Vite",
+  ],
+  backend: [
+    "Node.js",
+    "NestJS",
+    "Express",
+    "Java",
+    "Spring",
+    "Python",
+    "FastAPI",
+    "Go",
+    ".NET",
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "GraphQL",
+    "REST",
+  ],
+  full_stack: [
+    "React",
+    "Next.js",
+    "Node.js",
+    "TypeScript",
+    "PostgreSQL",
+    "Docker",
+    "AWS",
+    "GraphQL",
+    "NestJS",
+    "Tailwind",
+  ],
+  mobile: ["React Native", "Flutter", "Swift", "Kotlin", "Android", "iOS", "Expo", "Firebase"],
+  qa: ["Selenium", "Cypress", "Playwright", "Jest", "Postman", "Test Automation", "API Testing"],
+  devops: ["Docker", "Kubernetes", "AWS", "Azure", "Terraform", "CI/CD", "Linux", "GitHub Actions"],
+  ux_ui: ["Figma", "Sketch", "Adobe XD", "Design Systems", "Prototyping", "User Research", "Wireframing"],
+  product_owner: ["Discovery", "Roadmap", "Jira", "Scrum", "Kanban", "OKRs", "Stakeholders", "Backlog"],
+  product_manager: ["Discovery", "Analytics", "Growth", "Métricas", "Roadmap", "A/B Testing", "OKRs"],
+  scrum_master: ["Scrum", "Kanban", "Facilitação", "Agile", "Métricas", "Retrospectiva", "Jira"],
+  tech_lead: ["Arquitetura", "Mentoria", "Code Review", "React", "Node.js", "System Design", "Liderança"],
+  data_analyst: ["SQL", "Python", "Power BI", "Tableau", "Excel", "Statistics", "Looker"],
+  data_engineer: ["Python", "Spark", "Airflow", "SQL", "dbt", "Kafka", "AWS", "ETL"],
+  business_analyst: ["Requirements", "BPMN", "SQL", "Stakeholders", "Documentation", "Process Mapping"],
+  agile_coach: ["Agile", "Scrum", "Kanban", "Facilitação", "Coaching", "OKRs", "Change Management"],
+  other: ["Comunicação", "Gestão", "Análise", "Documentação", "Planejamento"],
+};
+
+export const getSkillsForArea = (area: ProfessionalArea | ""): string[] => {
+  if (!area) return [];
+  return SKILLS_BY_AREA[area] ?? [];
+};
