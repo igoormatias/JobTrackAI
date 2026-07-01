@@ -156,6 +156,38 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 
 ---
 
+## ADR-015 — Contrato `/pipeline` como API pública
+
+**Status:** Aceito (Etapa 10)
+
+**Decisão:** A UI consome apenas endpoints `/pipeline/*`. A entidade interna continua sendo `Application`; `/applications` permanece legado interno até remoção futura.
+
+---
+
+## ADR-016 — `@dnd-kit` para Kanban
+
+**Status:** Aceito (Etapa 10)
+
+**Decisão:** Drag and drop entre colunas via `@dnd-kit/core` com optimistic update no React Query.
+
+---
+
+## ADR-017 — Detalhe do pipeline in-page (drawer/panel)
+
+**Status:** Aceito (Etapa 10)
+
+**Decisão:** Abrir detalhes da candidatura em drawer (mobile) ou side panel (desktop), sem navegar para `/jobs/[id]`.
+
+---
+
+## ADR-018 — Backend como fonte de verdade do pipeline
+
+**Status:** Aceito (Etapa 10)
+
+**Decisão:** Lógica de KPIs, filtros e timeline no backend Express. MSW espelha contratos apenas para testes Vitest.
+
+---
+
 ## Template para novas decisões
 
 ```markdown

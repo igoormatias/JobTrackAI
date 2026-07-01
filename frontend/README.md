@@ -656,10 +656,10 @@ Serviços globais em `frontend/src/services/`. Mocks MSW em `frontend/src/mocks/
 
 ### Pipeline
 
-- [ ] Kanban
-- [ ] Drag and Drop
-- [ ] Timeline
-- [ ] Histórico
+- [x] Kanban
+- [x] Drag and Drop
+- [x] Timeline
+- [x] Histórico
 
 ### Tempo Real
 

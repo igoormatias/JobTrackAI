@@ -42,7 +42,10 @@ export const queryKeys = {
   },
   pipeline: {
     all: ["pipeline"] as const,
-    detail: () => [...queryKeys.pipeline.all, "detail"] as const,
+    boards: () => [...queryKeys.pipeline.all, "board"] as const,
+    board: (params: Record<string, unknown>) => [...queryKeys.pipeline.boards(), params] as const,
+    detail: (id: string) => [...queryKeys.pipeline.all, "detail", id] as const,
+    timeline: (id: string) => [...queryKeys.pipeline.all, "timeline", id] as const,
   },
   notifications: {
     all: ["notifications"] as const,

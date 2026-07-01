@@ -64,7 +64,18 @@ JobDetailsPage → MainWidget / SidebarWidget → Hooks paralelos → job-detail
 - **Layout:** coluna única no mobile com bottom actions; grid `1fr + 360px` com sidebar sticky no desktop
 - **Mutations:** reutiliza `useJobMutations` (favoritar, aplicar, marcar visualizada)
 
-Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) para detalhes da estrutura.
+### Feature Pipeline (Etapa 10)
+
+```
+PipelinePage → KPIs / Toolbar / Board widgets → hooks → pipeline-service → backend /pipeline/*
+```
+
+- **Contrato público:** `GET /pipeline`, `PATCH /pipeline/:id/status|favorite`, `DELETE /pipeline/:id`, `GET /pipeline/:id/timeline`
+- **DnD:** `@dnd-kit` com optimistic update e rollback
+- **Detalhe:** drawer mobile + side panel desktop (sem navegar para `/jobs/[id]`)
+- **Backend:** fonte de verdade in-memory; MSW espelhado para testes Vitest
+
+Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) e [BACKEND_GUIDE.md](./BACKEND_GUIDE.md).
 
 ## Backend
 
@@ -72,7 +83,7 @@ Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) para detalhes da estrutura.
 - **Framework:** Express 5
 - **ORM:** Prisma (PostgreSQL)
 - **Validação:** Zod
-- **Módulos:** `auth`, `profiles`, `jobs`, `recommendations`, `health`, providers (Gupy, LinkedIn, Programathor)
+- **Módulos:** `auth`, `profiles`, `jobs`, `pipeline`, `recommendations`, `health`, providers (Gupy, LinkedIn, Programathor)
 - **Tempo real:** Socket.IO (preparado, não exposto no MVP)
 - **Rate limit:** `express-rate-limit` em memória (sem Redis no MVP)
 

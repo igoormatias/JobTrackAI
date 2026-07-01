@@ -1,4 +1,9 @@
 import { NotFoundError } from "../../../shared/errors/not-found-error.js";
+import {
+  PIPELINE_STAGE_LABELS,
+  PIPELINE_STAGES,
+} from "../../pipeline/constants/pipeline-stages.js";
+import { pipelineRepository } from "../../pipeline/repositories/pipeline.repository.js";
 import { jobRepository, type JobRepository } from "../repositories/job.repository.js";
 import type { JobInsight, JobMatchDto, JobTimelineStep, LearningGap } from "../types/job-details.types.js";
 import type { Job } from "../types/job.types.js";
@@ -12,15 +17,6 @@ const MATCH_LABEL_PT: Record<Job["matchScore"]["label"], string> = {
 };
 
 const HIGH_PRIORITY_SKILLS = ["Docker", "AWS", "Kafka", "Kubernetes", "GraphQL", "Terraform"];
-
-const PIPELINE_STAGES = ["applied", "screening", "interview", "offer", "hired"] as const;
-const PIPELINE_STAGE_LABELS: Record<(typeof PIPELINE_STAGES)[number], string> = {
-  applied: "Candidatura enviada",
-  screening: "Triagem",
-  interview: "Entrevista",
-  offer: "Proposta",
-  hired: "Contratado",
-};
 
 const categorizeSkill = (name: string): string => {
   const normalized = name.toLowerCase();
@@ -75,12 +71,18 @@ export class JobDetailsService {
   }
 
   getJobTimeline(id: string): JobTimelineStep[] {
-    const job = this.jobs.getJobById(id);
-    if (job.engagementState !== "applied") return [];
+    const application = pipelineRepository.findByJobId(id);
+    if (!application) return [];
 
-    const currentIndex = 0;
+    const currentIndex = PIPELINE_STAGES.indexOf(application.stage);
 
     return PIPELINE_STAGES.map((stage, index) => {
+      const timelineEvent = application.timeline.find((event) =>
+        event.metadata && typeof event.metadata === "object" && "to" in event.metadata
+          ? event.metadata.to === stage
+          : false,
+      );
+
       let status: JobTimelineStep["status"] = "upcoming";
       if (index < currentIndex) status = "completed";
       if (index === currentIndex) status = "current";
@@ -89,7 +91,7 @@ export class JobDetailsService {
         stage,
         label: PIPELINE_STAGE_LABELS[stage],
         status,
-        occurredAt: status === "current" ? job.updatedAt : undefined,
+        occurredAt: timelineEvent?.occurredAt ?? (status === "current" ? application.updatedAt : undefined),
       };
     });
   }

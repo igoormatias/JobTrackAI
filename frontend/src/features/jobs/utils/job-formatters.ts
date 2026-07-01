@@ -26,3 +26,12 @@ export const getCompanyInitials = (name: string): string =>
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
+
+export const formatModality = (modality: string): string => {
+  const labels: Record<string, string> = {
+    remote: "Remoto",
+    hybrid: "Híbrido",
+    onsite: "Presencial",
+  };
+  return labels[modality] ?? modality;
+};

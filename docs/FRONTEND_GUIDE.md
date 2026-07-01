@@ -95,11 +95,33 @@ Cada seção consome seu endpoint dedicado via React Query. Hooks secundários u
 
 Na rota `/jobs/[id]`, o score vem de `GET /jobs/:id/match` via `JobMatchScoreCircle`. Nunca calculado no componente.
 
-`engagementState` no tipo `Job` — feedback visual no card (badge + borda). Nunca calculado no componente.
+## Feature Pipeline (Etapa 10)
+
+```
+PipelinePage
+  → PipelineKpisWidget / PipelineToolbarWidget / PipelineBoardWidget
+  → usePipelineQuery + usePipelineFilters + mutations (move/favorite/delete)
+  → pipeline-service
+  → backend GET|PATCH|DELETE /pipeline/*
+```
+
+### Organização
+
+| Componente | Responsabilidade |
+|------------|------------------|
+| `PipelineKanbanBoard` | DnD entre colunas (`@dnd-kit`) |
+| `PipelineApplicationCard` | Card com match, ações rápidas |
+| `PipelineColumnNav` | Navegação por coluna no mobile |
+| `PipelineDetailDrawer` / `PipelineDetailPanel` | Detalhe sem sair do pipeline |
+| `PipelineApplicationTimeline` | Histórico da candidatura |
+
+### Optimistic updates
+
+`useMoveApplicationMutation` atualiza cache local e faz rollback em erro.
 
 ### Testes
 
-Colocados ao lado dos módulos (`*.test.ts(x)`). MSW ativo nos testes de service/hooks.
+MSW handlers espelham backend; usados no Vitest (`pipeline.handlers.test.ts`). Testes de componentes/hooks ao lado dos módulos.
 
 ## Referências
 

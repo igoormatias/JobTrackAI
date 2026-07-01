@@ -67,6 +67,18 @@ const buildTimelineForStage = (applicationId: string, stage: PipelineStage, appl
     );
   }
 
+  if (stage === "hired") {
+    events.push(
+      createTimelineEvent({
+        applicationId,
+        index: 6,
+        type: "stage_changed",
+        title: "Contratação confirmada",
+        occurredAt: addDays(new Date(appliedAt), 20).toISOString(),
+      }),
+    );
+  }
+
   if (stage === "rejected") {
     events.push(
       createTimelineEvent({
@@ -110,6 +122,11 @@ export const createApplication = ({ index, userId, job, stage }: CreateApplicati
       modality: job.modality,
       location: job.location,
       matchScore: job.matchScore,
+      technologies: job.technologies,
+      sourceUrl: job.sourceUrl,
+      area: job.area,
+      isFavorite: job.isFavorite,
+      updatedAt: job.updatedAt,
     },
     timeline: buildTimelineForStage(id, stage, appliedAt),
     appliedAt,

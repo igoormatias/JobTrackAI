@@ -22,13 +22,24 @@ export const getPrioritizedCompanies = engine.getPrioritizedCompanies;
 
 export const enrichApplicationJob = (application: Application, jobs: Job[]): Application => {
   const fullJob = jobs.find((job) => job.id === application.jobId);
-  const matchScore = fullJob ? engine.getScoredJob(fullJob).matchScore : application.job.matchScore;
+  if (!fullJob) return application;
+
+  const scored = engine.getScoredJob(fullJob);
 
   return {
     ...application,
     job: {
-      ...application.job,
-      matchScore,
+      id: scored.id,
+      title: scored.title,
+      company: scored.company,
+      modality: scored.modality,
+      location: scored.location,
+      area: scored.area,
+      matchScore: scored.matchScore,
+      technologies: scored.technologies,
+      sourceUrl: scored.sourceUrl,
+      isFavorite: scored.isFavorite,
+      updatedAt: scored.updatedAt,
     },
   };
 };

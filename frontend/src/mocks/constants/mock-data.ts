@@ -44,19 +44,28 @@ export const PIPELINE_STAGES = [
   "manager",
   "client",
   "offer",
+  "hired",
   "rejected",
 ] as const;
 
 export const PIPELINE_STAGE_LABELS: Record<(typeof PIPELINE_STAGES)[number], string> = {
   favorite: "Favoritas",
   applied: "Aplicadas",
-  hr: "RH",
+  hr: "Triagem RH",
   technical_interview: "Entrevista Técnica",
-  manager: "Gestor",
-  client: "Cliente",
+  manager: "Entrevista Gestor",
+  client: "Entrevista Cliente",
   offer: "Oferta",
-  rejected: "Reprovadas",
+  hired: "Contratada",
+  rejected: "Rejeitada",
 };
+
+export const PIPELINE_INTERVIEW_STAGES = [
+  "hr",
+  "technical_interview",
+  "manager",
+  "client",
+] as const satisfies readonly (typeof PIPELINE_STAGES)[number][];
 
 export const TECHNOLOGIES = [
   "React",

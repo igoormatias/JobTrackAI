@@ -56,9 +56,9 @@ Listagem completa de vagas com busca global, filtros avançados (URL via nuqs), 
 
 Página de detalhe com match score, insights, learning gaps, vagas relacionadas, timeline e ações (favoritar, aplicar, compartilhar).
 
-### ⬜ Pipeline
+### ✅ Pipeline (Etapa 10)
 
-Kanban de candidaturas com drag and drop e histórico por estágio.
+Kanban de candidaturas com drag and drop, KPIs, filtros, drawer/panel de detalhes e histórico por estágio.
 
 ### ⬜ Profile
 

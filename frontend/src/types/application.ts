@@ -9,9 +9,26 @@ export type PipelineStage =
   | "manager"
   | "client"
   | "offer"
+  | "hired"
   | "rejected";
 
 export type ApplicationStatus = "active" | "archived" | "withdrawn";
+
+export type PipelineApplicationJob = Pick<
+  Job,
+  | "id"
+  | "title"
+  | "company"
+  | "modality"
+  | "location"
+  | "matchScore"
+  | "technologies"
+  | "sourceUrl"
+  | "area"
+  | "isFavorite"
+> & {
+  updatedAt: string;
+};
 
 export type Application = {
   id: string;
@@ -23,7 +40,7 @@ export type Application = {
   notes: string | null;
   nextStep: string | null;
   nextInterviewAt: string | null;
-  job: Pick<Job, "id" | "title" | "company" | "modality" | "location" | "matchScore">;
+  job: PipelineApplicationJob;
   timeline: TimelineEvent[];
   appliedAt: string;
   updatedAt: string;
@@ -47,4 +64,26 @@ export type PipelineColumn = {
 export type PipelineData = {
   columns: PipelineColumn[];
   totalApplications: number;
+  kpis: PipelineKpis;
+};
+
+export type PipelineKpis = {
+  totalApplications: number;
+  interviews: number;
+  offers: number;
+  rejections: number;
+  conversionRate: number;
+  avgDaysPerStage: number;
+};
+
+export type PipelineListParams = {
+  q?: string;
+  companyId?: string;
+  stage?: PipelineStage;
+  area?: string;
+  technology?: string;
+  matchMin?: number;
+  isFavorite?: boolean;
+  sortBy?: "recent" | "match" | "company" | "updated";
+  sortDirection?: "asc" | "desc";
 };
