@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { createUserProfile } from "@/mocks/fixtures/profile-store";
 import { apiClient } from "@/lib/api-client";
 import type { CursorPaginatedResponse, Job } from "@/types";
 
@@ -39,5 +40,26 @@ describe("jobs handlers", () => {
     const { data } = await apiClient.get<{ data: Job }>(`/jobs/${jobId}`);
 
     expect(data.data.id).toBe(jobId);
+  });
+
+  it("sorts jobs by match score by default", async () => {
+    createUserProfile("user_0001", {
+      area: "frontend",
+      seniority: "senior",
+      modality: "remote",
+      skillNames: ["React", "TypeScript"],
+      blockedSkills: [],
+      onboardingCompleted: true,
+    });
+
+    const { data } = await apiClient.get<CursorPaginatedResponse<Job>>("/jobs", {
+      params: { limit: 20 },
+    });
+
+    const scores = data.data.map((job) => job.matchScore.score);
+    const sorted = [...scores].sort((a, b) => b - a);
+
+    expect(scores).toEqual(sorted);
+    expect(data.data[0]?.matchScore.reasons.length).toBeGreaterThan(0);
   });
 });

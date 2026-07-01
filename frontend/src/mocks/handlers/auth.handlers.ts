@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-import type { ApiResponse } from "@/types";
+import type { ApiResponse, ProfessionalArea, SalaryBand, Seniority } from "@/types";
 import type { AuthResponse, OnboardingCompletePayload } from "@/features/auth/types";
 
 import {
@@ -13,6 +13,7 @@ import {
   logoutAuthStore,
   resetAuthStore,
 } from "../fixtures/auth-store";
+import { createUserProfile, getUserProfile, updateUserProfile } from "../fixtures/profile-store";
 
 const jsonAuthResponse = (response: AuthResponse): ApiResponse<AuthResponse> => ({
   data: response,
@@ -100,6 +101,26 @@ export const authHandlers = [
 
     const payload = (await request.json()) as OnboardingCompletePayload;
     const data = completeOnboardingAuthStore(payload);
+
+    const userId = getAuthStore().user.id;
+    const profilePayload = {
+      area: payload.professionalArea as ProfessionalArea,
+      seniority: payload.seniority as Seniority,
+      modality: payload.modality,
+      location: payload.location,
+      locationPreference: payload.locationPreference,
+      salaryBand: payload.salaryBand as SalaryBand,
+      salaryExpectation: payload.salaryExpectation,
+      skillNames: payload.skills,
+      blockedSkills: payload.blockedSkills,
+      onboardingCompleted: true,
+    };
+
+    if (getUserProfile(userId)) {
+      updateUserProfile(userId, profilePayload);
+    } else {
+      createUserProfile(userId, profilePayload);
+    }
 
     return HttpResponse.json({
       data: { user: data.user },

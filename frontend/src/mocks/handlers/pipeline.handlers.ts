@@ -4,13 +4,16 @@ import type { ApiResponse, PipelineData } from "@/types";
 
 import { PIPELINE_STAGES, PIPELINE_STAGE_LABELS } from "../constants/mock-data";
 import { getFixtureStore } from "../fixtures";
+import { enrichApplicationJob } from "../utils/smart-mock-context";
 
 export const pipelineHandlers = [
   http.get("*/pipeline", () => {
     const store = getFixtureStore();
 
     const columns = PIPELINE_STAGES.map((stage) => {
-      const applications = store.applications.filter((app) => app.stage === stage);
+      const applications = store.applications
+        .filter((app) => app.stage === stage)
+        .map((app) => enrichApplicationJob(app, store.jobs));
 
       return {
         stage,

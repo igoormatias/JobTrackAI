@@ -1,38 +1,44 @@
-import { faker } from "@faker-js/faker";
+import type { Job } from "@/types/job";
+import type { MatchScore } from "@/types/match";
 
-import type { MatchScore } from "@/types";
+import { computeMatchScore, getMatchLabel } from "@/features/recommendations/utils/match-score";
+import type { RecommendationProfile } from "@/features/recommendations/types/recommendation.types";
 
-import { MATCH_REASONS, MISSING_SKILLS } from "../constants/mock-data";
 import { createId, slugify } from "../utils/mock-utils";
 
 export type CreateMatchInput = {
   score?: number;
+  job?: Job;
+  profile?: RecommendationProfile;
 };
 
-const getMatchLabel = (score: number): MatchScore["label"] => {
-  if (score >= 90) return "excellent";
-  if (score >= 75) return "good";
-  if (score >= 60) return "fair";
-  return "low";
-};
+export { getMatchLabel };
 
-export const createMatchScore = ({ score }: CreateMatchInput = {}): MatchScore => {
-  const finalScore = score ?? faker.number.int({ min: 55, max: 98 });
-  const reasonCount = faker.number.int({ min: 3, max: 5 });
-  const missingCount = faker.number.int({ min: 1, max: 3 });
+export const createMatchScore = ({ score, job, profile }: CreateMatchInput = {}): MatchScore => {
+  if (job && profile) {
+    return computeMatchScore(job, profile);
+  }
+
+  if (score !== undefined) {
+    return {
+      score,
+      label: getMatchLabel(score),
+      reasons: [],
+      missingSkills: [],
+    };
+  }
+
+  const fallbackScore = 70;
 
   return {
-    score: finalScore,
-    label: getMatchLabel(finalScore),
-    reasons: faker.helpers.arrayElements([...MATCH_REASONS], reasonCount).map((label, index) => ({
-      id: createId("reason", index + 1),
-      label,
-      matched: true,
-    })),
-    missingSkills: faker.helpers.arrayElements([...MISSING_SKILLS], missingCount).map((name, index) => ({
-      id: createId("missing", index + 1),
-      name,
-      slug: slugify(name),
-    })),
+    score: fallbackScore,
+    label: getMatchLabel(fallbackScore),
+    reasons: [
+      { id: createId("reason", 1), label: "Stack principal", matched: true },
+      { id: createId("reason", 2), label: "Remoto", matched: true },
+    ],
+    missingSkills: [
+      { id: createId("missing", 1), name: "Docker", slug: slugify("Docker") },
+    ],
   };
 };

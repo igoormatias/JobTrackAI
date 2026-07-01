@@ -10,6 +10,7 @@ import type {
 } from "@/types";
 
 import { getFixtureStore } from "../fixtures";
+import { getPersonalizedNotifications } from "../utils/smart-mock-context";
 import { paginateWithCursor } from "../utils/pagination";
 
 const parseNotificationListParams = (searchParams: URLSearchParams): NotificationListParams => ({
@@ -19,12 +20,23 @@ const parseNotificationListParams = (searchParams: URLSearchParams): Notificatio
   type: (searchParams.get("type") as NotificationType) ?? undefined,
 });
 
+let readNotificationIds = new Set<string>();
+
+export const resetNotificationReadState = (): void => {
+  readNotificationIds = new Set();
+};
+
 export const notificationsHandlers = [
   http.get("*/notifications", ({ request }) => {
     const store = getFixtureStore();
     const params = parseNotificationListParams(new URL(request.url).searchParams);
 
-    let notifications = [...store.notifications];
+    let notifications = getPersonalizedNotifications(store.user.id, store.jobs, store.applications).map(
+      (item) => ({
+        ...item,
+        read: item.read || readNotificationIds.has(item.id),
+      }),
+    );
 
     if (params.read !== undefined) {
       notifications = notifications.filter((item) => item.read === params.read);
@@ -47,19 +59,20 @@ export const notificationsHandlers = [
   }),
 
   http.patch("*/notifications/read", async ({ request }) => {
-    const store = getFixtureStore();
     const payload = (await request.json()) as MarkNotificationsReadPayload;
+    const store = getFixtureStore();
+    const notifications = getPersonalizedNotifications(store.user.id, store.jobs, store.applications);
 
     if (payload.all) {
-      store.notifications = store.notifications.map((item) => ({ ...item, read: true }));
+      notifications.forEach((item) => readNotificationIds.add(item.id));
     } else if (payload.ids?.length) {
-      store.notifications = store.notifications.map((item) =>
-        payload.ids!.includes(item.id) ? { ...item, read: true } : item,
-      );
+      payload.ids.forEach((id) => readNotificationIds.add(id));
     }
 
+    const updatedCount = notifications.filter((item) => readNotificationIds.has(item.id)).length;
+
     return HttpResponse.json<ApiResponse<{ updated: number }>>({
-      data: { updated: store.notifications.filter((item) => item.read).length },
+      data: { updated: updatedCount },
       message: "Notifications marked as read",
     });
   }),

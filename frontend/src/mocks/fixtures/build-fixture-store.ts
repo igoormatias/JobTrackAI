@@ -73,7 +73,6 @@ const buildJobs = (companies: Company[], favoriteJobIds: Set<string>): Job[] => 
         company,
         area,
         isFavorite,
-        matchScore: index % 7 === 0 ? 94 : undefined,
       }),
     );
   }

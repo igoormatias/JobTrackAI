@@ -1,5 +1,5 @@
-import { DashboardPlaceholderPage } from "@/features/dashboard";
+import { DashboardPage } from "@/features/dashboard";
 
-export default function DashboardPage() {
-  return <DashboardPlaceholderPage />;
+export default function DashboardRoutePage() {
+  return <DashboardPage />;
 }

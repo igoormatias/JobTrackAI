@@ -72,7 +72,7 @@ export const filterJobs = (jobs: Job[], params: JobListParams): Job[] => {
     result = result.filter((job) => job.isFavorite === params.isFavorite);
   }
 
-  const sortBy = params.sortBy ?? "date";
+  const sortBy = params.sortBy ?? "match";
   const direction = params.sortDirection === "asc" ? 1 : -1;
 
   result.sort((a, b) => {

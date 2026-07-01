@@ -1,10 +1,14 @@
-import type { Application, DashboardData, Job } from "@/types";
+import type { Application, DashboardData, DashboardInsight, Job } from "@/types";
+
+import { buildApplicationsTimeline, buildPersonalizedDashboard } from "@/features/recommendations/utils/dashboard-builder";
+import type { RecommendationProfile } from "@/features/recommendations/types/recommendation.types";
 
 import { PIPELINE_STAGE_LABELS, PROFESSIONAL_AREAS } from "../constants/mock-data";
 
 export type CreateDashboardInput = {
   jobs: Job[];
   applications: Application[];
+  profile?: RecommendationProfile;
 };
 
 const countBy = <T>(items: T[], getKey: (item: T) => string): Record<string, number> =>
@@ -14,8 +18,11 @@ const countBy = <T>(items: T[], getKey: (item: T) => string): Record<string, num
     return acc;
   }, {});
 
-export const createDashboard = ({ jobs, applications }: CreateDashboardInput): DashboardData => {
-  const highMatchJobs = jobs.filter((job) => job.matchScore.score >= 85);
+export const createDashboard = ({ jobs, applications, profile }: CreateDashboardInput): DashboardData => {
+  if (profile) {
+    return buildPersonalizedDashboard({ jobs, applications, profile });
+  }
+
   const favoriteJobs = jobs.filter((job) => job.isFavorite);
   const areaCounts = countBy(jobs, (job) => job.area);
   const stageCounts = countBy(applications, (app) => app.stage);
@@ -41,7 +48,17 @@ export const createDashboard = ({ jobs, applications }: CreateDashboardInput): D
       companyName: app.job.company.name,
       scheduledAt: app.nextInterviewAt!,
       stage: PIPELINE_STAGE_LABELS[app.stage],
+      status: PIPELINE_STAGE_LABELS[app.stage],
     }));
+
+  const newJobsCount = jobs.filter((job) => new Date(job.publishedAt) > new Date(Date.now() - 7 * 86400000)).length;
+
+  const insight: DashboardInsight = {
+    title: "Insight da semana",
+    message: `Encontramos ${newJobsCount} novas vagas esta semana. Continuaremos monitorando oportunidades compatíveis com seu perfil.`,
+    highlight: "mercado",
+    trendPercent: 12,
+  };
 
   return {
     kpis: [
@@ -54,10 +71,10 @@ export const createDashboard = ({ jobs, applications }: CreateDashboardInput): D
       },
       {
         id: "kpi_high_match",
-        label: "Matchs altos",
-        value: highMatchJobs.length,
+        label: "Match acima de 90%",
+        value: jobs.filter((job) => job.matchScore.score >= 90).length,
         change: 8,
-        changeLabel: "≥ 85%",
+        changeLabel: "≥ 90%",
       },
       {
         id: "kpi_favorites",
@@ -108,6 +125,8 @@ export const createDashboard = ({ jobs, applications }: CreateDashboardInput): D
       })),
     ].slice(0, 6),
     upcomingInterviews,
+    insight,
+    applicationsTimeline: buildApplicationsTimeline(applications),
     generatedAt: new Date().toISOString(),
   };
 };

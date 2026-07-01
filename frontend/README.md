@@ -538,29 +538,62 @@ Toast
 
 ```bash
 # instalar dependências
-npm install
+pnpm install
 
 # desenvolvimento
-npm run dev
+pnpm dev
 
 # build
-npm run build
+pnpm build
 
-# produção
-npm start
+# typecheck
+pnpm typecheck
 
 # lint
-npm run lint
+pnpm lint
 
 # testes
-npm run test
-
-# cobertura
-npm run test:coverage
-
-# e2e
-npm run test:e2e
+pnpm test
 ```
+
+---
+
+# 🐳 Docker (desenvolvimento)
+
+Na **raiz do monorepo**:
+
+```bash
+npm run docker:up
+```
+
+- Frontend: http://localhost:3000
+- API: `NEXT_PUBLIC_API_URL=http://localhost:3333`
+- MSW ativo por padrão (`NEXT_PUBLIC_ENABLE_MSW=true`)
+- Health: http://localhost:3000/api/health
+- Hot reload via volumes montados
+
+Referências visuais: [`../assets/`](../assets/).
+
+Documentação: [README.md](../README.md) | [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
+
+---
+
+# 📁 Estrutura (features)
+
+```
+frontend/src/features/
+├── auth/
+├── dashboard/
+├── jobs/
+├── onboarding/
+├── profile/
+├── pipeline/
+├── notifications/
+├── recommendations/   # Smart Mock Engine
+└── settings/
+```
+
+Serviços globais em `frontend/src/services/`. Mocks MSW em `frontend/src/mocks/`.
 
 ---
 
@@ -600,21 +633,22 @@ npm run test:e2e
 
 ### Perfil
 
-- [ ] Onboarding
+- [x] Onboarding
 - [ ] Preferências do usuário
 
 ### Dashboard
 
-- [ ] KPIs
-- [ ] Cards
-- [ ] Atividades
+- [x] KPIs
+- [x] Cards
+- [x] Atividades
+- [x] Insight e gráficos
 
 ### Vagas
 
-- [ ] Listagem
+- [x] Match Score (MSW)
+- [ ] Listagem completa
 - [ ] Pesquisa
 - [ ] Filtros
-- [ ] Match Score
 - [ ] Favoritos
 - [ ] Detalhes
 

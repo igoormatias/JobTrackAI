@@ -3,6 +3,7 @@ import { http, HttpResponse } from "msw";
 import type { ApiResponse, CursorPaginatedResponse, Job } from "@/types";
 
 import { getFixtureStore } from "../fixtures";
+import { getScoredJob, getScoredJobs } from "../utils/smart-mock-context";
 import { filterJobs, parseJobListParams } from "../utils/job-filters";
 import { paginateWithCursor } from "../utils/pagination";
 
@@ -10,7 +11,8 @@ export const jobsHandlers = [
   http.get("*/jobs", ({ request }) => {
     const store = getFixtureStore();
     const params = parseJobListParams(new URL(request.url).searchParams);
-    const filtered = filterJobs(store.jobs, params);
+    const scoredJobs = getScoredJobs(store.jobs);
+    const filtered = filterJobs(scoredJobs, params);
 
     const response = paginateWithCursor(filtered, {
       cursor: params.cursor,
@@ -30,6 +32,6 @@ export const jobsHandlers = [
       return HttpResponse.json({ message: "Job not found" }, { status: 404 });
     }
 
-    return HttpResponse.json<ApiResponse<Job>>({ data: job });
+    return HttpResponse.json<ApiResponse<Job>>({ data: getScoredJob(job) });
   }),
 ];

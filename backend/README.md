@@ -71,14 +71,10 @@ Ele centraliza toda a lógica de negócio da plataforma, permitindo:
 
 ## Cache
 
-- Redis (Upstash)
+- TanStack React Query no frontend (cache de dados de API)
+- Rate limiting em memória no backend (`express-rate-limit`)
 
-Utilizado para:
-
-- Cache de consultas
-- Sessões
-- Rate Limiting
-- Dados temporários
+Redis não faz parte do MVP. Ver [docs/DECISIONS.md](../docs/DECISIONS.md).
 
 ---
 
@@ -531,13 +527,11 @@ Boas práticas implementadas.
 
 - Paginação Cursor
 - Índices no PostgreSQL
-- Redis Cache
 - Compressão Gzip
 - Queries otimizadas
 - DTOs
 - Validação antes da persistência
-- Cache de consultas
-- Rate Limiting
+- Rate Limiting (em memória)
 
 ---
 
@@ -601,7 +595,36 @@ npm run test:coverage
 
 # integração
 npm run test:integration
+
+# prisma
+npm run prisma:generate
 ```
+
+---
+
+# 🐳 Docker (desenvolvimento)
+
+O backend sobe via Docker Compose na raiz do monorepo:
+
+```bash
+# na raiz do repositório
+npm run docker:up
+```
+
+- Porta: **3333**
+- Health: `GET /health`
+- `DATABASE_URL` no container aponta para o serviço `postgres`
+- Migrations Prisma: executar manualmente (`docker compose exec backend npx prisma migrate dev`)
+
+Documentação: [README.md](../README.md) e [docs/DEPLOY.md](../docs/DEPLOY.md).
+
+---
+
+# 🚀 Deploy
+
+Produção via **Vercel Services** + **Supabase PostgreSQL**. Sem Docker em produção.
+
+Detalhes: [docs/DEPLOY.md](../docs/DEPLOY.md).
 
 ---
 
@@ -629,7 +652,6 @@ npm run test:integration
 - [ ] Express + TypeScript
 - [ ] Prisma
 - [ ] PostgreSQL
-- [ ] Redis
 - [ ] ESLint
 - [ ] Prettier
 - [ ] Husky

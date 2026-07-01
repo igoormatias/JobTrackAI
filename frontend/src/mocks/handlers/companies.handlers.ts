@@ -3,6 +3,7 @@ import { http, HttpResponse } from "msw";
 import type { Company, CompanyListParams, CursorPaginatedResponse } from "@/types";
 
 import { getFixtureStore } from "../fixtures";
+import { getPrioritizedCompanies } from "../utils/smart-mock-context";
 import { paginateWithCursor } from "../utils/pagination";
 
 const parseCompanyListParams = (searchParams: URLSearchParams): CompanyListParams => ({
@@ -16,7 +17,7 @@ export const companiesHandlers = [
     const store = getFixtureStore();
     const params = parseCompanyListParams(new URL(request.url).searchParams);
 
-    let companies = [...store.companies];
+    let companies = getPrioritizedCompanies(store.companies);
 
     if (params.q) {
       const query = params.q.toLowerCase();
@@ -28,13 +29,11 @@ export const companiesHandlers = [
       );
     }
 
-    companies.sort((a, b) => a.name.localeCompare(b.name));
-
     const response = paginateWithCursor(companies, {
       cursor: params.cursor,
       limit: params.limit,
       getId: (company) => company.id,
-      getSortValue: (company) => company.name,
+      getSortValue: (company: Company) => company.name,
     });
 
     return HttpResponse.json<CursorPaginatedResponse<Company>>(response);

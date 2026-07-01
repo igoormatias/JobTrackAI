@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { subDays } from "date-fns";
 
+import { SKILLS_BY_AREA } from "@/features/onboarding/constants/skills-by-area";
 import type { Company, Job, JobSource, ProfessionalArea, Technology } from "@/types";
 
 import {
@@ -18,7 +19,6 @@ export type CreateJobInput = {
   company: Company;
   area?: ProfessionalArea;
   isFavorite?: boolean;
-  matchScore?: number;
 };
 
 const createJobTechnology = (name: string, index: number): Technology => ({
@@ -27,18 +27,18 @@ const createJobTechnology = (name: string, index: number): Technology => ({
   slug: slugify(name),
 });
 
-export const createJob = ({
-  index,
-  company,
-  area,
-  isFavorite = false,
-  matchScore,
-}: CreateJobInput): Job => {
+const getTechNamesForArea = (jobArea: ProfessionalArea): string[] => {
+  const areaSkills = SKILLS_BY_AREA[jobArea] ?? [];
+  const pool = areaSkills.length > 0 ? areaSkills : [...TECHNOLOGIES];
+  return faker.helpers.arrayElements(pool, { min: 4, max: Math.min(8, pool.length) });
+};
+
+export const createJob = ({ index, company, area, isFavorite = false }: CreateJobInput): Job => {
   const jobArea = area ?? faker.helpers.arrayElement([...PROFESSIONAL_AREAS]);
   const title = faker.helpers.arrayElement(JOB_TITLES_BY_AREA[jobArea]);
   const seniority = faker.helpers.arrayElement([...SENIORITIES]);
   const modality = faker.helpers.arrayElement([...MODALITIES]);
-  const techNames = faker.helpers.arrayElements([...TECHNOLOGIES], { min: 4, max: 8 });
+  const techNames = getTechNamesForArea(jobArea);
   const publishedAt = subDays(new Date(), faker.number.int({ min: 1, max: 45 })).toISOString();
   const now = new Date().toISOString();
   const salaryMin = faker.number.int({ min: 6000, max: 14000 });
@@ -83,7 +83,7 @@ export const createJob = ({
     sourceUrl: `https://${source}.com.br/vagas/${index}`,
     status: "active",
     isFavorite,
-    matchScore: createMatchScore({ score: matchScore }),
+    matchScore: createMatchScore({ score: 70 }),
     publishedAt,
     createdAt: publishedAt,
     updatedAt: now,

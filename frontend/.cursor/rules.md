@@ -150,8 +150,7 @@ export default function Page() {
 ### Regra
 
 - O site deve ser **responsivo** e **mobile-first**.
-- Os prints em `assets/` são referência visual oficial, mas são majoritariamente **desktop**. Toda tela deve:
-  - ser implementada com base no desktop;
+- Os prints em `assets/` na raiz do monorepo são referência visual oficial, mas são majoritariamente **desktop**. Toda tela deve:
   - ser **adaptada para mobile/tablet** (não “espremer” desktop no mobile);
   - simplificar navegação quando necessário (sidebar → drawer, menus compactos, cards reordenados).
 - **Desktop** não pode ser “mobile esticado”.

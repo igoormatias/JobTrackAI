@@ -1,0 +1,33 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
+import { DashboardInterviewsCard } from "./DashboardInterviewsCard";
+
+describe("DashboardInterviewsCard", () => {
+  it("renders interview details", () => {
+    render(
+      <DashboardInterviewsCard
+        interviews={[
+          {
+            id: "i1",
+            applicationId: "a1",
+            jobTitle: "Frontend Engineer",
+            companyName: "Nubank",
+            scheduledAt: "2026-06-28T14:00:00.000Z",
+            stage: "Entrevista técnica",
+            status: "Entrevista técnica",
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Frontend Engineer")).toBeInTheDocument();
+    expect(screen.getByText("Nubank")).toBeInTheDocument();
+  });
+
+  it("shows empty state when no interviews", () => {
+    render(<DashboardInterviewsCard interviews={[]} />);
+
+    expect(screen.getByText("Nenhuma entrevista agendada")).toBeInTheDocument();
+  });
+});

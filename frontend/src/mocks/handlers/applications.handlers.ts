@@ -10,9 +10,9 @@ import type {
 } from "@/types";
 
 import { createTimelineEvent } from "../factories/create-timeline-event";
-import { createDashboard } from "../factories/create-dashboard";
 import { PIPELINE_STAGE_LABELS } from "../constants/mock-data";
 import { getFixtureStore } from "../fixtures";
+import { enrichApplicationJob } from "../utils/smart-mock-context";
 import { paginateWithCursor } from "../utils/pagination";
 
 const parseApplicationListParams = (searchParams: URLSearchParams): ApplicationListParams => ({
@@ -28,7 +28,7 @@ export const applicationsHandlers = [
     const store = getFixtureStore();
     const params = parseApplicationListParams(new URL(request.url).searchParams);
 
-    let applications = [...store.applications];
+    let applications = store.applications.map((app) => enrichApplicationJob(app, store.jobs));
 
     if (params.stage) {
       applications = applications.filter((app) => app.stage === params.stage);
@@ -74,6 +74,7 @@ export const applicationsHandlers = [
     const updated: Application = {
       ...current,
       ...payload,
+      job: enrichApplicationJob(current, store.jobs).job,
       updatedAt: new Date().toISOString(),
     };
 
@@ -92,7 +93,6 @@ export const applicationsHandlers = [
     }
 
     store.applications[index] = updated;
-    store.dashboard = createDashboard({ jobs: store.jobs, applications: store.applications });
 
     return HttpResponse.json<ApiResponse<Application>>({
       data: updated,

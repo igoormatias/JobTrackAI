@@ -23,14 +23,23 @@ export const useSaveProfile = () => {
     }) => saveOnboardingProfile(payload, exists),
      onSuccess: (profile) => {
       queryClient.setQueryData(onboardingQueryKeys.profile(), profile);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
     },
   });
 
   const completeMutation = useMutation({
     mutationFn: (payload: OnboardingCompletePayload) => completeOnboarding(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.auth.me() });
-      queryClient.invalidateQueries({ queryKey: onboardingQueryKeys.profile() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.me() });
+      void queryClient.invalidateQueries({ queryKey: onboardingQueryKeys.profile() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
     },
   });
 
