@@ -83,6 +83,7 @@ export const createJob = ({ index, company, area, isFavorite = false }: CreateJo
     sourceUrl: `https://${source}.com.br/vagas/${index}`,
     status: "active",
     isFavorite,
+    engagementState: isFavorite ? "favorited" : "new",
     matchScore: createMatchScore({ score: 70 }),
     publishedAt,
     createdAt: publishedAt,

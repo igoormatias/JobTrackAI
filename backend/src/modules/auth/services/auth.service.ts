@@ -169,7 +169,7 @@ export class AuthService {
       });
     }
 
-    const { profile: savedProfile, ...user } = updated;
+    const { profile: _savedProfile, ...user } = updated;
 
     return {
       data: { user },

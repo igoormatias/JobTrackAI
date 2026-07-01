@@ -1,4 +1,5 @@
 import type { JobSortField, SortDirection } from "./api";
+import type { JobSource } from "./job";
 import type { NotificationType } from "./notification";
 import type { PipelineStage } from "./application";
 import type { ProfessionalArea, Seniority, WorkModality } from "./profile";
@@ -11,9 +12,13 @@ export type JobListParams = {
   q?: string;
   role?: string;
   companyId?: string;
+  companyIds?: string[];
   area?: ProfessionalArea;
+  areas?: ProfessionalArea[];
   seniority?: Seniority;
+  seniorities?: Seniority[];
   modality?: WorkModality;
+  modalities?: WorkModality[];
   location?: string;
   salaryMin?: number;
   salaryMax?: number;
@@ -22,6 +27,7 @@ export type JobListParams = {
   dateFrom?: string;
   dateTo?: string;
   isFavorite?: boolean;
+  sources?: JobSource[];
 };
 
 export type ApplicationListParams = {

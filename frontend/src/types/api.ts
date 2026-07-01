@@ -17,4 +17,4 @@ export type CursorPaginatedResponse<T> = {
 
 export type SortDirection = "asc" | "desc";
 
-export type JobSortField = "match" | "date" | "salary" | "title";
+export type JobSortField = "match" | "date" | "salary" | "title" | "company";

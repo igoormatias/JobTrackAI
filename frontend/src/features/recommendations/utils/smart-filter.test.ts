@@ -38,6 +38,7 @@ const baseJob = (area: Job["area"], tech: string, id: string): Job =>
     sourceUrl: "url",
     status: "active",
     isFavorite: false,
+    engagementState: "new",
     matchScore: { score: 0, label: "low", reasons: [], missingSkills: [] },
     publishedAt: "2025-01-01T00:00:00.000Z",
     createdAt: "2025-01-01T00:00:00.000Z",

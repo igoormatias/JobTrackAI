@@ -86,6 +86,44 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 
 ---
 
+## ADR-008 — Parâmetro `search` na URL vs `q` na API
+
+**Status:** Aceito (Etapa 08)
+
+**Decisão:** A URL do browser usa `?search=` (nuqs); o service mapeia para `q` na API.
+
+**Motivos:** UX e compartilhamento de links legíveis; compatibilidade com handlers MSW que aceitam ambos.
+
+---
+
+## ADR-009 — `engagementState` computado server-side
+
+**Status:** Aceito (Etapa 08)
+
+**Decisão:** Estados de vaga (`new`, `viewed`, `favorited`, `applied`, `rejected`) são derivados no MSW/backend e retornados no objeto `Job`.
+
+**Motivos:** Componentes permanecem apresentacionais; regras centralizadas para futura API real.
+
+---
+
+## ADR-010 — `JobCard` compartilhado entre Dashboard e Jobs
+
+**Status:** Aceito (Etapa 08)
+
+**Decisão:** `DashboardTopJobCard` compõe `JobCard` em variante `compact` em vez de duplicar markup.
+
+---
+
+## ADR-011 — Virtualização condicional na listagem
+
+**Status:** Aceito (Etapa 08)
+
+**Decisão:** `@tanstack/react-virtual` ativado apenas quando a lista acumulada ultrapassa 30 itens.
+
+**Motivos:** Performance em listas longas sem custo em páginas iniciais pequenas.
+
+---
+
 ## Template para novas decisões
 
 ```markdown

@@ -7,6 +7,8 @@ export type JobSource = "gupy" | "linkedin" | "programathor" | "internal";
 
 export type JobStatus = "active" | "closed" | "expired";
 
+export type JobEngagementState = "new" | "viewed" | "favorited" | "applied" | "rejected";
+
 export type Job = {
   id: string;
   title: string;
@@ -28,6 +30,7 @@ export type Job = {
   sourceUrl: string;
   status: JobStatus;
   isFavorite: boolean;
+  engagementState: JobEngagementState;
   matchScore: MatchScore;
   publishedAt: string;
   createdAt: string;

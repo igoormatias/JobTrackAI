@@ -62,4 +62,32 @@ describe("jobs handlers", () => {
     expect(scores).toEqual(sorted);
     expect(data.data[0]?.matchScore.reasons.length).toBeGreaterThan(0);
   });
+
+  it("sorts jobs by company", async () => {
+    const { data } = await apiClient.get<CursorPaginatedResponse<Job>>("/jobs", {
+      params: { sortBy: "company", sortDirection: "asc", limit: 10 },
+    });
+
+    const names = data.data.map((job) => job.company.name);
+    const sorted = [...names].sort((a, b) => a.localeCompare(b));
+    expect(names).toEqual(sorted);
+  });
+
+  it("favorites and applies to jobs", async () => {
+    const { data: list } = await apiClient.get<CursorPaginatedResponse<Job>>("/jobs", {
+      params: { limit: 1 },
+    });
+    const jobId = list.data[0]!.id;
+
+    const { data: favorited } = await apiClient.patch<{ data: Job }>(`/jobs/${jobId}/favorite`, {
+      isFavorite: true,
+    });
+    expect(favorited.data.isFavorite).toBe(true);
+
+    const { data: applied } = await apiClient.post<{ data: Job }>(`/jobs/${jobId}/apply`);
+    expect(applied.data.engagementState).toBe("applied");
+
+    const { data: removed } = await apiClient.delete<{ data: Job }>(`/jobs/${jobId}/apply`);
+    expect(removed.data.engagementState).not.toBe("applied");
+  });
 });

@@ -574,7 +574,7 @@ npm run docker:up
 
 Referências visuais: [`../assets/`](../assets/).
 
-Documentação: [README.md](../README.md) | [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
+Documentação: [README.md](../README.md) | [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) | [docs/FRONTEND_GUIDE.md](../docs/FRONTEND_GUIDE.md)
 
 ---
 
@@ -646,11 +646,13 @@ Serviços globais em `frontend/src/services/`. Mocks MSW em `frontend/src/mocks/
 ### Vagas
 
 - [x] Match Score (MSW)
-- [ ] Listagem completa
-- [ ] Pesquisa
-- [ ] Filtros
-- [ ] Favoritos
-- [ ] Detalhes
+- [x] Listagem completa (Etapa 08)
+- [x] Pesquisa global (nuqs + debounce)
+- [x] Filtros avançados (URL)
+- [x] Ordenação
+- [x] Infinite scroll
+- [x] Favoritos e aplicar
+- [ ] Detalhes (Etapa 09)
 
 ### Pipeline
 

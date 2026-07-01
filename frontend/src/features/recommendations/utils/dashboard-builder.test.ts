@@ -45,6 +45,7 @@ const job = (area: Job["area"]): Job =>
         sourceUrl: "url",
         status: "active",
         isFavorite: false,
+        engagementState: "new",
         matchScore: { score: 0, label: "low", reasons: [], missingSkills: [] },
         publishedAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),

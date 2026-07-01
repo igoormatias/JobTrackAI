@@ -41,13 +41,27 @@ Componente → Hook → Service → React Query → API (MSW ou backend real)
 
 No MVP com `NEXT_PUBLIC_ENABLE_MSW=true`, o MSW intercepta requisições e aplica o Smart Mock Engine (`features/recommendations`).
 
+### Feature Jobs (Etapa 08)
+
+```
+JobsPage → JobsToolbarWidget / JobsResultsWidget → Hooks → jobs-service → MSW ou backend
+```
+
+- **Filtros na URL:** `nuqs` (`?search=react`, arrays comma-separated)
+- **Listagem:** `useInfiniteQuery` com cursor pagination
+- **Match score:** exibido no `JobCard`; calculado no MSW/backend, nunca no componente
+- **Estados de engajamento:** `engagementState` (`new`, `viewed`, `favorited`, `applied`, `rejected`) computado no servidor
+- **Mutations:** favoritar, aplicar, marcar visualizada via React Query
+
+Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) para detalhes da estrutura.
+
 ## Backend
 
 - **Runtime:** Node.js 22+
 - **Framework:** Express 5
 - **ORM:** Prisma (PostgreSQL)
 - **Validação:** Zod
-- **Módulos:** `auth`, `profiles`, `recommendations`, `health`, providers (Gupy, LinkedIn, Programathor)
+- **Módulos:** `auth`, `profiles`, `jobs`, `recommendations`, `health`, providers (Gupy, LinkedIn, Programathor)
 - **Tempo real:** Socket.IO (preparado, não exposto no MVP)
 - **Rate limit:** `express-rate-limit` em memória (sem Redis no MVP)
 

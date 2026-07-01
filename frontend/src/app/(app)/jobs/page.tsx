@@ -1,5 +1,12 @@
-import { JobsPlaceholderPage } from "@/features/jobs";
+import { Suspense } from "react";
 
-export default function JobsPage() {
-  return <JobsPlaceholderPage />;
+import { JobsPage } from "@/features/jobs";
+import { JobsPageSkeleton } from "@/features/jobs/components/JobsPageSkeleton";
+
+export default function JobsRoutePage() {
+  return (
+    <Suspense fallback={<JobsPageSkeleton />}>
+      <JobsPage />
+    </Suspense>
+  );
 }

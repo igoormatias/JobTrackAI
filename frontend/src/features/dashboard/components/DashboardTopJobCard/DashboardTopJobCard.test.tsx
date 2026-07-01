@@ -30,6 +30,7 @@ const job = {
   sourceUrl: "https://example.com",
   status: "active" as const,
   isFavorite: false,
+  engagementState: "new" as const,
   matchScore: { score: 92, label: "excellent" as const, reasons: [], missingSkills: [] },
   publishedAt: new Date().toISOString(),
   createdAt: new Date().toISOString(),
@@ -41,7 +42,7 @@ describe("DashboardTopJobCard", () => {
     render(<DashboardTopJobCard job={job} />);
 
     expect(screen.getByText("Senior Frontend Engineer")).toBeInTheDocument();
-    expect(screen.getByText("Nubank")).toBeInTheDocument();
+    expect(screen.getByText(/Nubank/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver vaga" })).toHaveAttribute("href", "/jobs/job_1");
     expect(screen.getByText(/92%/)).toBeInTheDocument();
   });

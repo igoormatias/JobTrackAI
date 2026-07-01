@@ -42,6 +42,7 @@ const createTestJob = (overrides: Partial<Job> = {}): Job =>
     sourceUrl: "https://gupy.com.br",
     status: "active",
     isFavorite: false,
+    engagementState: "new",
     matchScore: { score: 0, label: "low", reasons: [], missingSkills: [] },
     publishedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),

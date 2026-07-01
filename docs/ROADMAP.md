@@ -48,9 +48,9 @@ Match score determinístico, dashboard/notificações/jobs personalizados por pe
 
 Home com KPIs, insight, melhores vagas, entrevistas, timeline, empresas, tecnologias e gráfico Recharts.
 
-### ⬜ Jobs
+### ✅ Jobs (Etapa 08)
 
-Listagem completa de vagas com filtros, busca, ordenação por match e favoritos.
+Listagem completa de vagas com busca global, filtros avançados (URL via nuqs), ordenação, infinite scroll, JobCard reutilizável, favoritos e aplicar vaga.
 
 ### ⬜ Job Details
 

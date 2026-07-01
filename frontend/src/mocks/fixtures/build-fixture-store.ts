@@ -29,6 +29,7 @@ export type FixtureStore = {
   companies: Company[];
   jobs: Job[];
   favoriteJobIds: Set<string>;
+  viewedJobIds: Set<string>;
   applications: Application[];
   notifications: Notification[];
   dashboard: DashboardData;
@@ -123,6 +124,10 @@ export const buildFixtureStore = (): FixtureStore => {
     Array.from({ length: 12 }, (_, index) => `job_${String(index + 1).padStart(4, "0")}`),
   );
 
+  const viewedJobIds = new Set(
+    Array.from({ length: 20 }, (_, index) => `job_${String(index + 13).padStart(4, "0")}`),
+  );
+
   const jobs = buildJobs(companies, favoriteJobIds).map((job) => ({
     ...job,
     isFavorite: favoriteJobIds.has(job.id),
@@ -143,6 +148,7 @@ export const buildFixtureStore = (): FixtureStore => {
     companies,
     jobs,
     favoriteJobIds,
+    viewedJobIds,
     applications,
     notifications,
     dashboard,
