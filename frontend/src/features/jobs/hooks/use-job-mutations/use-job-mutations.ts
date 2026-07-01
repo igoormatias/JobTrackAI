@@ -12,6 +12,7 @@ export const useJobMutations = () => {
 
   const invalidateJobs = async () => {
     await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+    await queryClient.invalidateQueries({ queryKey: queryKeys.jobDetails.all });
   };
 
   const updateJobInCache = (updatedJob: Job) => {
@@ -44,6 +45,7 @@ export const useJobMutations = () => {
     });
 
     queryClient.setQueryData(queryKeys.jobs.detail(updatedJob.id), updatedJob);
+    queryClient.setQueryData(queryKeys.jobDetails.detail(updatedJob.id), updatedJob);
   };
 
   const favoriteMutation = useMutation({

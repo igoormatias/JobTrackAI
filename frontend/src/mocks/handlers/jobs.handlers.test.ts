@@ -90,4 +90,75 @@ describe("jobs handlers", () => {
     const { data: removed } = await apiClient.delete<{ data: Job }>(`/jobs/${jobId}/apply`);
     expect(removed.data.engagementState).not.toBe("applied");
   });
+
+  it("returns job match details", async () => {
+    const { data: list } = await apiClient.get<CursorPaginatedResponse<Job>>("/jobs", {
+      params: { limit: 1 },
+    });
+    const jobId = list.data[0]!.id;
+
+    const { data } = await apiClient.get<{ data: { matchScore: { score: number }; compatibilityLabel: string } }>(
+      `/jobs/${jobId}/match`,
+    );
+
+    expect(data.data.matchScore.score).toBeGreaterThan(0);
+    expect(data.data.compatibilityLabel).toBeTruthy();
+  });
+
+  it("returns related jobs", async () => {
+    const { data: list } = await apiClient.get<CursorPaginatedResponse<Job>>("/jobs", {
+      params: { limit: 1 },
+    });
+    const jobId = list.data[0]!.id;
+
+    const { data } = await apiClient.get<{ data: Job[] }>(`/jobs/${jobId}/related`);
+
+    expect(data.data.length).toBeGreaterThan(0);
+    expect(data.data.length).toBeLessThanOrEqual(5);
+    expect(data.data.every((job) => job.id !== jobId)).toBe(true);
+  });
+
+  it("returns job timeline", async () => {
+    const { data: list } = await apiClient.get<CursorPaginatedResponse<Job>>("/jobs", {
+      params: { limit: 1 },
+    });
+    const jobId = list.data[0]!.id;
+
+    await apiClient.post(`/jobs/${jobId}/apply`);
+
+    const { data } = await apiClient.get<{ data: { stage: string; status: string }[] }>(
+      `/jobs/${jobId}/timeline`,
+    );
+
+    expect(Array.isArray(data.data)).toBe(true);
+    if (data.data.length > 0) {
+      expect(data.data.some((step) => step.status === "current")).toBe(true);
+    }
+  });
+
+  it("returns job insights", async () => {
+    const { data: list } = await apiClient.get<CursorPaginatedResponse<Job>>("/jobs", {
+      params: { limit: 1 },
+    });
+    const jobId = list.data[0]!.id;
+
+    const { data } = await apiClient.get<{ data: { id: string; title: string }[] }>(
+      `/jobs/${jobId}/insights`,
+    );
+
+    expect(data.data.length).toBeGreaterThan(0);
+  });
+
+  it("returns learning gaps", async () => {
+    const { data: list } = await apiClient.get<CursorPaginatedResponse<Job>>("/jobs", {
+      params: { limit: 1 },
+    });
+    const jobId = list.data[0]!.id;
+
+    const { data } = await apiClient.get<{ data: { id: string; name: string; importance: string }[] }>(
+      `/jobs/${jobId}/learning-gaps`,
+    );
+
+    expect(Array.isArray(data.data)).toBe(true);
+  });
 });

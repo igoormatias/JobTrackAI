@@ -124,6 +124,38 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 
 ---
 
+## ADR-012 — Endpoints paralelos na Job Details
+
+**Status:** Aceito (Etapa 09)
+
+**Decisão:** A página de detalhe consome `GET /jobs/:id` e sub-recursos (`/match`, `/related`, `/timeline`, `/insights`, `/learning-gaps`) em paralelo via React Query, em vez de um único aggregate.
+
+**Motivos:** Cache granular, carregamento progressivo, reuso de endpoints em outros contextos futuros.
+
+**Consequências:** Mais requisições na primeira visita; componentes permanecem apresentacionais.
+
+---
+
+## ADR-013 — Feature `job-details` separada de `jobs`
+
+**Status:** Aceito (Etapa 09)
+
+**Decisão:** Detalhe da vaga vive em `features/job-details`; listagem permanece em `features/jobs`.
+
+**Motivos:** Separação de responsabilidades, evolução independente da página de detalhe.
+
+---
+
+## ADR-014 — Match na detail page só via `/match`
+
+**Status:** Aceito (Etapa 09)
+
+**Decisão:** Na rota `/jobs/[id]`, o score exibido vem exclusivamente de `GET /jobs/:id/match`, ignorando `job.matchScore` do payload principal.
+
+**Motivos:** Consistência com endpoint dedicado; evita divergência se o job principal for cacheado sem score atualizado.
+
+---
+
 ## Template para novas decisões
 
 ```markdown

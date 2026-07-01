@@ -27,6 +27,7 @@ export type CircularProgressProps = {
   size?: number;
   strokeWidth?: number;
   className?: string;
+  "aria-label"?: string;
 };
 
 export const CircularProgress = ({
@@ -34,13 +35,19 @@ export const CircularProgress = ({
   size = 64,
   strokeWidth = 4,
   className,
+  "aria-label": ariaLabel,
 }: CircularProgressProps) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (value / 100) * circumference;
 
   return (
-    <svg width={size} height={size} className={className} aria-label={`${value}%`}>
+    <svg
+      width={size}
+      height={size}
+      className={className}
+      aria-label={ariaLabel ?? `${value}%`}
+    >
       <circle
         cx={size / 2}
         cy={size / 2}

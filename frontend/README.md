@@ -652,7 +652,7 @@ Serviços globais em `frontend/src/services/`. Mocks MSW em `frontend/src/mocks/
 - [x] Ordenação
 - [x] Infinite scroll
 - [x] Favoritos e aplicar
-- [ ] Detalhes (Etapa 09)
+- [x] Detalhes (Etapa 09)
 
 ### Pipeline
 

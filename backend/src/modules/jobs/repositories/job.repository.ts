@@ -7,7 +7,13 @@ const createMatchScore = (score: number) => ({
     { id: "reason_stack", label: "Stack compatível", matched: true },
     { id: "reason_modality", label: "Modalidade alinhada", matched: true },
   ],
-  missingSkills: [],
+  missingSkills:
+    score < 90
+      ? [
+          { id: "missing_docker", name: "Docker" },
+          { id: "missing_graphql", name: "GraphQL" },
+        ]
+      : [],
 } as Job["matchScore"]);
 
 const createJob = (index: number): Job => {

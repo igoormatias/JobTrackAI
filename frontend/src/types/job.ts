@@ -9,6 +9,8 @@ export type JobStatus = "active" | "closed" | "expired";
 
 export type JobEngagementState = "new" | "viewed" | "favorited" | "applied" | "rejected";
 
+export type EmploymentType = "clt" | "pj" | "contract" | "internship";
+
 export type Job = {
   id: string;
   title: string;
@@ -18,6 +20,7 @@ export type Job = {
   area: ProfessionalArea;
   seniority: Seniority;
   modality: WorkModality;
+  employmentType?: EmploymentType;
   location: string;
   salaryMin: number | null;
   salaryMax: number | null;

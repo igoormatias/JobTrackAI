@@ -15,6 +15,15 @@ export const queryKeys = {
     details: () => [...queryKeys.jobs.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.jobs.details(), id] as const,
   },
+  jobDetails: {
+    all: ["job-details"] as const,
+    detail: (id: string) => [...queryKeys.jobDetails.all, "detail", id] as const,
+    match: (id: string) => [...queryKeys.jobDetails.all, "match", id] as const,
+    related: (id: string) => [...queryKeys.jobDetails.all, "related", id] as const,
+    timeline: (id: string) => [...queryKeys.jobDetails.all, "timeline", id] as const,
+    insights: (id: string) => [...queryKeys.jobDetails.all, "insights", id] as const,
+    learningGaps: (id: string) => [...queryKeys.jobDetails.all, "learning-gaps", id] as const,
+  },
   companies: {
     all: ["companies"] as const,
     lists: () => [...queryKeys.companies.all, "list"] as const,

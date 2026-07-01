@@ -62,7 +62,38 @@ JobsPage
 
 Dados vindos do Smart Mock Engine (`getScoredJobs` no MSW). O `JobCard` apenas exibe `MatchScoreBadge` e `MatchReasonsList`.
 
-### Estados de engajamento
+## Feature Job Details (Etapa 09)
+
+```
+JobDetailsPage
+  → JobDetailsMainWidget / JobDetailsSidebarWidget
+  → useJobDetailsQuery + useJobMatchQuery + useRelatedJobsQuery + ...
+  → useJobDetailsMutations (wrapper de useJobMutations)
+  → job-details-service
+  → MSW handlers / backend GET /jobs/:id/*
+```
+
+### Organização dos componentes
+
+| Componente | Responsabilidade |
+|------------|------------------|
+| `JobMatchScoreCircle` | Match circular grande + label de compatibilidade |
+| `JobWhyThisJobCard` | Reasons matched da vaga |
+| `JobLearningGapsCard` | Gaps com badges de importância |
+| `JobDescriptionCard` | Seções da descrição |
+| `JobInsightsCard` | Insights gerados no servidor |
+| `JobPipelineTimeline` | Timeline do pipeline (quando há candidatura) |
+| `JobRelatedJobsSection` | Até 5 `JobCard` compact |
+| `JobDetailsBottomActions` | Barra fixa mobile (salvar + candidatar) |
+| `JobDetailsSidebarWidget` | Match, insights, empresa, related, timeline (desktop) |
+
+### Queries paralelas
+
+Cada seção consome seu endpoint dedicado via React Query. Hooks secundários usam `enabled` após o job principal carregar.
+
+### Match score na detail page
+
+Na rota `/jobs/[id]`, o score vem de `GET /jobs/:id/match` via `JobMatchScoreCircle`. Nunca calculado no componente.
 
 `engagementState` no tipo `Job` — feedback visual no card (badge + borda). Nunca calculado no componente.
 

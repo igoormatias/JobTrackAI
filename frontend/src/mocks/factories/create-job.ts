@@ -44,6 +44,7 @@ export const createJob = ({ index, company, area, isFavorite = false }: CreateJo
   const salaryMin = faker.number.int({ min: 6000, max: 14000 });
   const salaryMax = salaryMin + faker.number.int({ min: 2000, max: 8000 });
   const source: JobSource = faker.helpers.arrayElement(["gupy", "linkedin", "programathor"]);
+  const employmentType = faker.helpers.arrayElement(["clt", "pj", "contract", "internship"] as const);
 
   return {
     id: createId("job", index),
@@ -59,6 +60,7 @@ export const createJob = ({ index, company, area, isFavorite = false }: CreateJo
     area: jobArea,
     seniority,
     modality,
+    employmentType,
     location: company.location,
     salaryMin,
     salaryMax,

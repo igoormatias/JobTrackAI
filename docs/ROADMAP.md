@@ -52,9 +52,9 @@ Home com KPIs, insight, melhores vagas, entrevistas, timeline, empresas, tecnolo
 
 Listagem completa de vagas com busca global, filtros avançados (URL via nuqs), ordenação, infinite scroll, JobCard reutilizável, favoritos e aplicar vaga.
 
-### ⬜ Job Details
+### ✅ Job Details (Etapa 09)
 
-Página de detalhe com match score, reasons, missing skills e ações (favoritar, aplicar).
+Página de detalhe com match score, insights, learning gaps, vagas relacionadas, timeline e ações (favoritar, aplicar, compartilhar).
 
 ### ⬜ Pipeline
 
