@@ -47,6 +47,12 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.pipeline.all, "detail", id] as const,
     timeline: (id: string) => [...queryKeys.pipeline.all, "timeline", id] as const,
   },
+  tracking: {
+    all: ["tracking"] as const,
+    lists: () => [...queryKeys.tracking.all, "list"] as const,
+    detail: (id: string) => [...queryKeys.tracking.all, "detail", id] as const,
+    timeline: (id: string) => [...queryKeys.tracking.all, "timeline", id] as const,
+  },
   notifications: {
     all: ["notifications"] as const,
     lists: () => [...queryKeys.notifications.all, "list"] as const,

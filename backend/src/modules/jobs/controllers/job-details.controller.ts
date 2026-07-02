@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { getAuthUserId } from "../../../shared/http/get-auth-user-id.js";
 import type {
   JobInsightsResponseDto,
   JobMatchResponseDto,
@@ -12,9 +13,9 @@ import { jobDetailsService, type JobDetailsService } from "../services/job-detai
 export class JobDetailsController {
   constructor(private readonly service: JobDetailsService = jobDetailsService) {}
 
-  getJobMatch = (req: Request, res: Response, next: NextFunction): void => {
+  getJobMatch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = this.service.getJobMatch(req.params.id!);
+      const data = await this.service.getJobMatch(getAuthUserId(req), req.params.id!);
       const response: JobMatchResponseDto = { data };
       res.status(200).json(response);
     } catch (error) {
@@ -22,9 +23,9 @@ export class JobDetailsController {
     }
   };
 
-  getRelatedJobs = (req: Request, res: Response, next: NextFunction): void => {
+  getRelatedJobs = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = this.service.getRelatedJobs(req.params.id!);
+      const data = await this.service.getRelatedJobs(getAuthUserId(req), req.params.id!);
       const response: JobRelatedResponseDto = { data };
       res.status(200).json(response);
     } catch (error) {
@@ -32,9 +33,9 @@ export class JobDetailsController {
     }
   };
 
-  getJobTimeline = (req: Request, res: Response, next: NextFunction): void => {
+  getJobTimeline = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = this.service.getJobTimeline(req.params.id!);
+      const data = await this.service.getJobTimeline(getAuthUserId(req), req.params.id!);
       const response: JobTimelineResponseDto = { data };
       res.status(200).json(response);
     } catch (error) {
@@ -42,9 +43,9 @@ export class JobDetailsController {
     }
   };
 
-  getJobInsights = (req: Request, res: Response, next: NextFunction): void => {
+  getJobInsights = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = this.service.getJobInsights(req.params.id!);
+      const data = await this.service.getJobInsights(getAuthUserId(req), req.params.id!);
       const response: JobInsightsResponseDto = { data };
       res.status(200).json(response);
     } catch (error) {
@@ -52,9 +53,9 @@ export class JobDetailsController {
     }
   };
 
-  getLearningGaps = (req: Request, res: Response, next: NextFunction): void => {
+  getLearningGaps = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = this.service.getLearningGaps(req.params.id!);
+      const data = await this.service.getLearningGaps(getAuthUserId(req), req.params.id!);
       const response: LearningGapsResponseDto = { data };
       res.status(200).json(response);
     } catch (error) {

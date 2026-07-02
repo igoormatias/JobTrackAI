@@ -214,7 +214,7 @@ export const buildPersonalizedDashboard = ({
         id: "kpi_applications",
         label: "Aplicações",
         value: applications.length,
-        change: applications.filter((app) => app.stage !== "favorite").length,
+        change: applications.filter((app) => app.stage !== "discovery").length,
         changeLabel: "em andamento",
       },
       {

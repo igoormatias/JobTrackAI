@@ -371,6 +371,69 @@ Importar por URL e Providers automáticos — fora do MVP.
 
 ---
 
+## ADR-023 — Job Tracking como domínio central (Etapa 12)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 12)
+
+**Contexto:** Jobs (descoberta) e Pipeline (Kanban) compartilhavam regras de engajamento e estágio. ADR-022 separou `JobEngagement` e `Application`, mas a API ainda espalhava mutações entre `/jobs` e `/pipeline`.
+
+**Decisão:**
+
+### Três camadas
+
+| Camada | Responsabilidade | API |
+|--------|------------------|-----|
+| **Job** | Oportunidade imutável (provider-agnostic) | `GET /jobs`, match, detalhes |
+| **JobTracking** | Estado do usuário: favorito, prioridade, visibilidade, estágio, notas, timeline | `POST/GET/PATCH /tracking/*` |
+| **Pipeline** | Visualização Kanban agrupada por estágio | `GET /pipeline` (view) |
+
+### Agregado `JobTracking`
+
+Substitui `JobEngagement` + `Application` no código e persistência. Um único fluxo para vagas importadas e processos manuais (`POST /tracking`).
+
+### Estágios (slug + label PT)
+
+`discovery` → `closed` (10 estágios). **Sem** estágio `favorite` — favorito é `isFavorite` com destaque visual.
+
+### Eventos
+
+`TrackingCreated`, `TrackingStageChanged`, `TimelineCreated`, `TimelineUpdated`, `JobFavorited`, `PriorityChanged`, `JobHidden`, `JobRestored`, `NoteAdded`.
+
+**Consequências:**
+
+- ADR-022 permanece nos princípios (ortogonalidade, sem candidatura interna)
+- `POST /jobs/:id/apply` removido; `PATCH /jobs/:id/favorite` vira alias temporário
+- Documentação e Cursor Rules atualizados para separação Jobs / Tracking / Pipeline
+
+---
+
+## ADR-024 — MVP Stabilization (Etapa 13)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 13)
+
+**Contexto:** O MVP tinha núcleo funcional (Jobs, Tracking, Pipeline, Dashboard) mas dependia de repositórios in-memory, MSW no browser e Smart Mock Engine para match/dashboard. Isso impedia consistência entre sessões, deploy e validação real do produto.
+
+**Decisão:**
+
+- **Persistência Prisma** para núcleo: `Job` (catálogo seed), `JobTracking`, `TimelineEvent`, `Interview`, `Notification`, `JobView`
+- **MSW** restrito a testes (Vitest) — runtime consome Express + Prisma
+- **Match Engine V1** (`engineVersion: "rules-v1"`) no backend; contrato estável para Etapa 15 (AI enriquece, não substitui)
+- **Google OAuth real** em todos os ambientes (dev, produção e testes usam stub/mocks apenas nos testes automatizados)
+- **Dashboard** calculado via agregações Prisma (sem Smart Mock Engine)
+- **Notificações** internas via EventBus + Prisma
+- **Entrevistas** sub-recurso de Tracking (`/tracking/:id/interviews`)
+
+**Consequências:**
+
+- Etapa 14 = Release Candidate (E2E, CI/CD, deploy)
+- Etapa 15 = AI Match Engine (enriquecimento sobre contrato V1)
+- `docs/IMPLEMENTATION_STATUS.md` e `CHANGELOG.md` como fonte de status
+- Cursor Rule `.cursor/rules/msw-test-only.mdc`
+
+---
+
 ## Template para novas decisões
 
 ```markdown

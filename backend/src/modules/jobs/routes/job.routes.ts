@@ -19,8 +19,6 @@ export const createJobRoutes = (): Router => {
   router.get("/:id", controller.getJobById);
   router.patch("/:id/favorite", controller.favoriteJob);
   router.post("/:id/view", controller.markViewed);
-  router.post("/:id/apply", controller.applyToJob);
-  router.delete("/:id/apply", controller.removeApplication);
 
   return router;
 };

@@ -11,7 +11,7 @@ import {
 describe("pipeline-service", () => {
   it("loads pipeline endpoints", async () => {
     const pipeline = await getPipeline();
-    expect(pipeline.columns).toHaveLength(9);
+    expect(pipeline.columns).toHaveLength(10);
 
     const application = pipeline.columns.flatMap((column) => column.applications)[0]!;
     const moved = await moveApplication(application.id, "hr");

@@ -10,7 +10,7 @@ describe("onboarding-service", () => {
   beforeEach(async () => {
     resetAuthStore();
     resetProfileStore();
-    await loginWithGoogle({ provider: "google" });
+    await loginWithGoogle({ provider: "google", idToken: "test-id-token" });
   });
 
   it("returns null when profile does not exist", async () => {

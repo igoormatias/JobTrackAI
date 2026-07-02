@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
 
 describe("useCurrentUserQuery", () => {
   beforeEach(async () => {
-    await loginWithGoogle({ provider: "google" });
+    await loginWithGoogle({ provider: "google", idToken: "test-id-token" });
   });
 
   it("loads authenticated user after login", async () => {

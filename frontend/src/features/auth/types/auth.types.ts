@@ -47,7 +47,7 @@ export type AuthSession = {
 
 export type LoginPayload = {
   provider: "google";
-  idToken?: string;
+  idToken: string;
 };
 
 export type AuthResponse = {

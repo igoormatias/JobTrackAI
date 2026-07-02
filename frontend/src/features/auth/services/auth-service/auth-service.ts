@@ -5,7 +5,7 @@ import type { AuthResponse, LoginPayload, OnboardingCompletePayload } from "../.
 
 type AuthApiResponse = ApiResponse<AuthResponse>;
 
-export const loginWithGoogle = async (payload: LoginPayload = { provider: "google" }): Promise<AuthResponse> => {
+export const loginWithGoogle = async (payload: LoginPayload): Promise<AuthResponse> => {
   const { data } = await apiClient.post<AuthApiResponse>("/auth/login", payload);
   return data.data;
 };

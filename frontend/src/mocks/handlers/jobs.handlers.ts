@@ -8,7 +8,6 @@ import type {
 } from "@/features/job-details/types/job-details.types";
 import type { ApiResponse, CursorPaginatedResponse, Job } from "@/types";
 
-import { createApplication } from "../factories/create-application";
 import { getFixtureStore } from "../fixtures";
 import { enrichJobWithEngagement } from "../utils/job-engagement";
 import {
@@ -104,45 +103,6 @@ export const jobsHandlers = [
 
     const enriched = getEnrichedJobById(jobId);
     return HttpResponse.json<ApiResponse<Job>>({ data: enriched!, message: "Favorite updated" });
-  }),
-
-  http.post("*/jobs/:id/apply", ({ params }) => {
-    const store = getFixtureStore();
-    const jobId = String(params.id);
-    const job = store.jobs.find((item) => item.id === jobId);
-    if (!job) return notFound();
-
-    const existing = store.applications.find((app) => app.jobId === jobId);
-    if (existing) {
-      const enriched = getEnrichedJobById(jobId);
-      return HttpResponse.json<ApiResponse<Job>>({ data: enriched!, message: "Already applied" });
-    }
-
-    const application = createApplication({
-      index: store.applications.length + 1,
-      userId: store.user.id,
-      job: getScoredJob(job),
-      stage: "applied",
-    });
-
-    store.applications.push(application);
-    store.favoriteJobIds.add(jobId);
-
-    const enriched = getEnrichedJobById(jobId);
-    return HttpResponse.json<ApiResponse<Job>>({ data: enriched!, message: "Application created" });
-  }),
-
-  http.delete("*/jobs/:id/apply", ({ params }) => {
-    const store = getFixtureStore();
-    const jobId = String(params.id);
-    const index = store.applications.findIndex((app) => app.jobId === jobId);
-    if (index === -1) {
-      return HttpResponse.json({ message: "Application not found" }, { status: 404 });
-    }
-
-    store.applications.splice(index, 1);
-    const enriched = getEnrichedJobById(jobId);
-    return HttpResponse.json<ApiResponse<Job>>({ data: enriched!, message: "Application removed" });
   }),
 
   http.post("*/jobs/:id/view", ({ params }) => {

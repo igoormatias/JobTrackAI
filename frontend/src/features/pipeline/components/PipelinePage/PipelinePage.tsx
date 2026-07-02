@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/ui/Button";
 import type { Application } from "@/types";
+
+import { AddToTrackingModal } from "@/features/tracking/components/AddToTrackingModal/AddToTrackingModal";
+import { useCreateTrackingMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 
 import { PipelineBoardSkeleton } from "../../components/PipelineBoardSkeleton";
 import { PipelineDetailDrawer } from "../../components/PipelineDetailDrawer";
@@ -18,8 +22,10 @@ import { PipelineToolbarWidget } from "../../widgets/PipelineToolbarWidget";
 export const PipelinePage = () => {
   const { listParams } = usePipelineFilters();
   const { data, isLoading, isError } = usePipelineQuery(listParams);
+  const createTrackingMutation = useCreateTrackingMutation();
   const [selected, setSelected] = useState<Application | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [manualModalOpen, setManualModalOpen] = useState(false);
 
   const openDetails = (application: Application) => {
     setSelected(application);
@@ -36,9 +42,14 @@ export const PipelinePage = () => {
 
   return (
     <div className={PIPELINE_LAYOUT.page}>
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Pipeline de carreira</h1>
-        <p className="text-sm text-muted-foreground">Acompanhe toda a sua jornada de candidaturas</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Pipeline de carreira</h1>
+          <p className="text-sm text-muted-foreground">Acompanhe toda a sua jornada de candidaturas</p>
+        </div>
+        <Button type="button" onClick={() => setManualModalOpen(true)}>
+          Adicionar Processo
+        </Button>
       </div>
 
       {data ? <PipelineKpisWidget kpis={data.kpis} /> : null}
@@ -54,6 +65,19 @@ export const PipelinePage = () => {
         application={selected}
         open={detailOpen}
         onOpenChange={setDetailOpen}
+      />
+
+      <AddToTrackingModal
+        open={manualModalOpen}
+        onOpenChange={setManualModalOpen}
+        mode="manual"
+        isSubmitting={createTrackingMutation.isPending}
+        onSubmit={(values) => {
+          createTrackingMutation.mutate(
+            values as Parameters<typeof createTrackingMutation.mutate>[0],
+            { onSuccess: () => setManualModalOpen(false) },
+          );
+        }}
       />
     </div>
   );

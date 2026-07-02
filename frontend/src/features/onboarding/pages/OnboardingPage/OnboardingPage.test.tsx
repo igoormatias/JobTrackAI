@@ -17,7 +17,7 @@ vi.mock("next/navigation", () => ({
 
 describe("OnboardingPage", () => {
   beforeEach(async () => {
-    await loginWithGoogle({ provider: "google" });
+    await loginWithGoogle({ provider: "google", idToken: "test-id-token" });
   });
 
   it("renders first onboarding step and blocks continue without selection", async () => {

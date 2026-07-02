@@ -37,27 +37,29 @@ export const SENIORITIES = ["intern", "junior", "mid", "senior", "lead", "staff"
 export const MODALITIES = ["remote", "hybrid", "onsite"] as const;
 
 export const PIPELINE_STAGES = [
-  "favorite",
+  "discovery",
   "applied",
   "hr",
   "technical_interview",
   "manager",
   "client",
+  "technical_test",
   "offer",
   "hired",
-  "rejected",
+  "closed",
 ] as const;
 
 export const PIPELINE_STAGE_LABELS: Record<(typeof PIPELINE_STAGES)[number], string> = {
-  favorite: "Favoritas",
-  applied: "Aplicadas",
+  discovery: "Descoberta",
+  applied: "Aplicada",
   hr: "Triagem RH",
   technical_interview: "Entrevista Técnica",
   manager: "Entrevista Gestor",
   client: "Entrevista Cliente",
+  technical_test: "Teste Técnico",
   offer: "Oferta",
   hired: "Contratada",
-  rejected: "Rejeitada",
+  closed: "Encerrada",
 };
 
 export const PIPELINE_INTERVIEW_STAGES = [
@@ -65,6 +67,7 @@ export const PIPELINE_INTERVIEW_STAGES = [
   "technical_interview",
   "manager",
   "client",
+  "technical_test",
 ] as const satisfies readonly (typeof PIPELINE_STAGES)[number][];
 
 export const TECHNOLOGIES = [

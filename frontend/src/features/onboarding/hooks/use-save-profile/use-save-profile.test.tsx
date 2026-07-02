@@ -8,7 +8,7 @@ import { useSaveProfile } from "./use-save-profile";
 
 describe("useSaveProfile", () => {
   beforeEach(async () => {
-    await loginWithGoogle({ provider: "google" });
+    await loginWithGoogle({ provider: "google", idToken: "test-id-token" });
   });
 
   it("saves profile draft through mutation", async () => {

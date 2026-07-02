@@ -5,5 +5,8 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.ts"],
     exclude: ["src/**/*.integration.test.ts"],
+    env: {
+      GOOGLE_CLIENT_ID: "test-google-client-id.apps.googleusercontent.com",
+    },
   },
 });

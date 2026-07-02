@@ -44,7 +44,7 @@ Favorito, prioridade e visibilidade são **ortogonais** ao estágio do pipeline.
 
 | Método | Rota | Auth | Descrição |
 |--------|------|------|-----------|
-| `POST` | `/auth/login` | Público | Login Google (mock no dev) |
+| `POST` | `/auth/login` | Público | Login Google OAuth (`idToken` obrigatório) |
 | `POST` | `/auth/logout` | Sim | Encerra sessão |
 | `POST` | `/auth/refresh` | Cookie | Renova tokens |
 | `GET` | `/auth/me` | Sim | Usuário autenticado |

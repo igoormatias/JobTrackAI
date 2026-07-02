@@ -1,28 +1,39 @@
+import { OAuth2Client } from "google-auth-library";
+
+import { env } from "../../../config/env.js";
 import type { GoogleUser } from "../types/auth.types.js";
 
 export type GoogleAuthService = {
-  verifyIdToken: (idToken?: string) => Promise<GoogleUser>;
+  verifyIdToken: (idToken: string) => Promise<GoogleUser>;
 };
 
-export class MockGoogleAuthService implements GoogleAuthService {
-  verifyIdToken = async (_idToken?: string): Promise<GoogleUser> => ({
-    sub: "google_mock_0001",
-    email: "matias.silva@email.com",
-    name: "Matias Silva",
-    picture: "https://api.dicebear.com/7.x/avataaars/svg?seed=Matias",
-  });
-}
+export class GoogleAuthServiceImpl implements GoogleAuthService {
+  private readonly client: OAuth2Client;
 
-export class RealGoogleAuthService implements GoogleAuthService {
-  verifyIdToken = async (_idToken?: string): Promise<GoogleUser> => {
-    throw new Error("Google OAuth is not configured yet");
+  constructor(clientId: string) {
+    this.client = new OAuth2Client(clientId);
+  }
+
+  verifyIdToken = async (idToken: string): Promise<GoogleUser> => {
+    const ticket = await this.client.verifyIdToken({
+      idToken,
+      audience: env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload?.email || !payload.sub) {
+      throw new Error("Invalid Google token payload");
+    }
+
+    return {
+      sub: payload.sub,
+      email: payload.email,
+      name: payload.name ?? payload.email,
+      picture: payload.picture ?? null,
+    };
   };
 }
 
 export const createGoogleAuthService = (): GoogleAuthService => {
-  if (process.env.GOOGLE_CLIENT_ID) {
-    return new RealGoogleAuthService();
-  }
-
-  return new MockGoogleAuthService();
+  return new GoogleAuthServiceImpl(env.GOOGLE_CLIENT_ID);
 };

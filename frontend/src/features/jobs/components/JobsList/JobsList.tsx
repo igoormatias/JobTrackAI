@@ -20,10 +20,10 @@ export type JobsListProps = {
   hasNextPage: boolean;
   onLoadMore: () => void;
   onFavorite: (job: Job) => void;
-  onApply: (job: Job) => void;
+  onOpenJob: (job: Job) => void;
+  onAddToPipeline: (job: Job) => void;
   onViewDetails: (job: Job) => void;
   favoritePendingId?: string;
-  applyPendingId?: string;
 };
 
 export const JobsList = ({
@@ -33,10 +33,10 @@ export const JobsList = ({
   hasNextPage,
   onLoadMore,
   onFavorite,
-  onApply,
+  onOpenJob,
+  onAddToPipeline,
   onViewDetails,
   favoritePendingId,
-  applyPendingId,
 }: JobsListProps) => {
   const listRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -101,10 +101,10 @@ export const JobsList = ({
               key={job.id}
               job={job}
               onFavorite={onFavorite}
-              onApply={onApply}
+              onOpenJob={onOpenJob}
+              onAddToPipeline={onAddToPipeline}
               onViewDetails={onViewDetails}
               isFavoritePending={favoritePendingId === job.id}
-              isApplyPending={applyPendingId === job.id}
             />
           ))}
         </div>
@@ -144,10 +144,10 @@ export const JobsList = ({
               <JobCard
                 job={job}
                 onFavorite={onFavorite}
-                onApply={onApply}
+                onOpenJob={onOpenJob}
+                onAddToPipeline={onAddToPipeline}
                 onViewDetails={onViewDetails}
                 isFavoritePending={favoritePendingId === job.id}
-                isApplyPending={applyPendingId === job.id}
               />
             </div>
           );

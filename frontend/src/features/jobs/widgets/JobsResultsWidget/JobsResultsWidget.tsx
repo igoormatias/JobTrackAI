@@ -20,12 +20,12 @@ export type JobsResultsWidgetProps = {
   onDirectionChange: (direction: SortDirection) => void;
   onLoadMore: () => void;
   onFavorite: (job: Job) => void;
-  onApply: (job: Job) => void;
+  onOpenJob: (job: Job) => void;
+  onAddToPipeline: (job: Job) => void;
   onViewDetails: (job: Job) => void;
   onClearFilters?: () => void;
   onRetry?: () => void;
   favoritePendingId?: string;
-  applyPendingId?: string;
 };
 
 export const JobsResultsWidget = ({
@@ -42,12 +42,12 @@ export const JobsResultsWidget = ({
   onDirectionChange,
   onLoadMore,
   onFavorite,
-  onApply,
+  onOpenJob,
+  onAddToPipeline,
   onViewDetails,
   onClearFilters,
   onRetry,
   favoritePendingId,
-  applyPendingId,
 }: JobsResultsWidgetProps) => {
   if (isError) {
     return <JobsEmptyState variant="error" onRetry={onRetry} />;
@@ -73,10 +73,10 @@ export const JobsResultsWidget = ({
         hasNextPage={hasNextPage}
         onLoadMore={onLoadMore}
         onFavorite={onFavorite}
-        onApply={onApply}
+        onOpenJob={onOpenJob}
+        onAddToPipeline={onAddToPipeline}
         onViewDetails={onViewDetails}
         favoritePendingId={favoritePendingId}
-        applyPendingId={applyPendingId}
       />
     </div>
   );

@@ -22,7 +22,7 @@ export const useLoginMutation = () => {
   const { setAuthState } = useAuthContext();
 
   return useMutation({
-    mutationFn: () => loginWithGoogle({ provider: "google" }),
+    mutationFn: (idToken: string) => loginWithGoogle({ provider: "google", idToken }),
     onSuccess: (response) => {
       setAuthState(response);
       void queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });

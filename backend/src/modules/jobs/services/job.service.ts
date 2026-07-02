@@ -1,6 +1,14 @@
 import { NotFoundError } from "../../../shared/errors/not-found-error.js";
-import { jobRepository, type JobRepository } from "../repositories/job.repository.js";
+import { prismaProfileRepository } from "../../profiles/infrastructure/repositories/prisma-profile.repository.js";
+import type { MatchProfileInput } from "../../match/domain/services/match-engine.service.js";
+import {
+  prismaJobRepository,
+  type PrismaJobRepository,
+} from "../infrastructure/repositories/prisma-job.repository.js";
+import { jobRepository as inMemoryJobRepository } from "../repositories/job.repository.js";
 import type { Job, JobListParams, JobListResult } from "../types/job.types.js";
+
+const isTestEnv = process.env.NODE_ENV === "test";
 
 const toArray = (value?: string | string[]): string[] | undefined => {
   if (!value) return undefined;
@@ -32,51 +40,50 @@ const filterJobs = (jobs: Job[], params: JobListParams): Job[] => {
     );
   }
 
-  if (params.areas?.length) {
-    result = result.filter((job) => params.areas!.includes(job.area));
-  }
-
+  if (params.areas?.length) result = result.filter((job) => params.areas!.includes(job.area));
   if (params.companyIds?.length) {
     result = result.filter((job) => params.companyIds!.includes(job.companyId));
   }
-
   if (params.seniorities?.length) {
     result = result.filter((job) => params.seniorities!.includes(job.seniority));
   }
-
   if (params.modalities?.length) {
     result = result.filter((job) => params.modalities!.includes(job.modality));
   }
-
   if (params.location) {
     const location = params.location.toLowerCase();
     result = result.filter((job) => job.location.toLowerCase().includes(location));
   }
-
   if (params.salaryMin !== undefined) {
     result = result.filter((job) => (job.salaryMax ?? 0) >= params.salaryMin!);
   }
-
   if (params.salaryMax !== undefined) {
     result = result.filter((job) => (job.salaryMin ?? Number.MAX_SAFE_INTEGER) <= params.salaryMax!);
   }
-
   if (params.skills?.length) {
     result = result.filter((job) =>
       params.skills!.every((skill) =>
-        job.technologies.some((tech) => tech.slug === skill || tech.name.toLowerCase() === skill.toLowerCase()),
+        job.technologies.some(
+          (tech) => tech.slug === skill || tech.name.toLowerCase() === skill.toLowerCase(),
+        ),
       ),
     );
   }
-
   if (params.matchMin !== undefined) {
     result = result.filter((job) => job.matchScore.score >= params.matchMin!);
   }
-
   if (params.isFavorite !== undefined) {
     result = result.filter((job) => job.isFavorite === params.isFavorite);
   }
-
+  if (params.visibility === "hidden") {
+    result = result.filter((job) => job.visibility === "HIDDEN");
+  } else if (params.visibility === "visible") {
+    result = result.filter((job) => job.visibility !== "HIDDEN");
+  }
+  if (params.priority) {
+    const map = { high: "HIGH", medium: "MEDIUM", low: "LOW" } as const;
+    result = result.filter((job) => job.priority === map[params.priority!]);
+  }
   if (params.sources?.length) {
     result = result.filter((job) => params.sources!.includes(job.source));
   }
@@ -94,6 +101,10 @@ const filterJobs = (jobs: Job[], params: JobListParams): Job[] => {
         return a.company.name.localeCompare(b.company.name) * direction;
       case "date":
         return (new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()) * direction;
+      case "priority": {
+        const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+        return ((order[a.priority ?? "MEDIUM"] ?? 2) - (order[b.priority ?? "MEDIUM"] ?? 2)) * direction;
+      }
       case "match":
       default:
         return (a.matchScore.score - b.matchScore.score) * direction;
@@ -121,57 +132,80 @@ const paginate = (jobs: Job[], params: JobListParams): JobListResult => {
       limit,
       total: jobs.length,
       hasMore,
-      nextCursor: hasMore ? data[data.length - 1]?.id ?? null : null,
+      nextCursor: hasMore ? (data[data.length - 1]?.id ?? null) : null,
     },
   };
 };
 
+const toMatchProfile = async (userId: string): Promise<MatchProfileInput | null> => {
+  const profile = await prismaProfileRepository.findByUserId(userId);
+  if (!profile) return null;
+  return {
+    area: profile.area,
+    seniority: profile.seniority,
+    modality: profile.modality,
+    location: profile.location,
+    locationPreference: profile.locationPreference as MatchProfileInput["locationPreference"],
+    salaryExpectation: profile.salaryExpectation as MatchProfileInput["salaryExpectation"],
+    skillNames: profile.skillNames,
+    blockedSkills: profile.blockedSkills,
+  };
+};
+
 export class JobService {
-  constructor(private readonly repository: JobRepository = jobRepository) {}
+  constructor(
+    private readonly prismaRepo: PrismaJobRepository = prismaJobRepository,
+    private readonly memoryRepo = inMemoryJobRepository,
+  ) {}
 
-  listJobs(params: JobListParams): JobListResult {
+  private get usePrisma(): boolean {
+    return !isTestEnv;
+  }
+
+  async listJobs(userId: string, params: JobListParams): Promise<JobListResult> {
     const normalized = normalizeParams(params);
-    const filtered = filterJobs(this.repository.findAll(), normalized);
-    return paginate(filtered, normalized);
+    if (!this.usePrisma) {
+      return paginate(filterJobs(this.memoryRepo.findAll(), normalized), normalized);
+    }
+
+    const profile = await toMatchProfile(userId);
+    const jobs = await this.prismaRepo.findAllForUser({ userId, profile });
+    return paginate(filterJobs(jobs, normalized), normalized);
   }
 
-  getJobById(id: string): Job {
-    const job = this.repository.findById(id);
-    if (!job) {
-      throw new NotFoundError("Job not found");
+  async getJobById(userId: string, id: string): Promise<Job> {
+    if (!this.usePrisma) {
+      const job = this.memoryRepo.findById(id);
+      if (!job) throw new NotFoundError("Job not found");
+      return job;
     }
+
+    const profile = await toMatchProfile(userId);
+    const job = await this.prismaRepo.findByIdForUser(id, { userId, profile });
+    if (!job) throw new NotFoundError("Job not found");
     return job;
   }
 
-  favoriteJob(id: string, isFavorite: boolean): Job {
-    const job = this.repository.setFavorite(id, isFavorite);
-    if (!job) {
-      throw new NotFoundError("Job not found");
+  async favoriteJob(userId: string, id: string, isFavorite: boolean): Promise<Job> {
+    if (!this.usePrisma) {
+      const job = this.memoryRepo.setFavorite(id, isFavorite);
+      if (!job) throw new NotFoundError("Job not found");
+      return job;
     }
-    return job;
+
+    await this.prismaRepo.upsertFavorite(userId, id, isFavorite);
+    return this.getJobById(userId, id);
   }
 
-  markViewed(id: string): Job {
-    const job = this.repository.markViewed(id);
-    if (!job) {
-      throw new NotFoundError("Job not found");
+  async markViewed(userId: string, id: string): Promise<Job> {
+    if (!this.usePrisma) {
+      const job = this.memoryRepo.markViewed(id);
+      if (!job) throw new NotFoundError("Job not found");
+      return job;
     }
-    return job;
-  }
 
-  applyToJob(id: string): Job {
-    const job = this.repository.apply(id);
-    if (!job) {
-      throw new NotFoundError("Job not found");
-    }
-    return job;
-  }
-
-  removeApplication(id: string): Job {
-    const job = this.repository.removeApplication(id);
-    if (!job) {
-      throw new NotFoundError("Job not found");
-    }
+    const job = await this.prismaRepo.markViewed(userId, id);
+    if (!job) throw new NotFoundError("Job not found");
     return job;
   }
 }

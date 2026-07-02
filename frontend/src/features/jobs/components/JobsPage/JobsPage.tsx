@@ -1,9 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AddToTrackingModal } from "@/features/tracking/components/AddToTrackingModal/AddToTrackingModal";
+import { useCreateTrackingMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 import { listCompanies } from "@/services/companies-service";
 import { queryKeys } from "@/lib/query-client/query-keys";
 import type { Job, JobSortField, SortDirection } from "@/types";
@@ -27,8 +29,10 @@ const getEmptyVariant = (
 
 export const JobsPage = () => {
   const filters = useJobFilters();
-  const { favoriteMutation, applyMutation, removeApplicationMutation, viewMutation } =
-    useJobMutations();
+  const { favoriteMutation, viewMutation } = useJobMutations();
+  const createTrackingMutation = useCreateTrackingMutation();
+  const [trackingJob, setTrackingJob] = useState<Job | null>(null);
+  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
 
   const { data: companiesData } = useQuery({
     queryKey: queryKeys.companies.list({ limit: 30 }),
@@ -69,12 +73,15 @@ export const JobsPage = () => {
     favoriteMutation.mutate({ id: job.id, isFavorite: !job.isFavorite });
   };
 
-  const handleApply = (job: Job) => {
-    if (job.engagementState === "applied") {
-      removeApplicationMutation.mutate(job.id);
-      return;
+  const handleOpenJob = (job: Job) => {
+    if (job.sourceUrl) {
+      window.open(job.sourceUrl, "_blank", "noopener,noreferrer");
     }
-    applyMutation.mutate(job.id);
+  };
+
+  const handleAddToPipeline = (job: Job) => {
+    setTrackingJob(job);
+    setTrackingModalOpen(true);
   };
 
   const handleViewDetails = (job: Job) => {
@@ -108,18 +115,28 @@ export const JobsPage = () => {
         onDirectionChange={handleDirectionChange}
         onLoadMore={() => void fetchNextPage()}
         onFavorite={handleFavorite}
-        onApply={handleApply}
+        onOpenJob={handleOpenJob}
+        onAddToPipeline={handleAddToPipeline}
         onViewDetails={handleViewDetails}
         onClearFilters={filters.clearFilters}
         onRetry={() => void refetch()}
         favoritePendingId={
           favoriteMutation.isPending ? favoriteMutation.variables?.id : undefined
         }
-        applyPendingId={
-          applyMutation.isPending || removeApplicationMutation.isPending
-            ? applyMutation.variables ?? removeApplicationMutation.variables
-            : undefined
-        }
+      />
+
+      <AddToTrackingModal
+        open={trackingModalOpen}
+        onOpenChange={setTrackingModalOpen}
+        mode="fromJob"
+        job={trackingJob}
+        isSubmitting={createTrackingMutation.isPending}
+        onSubmit={(values) => {
+          createTrackingMutation.mutate(
+            values as Parameters<typeof createTrackingMutation.mutate>[0],
+            { onSuccess: () => setTrackingModalOpen(false) },
+          );
+        }}
       />
     </div>
   );

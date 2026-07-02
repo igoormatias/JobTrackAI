@@ -1,9 +1,10 @@
 import { NotFoundError } from "../../../shared/errors/not-found-error.js";
+import { MATCH_ENGINE_VERSION } from "../../../shared/domain/match-weights.js";
 import {
   PIPELINE_STAGE_LABELS,
   PIPELINE_STAGES,
 } from "../../pipeline/constants/pipeline-stages.js";
-import { pipelineRepository } from "../../pipeline/repositories/pipeline.repository.js";
+import { trackingService } from "../../tracking/application/tracking.service.js";
 import { jobRepository, type JobRepository } from "../repositories/job.repository.js";
 import type { JobInsight, JobMatchDto, JobTimelineStep, LearningGap } from "../types/job-details.types.js";
 import type { Job } from "../types/job.types.js";
@@ -46,18 +47,19 @@ export class JobDetailsService {
     private readonly repository: JobRepository = jobRepository,
   ) {}
 
-  getJobMatch(id: string): JobMatchDto {
-    const job = this.jobs.getJobById(id);
+  async getJobMatch(userId: string, id: string): Promise<JobMatchDto> {
+    const job = await this.jobs.getJobById(userId, id);
     return {
       matchScore: job.matchScore,
       compatibilityLabel: MATCH_LABEL_PT[job.matchScore.label],
+      engineVersion: MATCH_ENGINE_VERSION,
     };
   }
 
-  getRelatedJobs(id: string): Job[] {
-    const current = this.jobs.getJobById(id);
-    return this.repository
-      .findAll()
+  async getRelatedJobs(userId: string, id: string): Promise<Job[]> {
+    const current = await this.jobs.getJobById(userId, id);
+    const list = await this.jobs.listJobs(userId, { limit: 100 });
+    return list.data
       .filter((job) => job.id !== id)
       .filter(
         (job) =>
@@ -70,14 +72,14 @@ export class JobDetailsService {
       .slice(0, 5);
   }
 
-  getJobTimeline(id: string): JobTimelineStep[] {
-    const application = pipelineRepository.findByJobId(id);
-    if (!application) return [];
+  async getJobTimeline(userId: string, jobId: string): Promise<JobTimelineStep[]> {
+    const tracking = await trackingService.findByJobId(userId, jobId);
+    if (!tracking) return [];
 
-    const currentIndex = PIPELINE_STAGES.indexOf(application.stage);
+    const currentIndex = PIPELINE_STAGES.indexOf(tracking.stage);
 
     return PIPELINE_STAGES.map((stage, index) => {
-      const timelineEvent = application.timeline.find((event) =>
+      const timelineEvent = tracking.timeline.find((event) =>
         event.metadata && typeof event.metadata === "object" && "to" in event.metadata
           ? event.metadata.to === stage
           : false,
@@ -91,14 +93,14 @@ export class JobDetailsService {
         stage,
         label: PIPELINE_STAGE_LABELS[stage],
         status,
-        occurredAt: timelineEvent?.occurredAt ?? (status === "current" ? application.updatedAt : undefined),
+        occurredAt: timelineEvent?.occurredAt ?? (status === "current" ? tracking.updatedAt : undefined),
       };
     });
   }
 
-  getJobInsights(id: string): JobInsight[] {
-    const job = this.jobs.getJobById(id);
-    const match = this.getJobMatch(id);
+  async getJobInsights(userId: string, id: string): Promise<JobInsight[]> {
+    const job = await this.jobs.getJobById(userId, id);
+    const match = await this.getJobMatch(userId, id);
     const insights: JobInsight[] = [];
     const matchedReasons = match.matchScore.reasons.filter((reason) => reason.matched);
     const requirementsMetPercent = job.requirements.length
@@ -136,8 +138,8 @@ export class JobDetailsService {
     return insights;
   }
 
-  getLearningGaps(id: string): LearningGap[] {
-    const job = this.jobs.getJobById(id);
+  async getLearningGaps(userId: string, id: string): Promise<LearningGap[]> {
+    const job = await this.jobs.getJobById(userId, id);
     return job.matchScore.missingSkills.map((skill, index) => ({
       id: skill.id,
       name: skill.name,

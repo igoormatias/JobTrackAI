@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const loginSchema = z.object({
   provider: z.literal("google"),
-  idToken: z.string().optional(),
+  idToken: z.string().min(1, "Google idToken is required"),
 });
 
 const professionalAreaSchema = z.enum([

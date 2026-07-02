@@ -30,7 +30,7 @@ const buildTimelineForStage = (applicationId: string, stage: PipelineStage, appl
     }),
   ];
 
-  if (stage !== "favorite" && stage !== "applied") {
+  if (stage !== "discovery" && stage !== "applied") {
     events.push(
       createTimelineEvent({
         applicationId,
@@ -79,7 +79,7 @@ const buildTimelineForStage = (applicationId: string, stage: PipelineStage, appl
     );
   }
 
-  if (stage === "rejected") {
+  if (stage === "closed") {
     events.push(
       createTimelineEvent({
         applicationId,
@@ -107,7 +107,7 @@ export const createApplication = ({ index, userId, job, stage }: CreateApplicati
     userId,
     stage,
     status: "active",
-    notes: stage === "rejected" ? "Aguardar retorno em 6 meses." : null,
+    notes: stage === "closed" ? "Aguardar retorno em 6 meses." : null,
     nextStep:
       stage === "technical_interview"
         ? "Preparar live coding"

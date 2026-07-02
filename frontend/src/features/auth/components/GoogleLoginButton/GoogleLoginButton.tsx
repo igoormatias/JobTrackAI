@@ -1,25 +1,38 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
+import { toast } from "sonner";
 
-import { GoogleIcon } from "../GoogleIcon";
 import { useLoginMutation } from "../../hooks/use-auth-mutations";
 
 export const GoogleLoginButton = () => {
   const loginMutation = useLoginMutation();
 
+  const handleSuccess = (credentialResponse: CredentialResponse) => {
+    const idToken = credentialResponse.credential;
+
+    if (!idToken) {
+      toast.error("Não foi possível obter credencial do Google");
+      return;
+    }
+
+    loginMutation.mutate(idToken);
+  };
+
+  const handleError = () => {
+    toast.error("Falha ao entrar com Google");
+  };
+
   return (
-    <Button
-      type="button"
-      variant="primary"
-      size="lg"
-      className="h-12 w-full gap-3 text-base font-medium"
-      onClick={() => loginMutation.mutate()}
-      disabled={loginMutation.isPending}
-      isLoading={loginMutation.isPending}
-    >
-      <GoogleIcon />
-      Entrar com Google
-    </Button>
+    <div className="flex w-full justify-center [&>div]:w-full [&_iframe]:w-full">
+      <GoogleLogin
+        onSuccess={handleSuccess}
+        onError={handleError}
+        text="signin_with"
+        shape="rectangular"
+        size="large"
+        width="100%"
+      />
+    </div>
   );
 };

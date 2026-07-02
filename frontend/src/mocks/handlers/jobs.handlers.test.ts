@@ -73,7 +73,7 @@ describe("jobs handlers", () => {
     expect(names).toEqual(sorted);
   });
 
-  it("favorites and applies to jobs", async () => {
+  it("favorites a job", async () => {
     const { data: list } = await apiClient.get<CursorPaginatedResponse<Job>>("/jobs", {
       params: { limit: 1 },
     });
@@ -83,12 +83,6 @@ describe("jobs handlers", () => {
       isFavorite: true,
     });
     expect(favorited.data.isFavorite).toBe(true);
-
-    const { data: applied } = await apiClient.post<{ data: Job }>(`/jobs/${jobId}/apply`);
-    expect(applied.data.engagementState).toBe("applied");
-
-    const { data: removed } = await apiClient.delete<{ data: Job }>(`/jobs/${jobId}/apply`);
-    expect(removed.data.engagementState).not.toBe("applied");
   });
 
   it("returns job match details", async () => {
@@ -124,7 +118,11 @@ describe("jobs handlers", () => {
     });
     const jobId = list.data[0]!.id;
 
-    await apiClient.post(`/jobs/${jobId}/apply`);
+    await apiClient.post("/tracking", {
+      jobId,
+      stage: "applied",
+      stageOccurredAt: new Date().toISOString(),
+    });
 
     const { data } = await apiClient.get<{ data: { stage: string; status: string }[] }>(
       `/jobs/${jobId}/timeline`,

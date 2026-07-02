@@ -6,6 +6,7 @@ export type JobMatchDto = {
     missingSkills: { id: string; name: string }[];
   };
   compatibilityLabel: string;
+  engineVersion?: string;
 };
 
 export type LearningGap = {

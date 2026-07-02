@@ -4,7 +4,7 @@ import { type ReactNode } from "react";
 
 import { SessionProvider } from "@/features/auth/context/SessionProvider";
 import { TooltipProvider } from "@/components/ui/Tooltip";
-import { MswProvider } from "@/providers/msw-provider";
+import { GoogleAuthProvider } from "@/providers/google-auth-provider";
 import { NuqsProvider } from "@/providers/nuqs-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -16,7 +16,7 @@ type AppProvidersProps = {
 
 export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
-    <MswProvider>
+    <GoogleAuthProvider>
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider delayDuration={200}>
           <QueryProvider>
@@ -29,6 +29,6 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
           </QueryProvider>
         </TooltipProvider>
       </ThemeProvider>
-    </MswProvider>
+    </GoogleAuthProvider>
   );
 };

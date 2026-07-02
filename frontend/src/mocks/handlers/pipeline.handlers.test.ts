@@ -7,7 +7,7 @@ describe("pipeline handlers", () => {
   it("returns pipeline with kpis and columns", async () => {
     const { data } = await apiClient.get<{ data: PipelineData }>("/pipeline");
 
-    expect(data.data.columns).toHaveLength(9);
+    expect(data.data.columns).toHaveLength(10);
     expect(data.data.kpis.totalApplications).toBeGreaterThan(0);
   });
 

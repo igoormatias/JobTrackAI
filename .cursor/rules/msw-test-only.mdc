@@ -1,0 +1,28 @@
+---
+description: MSW restrito a testes — runtime consome Express + Prisma (ADR-024)
+alwaysApply: true
+---
+
+# MSW — apenas testes (ADR-024)
+
+## Regra
+
+- **Nunca** usar MSW no runtime da aplicação (browser dev/prod).
+- MSW é permitido **somente** em: Vitest (`msw/node`), Storybook, testes de componentes isolados.
+- Toda feature MVP implementada deve consumir **Backend Express → Prisma**.
+
+## Frontend
+
+- `NEXT_PUBLIC_ENABLE_MSW` deve ser `false` em `.env.example` e Docker.
+- Não montar `MswProvider` no `layout.tsx` em runtime.
+- Não importar `smart-mock-context` ou `dashboard-builder` fora de `src/mocks/` ou `src/test/`.
+
+## Backend
+
+- Núcleo MVP (jobs, tracking, pipeline, dashboard, notifications) usa **Prisma repositories**.
+- InMemory repositories apenas em testes unitários/integração.
+
+## Referências
+
+- `docs/DECISIONS.md` — ADR-024
+- `docs/IMPLEMENTATION_STATUS.md`

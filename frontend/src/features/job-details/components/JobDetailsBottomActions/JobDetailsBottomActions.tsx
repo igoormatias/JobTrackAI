@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark } from "lucide-react";
+import { Bookmark, ExternalLink } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import type { Job } from "@/types";
@@ -10,20 +10,20 @@ import { JOB_DETAILS_LAYOUT } from "../../constants/job-details-constants";
 export type JobDetailsBottomActionsProps = {
   job: Job;
   onFavorite: () => void;
-  onApply: () => void;
+  onOpenJob: () => void;
+  onAddToPipeline: () => void;
   isFavoritePending?: boolean;
-  isApplyPending?: boolean;
+  isAddToPipelinePending?: boolean;
 };
 
 export const JobDetailsBottomActions = ({
   job,
   onFavorite,
-  onApply,
+  onOpenJob,
+  onAddToPipeline,
   isFavoritePending,
-  isApplyPending,
+  isAddToPipelinePending,
 }: JobDetailsBottomActionsProps) => {
-  const isApplied = job.engagementState === "applied";
-
   return (
     <div className={JOB_DETAILS_LAYOUT.bottomBar}>
       <div className="mx-auto flex max-w-3xl items-center gap-2">
@@ -38,11 +38,21 @@ export const JobDetailsBottomActions = ({
         </Button>
         <Button
           type="button"
+          variant="outline"
           className="flex-1"
-          onClick={onApply}
-          disabled={isApplyPending || isApplied}
+          onClick={onOpenJob}
+          disabled={!job.sourceUrl}
         >
-          {isApplied ? "Candidatura enviada" : "Me candidatar agora"}
+          <ExternalLink className="mr-2 h-4 w-4" />
+          Abrir vaga
+        </Button>
+        <Button
+          type="button"
+          className="flex-1"
+          onClick={onAddToPipeline}
+          disabled={isAddToPipelinePending}
+        >
+          Adicionar ao Pipeline
         </Button>
       </div>
     </div>

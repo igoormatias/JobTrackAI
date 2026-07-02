@@ -16,7 +16,7 @@ Detalhes: [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md)
 - Permite favoritar, priorizar e ocultar vagas
 - Abre vagas na plataforma original (nunca candidatura interna)
 - Cadastro manual de vagas com mesmo fluxo das importadas
-- Calcula Match Score personalizado (MSW no MVP)
+- Calcula Match Score personalizado (Match Engine V1 no backend)
 - Dashboard com visão da busca
 - Pipeline manual para acompanhar a jornada seletiva
 - Timeline automática de eventos
@@ -57,8 +57,10 @@ Encontrou vaga → Favoritou → Definiu prioridade → Abriu vaga (origem)
 |-------|------|--------|
 | 10.7 | Product Refinement (domínio oficial) | Concluída |
 | 11 | Minha Conta | Concluída |
-| 12 | Pipeline Refinado | Próxima |
-| 13 | Release Candidate MVP | Pendente |
+| 12 | Pipeline & Job Tracking | Concluída |
+| 13 | MVP Stabilization | Concluída |
+| 14 | Release Candidate (RC1) | Próxima |
+| 15 | AI Match Engine | Pendente |
 
 - **V2** — Providers, Scheduler, Match Engine real, WebSocket, IA, Analytics, ML, i18n
 
@@ -70,7 +72,7 @@ Ver [docs/ROADMAP.md](docs/ROADMAP.md)
 Browser
    │
    ▼
-Frontend (Next.js :3000) ──► React Query ──► MSW (dev) ou API REST
+Frontend (Next.js :3000) ──► React Query ──► API REST (Express)
    │
    ▼
 Backend (Express :3333) ──► Prisma ──► PostgreSQL

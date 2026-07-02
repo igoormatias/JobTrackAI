@@ -20,6 +20,10 @@ export type CreateJobInput = {
   company: Company;
   area?: ProfessionalArea;
   isFavorite?: boolean;
+  title?: string;
+  source?: JobSource;
+  sourceUrl?: string;
+  description?: string;
 };
 
 const createJobTechnology = (name: string, index: number): Technology => ({
@@ -34,9 +38,18 @@ const getTechNamesForArea = (jobArea: ProfessionalArea): string[] => {
   return faker.helpers.arrayElements(pool, { min: 4, max: Math.min(8, pool.length) });
 };
 
-export const createJob = ({ index, company, area, isFavorite = false }: CreateJobInput): Job => {
+export const createJob = ({
+  index,
+  company,
+  area,
+  isFavorite = false,
+  title: titleOverride,
+  source: sourceOverride,
+  sourceUrl: sourceUrlOverride,
+  description: descriptionOverride,
+}: CreateJobInput): Job => {
   const jobArea = area ?? faker.helpers.arrayElement([...PROFESSIONAL_AREAS]);
-  const title = faker.helpers.arrayElement(JOB_TITLES_BY_AREA[jobArea]);
+  const title = titleOverride ?? faker.helpers.arrayElement(JOB_TITLES_BY_AREA[jobArea]);
   const seniority = faker.helpers.arrayElement([...SENIORITIES]);
   const modality = faker.helpers.arrayElement([...MODALITIES]);
   const techNames = getTechNamesForArea(jobArea);
@@ -44,7 +57,7 @@ export const createJob = ({ index, company, area, isFavorite = false }: CreateJo
   const now = new Date().toISOString();
   const salaryMin = faker.number.int({ min: 6000, max: 14000 });
   const salaryMax = salaryMin + faker.number.int({ min: 2000, max: 8000 });
-  const source: JobSource = faker.helpers.arrayElement(["gupy", "linkedin", "programathor"]);
+  const source: JobSource = sourceOverride ?? faker.helpers.arrayElement(["gupy", "linkedin", "programathor"]);
   const employmentType = faker.helpers.arrayElement(["clt", "pj", "contract", "internship"] as const);
 
   return {
@@ -66,7 +79,7 @@ export const createJob = ({ index, company, area, isFavorite = false }: CreateJo
     salaryMin,
     salaryMax,
     currency: "BRL",
-    description: faker.lorem.paragraphs({ min: 2, max: 4 }),
+    description: descriptionOverride ?? faker.lorem.paragraphs({ min: 2, max: 4 }),
     requirements: faker.helpers.arrayElements(
       [
         "Experiência com desenvolvimento de software",
@@ -83,7 +96,7 @@ export const createJob = ({ index, company, area, isFavorite = false }: CreateJo
     ),
     technologies: techNames.map((name, techIndex) => createJobTechnology(name, index * 10 + techIndex)),
     source,
-    sourceUrl: `https://${source}.com.br/vagas/${index}`,
+    sourceUrl: sourceUrlOverride ?? `https://${source}.com.br/vagas/${index}`,
     status: "active",
     isFavorite,
     // @domain-refinement-10.7 — campos oficiais; defaults até Etapa 12

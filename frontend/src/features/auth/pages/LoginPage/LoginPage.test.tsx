@@ -3,6 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { LoginPage } from "./LoginPage";
 
+vi.mock("@react-oauth/google", () => ({
+  GoogleLogin: () => <button type="button" className="w-full">Entrar com Google</button>,
+}));
+
 vi.mock("../../hooks/use-auth", () => ({
   useAuth: () => ({
     isLoading: false,

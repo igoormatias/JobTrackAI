@@ -7,11 +7,11 @@ export const resolveJobEngagementState = (
 ): JobEngagementState => {
   const application = store.applications.find((item) => item.jobId === jobId);
 
-  if (application?.stage === "rejected") {
+  if (application?.stage === "closed") {
     return "rejected";
   }
 
-  if (application && application.stage !== "favorite") {
+  if (application && application.stage !== "discovery") {
     return "applied";
   }
 

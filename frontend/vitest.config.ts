@@ -8,6 +8,9 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    env: {
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: "test-google-client-id.apps.googleusercontent.com",
+    },
   },
   resolve: {
     alias: {

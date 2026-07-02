@@ -3,11 +3,13 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { AddToTrackingModal } from "@/features/tracking/components/AddToTrackingModal/AddToTrackingModal";
+import { useCreateTrackingMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 import { listCompanies } from "@/services/companies-service";
 import { queryKeys } from "@/lib/query-client/query-keys";
 import type { JobDetailsCompany } from "../../types/job-details.types";
@@ -51,7 +53,9 @@ export const JobDetailsPage = () => {
     enabled: jobReady,
   });
 
-  const { favoriteMutation, applyMutation, removeApplicationMutation } = useJobDetailsMutations();
+  const { favoriteMutation } = useJobDetailsMutations();
+  const createTrackingMutation = useCreateTrackingMutation();
+  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
   useMarkJobViewedOnMount(job);
 
   const companyRecord = companiesData?.data.find((item) => item.id === job?.companyId);
@@ -92,14 +96,15 @@ export const JobDetailsPage = () => {
     favoriteMutation.mutate({ id: job.id, isFavorite: !job.isFavorite });
   }, [favoriteMutation, job]);
 
-  const handleApply = useCallback(() => {
+  const handleOpenJob = useCallback(() => {
+    if (!job?.sourceUrl) return;
+    window.open(job.sourceUrl, "_blank", "noopener,noreferrer");
+  }, [job]);
+
+  const handleAddToPipeline = useCallback(() => {
     if (!job) return;
-    if (job.engagementState === "applied") {
-      removeApplicationMutation.mutate(job.id);
-      return;
-    }
-    applyMutation.mutate(job.id);
-  }, [applyMutation, job, removeApplicationMutation]);
+    setTrackingModalOpen(true);
+  }, [job]);
 
   if (isLoading) return <JobDetailsPageSkeleton />;
 
@@ -143,9 +148,24 @@ export const JobDetailsPage = () => {
       <JobDetailsBottomActions
         job={job}
         onFavorite={handleFavorite}
-        onApply={handleApply}
+        onOpenJob={handleOpenJob}
+        onAddToPipeline={handleAddToPipeline}
         isFavoritePending={favoriteMutation.isPending}
-        isApplyPending={applyMutation.isPending || removeApplicationMutation.isPending}
+        isAddToPipelinePending={createTrackingMutation.isPending}
+      />
+
+      <AddToTrackingModal
+        open={trackingModalOpen}
+        onOpenChange={setTrackingModalOpen}
+        mode="fromJob"
+        job={job}
+        isSubmitting={createTrackingMutation.isPending}
+        onSubmit={(values) => {
+          createTrackingMutation.mutate(
+            values as Parameters<typeof createTrackingMutation.mutate>[0],
+            { onSuccess: () => setTrackingModalOpen(false) },
+          );
+        }}
       />
     </div>
   );

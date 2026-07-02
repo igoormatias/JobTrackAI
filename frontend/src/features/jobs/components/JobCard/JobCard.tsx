@@ -22,10 +22,10 @@ export type JobCardProps = {
   job: Job;
   variant?: "default" | "compact";
   onFavorite?: (job: Job) => void;
-  onApply?: (job: Job) => void;
+  onOpenJob?: (job: Job) => void;
+  onAddToPipeline?: (job: Job) => void;
   onViewDetails?: (job: Job) => void;
   isFavoritePending?: boolean;
-  isApplyPending?: boolean;
   className?: string;
 };
 
@@ -42,17 +42,22 @@ export const JobCard = memo(
     job,
     variant = "default",
     onFavorite,
-    onApply,
+    onOpenJob,
+    onAddToPipeline,
     onViewDetails,
     isFavoritePending = false,
-    isApplyPending = false,
     className,
   }: JobCardProps) => {
     const isCompact = variant === "compact";
-    const isApplied = job.engagementState === "applied";
 
     return (
-      <Card className={cn("border", engagementBorderClass[job.engagementState], className)}>
+      <Card
+        className={cn(
+          "border",
+          job.isFavorite ? "border-amber-500/50 bg-amber-500/5" : engagementBorderClass[job.engagementState],
+          className,
+        )}
+      >
         <CardContent className={cn("flex flex-col gap-4", isCompact ? "p-4" : "p-5")}>
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-1 items-start gap-3">
@@ -68,6 +73,9 @@ export const JobCard = memo(
                   <Badge variant="outline" className="text-xs">
                     {JOB_ENGAGEMENT_LABELS[job.engagementState]}
                   </Badge>
+                  {job.isFavorite ? (
+                    <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300">Favorita</Badge>
+                  ) : null}
                 </div>
                 <p className="truncate text-sm text-muted-foreground">
                   {job.company.name} · {job.modality} · {job.location}
@@ -126,10 +134,14 @@ export const JobCard = memo(
             <Button
               type="button"
               size="sm"
-              onClick={() => onApply?.(job)}
-              disabled={isApplyPending || isApplied}
+              variant="outline"
+              onClick={() => onOpenJob?.(job)}
             >
-              {isApplied ? "Aplicada" : "Aplicar"}
+              <ExternalLink className="mr-1 h-4 w-4" />
+              Abrir vaga
+            </Button>
+            <Button type="button" size="sm" onClick={() => onAddToPipeline?.(job)}>
+              Adicionar ao Pipeline
             </Button>
           </div>
         </CardContent>

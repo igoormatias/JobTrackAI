@@ -48,7 +48,7 @@ Handlers MSW com fixtures, paginação, factories e integração com React Query
 
 #### ✅ Auth
 
-Login Google (mock), rotas protegidas, middleware, sessão via contexto e cookies.
+Login Google OAuth, rotas protegidas, middleware, sessão via contexto e cookies.
 
 #### ✅ Onboarding
 
@@ -86,27 +86,50 @@ Perfil simplificado + Preferências (`features/account`, Prisma User/Profile/Use
 - [x] Alinhamento de schemas (senioridade, labels)
 - [x] Integração React Query + Backend + Prisma + EventBus
 
-#### ⬜ Pipeline Refinado (Etapa 12)
+#### ✅ Pipeline & Job Tracking (Etapa 12)
 
-Implementação do domínio refinado (ADR-022):
+Domínio **Job Tracking** (ADR-023) — núcleo do MVP:
 
-- Prioridade (HIGH/MEDIUM/LOW) com filtros, ordenação e indicadores visuais
-- Visibilidade (ocultar/restaurar) com filtros
-- Cadastro manual de vagas (`POST /jobs`)
-- Adicionar ao pipeline (`POST /pipeline`)
-- Timeline automática completa + edição de `occurredAt`
-- `lastStageUpdatedAt` automático em movimentações
-- Remover estágio `"favorite"` do Kanban
-- Botão **Abrir vaga** substituindo "Aplicar"
-- Destaque visual de favoritos (borda/badge/background)
+- [x] Módulo `tracking` + API `/tracking/*`
+- [x] Pipeline como view Kanban (`GET /pipeline`)
+- [x] Modal unificado (Jobs + Pipeline manual)
+- [x] Timeline automática + modal de data no DnD
+- [x] Remoção estágio `favorite`; 10 estágios oficiais
+- [x] Abrir vaga + Adicionar ao Pipeline (sem `POST /apply`)
+- [x] Prisma Job + JobTracking + TimelineEvent
+- [x] Cursor Rules + ADR-023
 
-#### ⬜ Release Candidate MVP (Etapa 13)
+#### ✅ MVP Stabilization (Etapa 13)
 
-- Notificações (feed de eventos internos)
-- Entrevistas (gestão no contexto do pipeline)
-- Performance (bundle, cache, prefetch)
-- Testes (E2E e integração ampliada)
-- Deploy (CI/CD, staging/production)
+Consolidar MVP com persistência real, sem mocks em runtime:
+
+- [x] Prisma: Job catalog seed, Tracking, Interview, Notification
+- [x] Match Engine V1 (`rules-v1`)
+- [x] Dashboard + Notificações + Empresas no backend
+- [x] Google OAuth real
+- [x] MSW apenas em testes
+- [x] Entrevistas no domínio Tracking
+- [x] ADR-024 + IMPLEMENTATION_STATUS + CHANGELOG
+
+#### ⬜ Release Candidate (Etapa 14 — RC1)
+
+- E2E tests, CI/CD, deploy staging/production
+- Performance hardening e polish final
+
+#### ⬜ AI Match Engine (Etapa 15)
+
+- Enriquecimento AI sobre contrato `engineVersion` (explicações, learning tips)
+- Sem breaking changes no frontend
+
+---
+
+#### ~~Release Candidate MVP (Etapa 13)~~ — renumerado para Etapas 13–15
+
+~~- Notificações (feed de eventos internos)~~
+~~- Entrevistas (gestão no contexto do pipeline)~~
+~~- Performance (bundle, cache, prefetch)~~
+~~- Testes (E2E e integração ampliada)~~
+~~- Deploy (CI/CD, staging/production)~~
 
 ### Backend — MVP
 

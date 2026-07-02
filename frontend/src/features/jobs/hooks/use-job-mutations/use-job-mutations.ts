@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client/query-keys";
 import type { Job } from "@/types";
 
-import { applyToJob, favoriteJob, markJobViewed, removeJobApplication } from "../../services/jobs-service";
+import { favoriteJob, markJobViewed } from "../../services/jobs-service";
 
 export const useJobMutations = () => {
   const queryClient = useQueryClient();
@@ -56,22 +56,6 @@ export const useJobMutations = () => {
     },
   });
 
-  const applyMutation = useMutation({
-    mutationFn: (id: string) => applyToJob(id),
-    onSuccess: (job) => {
-      updateJobInCache(job);
-      void invalidateJobs();
-    },
-  });
-
-  const removeApplicationMutation = useMutation({
-    mutationFn: (id: string) => removeJobApplication(id),
-    onSuccess: (job) => {
-      updateJobInCache(job);
-      void invalidateJobs();
-    },
-  });
-
   const viewMutation = useMutation({
     mutationFn: (id: string) => markJobViewed(id),
     onSuccess: (job) => {
@@ -81,8 +65,6 @@ export const useJobMutations = () => {
 
   return {
     favoriteMutation,
-    applyMutation,
-    removeApplicationMutation,
     viewMutation,
   };
 };

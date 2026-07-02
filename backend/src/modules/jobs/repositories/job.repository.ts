@@ -110,6 +110,10 @@ export class JobRepository {
     return this.enrich(job);
   }
 
+  addManualJob(job: Job): void {
+    this.jobs.push(job);
+  }
+
   private resolveEngagementState(id: string): JobEngagementState {
     if (this.rejectedJobIds.has(id)) return "rejected";
     if (this.appliedJobIds.has(id)) return "applied";

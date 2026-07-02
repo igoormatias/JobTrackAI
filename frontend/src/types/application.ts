@@ -2,15 +2,16 @@ import type { Job } from "./job";
 import type { TimelineEvent } from "./timeline";
 
 export type PipelineStage =
-  | "favorite"
+  | "discovery"
   | "applied"
   | "hr"
   | "technical_interview"
   | "manager"
   | "client"
+  | "technical_test"
   | "offer"
   | "hired"
-  | "rejected";
+  | "closed";
 
 export type ApplicationStatus = "active" | "archived" | "withdrawn";
 

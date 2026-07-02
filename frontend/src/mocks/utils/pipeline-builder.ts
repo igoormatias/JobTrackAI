@@ -76,9 +76,9 @@ const buildKpis = (applications: Application[]): PipelineKpis => {
     PIPELINE_INTERVIEW_STAGES.includes(app.stage as (typeof PIPELINE_INTERVIEW_STAGES)[number]),
   ).length;
   const offers = applications.filter((app) => app.stage === "offer" || app.stage === "hired").length;
-  const rejections = applications.filter((app) => app.stage === "rejected").length;
+  const rejections = applications.filter((app) => app.stage === "closed").length;
   const hired = applications.filter((app) => app.stage === "hired").length;
-  const applied = applications.filter((app) => app.stage !== "favorite").length;
+  const applied = applications.filter((app) => app.stage !== "discovery").length;
 
   return {
     totalApplications: applications.length,
@@ -138,6 +138,7 @@ export const moveApplicationStage = (id: string, stage: PipelineStage): Applicat
     ...current,
     stage,
     updatedAt: new Date().toISOString(),
+    lastStageUpdatedAt: new Date().toISOString(),
     timeline: [
       ...current.timeline,
       {
@@ -172,7 +173,6 @@ export const toggleApplicationFavorite = (id: string): Application | null => {
 
   const updated: Application = {
     ...current,
-    stage: isFavorite && current.stage === "applied" ? "favorite" : current.stage,
     job: { ...enrichApplicationJob(current, store.jobs).job, isFavorite },
     updatedAt: new Date().toISOString(),
   };

@@ -10,9 +10,13 @@ export type MissingSkill = {
   slug: string;
 };
 
+export type MatchEngineVersion = "rules-v1";
+
 export type MatchScore = {
   score: number;
   label: "excellent" | "good" | "fair" | "low";
   reasons: MatchReason[];
   missingSkills: MissingSkill[];
+  matchedSkills?: string[];
+  engineVersion?: MatchEngineVersion;
 };

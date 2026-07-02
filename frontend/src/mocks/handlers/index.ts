@@ -8,6 +8,8 @@ import { pipelineHandlers } from "./pipeline.handlers";
 import { profileHandlers } from "./profile.handlers";
 import { settingsHandlers } from "./settings.handlers";
 
+import { trackingHandlers } from "./tracking.handlers";
+
 export const handlers = [
   ...authHandlers,
   ...dashboardHandlers,
@@ -16,6 +18,7 @@ export const handlers = [
   ...profileHandlers,
   ...applicationsHandlers,
   ...pipelineHandlers,
+  ...trackingHandlers,
   ...notificationsHandlers,
   ...settingsHandlers,
 ];

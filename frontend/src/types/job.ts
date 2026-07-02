@@ -7,7 +7,15 @@ export type JobPriority = "HIGH" | "MEDIUM" | "LOW";
 
 export type JobVisibility = "VISIBLE" | "HIDDEN";
 
-export type JobSource = "gupy" | "linkedin" | "programathor" | "manual";
+export type JobSource =
+  | "gupy"
+  | "linkedin"
+  | "programathor"
+  | "manual"
+  | "referral"
+  | "recruiter"
+  | "company_site"
+  | "other";
 
 export type JobStatus = "active" | "closed" | "expired";
 

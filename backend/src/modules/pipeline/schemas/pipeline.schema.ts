@@ -21,6 +21,7 @@ export const pipelineListQuerySchema = z.object({
 
 export const moveApplicationSchema = z.object({
   stage: pipelineStageSchema,
+  occurredAt: z.string().datetime().optional(),
 });
 
 export const updateApplicationNotesSchema = z.object({

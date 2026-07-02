@@ -12,7 +12,7 @@ describe("usePipelineQuery", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data?.columns).toHaveLength(9);
+    expect(result.current.data?.columns).toHaveLength(10);
     expect(result.current.data?.kpis.totalApplications).toBeGreaterThan(0);
   });
 });

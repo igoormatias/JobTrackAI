@@ -68,7 +68,7 @@ export class AuthService {
     };
   }
 
-  async loginWithGoogle(idToken: string | undefined, res: Response): Promise<AuthResponseDto> {
+  async loginWithGoogle(idToken: string, res: Response): Promise<AuthResponseDto> {
     const googleUser = await this.googleAuthService.verifyIdToken(idToken);
     const stored = await this.users.upsertFromGoogle({
       name: googleUser.name,

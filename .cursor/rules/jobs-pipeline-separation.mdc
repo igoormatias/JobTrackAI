@@ -1,0 +1,29 @@
+---
+description: Separação Jobs (descoberta), Job Tracking (domínio) e Pipeline (Kanban) — ADR-023
+alwaysApply: true
+---
+
+# Jobs · Tracking · Pipeline
+
+## Responsabilidades
+
+| Camada | Função | API |
+|--------|--------|-----|
+| **Jobs** | Descoberta: buscar, filtrar, match, abrir vaga na origem | `GET /jobs` |
+| **Job Tracking** | Estado do usuário: favorito, prioridade, ocultar, estágio, timeline, notas | `/tracking/*` |
+| **Pipeline** | Visualização Kanban do tracking | `GET /pipeline` |
+
+## Regras obrigatórias
+
+- A tela **Jobs** existe apenas para descoberta de oportunidades — **sem** cadastro manual de processos
+- A **Pipeline** existe apenas para acompanhamento visual — mutações via `/tracking`
+- **Nunca** misturar descoberta com tracking
+- **Nunca** criar módulo `ManualJobs` — manual e importado usam o mesmo `POST /tracking`
+- **Nunca** implementar candidatura interna (`POST /jobs/:id/apply` removido)
+- Favorito **não** é estágio do Kanban — usar `isFavorite` + destaque visual
+
+## Referências
+
+- `docs/DECISIONS.md` — ADR-022, ADR-023
+- `docs/API_CONTRACT.md`
+- `backend/src/modules/tracking/`
