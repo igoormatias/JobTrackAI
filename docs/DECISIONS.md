@@ -251,6 +251,30 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 
 ---
 
+## ADR-021 — Minha Conta e persistência Prisma
+
+**Status:** Aceito  
+**Data:** 2026-06 (Etapa 11)
+
+**Contexto:** Profile e settings eram in-memory no backend; frontend tinha placeholders em `features/profile` e `features/settings`. O tipo `UserSettings` incluía campos V2 (push, e-mail, i18n).
+
+**Decisão:**
+
+- Models Prisma: `User`, `Profile`, `UserSettings` com repositories Prisma
+- Módulo `profiles` refatorado para Clean Architecture + evento `ProfileUpdated`
+- Módulo greenfield `settings` + evento `SettingsUpdated`
+- Feature frontend `features/account` (Perfil + Preferências)
+- Auth faz `upsert` de User + default UserSettings no login Google
+- Preferências MVP: tema (`system` suportado), refresh de vagas, intervalo dashboard, toggles de compatibilidade/salário
+
+**Consequências:**
+
+- Repositories in-memory de profile removidos; auth usa Prisma em produção e in-memory em testes
+- Navegação agrupada: Minha Conta > Perfil / Preferências
+- `GET /profile` retorna `user` read-only no DTO
+
+---
+
 ## Template para novas decisões
 
 ```markdown

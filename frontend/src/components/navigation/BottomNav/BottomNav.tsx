@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { MAIN_NAV } from "@/lib/constants/navigation";
+import { MAIN_NAV, MOBILE_ACCOUNT_NAV } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
 
 export type BottomNavProps = {
   className?: string;
 };
+
+const MOBILE_NAV = [...MAIN_NAV, MOBILE_ACCOUNT_NAV];
 
 export const BottomNav = ({ className }: BottomNavProps) => {
   const pathname = usePathname();
@@ -21,8 +23,11 @@ export const BottomNav = ({ className }: BottomNavProps) => {
       )}
     >
       <div className="flex items-center justify-around px-2 py-2">
-        {MAIN_NAV.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+        {MOBILE_NAV.map((item) => {
+          const isActive =
+            item.href === "/profile"
+              ? pathname.startsWith("/profile") || pathname.startsWith("/settings")
+              : pathname.startsWith(item.href);
           const Icon = item.icon;
 
           return (

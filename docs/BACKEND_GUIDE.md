@@ -180,9 +180,29 @@ Publica `SystemHealthChecked` via EventBus no health check.
 
 ## Módulos legados
 
-Módulos com `service/` (`auth`, `jobs`, `pipeline`, `profiles`, `recommendations`) **não devem ser usados como modelo para novos módulos**.
+Módulos com `service/` (`auth`, `jobs`, `pipeline`, `recommendations`) **não devem ser usados como modelo para novos módulos**.
 
 Migrar gradualmente quando o módulo receber alterações significativas. Ver ADR-019.
+
+### Módulo `profiles` (Etapa 11 — Clean Architecture)
+
+| Camada | Artefatos |
+|--------|-----------|
+| Domain | `Profile` entity, `ProfileRepository`, `ProfileUpdated` |
+| Application | `GetProfileUseCase`, `CreateProfileUseCase`, `UpdateProfileUseCase` |
+| Infrastructure | `ProfileController`, `PrismaProfileRepository`, rotas `/profile` |
+
+`GET /profile` compõe perfil + `user` read-only (nome, e-mail, avatar).
+
+### Módulo `settings` (Etapa 11 — Clean Architecture)
+
+| Camada | Artefatos |
+|--------|-----------|
+| Domain | `UserSettings` entity, `UserSettingsRepository`, `SettingsUpdated` |
+| Application | `GetSettingsUseCase`, `UpdateSettingsUseCase` |
+| Infrastructure | `SettingsController`, `PrismaUserSettingsRepository`, rotas `/settings` |
+
+Auth faz `upsert` de `User` + `UserSettings` default no login Google.
 
 ### Referência legada: Pipeline (Etapa 10)
 

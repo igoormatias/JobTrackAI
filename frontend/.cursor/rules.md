@@ -26,6 +26,7 @@ src/features/<feature-name>/
 
 ```bash
 features/
+  account/        # Minha Conta — Perfil + Preferências (Etapa 11)
   portfolio/
     components/     # UI da feature
     pages/          # composição

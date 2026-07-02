@@ -176,7 +176,8 @@ src/
 │   ├── auth/              # Legado
 │   ├── jobs/              # Legado
 │   ├── pipeline/          # Legado
-│   ├── profiles/          # Legado
+│   ├── profiles/          # Clean Architecture (Etapa 11)
+│   ├── settings/          # Clean Architecture (Etapa 11)
 │   └── recommendations/   # Legado
 ├── providers/             # Integrações externas (Gupy, LinkedIn, etc.)
 ├── shared/

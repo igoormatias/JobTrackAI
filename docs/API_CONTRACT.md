@@ -50,7 +50,34 @@ Contrato REST oficial alinhado ao escopo do MVP. Ver [MVP_SCOPE.md](./MVP_SCOPE.
 | `POST` | `/profile` | Sim | Cria perfil (onboarding) |
 | `PATCH` | `/profile` | Sim | Atualiza perfil |
 
-**Campos MVP:** nome e foto (Google), área, senioridade, competências, modalidade, localização, pretensão salarial.
+**Campos MVP:** área, senioridade, competências (`skillNames`), modalidade, localização, pretensão salarial.
+
+**Resposta `GET /profile`:** inclui `user` read-only `{ name, email, avatarUrl }` (Google).
+
+**Campos fora do update MVP:** `bio`, `linkedinUrl`, `githubUrl`, `blockedSkills`, `headline`.
+
+---
+
+## Settings (preferências MVP)
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| `GET` | `/settings` | Sim | Retorna preferências do usuário (cria defaults se ausente) |
+| `PATCH` | `/settings` | Sim | Atualiza preferências |
+
+**Campos MVP:**
+
+| Campo | Tipo | Valores |
+|-------|------|---------|
+| `theme` | string | `dark` \| `light` \| `system` |
+| `jobRefreshFrequency` | string | `15m` \| `30m` \| `1h` \| `2h` \| `manual` |
+| `dashboardNotificationInterval` | string | mesmo enum acima |
+| `showCompatibleJobsOnly` | boolean | — |
+| `showSalaryWhenAvailable` | boolean | — |
+
+**Fora do MVP:** push, e-mail, i18n (`language`).
+
+**Evento:** `SettingsUpdated` (EventBus, log debug no bootstrap).
 
 ---
 

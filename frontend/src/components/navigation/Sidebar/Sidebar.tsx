@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, LogOut } from "lucide-react";
+import { ChevronDown, ChevronLeft, LogOut } from "lucide-react";
+import { useState } from "react";
 
 import { useCurrentUser, useLogoutMutation } from "@/features/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
-import { MAIN_NAV, SECONDARY_NAV } from "@/lib/constants/navigation";
+import { ACCOUNT_NAV, MAIN_NAV } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/app-store";
 
@@ -27,6 +28,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const { isSidebarCollapsed, toggleSidebarCollapsed } = useAppStore();
   const { user } = useCurrentUser();
   const logoutMutation = useLogoutMutation();
+  const isAccountActive = ACCOUNT_NAV.children.some((item) => pathname.startsWith(item.href));
+  const [isAccountOpen, setIsAccountOpen] = useState(isAccountActive);
 
   return (
     <aside
@@ -72,27 +75,58 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
         <div className="my-3 border-t border-border" />
 
-        {SECONDARY_NAV.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          const Icon = item.icon;
+        {!isSidebarCollapsed ? (
+          <button
+            type="button"
+            onClick={() => setIsAccountOpen((open) => !open)}
+            className={cn(
+              "flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              isAccountActive
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground",
+            )}
+          >
+            <ACCOUNT_NAV.icon className="h-5 w-5 shrink-0" />
+            <span className="flex-1 text-left">{ACCOUNT_NAV.label}</span>
+            <ChevronDown className={cn("h-4 w-4 transition-transform", isAccountOpen && "rotate-180")} />
+          </button>
+        ) : (
+          <Link
+            href="/profile"
+            className={cn(
+              "flex cursor-pointer items-center justify-center rounded-lg px-2 py-2.5 text-sm font-medium transition-colors",
+              isAccountActive
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground",
+            )}
+            aria-label={ACCOUNT_NAV.label}
+          >
+            <ACCOUNT_NAV.icon className="h-5 w-5 shrink-0" />
+          </Link>
+        )}
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground",
-                isSidebarCollapsed && "justify-center px-2",
-              )}
-            >
-              <Icon className="h-5 w-5 shrink-0" />
-              {!isSidebarCollapsed ? item.label : null}
-            </Link>
-          );
-        })}
+        {!isSidebarCollapsed && isAccountOpen
+          ? ACCOUNT_NAV.children.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "ml-3 flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  {item.label}
+                </Link>
+              );
+            })
+          : null}
       </nav>
 
       <div className="border-t border-border p-3">

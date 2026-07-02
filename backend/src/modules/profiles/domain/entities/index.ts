@@ -1,0 +1,16 @@
+export type {
+  CreateProfileInput,
+  OnboardingProgress,
+  OnboardingStepId,
+  ProfessionalArea,
+  Profile,
+  ProfileExtensions,
+  ProfileLocation,
+  ProfileLocationScope,
+  ProfileWithUser,
+  SalaryBand,
+  SalaryRange,
+  Seniority,
+  UpdateProfileInput,
+  WorkModality,
+} from "./profile.entity.js";

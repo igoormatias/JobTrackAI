@@ -153,11 +153,33 @@ Favoritou → Abriu vaga → Aplicou na origem → Adicionou ao Pipeline → Atu
 
 Eventos **internos** apenas: nova vaga, mudança de status, entrevista próxima, recomendação. Nunca controlar candidatura externa.
 
-## Perfil
+## Minha Conta (`features/account`)
 
-Campos MVP: nome e foto (Google), área, senioridade, competências, modalidade, localização, pretensão salarial. Sem upload de foto.
+Feature unificada para Perfil e Preferências (Etapa 11). Rotas: `/profile`, `/settings`.
 
-## Testes
+```
+features/account/
+  components/profile/   ProfileForm, ProfileReadOnlyFields
+  components/settings/  SettingsForm
+  hooks/                useAccountProfile, useAccountSettings
+  schemas/              account-profile.schema, account-settings.schema
+  pages/                ProfilePage, SettingsPage
+```
+
+- Hooks legados em `features/profile` e `features/settings` permanecem para React Query (`useProfile`, `useSettings`)
+- `ThemeProvider` suporta `dark | light | system` — sincronizado com `PATCH /settings`
+- Navegação: grupo colapsável **Minha Conta** na sidebar; mobile: link **Conta** → `/profile`
+- Formulários: React Hook Form + Zod; barra de alterações não salvas
+
+### Perfil (campos MVP)
+
+Read-only (Google): nome, e-mail, foto. Editáveis: área, senioridade, competências (MultiSelect por área), modalidade, localização, faixa salarial.
+
+### Preferências (campos MVP)
+
+Tema, atualização automática de vagas, intervalo de notificações internas no dashboard, toggles de vagas compatíveis e exibição de salário.
+
+---
 
 MSW handlers espelham backend; usados no Vitest. Testes de componentes/hooks ao lado dos módulos.
 
@@ -167,6 +189,6 @@ MSW handlers espelham backend; usados no Vitest. Testes de componentes/hooks ao 
 - [MVP_SCOPE.md](./MVP_SCOPE.md)
 - [API_CONTRACT.md](./API_CONTRACT.md)
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [DECISIONS.md](./DECISIONS.md) — ADR-020
+- [DECISIONS.md](./DECISIONS.md) — ADR-020, ADR-021
 - [ROADMAP.md](./ROADMAP.md)
 - Assets visuais: [`assets/`](../assets/)

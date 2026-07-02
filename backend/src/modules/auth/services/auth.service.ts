@@ -2,9 +2,10 @@ import type { Response } from "express";
 
 import { env } from "../../../config/env.js";
 import { UnauthorizedError } from "../../../shared/errors/unauthorized-error.js";
-import { profileRepository } from "../../profiles/repositories/profile.repository.js";
+import type { AuthUserRepository } from "../domain/repositories/auth-user.repository.js";
+import { prismaAuthUserRepository } from "../infrastructure/repositories/prisma-auth-user.repository.js";
 import type { AuthResponseDto, OnboardingCompleteResponseDto } from "../dto/auth-response.dto.js";
-import { userRepository } from "../repositories/user.repository.js";
+import { inMemoryAuthUserRepository } from "../repositories/user.repository.js";
 import type { OnboardingCompleteInput } from "../schemas/auth.schemas.js";
 import type { AuthPermissions, AuthProfile, AuthUser } from "../types/auth.types.js";
 import { createGoogleAuthService, type GoogleAuthService } from "./google-auth.service.js";
@@ -20,11 +21,14 @@ const cookieOptions = {
   path: "/",
 };
 
+const defaultAuthUserRepository =
+  process.env.NODE_ENV === "test" ? inMemoryAuthUserRepository : prismaAuthUserRepository;
+
 export class AuthService {
   constructor(
     private readonly googleAuthService: GoogleAuthService = createGoogleAuthService(),
     private readonly tokens: TokenService = tokenService,
-    private readonly users = userRepository,
+    private readonly users: AuthUserRepository = defaultAuthUserRepository,
   ) {}
 
   setAuthCookies(res: Response, userId: string, email: string): void {
@@ -66,13 +70,11 @@ export class AuthService {
 
   async loginWithGoogle(idToken: string | undefined, res: Response): Promise<AuthResponseDto> {
     const googleUser = await this.googleAuthService.verifyIdToken(idToken);
-    const stored = this.users.upsertFromGoogle({
-      id: "user_0001",
+    const stored = await this.users.upsertFromGoogle({
       name: googleUser.name,
       email: googleUser.email,
       avatar: googleUser.picture,
       provider: "google",
-      createdAt: new Date().toISOString(),
     });
 
     this.setAuthCookies(res, stored.id, stored.email);
@@ -86,13 +88,13 @@ export class AuthService {
     return { message: "Logged out successfully" };
   }
 
-  refreshSession(refreshToken: string | undefined, res: Response): AuthResponseDto {
+  async refreshSession(refreshToken: string | undefined, res: Response): Promise<AuthResponseDto> {
     if (!refreshToken) {
       throw new UnauthorizedError("Refresh token missing");
     }
 
     const payload = this.tokens.verifyToken(refreshToken, "refresh");
-    const stored = this.users.findById(payload.userId);
+    const stored = await this.users.findById(payload.userId);
 
     if (!stored) {
       throw new UnauthorizedError("User not found");
@@ -104,13 +106,13 @@ export class AuthService {
     return this.toAuthResponse(user, profile);
   }
 
-  getCurrentUser(accessToken: string | undefined): AuthResponseDto {
+  async getCurrentUser(accessToken: string | undefined): Promise<AuthResponseDto> {
     if (!accessToken) {
       throw new UnauthorizedError("Access token missing");
     }
 
     const payload = this.tokens.verifyToken(accessToken, "access");
-    const stored = this.users.findById(payload.userId);
+    const stored = await this.users.findById(payload.userId);
 
     if (!stored) {
       throw new UnauthorizedError("User not found");
@@ -120,7 +122,7 @@ export class AuthService {
     return this.toAuthResponse(user, profile);
   }
 
-  completeOnboarding(userId: string, input: OnboardingCompleteInput): OnboardingCompleteResponseDto {
+  async completeOnboarding(userId: string, input: OnboardingCompleteInput): Promise<OnboardingCompleteResponseDto> {
     const profile: AuthProfile = {
       professionalArea: input.professionalArea,
       seniority: input.seniority,
@@ -133,40 +135,10 @@ export class AuthService {
       salaryBand: input.salaryBand,
     };
 
-    const updated = this.users.updateProfile(userId, profile, true);
+    const updated = await this.users.updateProfile(userId, profile, true);
 
     if (!updated) {
       throw new UnauthorizedError("User not found");
-    }
-
-    const existingProfile = profileRepository.findByUserId(userId);
-
-    if (existingProfile) {
-      profileRepository.update(userId, {
-        area: input.professionalArea as import("../../profiles/types/profile.types.js").ProfessionalArea,
-        seniority: input.seniority as import("../../profiles/types/profile.types.js").Seniority,
-        modality: input.modality ?? null,
-        location: input.location,
-        locationPreference: input.locationPreference ?? null,
-        salaryBand: input.salaryBand ?? null,
-        salaryExpectation: input.salaryExpectation,
-        skillNames: input.skills,
-        blockedSkills: input.blockedSkills,
-        onboardingCompleted: true,
-      });
-    } else {
-      profileRepository.create(userId, {
-        area: input.professionalArea as import("../../profiles/types/profile.types.js").ProfessionalArea,
-        seniority: input.seniority as import("../../profiles/types/profile.types.js").Seniority,
-        modality: input.modality ?? null,
-        location: input.location,
-        locationPreference: input.locationPreference ?? null,
-        salaryBand: input.salaryBand ?? null,
-        salaryExpectation: input.salaryExpectation,
-        skillNames: input.skills,
-        blockedSkills: input.blockedSkills,
-        onboardingCompleted: true,
-      });
     }
 
     const { profile: _savedProfile, ...user } = updated;

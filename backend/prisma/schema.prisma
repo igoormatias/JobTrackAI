@@ -6,3 +6,44 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  profile   Profile?
+  settings  UserSettings?
+}
+
+model Profile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  area                String?
+  seniority           String?
+  modality            String?
+  location            String   @default("")
+  locationPreference  Json?
+  salaryBand          String?
+  salaryExpectation   Json?
+  skillNames          String[] @default([])
+  blockedSkills       String[] @default([])
+  onboardingCompleted Boolean  @default(false)
+  onboardingProgress  Json?
+  updatedAt           DateTime @updatedAt
+}
+
+model UserSettings {
+  id                            String   @id @default(cuid())
+  userId                        String   @unique
+  user                          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme                         String   @default("dark")
+  jobRefreshFrequency           String   @default("1h")
+  dashboardNotificationInterval String   @default("1h")
+  showCompatibleJobsOnly        Boolean  @default(false)
+  showSalaryWhenAvailable       Boolean  @default(true)
+  updatedAt                     DateTime @updatedAt
+}

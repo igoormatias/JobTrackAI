@@ -1,5 +1,5 @@
-import { ProfilePlaceholderPage } from "@/features/profile";
+import { ProfilePage } from "@/features/account";
 
-export default function ProfilePage() {
-  return <ProfilePlaceholderPage />;
+export default function Page() {
+  return <ProfilePage />;
 }

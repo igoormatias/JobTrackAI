@@ -328,9 +328,10 @@ src/
 │── dashboard/
 │── jobs/
 │── pipeline/
-│── profile/
+│── account/       # Minha Conta — Perfil + Preferências (Etapa 11)
+│── profile/       # hooks legados (useProfile)
 │── notifications/
-│── settings/
+│── settings/      # hooks legados (useSettings)
 │── shared/
 │
 ├── hooks/

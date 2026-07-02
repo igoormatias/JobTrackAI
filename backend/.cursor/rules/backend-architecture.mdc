@@ -66,7 +66,7 @@ Nunca inverter. Domain não importa Application nem Infrastructure.
 - Usar `InMemoryEventBus` (`src/shared/events/`)
 - Não acoplar serviços diretamente quando um evento resolve
 
-Exemplos: `ApplicationCreated`, `PipelineStageChanged`, `SystemHealthChecked`
+Exemplos: `ApplicationCreated`, `PipelineStageChanged`, `SystemHealthChecked`, `ProfileUpdated`, `SettingsUpdated`
 
 ## Validação e tipagem
 
@@ -88,7 +88,9 @@ Exemplos: `ApplicationCreated`, `PipelineStageChanged`, `SystemHealthChecked`
 
 ## Módulos legados
 
-Módulos com `service/` (auth, jobs, pipeline, profiles, recommendations) permanecem até migração gradual. **Novos módulos NÃO podem usar `service/`** — usar `use-cases/`.
+Módulos com `service/` (auth, jobs, pipeline, recommendations) permanecem até migração gradual. **Novos módulos NÃO podem usar `service/`** — usar `use-cases/`.
+
+Módulos de referência pós-`system`: `profiles`, `settings` (Etapa 11 — Clean Architecture + Prisma).
 
 ## Exceções
 

@@ -99,8 +99,8 @@ Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) e [BACKEND_GUIDE.md](./BACKEND_GUID
 - **ORM:** Prisma (PostgreSQL)
 - **Validação:** Zod
 - **Arquitetura:** Clean Architecture + DDD (lightweight) — padrão oficial para novos módulos
-- **Módulos legados:** `auth`, `profiles`, `jobs`, `pipeline`, `recommendations` (controller → service → repository)
-- **Módulo template:** `system` (`/health`, `/version`, `/info`)
+- **Módulos Clean Architecture:** `system`, `profiles`, `settings`
+- **Módulos legados:** `auth`, `jobs`, `pipeline`, `recommendations` (controller → service → repository)
 - **Eventos:** `EventBus` com `InMemoryEventBus` em `src/shared/events/`
 - **Providers:** Gupy, LinkedIn, Programathor — **preparados, V2** (MVP usa MSW/fixtures)
 - **Tempo real:** Socket.IO — **preparado, V2** (não exposto no MVP)

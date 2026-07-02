@@ -31,27 +31,27 @@ export class AuthController {
     res.status(200).json({ data: null, message: result.message });
   };
 
-  refresh = (req: Request, res: Response, next: NextFunction): void => {
+  refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const refreshToken = req.cookies?.[REFRESH_COOKIE] as string | undefined;
-      const response = this.service.refreshSession(refreshToken, res);
+      const response = await this.service.refreshSession(refreshToken, res);
       res.status(200).json(response);
     } catch (error) {
       next(error);
     }
   };
 
-  me = (req: Request, res: Response, next: NextFunction): void => {
+  me = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const accessToken = req.cookies?.[ACCESS_COOKIE] as string | undefined;
-      const response = this.service.getCurrentUser(accessToken);
+      const response = await this.service.getCurrentUser(accessToken);
       res.status(200).json(response);
     } catch (error) {
       next(error);
     }
   };
 
-  completeOnboarding = (req: Request, res: Response, next: NextFunction): void => {
+  completeOnboarding = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const parsed = onboardingCompleteSchema.safeParse(req.body);
 
@@ -60,8 +60,8 @@ export class AuthController {
       }
 
       const accessToken = req.cookies?.[ACCESS_COOKIE] as string | undefined;
-      const currentUser = this.service.getCurrentUser(accessToken);
-      const response = this.service.completeOnboarding(currentUser.data.user.id, parsed.data);
+      const currentUser = await this.service.getCurrentUser(accessToken);
+      const response = await this.service.completeOnboarding(currentUser.data.user.id, parsed.data);
       res.status(200).json(response);
     } catch (error) {
       next(error);

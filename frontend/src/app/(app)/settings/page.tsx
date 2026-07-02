@@ -1,5 +1,5 @@
-import { SettingsPlaceholderPage } from "@/features/settings";
+import { SettingsPage } from "@/features/account";
 
-export default function SettingsPage() {
-  return <SettingsPlaceholderPage />;
+export default function Page() {
+  return <SettingsPage />;
 }

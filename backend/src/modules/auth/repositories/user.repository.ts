@@ -1,10 +1,11 @@
-import type { AuthProfile, AuthUser } from "../types/auth.types.js";
+import type { AuthProfile } from "../types/auth.types.js";
+import type {
+  AuthUserRepository,
+  StoredAuthUser,
+  UpsertGoogleUserInput,
+} from "../domain/repositories/auth-user.repository.js";
 
-type StoredUser = AuthUser & {
-  profile: AuthProfile | null;
-};
-
-const createDefaultUser = (): StoredUser => ({
+const createDefaultUser = (): StoredAuthUser => ({
   id: "user_0001",
   name: "Matias Silva",
   email: "matias.silva@email.com",
@@ -15,35 +16,42 @@ const createDefaultUser = (): StoredUser => ({
   profile: null,
 });
 
-let users = new Map<string, StoredUser>([[createDefaultUser().id, createDefaultUser()]]);
+let users = new Map<string, StoredAuthUser>([[createDefaultUser().id, createDefaultUser()]]);
 
-export class UserRepository {
-  findByEmail(email: string): StoredUser | null {
+export class InMemoryAuthUserRepository implements AuthUserRepository {
+  async findByEmail(email: string): Promise<StoredAuthUser | null> {
     return [...users.values()].find((user) => user.email === email) ?? null;
   }
 
-  findById(id: string): StoredUser | null {
+  async findById(id: string): Promise<StoredAuthUser | null> {
     return users.get(id) ?? null;
   }
 
-  upsertFromGoogle(user: Omit<StoredUser, "profile" | "onboardingCompleted"> & Partial<Pick<StoredUser, "profile" | "onboardingCompleted">>): StoredUser {
-    const existing = this.findByEmail(user.email);
-    const stored: StoredUser = {
+  async upsertFromGoogle(input: UpsertGoogleUserInput): Promise<StoredAuthUser> {
+    const existing = await this.findByEmail(input.email);
+    const stored: StoredAuthUser = {
       ...(existing ?? createDefaultUser()),
-      ...user,
-      profile: existing?.profile ?? user.profile ?? null,
-      onboardingCompleted: existing?.onboardingCompleted ?? user.onboardingCompleted ?? false,
+      name: input.name,
+      email: input.email,
+      avatar: input.avatar,
+      provider: input.provider,
+      profile: existing?.profile ?? null,
+      onboardingCompleted: existing?.onboardingCompleted ?? false,
     };
 
     users.set(stored.id, stored);
     return stored;
   }
 
-  updateProfile(userId: string, profile: AuthProfile, onboardingCompleted = true): StoredUser | null {
+  async updateProfile(
+    userId: string,
+    profile: AuthProfile,
+    onboardingCompleted = true,
+  ): Promise<StoredAuthUser | null> {
     const user = users.get(userId);
     if (!user) return null;
 
-    const updated: StoredUser = {
+    const updated: StoredAuthUser = {
       ...user,
       profile,
       onboardingCompleted,
@@ -58,4 +66,9 @@ export class UserRepository {
   }
 }
 
-export const userRepository = new UserRepository();
+export const inMemoryAuthUserRepository = new InMemoryAuthUserRepository();
+
+// Re-export for backwards compatibility in tests
+export type StoredUser = StoredAuthUser;
+export class UserRepository extends InMemoryAuthUserRepository {}
+export const userRepository = inMemoryAuthUserRepository;

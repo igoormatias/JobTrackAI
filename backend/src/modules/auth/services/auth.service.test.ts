@@ -1,7 +1,6 @@
 import { describe, expect, it, beforeEach } from "vitest";
 
-import { userRepository } from "../repositories/user.repository.js";
-import { profileRepository } from "../../profiles/repositories/profile.repository.js";
+import { inMemoryAuthUserRepository } from "../repositories/user.repository.js";
 import { AuthService } from "./auth.service.js";
 import { MockGoogleAuthService } from "./google-auth.service.js";
 import { TokenService } from "./token.service.js";
@@ -22,12 +21,15 @@ const createMockResponse = () => {
 
 describe("AuthService", () => {
   beforeEach(() => {
-    userRepository.reset();
-    profileRepository.reset();
+    inMemoryAuthUserRepository.reset();
   });
 
   it("logs in with mock google user and sets session data", async () => {
-    const service = new AuthService(new MockGoogleAuthService(), new TokenService());
+    const service = new AuthService(
+      new MockGoogleAuthService(),
+      new TokenService(),
+      inMemoryAuthUserRepository,
+    );
     const res = createMockResponse();
 
     const response = await service.loginWithGoogle(undefined, res);
@@ -39,11 +41,15 @@ describe("AuthService", () => {
   });
 
   it("completes onboarding and updates user profile", async () => {
-    const service = new AuthService(new MockGoogleAuthService(), new TokenService());
+    const service = new AuthService(
+      new MockGoogleAuthService(),
+      new TokenService(),
+      inMemoryAuthUserRepository,
+    );
     const res = createMockResponse();
     const login = await service.loginWithGoogle(undefined, res);
 
-    const completed = service.completeOnboarding(login.data.user.id, {
+    const completed = await service.completeOnboarding(login.data.user.id, {
       professionalArea: "frontend",
       seniority: "senior",
       modality: "remote",

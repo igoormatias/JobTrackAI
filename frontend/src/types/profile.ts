@@ -90,6 +90,16 @@ export type Profile = {
   updatedAt: string;
 };
 
+export type AccountUser = {
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+};
+
+export type AccountProfile = Profile & {
+  user: AccountUser;
+};
+
 export type CreateProfilePayload = {
   area?: ProfessionalArea | null;
   seniority?: Seniority | null;

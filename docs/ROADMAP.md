@@ -69,9 +69,9 @@ Página de detalhe com match score, insights, learning gaps, vagas relacionadas,
 
 Kanban de acompanhamento manual com drag and drop, KPIs, filtros, drawer/panel de detalhes e histórico por estágio.
 
-#### ⬜ Profile (edição pós-onboarding)
+#### ✅ Minha Conta (Etapa 11)
 
-Edição do perfil simplificado após onboarding (campos MVP em [MVP_SCOPE.md](./MVP_SCOPE.md)).
+Perfil simplificado + Preferências (`features/account`, Prisma User/Profile/UserSettings, módulos `profiles` e `settings` em Clean Architecture).
 
 #### ⬜ Notificações
 

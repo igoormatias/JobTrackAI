@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 
 import { getAuthStore, isAuthenticatedFromRequest } from "@/mocks/fixtures/auth-store";
-import type { ApiResponse, CreateProfilePayload, Profile, UpdateProfilePayload } from "@/types";
+import type { AccountProfile, ApiResponse, CreateProfilePayload, Profile, UpdateProfilePayload } from "@/types";
 
 import { getFixtureStore } from "../fixtures";
 import {
@@ -13,6 +13,22 @@ import {
 } from "../fixtures/profile-store";
 
 const unauthorized = () => HttpResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+const withUser = (profile: Profile, user: AccountProfile["user"]): AccountProfile => ({
+  ...profile,
+  user,
+});
+
+const getAccountUser = (): AccountProfile["user"] => {
+  const authStore = getAuthStore();
+  const fixtureUser = getFixtureStore().user;
+
+  return {
+    name: authStore.user.name || fixtureUser.name,
+    email: authStore.user.email || fixtureUser.email,
+    avatarUrl: authStore.user.avatar ?? fixtureUser.avatarUrl,
+  };
+};
 
 export const profileHandlers = [
   http.get("*/profile", ({ request }) => {
@@ -27,13 +43,17 @@ export const profileHandlers = [
     const userProfile = getUserProfile(userId);
 
     if (userProfile) {
-      return HttpResponse.json<ApiResponse<Profile>>({ data: userProfile });
+      return HttpResponse.json<ApiResponse<AccountProfile>>({
+        data: withUser(userProfile, getAccountUser()),
+      });
     }
 
     if (authStore.user.onboardingCompleted) {
       const fixtureProfile = getFixtureStore().profile;
       syncProfileStoreFromFixture(fixtureProfile);
-      return HttpResponse.json<ApiResponse<Profile>>({ data: fixtureProfile });
+      return HttpResponse.json<ApiResponse<AccountProfile>>({
+        data: withUser(fixtureProfile, getAccountUser()),
+      });
     }
 
     return HttpResponse.json({ message: "Profile not found" }, { status: 404 });
@@ -56,9 +76,9 @@ export const profileHandlers = [
     const payload = (await request.json()) as CreateProfilePayload;
     const profile = createUserProfile(userId, payload);
 
-    return HttpResponse.json<ApiResponse<Profile>>(
+    return HttpResponse.json<ApiResponse<AccountProfile>>(
       {
-        data: profile,
+        data: withUser(profile, getAccountUser()),
         message: "Profile created successfully",
       },
       { status: 201 },
@@ -85,8 +105,8 @@ export const profileHandlers = [
       profile = updated ?? profile;
     }
 
-    return HttpResponse.json<ApiResponse<Profile>>({
-      data: profile,
+    return HttpResponse.json<ApiResponse<AccountProfile>>({
+      data: withUser(profile, getAccountUser()),
       message: "Profile updated successfully",
     });
   }),

@@ -1,7 +1,5 @@
-export * from "./controllers/profile.controller.js";
-export * from "./services/profile.service.js";
-export * from "./repositories/profile.repository.js";
-export * from "./routes/profile.routes.js";
-export * from "./schemas/profile.schema.js";
-export * from "./dto/profile.dto.js";
-export * from "./types/profile.types.js";
+export { createProfileRoutes } from "./infrastructure/http/routes/profile.routes.js";
+export { CreateProfileUseCase } from "./application/use-cases/create-profile.use-case.js";
+export { UpdateProfileUseCase } from "./application/use-cases/update-profile.use-case.js";
+export { prismaProfileRepository } from "./infrastructure/repositories/prisma-profile.repository.js";
+export type { CreateProfileInput, Profile, UpdateProfileInput } from "./domain/entities/profile.entity.js";
