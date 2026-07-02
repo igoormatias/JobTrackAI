@@ -5,6 +5,15 @@ import type { OnboardingFormState, OnboardingStep } from "../types/onboarding.ty
 import { salaryBandToRange } from "./salary-band-mapper";
 import { formatLocationPreference } from "./location-formatter";
 
+export const resolveProfileSkills = (profile: Pick<Profile, "skillNames" | "skills">): string[] => {
+  const skillNames = profile.skillNames ?? [];
+  if (skillNames.length > 0) {
+    return skillNames;
+  }
+
+  return (profile.skills ?? []).map((skill) => skill.name);
+};
+
 export const mapFormToProfilePayload = (
   form: OnboardingFormState,
   currentStep: OnboardingStep,
@@ -34,7 +43,7 @@ export const mapFormToProfilePayload = (
 
 export const mapProfileToForm = (profile: Profile): OnboardingFormState => ({
   area: profile.area ?? "",
-  skills: profile.skillNames.length > 0 ? profile.skillNames : profile.skills.map((skill) => skill.name),
+  skills: resolveProfileSkills(profile),
   seniority: profile.seniority ?? "",
   modality: profile.modality ?? "",
   locationPreference: profile.locationPreference ?? {
@@ -42,7 +51,7 @@ export const mapProfileToForm = (profile: Profile): OnboardingFormState => ({
     acceptsRelocation: false,
   },
   salaryBand: profile.salaryBand ?? "",
-  blockedSkills: profile.blockedSkills,
+  blockedSkills: profile.blockedSkills ?? [],
 });
 
 export const mapFormToCompletePayload = (form: OnboardingFormState): OnboardingCompletePayload => ({

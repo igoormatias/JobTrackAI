@@ -23,7 +23,7 @@ export const SeniorityStep = ({ form, onChange, error }: SeniorityStepProps) => 
           aria-checked={form.seniority === option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium transition-colors",
+            "cursor-pointer rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium transition-colors",
             form.seniority === option.value && "border-primary bg-primary/10 text-primary",
           )}
         >

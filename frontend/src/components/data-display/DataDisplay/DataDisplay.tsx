@@ -1,17 +1,10 @@
 "use client";
 
-import { ChevronsUpDown } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { ChevronsUpDown, Search } from "lucide-react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { Chip } from "@/components/ui/Chip";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/Command";
+import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
 import {
@@ -54,9 +47,24 @@ export const MultiSelect = ({
   id,
 }: MultiSelectProps) => {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const fieldId = id ?? "multiselect-field";
+  const labelId = `${fieldId}-label`;
 
   const available = options.filter((option) => !value.includes(option.value));
+
+  const filteredAvailable = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return available;
+
+    return available.filter((option) => option.label.toLowerCase().includes(normalizedQuery));
+  }, [available, query]);
+
+  useEffect(() => {
+    if (!open) {
+      setQuery("");
+    }
+  }, [open]);
 
   const handleAdd = (selected: string) => {
     if (!value.includes(selected)) {
@@ -79,7 +87,11 @@ export const MultiSelect = ({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {label ? <Label htmlFor={fieldId}>{label}</Label> : null}
+      {label ? (
+        <Label id={labelId} htmlFor={fieldId}>
+          {label}
+        </Label>
+      ) : null}
       {helpText ? (
         <p id={`${fieldId}-help`} className="text-sm text-muted-foreground">
           {helpText}
@@ -92,37 +104,66 @@ export const MultiSelect = ({
             <button
               id={fieldId}
               type="button"
+              aria-expanded={open}
+              aria-haspopup="listbox"
+              aria-labelledby={label ? labelId : undefined}
+              aria-label={label ? undefined : placeholder}
               aria-describedby={error ? `${fieldId}-error` : helpText ? `${fieldId}-help` : undefined}
               className={cn(
-                "flex min-h-10 w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm",
+                "flex min-h-10 w-full cursor-pointer items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground",
                 error && "border-destructive",
               )}
             >
               <span className="text-muted-foreground">{placeholder}</span>
-              <ChevronsUpDown className="h-4 w-4 opacity-50" />
+              <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-            <Command>
-              <CommandInput placeholder="Pesquisar..." />
-              <CommandList>
-                <CommandEmpty>Nenhuma opção encontrada.</CommandEmpty>
-                <CommandGroup>
-                  {available.map((option) => (
-                    <CommandItem
-                      key={option.value}
-                      value={option.label}
-                      onSelect={() => {
-                        handleAdd(option.value);
-                        setOpen(false);
-                      }}
-                    >
-                      {option.label}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
+          <PopoverContent
+            className="w-[var(--radix-popover-trigger-width)] p-0 text-popover-foreground"
+            align="start"
+            onOpenAutoFocus={(event) => event.preventDefault()}
+          >
+            <div className="border-b border-border p-2">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Pesquisar..."
+                  aria-label="Pesquisar competências"
+                  className="h-9 border-0 bg-transparent pl-8 shadow-none focus-visible:ring-0"
+                />
+              </div>
+            </div>
+            <div
+              role="listbox"
+              aria-label={label ?? "Opções"}
+              className="max-h-[300px] overflow-y-auto scrollbar-app p-1"
+            >
+              {available.length === 0 ? (
+                <p className="px-2 py-6 text-center text-sm text-muted-foreground">
+                  Todas as opções já foram adicionadas.
+                </p>
+              ) : filteredAvailable.length === 0 ? (
+                <p className="px-2 py-6 text-center text-sm text-muted-foreground">
+                  Nenhuma opção encontrada.
+                </p>
+              ) : (
+                filteredAvailable.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="option"
+                    data-multiselect-option=""
+                    className="multiselect-option flex w-full cursor-pointer items-center rounded-sm px-2 py-2 text-left text-sm transition-colors focus-visible:outline-none"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleAdd(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))
+              )}
+            </div>
           </PopoverContent>
         </Popover>
       ) : (

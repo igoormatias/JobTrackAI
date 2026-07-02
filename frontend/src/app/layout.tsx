@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 import { AppProviders } from "@/providers";
@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   description: "Plataforma moderna para gerenciamento de carreira",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={`${inter.variable} min-h-screen antialiased`}>
+      <body className={`${inter.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

@@ -52,7 +52,7 @@ export type AreaStepProps = {
 
 export const AreaStep = ({ form, onChange, error }: AreaStepProps) => (
   <div className="space-y-3">
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Área profissional">
+    <div className="onboarding-area-grid grid grid-cols-2 gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Área profissional">
       {AREA_OPTIONS.map((option) => {
         const Icon = areaIcons[option.icon];
         const isSelected = form.area === option.value;
@@ -65,7 +65,7 @@ export const AreaStep = ({ form, onChange, error }: AreaStepProps) => (
             aria-checked={isSelected}
             onClick={() => onChange(option.value)}
             className={cn(
-              "flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-4 text-sm font-medium transition-colors",
+                "flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-4 text-sm font-medium transition-colors",
               isSelected && "border-primary bg-primary/10 text-primary",
             )}
           >

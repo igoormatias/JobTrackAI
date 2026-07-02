@@ -14,7 +14,7 @@ export const Chip = ({ className, children, onDismiss, ...props }: ChipProps) =>
       <button
         type="button"
         onClick={onDismiss}
-        className="rounded-sm p-0.5 hover:bg-accent"
+        className="cursor-pointer rounded-sm p-0.5 hover:bg-accent"
         aria-label="Remover"
       >
         <X className="h-3 w-3" />

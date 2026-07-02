@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Heading, Muted, Subtitle } from "@/components/typography";
+import { cn } from "@/lib/utils";
 
 import { OnboardingStepper } from "../../components/OnboardingStepper";
 import {
@@ -17,6 +18,7 @@ import {
   SummaryStep,
 } from "../../components/steps";
 import { useOnboarding } from "../../hooks/use-onboarding";
+import { ONBOARDING_LAYOUT } from "../../constants/onboarding-layout";
 import { STEP_HELP, STEP_TITLES } from "../../types/onboarding.types";
 
 export const OnboardingPage = () => {
@@ -37,15 +39,15 @@ export const OnboardingPage = () => {
 
   if (isLoading) {
     return (
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 py-12">
+      <div className={cn(ONBOARDING_LAYOUT.page, "gap-4 py-12")}>
         <Muted>Carregando seu progresso...</Muted>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
-      <div className="space-y-2">
+    <div className={ONBOARDING_LAYOUT.page}>
+      <div className={ONBOARDING_LAYOUT.header}>
         <Heading level={2}>{STEP_TITLES[step]}</Heading>
         <Subtitle>{STEP_HELP[step]}</Subtitle>
       </div>

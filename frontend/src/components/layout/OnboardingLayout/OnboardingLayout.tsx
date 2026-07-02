@@ -8,5 +8,7 @@ export type OnboardingLayoutProps = {
 };
 
 export const OnboardingLayout = ({ children, className }: OnboardingLayoutProps) => (
-  <div className={cn("min-h-screen bg-background px-4 py-8", className)}>{children}</div>
+  <div className={cn("min-h-screen w-full bg-background px-4 py-8 sm:py-12", className)}>
+    <div className="layout-shell w-full max-w-2xl">{children}</div>
+  </div>
 );

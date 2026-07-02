@@ -21,7 +21,7 @@ export const PipelineColumnNav = ({ activeStage, counts, onChange }: PipelineCol
         aria-selected={activeStage === column.stage}
         onClick={() => onChange(column.stage)}
         className={cn(
-          "shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+          "shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
           activeStage === column.stage
             ? "border-primary bg-primary text-primary-foreground"
             : "border-border bg-background text-muted-foreground",

@@ -1,7 +1,7 @@
 "use client";
 
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useRef } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Muted } from "@/components/typography";
@@ -38,16 +38,31 @@ export const JobsList = ({
   favoritePendingId,
   applyPendingId,
 }: JobsListProps) => {
-  const parentRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const [scrollMargin, setScrollMargin] = useState(0);
   const useVirtual = jobs.length > VIRTUALIZATION_THRESHOLD;
 
-  const virtualizer = useVirtualizer({
-    count: jobs.length,
-    getScrollElement: () => parentRef.current,
+  useLayoutEffect(() => {
+    if (!useVirtual || !listRef.current) return;
+
+    const updateScrollMargin = () => {
+      if (listRef.current) {
+        setScrollMargin(listRef.current.offsetTop);
+      }
+    };
+
+    updateScrollMargin();
+    window.addEventListener("resize", updateScrollMargin);
+
+    return () => window.removeEventListener("resize", updateScrollMargin);
+  }, [useVirtual, jobs.length]);
+
+  const virtualizer = useWindowVirtualizer({
+    count: useVirtual ? jobs.length : 0,
     estimateSize: () => 320,
-    enabled: useVirtual,
     overscan: 4,
+    scrollMargin,
   });
 
   useEffect(() => {
@@ -109,35 +124,34 @@ export const JobsList = ({
 
   return (
     <div className="space-y-4">
-      <div ref={parentRef} className="max-h-[70vh] overflow-auto">
-        <div
-          className={JOBS_LAYOUT.list}
-          style={{ height: virtualizer.getTotalSize(), position: "relative" }}
-        >
-          {virtualItems.map((virtualRow) => {
-            const job = jobs[virtualRow.index];
-            if (!job) return null;
+      <div
+        ref={listRef}
+        className={JOBS_LAYOUT.list}
+        style={{ height: virtualizer.getTotalSize(), position: "relative" }}
+      >
+        {virtualItems.map((virtualRow) => {
+          const job = jobs[virtualRow.index];
+          if (!job) return null;
 
-            return (
-              <div
-                key={job.id}
-                ref={virtualizer.measureElement}
-                data-index={virtualRow.index}
-                className="absolute left-0 top-0 w-full pb-4"
-                style={{ transform: `translateY(${virtualRow.start}px)` }}
-              >
-                <JobCard
-                  job={job}
-                  onFavorite={onFavorite}
-                  onApply={onApply}
-                  onViewDetails={onViewDetails}
-                  isFavoritePending={favoritePendingId === job.id}
-                  isApplyPending={applyPendingId === job.id}
-                />
-              </div>
-            );
-          })}
-        </div>
+          return (
+            <div
+              key={job.id}
+              ref={virtualizer.measureElement}
+              data-index={virtualRow.index}
+              className="absolute left-0 top-0 w-full pb-4"
+              style={{ transform: `translateY(${virtualRow.start - scrollMargin}px)` }}
+            >
+              <JobCard
+                job={job}
+                onFavorite={onFavorite}
+                onApply={onApply}
+                onViewDetails={onViewDetails}
+                isFavoritePending={favoritePendingId === job.id}
+                isApplyPending={applyPendingId === job.id}
+              />
+            </div>
+          );
+        })}
       </div>
       <div ref={loadMoreRef} className="flex justify-center py-4">
         {isFetchingNextPage ? <Muted>Carregando mais vagas...</Muted> : null}

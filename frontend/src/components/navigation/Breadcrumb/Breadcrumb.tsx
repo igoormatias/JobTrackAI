@@ -23,7 +23,7 @@ export const Breadcrumb = ({ items, className }: BreadcrumbProps) => (
         <span key={item.label} className="flex items-center gap-1">
           {index > 0 ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : null}
           {item.href && !isLast ? (
-            <Link href={item.href} className="text-muted-foreground hover:text-foreground">
+            <Link href={item.href} className="cursor-pointer text-muted-foreground hover:text-foreground">
               {item.label}
             </Link>
           ) : (

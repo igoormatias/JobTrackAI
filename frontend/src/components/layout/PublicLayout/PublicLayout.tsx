@@ -8,7 +8,7 @@ export type PublicLayoutProps = {
 };
 
 export const PublicLayout = ({ children, className }: PublicLayoutProps) => (
-  <div className={cn("flex min-h-screen items-center justify-center bg-background p-4", className)}>
-    {children}
+  <div className={cn("min-h-screen w-full bg-background px-4 py-8 sm:py-12", className)}>
+    <div className="layout-shell w-full max-w-[400px]">{children}</div>
   </div>
 );

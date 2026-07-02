@@ -12,7 +12,7 @@ export const HeaderNotificationButton = () => {
   return (
     <button
       type="button"
-      className="relative rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
+      className="relative cursor-pointer rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
       aria-label={`Notificações${unreadCount > 0 ? `, ${unreadCount} não lidas` : ""}`}
     >
       <Bell className="h-5 w-5" />

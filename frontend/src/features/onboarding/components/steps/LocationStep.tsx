@@ -41,7 +41,7 @@ export const LocationStep = ({ form, onChange, error }: LocationStepProps) => {
             aria-checked={locationPreference.scope === option.value}
             onClick={() => update({ scope: option.value })}
             className={cn(
-              "rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium transition-colors",
+              "cursor-pointer rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium transition-colors",
               locationPreference.scope === option.value && "border-primary bg-primary/10 text-primary",
             )}
           >

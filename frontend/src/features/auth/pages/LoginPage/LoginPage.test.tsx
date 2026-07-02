@@ -20,8 +20,11 @@ describe("LoginPage", () => {
   it("renders google login button and branding", () => {
     render(<LoginPage />);
 
+    expect(screen.getByRole("main")).toBeInTheDocument();
     expect(screen.getByText("JobTrack AI")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Entrar com Google/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Entrar com Google/i })).toHaveClass("w-full");
     expect(screen.getByText(/Sua busca por emprego/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Termos de Serviço/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Política de Privacidade/i })).toBeInTheDocument();
   });
 });
