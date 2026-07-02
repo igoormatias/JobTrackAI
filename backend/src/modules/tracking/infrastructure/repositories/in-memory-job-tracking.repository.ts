@@ -10,7 +10,7 @@ import {
 import type { TimelineEventType } from "../../../../shared/domain/timeline-event-type.js";
 import { ConflictError } from "../../../../shared/errors/conflict-error.js";
 import { NotFoundError } from "../../../../shared/errors/not-found-error.js";
-import { jobRepository } from "../../../jobs/repositories/job.repository.js";
+import { createInMemoryJobRepository } from "../../../jobs/testing/in-memory-job.repository.js";
 import type { Job } from "../../../jobs/types/job.types.js";
 import type {
   CreateTrackingInput,
@@ -18,7 +18,9 @@ import type {
   MoveTrackingStageInput,
   TrackingTimelineEvent,
   UpdateTimelineEventInput,
-} from "../entities/job-tracking.entity.js";
+} from "../../domain/entities/job-tracking.entity.js";
+
+const jobRepository = createInMemoryJobRepository();
 
 let trackingCounter = 1;
 let timelineCounter = 1;

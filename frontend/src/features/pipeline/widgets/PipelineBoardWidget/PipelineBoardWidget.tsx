@@ -26,9 +26,10 @@ import { usePipelineQuery } from "../../hooks/use-pipeline-query";
 
 export type PipelineBoardWidgetProps = {
   onOpenDetails: (application: Application) => void;
+  suppressEmptyState?: boolean;
 };
 
-export const PipelineBoardWidget = ({ onOpenDetails }: PipelineBoardWidgetProps) => {
+export const PipelineBoardWidget = ({ onOpenDetails, suppressEmptyState = false }: PipelineBoardWidgetProps) => {
   const { listParams } = usePipelineFilters();
   const { data, isLoading } = usePipelineQuery(listParams);
   const moveMutation = useMoveTrackingStageMutation();
@@ -112,6 +113,7 @@ export const PipelineBoardWidget = ({ onOpenDetails }: PipelineBoardWidgetProps)
   if (isLoading || !data) return null;
 
   if (data.totalApplications === 0) {
+    if (suppressEmptyState) return null;
     return <PipelineEmptyState variant="all" />;
   }
 

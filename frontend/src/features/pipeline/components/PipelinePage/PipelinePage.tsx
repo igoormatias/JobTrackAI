@@ -54,7 +54,7 @@ export const PipelinePage = () => {
 
       {data ? <PipelineKpisWidget kpis={data.kpis} /> : null}
       <PipelineToolbarWidget />
-      <PipelineBoardWidget onOpenDetails={openDetails} />
+      <PipelineBoardWidget onOpenDetails={openDetails} suppressEmptyState={manualModalOpen} />
 
       <PipelineDetailDrawer
         application={selected}

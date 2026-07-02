@@ -186,6 +186,17 @@
   margin-inline: auto;
 }
 
+[data-dialog-content] {
+  box-sizing: border-box;
+  width: min(32rem, calc(100vw - 2rem));
+  max-width: min(32rem, calc(100vw - 2rem));
+}
+
+[data-dialog-content="wide"] {
+  width: min(42rem, calc(100vw - 2rem));
+  max-width: min(42rem, calc(100vw - 2rem));
+}
+
 .layout-page {
   box-sizing: border-box;
   width: 100%;

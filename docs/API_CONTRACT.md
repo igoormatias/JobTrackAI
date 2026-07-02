@@ -101,6 +101,8 @@ Favorito, prioridade e visibilidade são **ortogonais** ao estágio do pipeline.
 
 ## Jobs
 
+**Fonte de dados (Etapa 14):** catálogo oficial persistido em Prisma (`isCatalog: true`, seed ~400 vagas). Filtros e paginação executados no banco. Providers automáticos (Gupy, LinkedIn, Programathor) são **V2** — alimentarão o mesmo modelo `Job` via `JobCatalogRepository`.
+
 | Método | Rota | Auth | Status | Descrição |
 |--------|------|------|--------|-----------|
 | `GET` | `/jobs` | Sim | Implementado | Lista paginada com filtros e match score |
@@ -121,6 +123,7 @@ Favorito, prioridade e visibilidade são **ortogonais** ao estágio do pipeline.
 ```json
 {
   "isFavorite": false,
+  "trackingId": "tracking_abc123",
   "priority": "MEDIUM",
   "visibility": "VISIBLE",
   "hiddenAt": null

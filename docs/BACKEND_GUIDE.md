@@ -253,6 +253,8 @@ Apenas eventos **internos** do JobTrack AI (nova vaga, mudança de status, entre
 
 Código preparado em `src/providers/`, `src/config/socket.ts`, `src/modules/scheduler/` — **V2**, não MVP.
 
+**Job Catalog (Etapa 14):** `src/modules/job-catalog/` — catálogo MVP via Prisma seed; `ProviderJobCatalogRepository` stub para ingestão V2.
+
 ## Infraestrutura compartilhada
 
 | Caminho | Descrição |

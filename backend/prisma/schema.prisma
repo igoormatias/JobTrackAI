@@ -1,164 +1,173 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  name          String
-  avatarUrl     String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  profile       Profile?
-  settings      UserSettings?
-  jobs          Job[]
-  trackings     JobTracking[]
-  notifications Notification[]
-  jobViews      JobView[]
-}
-
-model Job {
-  id          String        @id @default(cuid())
-  userId      String?
-  user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName String
-  companySlug String?
-  title       String
-  slug        String
-  description String?
-  sourceUrl   String?
-  source      String
-  area        String?
-  seniority   String?
-  modality    String?
-  location    String?
-  salaryMin   Int?
-  salaryMax   Int?
-  currency    String        @default("BRL")
-  status      String        @default("active")
-  isCatalog   Boolean       @default(false)
-  publishedAt DateTime      @default(now())
-  metadata    Json?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  trackings   JobTracking[]
-  views       JobView[]
-
-  @@index([isCatalog])
-  @@index([userId])
-  @@index([companySlug])
-}
-
-model JobView {
-  id       String   @id @default(cuid())
-  userId   String
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobId    String
-  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  viewedAt DateTime @default(now())
-
-  @@unique([userId, jobId])
-  @@index([userId])
-}
-
-model JobTracking {
-  id                 String          @id @default(cuid())
-  userId             String
-  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobId              String
-  job                Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  stage              String
-  status             String          @default("active")
-  isFavorite         Boolean         @default(false)
-  priority           String          @default("MEDIUM")
-  visibility         String          @default("VISIBLE")
-  hiddenAt           DateTime?
-  notes              String?
-  lastStageUpdatedAt DateTime?
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-  timelineEvents     TimelineEvent[]
-  interviews         Interview[]
-
-  @@unique([userId, jobId])
-  @@index([userId, stage])
-  @@index([userId, isFavorite])
-  @@index([userId, priority])
-  @@index([userId, visibility])
-}
-
-model TimelineEvent {
-  id          String      @id @default(cuid())
-  trackingId  String
-  tracking    JobTracking @relation(fields: [trackingId], references: [id], onDelete: Cascade)
-  type        String
-  title       String
-  occurredAt  DateTime
-  notes       String?
-  metadata    Json?
-  createdById String
-  createdAt   DateTime    @default(now())
-
-  @@index([trackingId])
-}
-
-model Interview {
-  id          String      @id @default(cuid())
-  trackingId  String
-  tracking    JobTracking @relation(fields: [trackingId], references: [id], onDelete: Cascade)
-  scheduledAt DateTime
-  link        String?
-  notes       String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  @@index([trackingId, scheduledAt])
-}
-
-model Notification {
-  id        String    @id @default(cuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String
-  title     String
-  message   String
-  readAt    DateTime?
-  metadata  Json?
-  createdAt DateTime  @default(now())
-
-  @@index([userId, readAt])
-  @@index([userId, createdAt])
-}
-
-model Profile {
-  id                  String   @id @default(cuid())
-  userId              String   @unique
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  area                String?
-  seniority           String?
-  modality            String?
-  location            String   @default("")
-  locationPreference  Json?
-  salaryBand          String?
-  salaryExpectation   Json?
-  skillNames          String[] @default([])
-  blockedSkills       String[] @default([])
-  onboardingCompleted Boolean  @default(false)
-  onboardingProgress  Json?
-  updatedAt           DateTime @updatedAt
-}
-
-model UserSettings {
-  id                            String   @id @default(cuid())
-  userId                        String   @unique
-  user                          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  theme                         String   @default("dark")
-  jobRefreshFrequency           String   @default("1h")
-  dashboardNotificationInterval String   @default("1h")
-  updatedAt                     DateTime @updatedAt
-}
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String
+  avatarUrl     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  profile       Profile?
+  settings      UserSettings?
+  jobs          Job[]
+  trackings     JobTracking[]
+  notifications Notification[]
+  jobViews      JobView[]
+}
+
+model Job {
+  id          String        @id @default(cuid())
+  userId      String?
+  user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  companySlug String?
+  title       String
+  slug        String
+  description String?
+  sourceUrl   String?
+  source      String
+  externalId  String?
+  area        String?
+  seniority   String?
+  modality    String?
+  location    String?
+  salaryMin   Int?
+  salaryMax   Int?
+  currency    String        @default("BRL")
+  status      String        @default("active")
+  isCatalog   Boolean       @default(false)
+  publishedAt DateTime      @default(now())
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  trackings   JobTracking[]
+  views       JobView[]
+
+  @@unique([source, externalId])
+  @@index([isCatalog])
+  @@index([isCatalog, status, publishedAt])
+  @@index([userId])
+  @@index([companySlug])
+  @@index([area])
+  @@index([seniority])
+  @@index([modality])
+  @@index([source])
+  @@index([publishedAt])
+  @@index([status])
+}
+
+model JobView {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId    String
+  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  viewedAt DateTime @default(now())
+
+  @@unique([userId, jobId])
+  @@index([userId])
+}
+
+model JobTracking {
+  id                 String          @id @default(cuid())
+  userId             String
+  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId              String
+  job                Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  stage              String
+  status             String          @default("active")
+  isFavorite         Boolean         @default(false)
+  priority           String          @default("MEDIUM")
+  visibility         String          @default("VISIBLE")
+  hiddenAt           DateTime?
+  notes              String?
+  lastStageUpdatedAt DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  timelineEvents     TimelineEvent[]
+  interviews         Interview[]
+
+  @@unique([userId, jobId])
+  @@index([userId, stage])
+  @@index([userId, isFavorite])
+  @@index([userId, priority])
+  @@index([userId, visibility])
+}
+
+model TimelineEvent {
+  id          String      @id @default(cuid())
+  trackingId  String
+  tracking    JobTracking @relation(fields: [trackingId], references: [id], onDelete: Cascade)
+  type        String
+  title       String
+  occurredAt  DateTime
+  notes       String?
+  metadata    Json?
+  createdById String
+  createdAt   DateTime    @default(now())
+
+  @@index([trackingId])
+}
+
+model Interview {
+  id          String      @id @default(cuid())
+  trackingId  String
+  tracking    JobTracking @relation(fields: [trackingId], references: [id], onDelete: Cascade)
+  scheduledAt DateTime
+  link        String?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([trackingId, scheduledAt])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  message   String
+  readAt    DateTime?
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+model Profile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  area                String?
+  seniority           String?
+  modality            String?
+  location            String   @default("")
+  locationPreference  Json?
+  salaryBand          String?
+  salaryExpectation   Json?
+  skillNames          String[] @default([])
+  blockedSkills       String[] @default([])
+  onboardingCompleted Boolean  @default(false)
+  onboardingProgress  Json?
+  updatedAt           DateTime @updatedAt
+}
+
+model UserSettings {
+  id                            String   @id @default(cuid())
+  userId                        String   @unique
+  user                          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme                         String   @default("dark")
+  jobRefreshFrequency           String   @default("1h")
+  dashboardNotificationInterval String   @default("1h")
+  updatedAt                     DateTime @updatedAt
+}

@@ -14,7 +14,7 @@ Se a resposta for **não**, a funcionalidade **não** deve ser implementada no M
 
 | Responsabilidade | Descrição |
 |------------------|-----------|
-| Centralizar vagas | Agregar oportunidades de múltiplas fontes (via MSW/fixtures no MVP; providers reais em V2) |
+| Centralizar vagas | Catálogo oficial Prisma (~400 vagas seed); providers reais em V2 |
 | Buscar vagas | Busca global com debounce e filtros na URL |
 | Filtrar vagas | Área, senioridade, modalidade, skills, empresa, fonte, prioridade, visibilidade, etc. |
 | Favoritar vagas | Salvar vagas para revisão posterior com destaque visual (Design System) |

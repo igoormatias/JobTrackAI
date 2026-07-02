@@ -4,6 +4,14 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [Unreleased]
 
+### Etapa 14 — Jobs Catalog
+
+- `job-catalog` module (Clean Architecture) with `JobCatalogRepository`
+- Prisma-native filters, sort, and cursor pagination for `GET /jobs`
+- Official catalog seed (~400 jobs) with `externalId` for V2 dedup
+- Removed in-memory job generation from production runtime
+- ADR-025
+
 ### Etapa 13 — MVP Stabilization
 
 - Prisma persistence for jobs catalog, tracking, timeline, interviews, notifications
@@ -33,7 +41,7 @@ All notable changes to JobTrack AI are documented in this file.
 - Smart Mock Engine for match score
 - Design system and Docker dev environment
 
-## [v1.0.0-rc1] — Planned (Etapa 14)
+## [v1.0.0-rc1] — Planned (Etapa 15)
 
 - E2E tests, CI/CD, staging/production deploy
 - Performance hardening and release polish

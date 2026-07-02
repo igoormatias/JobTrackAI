@@ -115,72 +115,74 @@ export const AddToTrackingModal = ({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent>
+      <ModalContent className="w-[min(42rem,calc(100vw-2rem))]" data-dialog-content="wide">
         <ModalHeader>
           <ModalTitle>{isManual ? "Adicionar processo" : "Adicionar ao Pipeline"}</ModalTitle>
         </ModalHeader>
-        <form className="space-y-4" onSubmit={submit}>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2 sm:col-span-2">
+        <form className="flex w-full min-w-0 flex-col gap-4" onSubmit={submit}>
+          <div className="grid min-w-0 grid-cols-1 gap-4">
+            <div className="min-w-0 space-y-2">
               <Label htmlFor="tracking-company">Empresa</Label>
               <Input id="tracking-company" disabled={!isManual} {...form.register("companyName")} />
             </div>
-            <div className="space-y-2 sm:col-span-2">
+            <div className="min-w-0 space-y-2">
               <Label htmlFor="tracking-title">Cargo</Label>
               <Input id="tracking-title" disabled={!isManual} {...form.register("title")} />
             </div>
-            <div className="space-y-2 sm:col-span-2">
+            <div className="min-w-0 space-y-2">
               <Label htmlFor="tracking-url">URL da vaga</Label>
               <Input id="tracking-url" disabled={!isManual} {...form.register("sourceUrl")} />
             </div>
-            <div className="space-y-2 sm:col-span-2">
+            <div className="min-w-0 space-y-2">
               <Label htmlFor="tracking-description">Descrição</Label>
               <Textarea id="tracking-description" disabled={!isManual} rows={3} {...form.register("description")} />
             </div>
-            <div className="space-y-2">
-              <Label>Origem</Label>
-              <Select
-                disabled={!isManual}
-                value={form.watch("source")}
-                onValueChange={(value) => form.setValue("source", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Origem" />
-                </SelectTrigger>
-                <SelectContent>
-                  {JOB_SOURCE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="min-w-0 space-y-2">
+                <Label>Origem</Label>
+                <Select
+                  disabled={!isManual}
+                  value={form.watch("source")}
+                  onValueChange={(value) => form.setValue("source", value)}
+                >
+                  <SelectTrigger className="w-full min-w-0">
+                    <SelectValue placeholder="Origem" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JOB_SOURCE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="min-w-0 space-y-2">
+                <Label>Status atual</Label>
+                <Select value={form.watch("stage")} onValueChange={(value) => form.setValue("stage", value)}>
+                  <SelectTrigger className="w-full min-w-0">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PIPELINE_STAGE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Status atual</Label>
-              <Select value={form.watch("stage")} onValueChange={(value) => form.setValue("stage", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PIPELINE_STAGE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2 sm:col-span-2">
+            <div className="min-w-0 space-y-2">
               <Label htmlFor="tracking-date">Data do status atual</Label>
               <Input id="tracking-date" type="datetime-local" {...form.register("stageOccurredAt")} />
             </div>
-            <div className="space-y-2 sm:col-span-2">
+            <div className="min-w-0 space-y-2">
               <Label htmlFor="tracking-notes">Observações</Label>
               <Textarea id="tracking-notes" rows={3} {...form.register("notes")} />
             </div>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex shrink-0 justify-end gap-2 border-t border-border pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>

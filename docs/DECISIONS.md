@@ -427,10 +427,33 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 **Consequências:**
 
-- Etapa 14 = Release Candidate (E2E, CI/CD, deploy)
-- Etapa 15 = AI Match Engine (enriquecimento sobre contrato V1)
+- Etapa 15 = Release Candidate (E2E, CI/CD, deploy)
+- Etapa 16 = AI Match Engine (enriquecimento sobre contrato V1)
 - `docs/IMPLEMENTATION_STATUS.md` e `CHANGELOG.md` como fonte de status
 - Cursor Rule `.cursor/rules/msw-test-only.mdc`
+
+---
+
+## ADR-025 — Job Catalog (Etapa 14)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 14)
+
+**Contexto:** O MVP ainda carregava vagas com filtros em memória e gerava jobs fake no import do backend. O catálogo precisava ser a fonte única de verdade para descoberta de vagas, preparada para ingestão por Providers na V2.
+
+**Decisão:**
+
+- **Job Catalog** como módulo oficial (`modules/job-catalog`) com `JobCatalogRepository`
+- **Implementação MVP:** `PrismaJobCatalogRepository` + seed Prisma (~400 vagas)
+- **Busca:** filtros, ordenação e paginação via Prisma (match sort usa subconjunto limitado do catálogo + Match Engine V1)
+- **V2:** `ProviderJobCatalogRepository` alimenta o mesmo modelo `Job` via providers + scheduler (não altera use cases)
+- **Sem** geração in-memory em runtime; repositório in-memory apenas em testes
+
+**Consequências:**
+
+- Providers (Gupy, LinkedIn, Programathor) e Scheduler permanecem V2
+- API `GET /jobs` mantém contrato público
+- `externalId` + `@@unique([source, externalId])` para deduplicação futura
 
 ---
 

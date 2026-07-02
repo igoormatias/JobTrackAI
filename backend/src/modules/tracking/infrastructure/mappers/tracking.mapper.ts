@@ -11,7 +11,7 @@ import type {
   MoveTrackingStageInput,
   TrackingTimelineEvent,
   UpdateTimelineEventInput,
-} from "../entities/job-tracking.entity.js";
+} from "../../domain/entities/job-tracking.entity.js";
 
 export const mapTimelineEvent = (event: TimelineEvent): TrackingTimelineEvent => ({
   id: event.id,

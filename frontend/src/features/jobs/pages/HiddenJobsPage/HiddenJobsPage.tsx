@@ -9,7 +9,7 @@ import { useTrackingVisibilityMutation } from "@/features/tracking/hooks/use-tra
 
 export const HiddenJobsPage = () => {
   const filters = useJobFilters();
-  const { data, isLoading } = useInfiniteJobs(filters.listParams);
+  const { data, isLoading } = useInfiniteJobs({ ...filters.listParams, visibility: "hidden" });
   const restoreMutation = useTrackingVisibilityMutation();
 
   const jobs = data?.pages.flatMap((page) => page.data) ?? [];
@@ -31,7 +31,11 @@ export const HiddenJobsPage = () => {
               type="button"
               size="sm"
               variant="outline"
-              onClick={() => restoreMutation.mutate({ id: job.id, visibility: "VISIBLE" })}
+              disabled={!job.trackingId || restoreMutation.isPending}
+              onClick={() => {
+                if (!job.trackingId) return;
+                restoreMutation.mutate({ id: job.trackingId, visibility: "VISIBLE" });
+              }}
             >
               Restaurar vaga
             </Button>

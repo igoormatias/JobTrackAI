@@ -5,7 +5,6 @@ import {
   PIPELINE_STAGES,
 } from "../../pipeline/constants/pipeline-stages.js";
 import { trackingService } from "../../tracking/application/tracking.service.js";
-import { jobRepository, type JobRepository } from "../repositories/job.repository.js";
 import type { JobInsight, JobMatchDto, JobTimelineStep, LearningGap } from "../types/job-details.types.js";
 import type { Job } from "../types/job.types.js";
 import { JobService } from "./job.service.js";
@@ -42,10 +41,7 @@ const slugify = (value: string): string =>
     .replace(/(^-|-$)/g, "");
 
 export class JobDetailsService {
-  constructor(
-    private readonly jobs: JobService = new JobService(),
-    private readonly repository: JobRepository = jobRepository,
-  ) {}
+  constructor(private readonly jobs: JobService = new JobService()) {}
 
   async getJobMatch(userId: string, id: string): Promise<JobMatchDto> {
     const job = await this.jobs.getJobById(userId, id);
@@ -58,18 +54,7 @@ export class JobDetailsService {
 
   async getRelatedJobs(userId: string, id: string): Promise<Job[]> {
     const current = await this.jobs.getJobById(userId, id);
-    const list = await this.jobs.listJobs(userId, { limit: 100 });
-    return list.data
-      .filter((job) => job.id !== id)
-      .filter(
-        (job) =>
-          job.area === current.area ||
-          job.technologies.some((tech) =>
-            current.technologies.some((currentTech) => currentTech.slug === tech.slug),
-          ),
-      )
-      .sort((a, b) => b.matchScore.score - a.matchScore.score)
-      .slice(0, 5);
+    return this.jobs.findRelatedJobs(userId, current);
   }
 
   async getJobTimeline(userId: string, jobId: string): Promise<JobTimelineStep[]> {
@@ -147,13 +132,6 @@ export class JobDetailsService {
       importance: HIGH_PRIORITY_SKILLS.includes(skill.name) ? "high" : index < 2 ? "medium" : "low",
       category: categorizeSkill(skill.name),
     }));
-  }
-
-  assertJobExists(id: string): void {
-    const job = this.repository.findById(id);
-    if (!job) {
-      throw new NotFoundError("Job not found");
-    }
   }
 }
 

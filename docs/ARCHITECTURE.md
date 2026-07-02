@@ -116,10 +116,11 @@ Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) e [BACKEND_GUIDE.md](./BACKEND_GUID
 - **ORM:** Prisma (PostgreSQL)
 - **Validação:** Zod
 - **Arquitetura:** Clean Architecture + DDD (lightweight) — padrão oficial para novos módulos
-- **Módulos Clean Architecture:** `system`, `profiles`, `settings`
-- **Módulos legados:** `auth`, `jobs`, `pipeline`, `recommendations` (controller → service → repository)
+- **Módulos Clean Architecture:** `system`, `profiles`, `settings`, `job-catalog`
+- **Módulos legados:** `auth`, `jobs`, `pipeline`, `recommendations` (controller → service; jobs delega catálogo ao `job-catalog`)
+- **Job Catalog (Etapa 14):** catálogo oficial via Prisma seed (~400 vagas); `JobCatalogRepository` + `PrismaJobCatalogRepository`; Providers alimentam o mesmo `Job` na V2
 - **Eventos:** `EventBus` com `InMemoryEventBus` em `src/shared/events/`
-- **Providers:** Gupy, LinkedIn, Programathor — **preparados, V2** (MVP usa MSW/fixtures)
+- **Providers:** Gupy, LinkedIn, Programathor — **stubs, V2** (MVP usa seed Prisma)
 - **Importação por URL:** interfaces preparadas, **V2**
 - **Tempo real:** Socket.IO — **preparado, V2** (não exposto no MVP)
 - **Rate limit:** `express-rate-limit` em memória (sem Redis no MVP)

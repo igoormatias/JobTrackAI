@@ -84,6 +84,7 @@ export const mapPrismaJobToDomain = (
     sourceUrl: record.sourceUrl ?? "",
     status: (record.status as Job["status"]) ?? "active",
     isFavorite: tracking?.isFavorite ?? false,
+    trackingId: tracking?.id,
     priority: (tracking?.priority as Job["priority"]) ?? "MEDIUM",
     visibility: (tracking?.visibility as Job["visibility"]) ?? "VISIBLE",
     hiddenAt: tracking?.hiddenAt?.toISOString() ?? null,

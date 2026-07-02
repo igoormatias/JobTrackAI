@@ -1,4 +1,4 @@
-import type { Job, JobEngagementState, JobListParams } from "../types/job.types.js";
+import type { Job, JobEngagementState } from "../types/job.types.js";
 
 const createMatchScore = (score: number) => ({
   score,
@@ -39,7 +39,7 @@ const createJob = (index: number): Job => {
     salaryMin: 12000,
     salaryMax: 18000,
     currency: "BRL",
-    description: "Vaga mock para desenvolvimento do módulo Jobs.",
+    description: "Vaga de teste para o módulo Jobs.",
     requirements: ["React", "TypeScript", "Trabalho em equipe"],
     benefits: ["Plano de saúde", "Home office"],
     technologies: [
@@ -58,12 +58,17 @@ const createJob = (index: number): Job => {
   };
 };
 
-export class JobRepository {
-  private jobs: Job[] = Array.from({ length: 50 }, (_, index) => createJob(index + 1));
-  private favoriteJobIds = new Set(this.jobs.filter((job) => job.isFavorite).map((job) => job.id));
+/** Test-only in-memory jobs. Not loaded in production runtime. */
+export class InMemoryJobRepository {
+  private jobs: Job[] = [];
+  private favoriteJobIds = new Set<string>();
   private viewedJobIds = new Set<string>();
   private appliedJobIds = new Set<string>();
   private rejectedJobIds = new Set<string>();
+
+  constructor(seedCount = 50) {
+    this.reset(seedCount);
+  }
 
   findAll(): Job[] {
     return this.jobs.map((job) => this.enrich(job));
@@ -94,22 +99,6 @@ export class JobRepository {
     return this.enrich(job);
   }
 
-  apply(id: string): Job | null {
-    const job = this.jobs.find((item) => item.id === id);
-    if (!job) return null;
-    this.appliedJobIds.add(id);
-    this.favoriteJobIds.add(id);
-    return this.enrich(job);
-  }
-
-  removeApplication(id: string): Job | null {
-    const job = this.jobs.find((item) => item.id === id);
-    if (!job) return null;
-    this.appliedJobIds.delete(id);
-    this.rejectedJobIds.delete(id);
-    return this.enrich(job);
-  }
-
   addManualJob(job: Job): void {
     this.jobs.push(job);
   }
@@ -131,8 +120,8 @@ export class JobRepository {
     };
   }
 
-  reset(): void {
-    this.jobs = Array.from({ length: 50 }, (_, index) => createJob(index + 1));
+  reset(seedCount = 50): void {
+    this.jobs = Array.from({ length: seedCount }, (_, index) => createJob(index + 1));
     this.favoriteJobIds = new Set(this.jobs.filter((job) => job.isFavorite).map((job) => job.id));
     this.viewedJobIds = new Set();
     this.appliedJobIds = new Set();
@@ -140,6 +129,5 @@ export class JobRepository {
   }
 }
 
-export const jobRepository = new JobRepository();
-
-export type { JobListParams };
+export const createInMemoryJobRepository = (seedCount = 50): InMemoryJobRepository =>
+  new InMemoryJobRepository(seedCount);

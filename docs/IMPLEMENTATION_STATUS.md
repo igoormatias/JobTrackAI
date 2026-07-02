@@ -1,16 +1,16 @@
 # JobTrack AI — Implementation Status
 
-Last updated: Etapa 13 (MVP Stabilization).  
+Last updated: Etapa 14 (Jobs Catalog).  
 Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 
 | Module | Frontend | Backend API | Prisma | Tests | Notes |
 |--------|----------|-------------|--------|-------|-------|
-| Auth | ✅ | ✅ | ✅ User | ✅ | Google OAuth real (Etapa 13) |
+| Auth | ✅ | ✅ | ✅ User | ✅ | Google OAuth real |
 | Onboarding | ✅ | ✅ | ✅ Profile | ✅ | |
 | Profile / Settings | ✅ | ✅ | ✅ | ✅ | Clean Architecture |
-| Jobs (catalog) | ✅ | ✅ | ✅ Job seed | ✅ | Seeds, no providers |
-| Job Details | ✅ | ✅ | ✅ | ✅ | Match V1 from backend |
-| Match Engine | ✅ types | ✅ | — | ✅ | `rules-v1`; AI enriches in Etapa 15 |
+| Jobs (catalog) | ✅ | ✅ | ✅ Job seed ~400 | ✅ | Job Catalog module; Prisma queries |
+| Job Details | ✅ | ✅ | ✅ | ✅ | Match V1; related via catalog |
+| Match Engine | ✅ types | ✅ | — | ✅ | `rules-v1`; AI enriches in Etapa 16 |
 | Job Tracking | ✅ | ✅ | ✅ | ✅ | Core domain |
 | Timeline | ✅ | ✅ | ✅ TimelineEvent | ✅ | |
 | Interviews | ✅ | ✅ | ✅ Interview | ✅ | Sub-resource of tracking |
@@ -23,11 +23,12 @@ Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 ## Runtime data flow (target)
 
 ```
-Browser → React Query → Express :3333 → Prisma → PostgreSQL
+Browser → React Query → Express :3333 → Job Catalog (Prisma) → PostgreSQL
 ```
 
-## Out of scope (Etapa 14+)
+## Out of scope (V2+)
 
 - Providers (Gupy, LinkedIn, Programathor) — V2
-- AI Match enrichment — Etapa 15
-- Push notifications, WebSocket, Scheduler — V2
+- Scheduler — V2
+- AI Match enrichment — Etapa 16
+- Push notifications, WebSocket — V2

@@ -111,12 +111,24 @@ Consolidar MVP com persistência real, sem mocks em runtime:
 - [x] Entrevistas no domínio Tracking
 - [x] ADR-024 + IMPLEMENTATION_STATUS + CHANGELOG
 
-#### ⬜ Release Candidate (Etapa 14 — RC1)
+#### ✅ Jobs Catalog (Etapa 14)
+
+Catálogo oficial persistido em Prisma — sem vagas fake em runtime:
+
+- [x] Módulo `job-catalog` (Clean Architecture) + `JobCatalogRepository`
+- [x] `PrismaJobCatalogRepository` com filtros, ordenação e paginação via Prisma
+- [x] Seed oficial ~400 vagas (`prisma/seeders/`)
+- [x] `externalId` + índices para filtros e dedup V2
+- [x] `ProviderJobCatalogRepository` documentado (stub V2)
+- [x] Remoção de geração in-memory em runtime
+- [x] ADR-025
+
+#### ⬜ Release Candidate (Etapa 15 — RC1)
 
 - E2E tests, CI/CD, deploy staging/production
 - Performance hardening e polish final
 
-#### ⬜ AI Match Engine (Etapa 15)
+#### ⬜ AI Match Engine (Etapa 16)
 
 - Enriquecimento AI sobre contrato `engineVersion` (explicações, learning tips)
 - Sem breaking changes no frontend

@@ -60,6 +60,7 @@ export type Job = {
   sourceUrl: string;
   status: JobStatus;
   isFavorite: boolean;
+  trackingId?: string;
   priority?: JobPriority;
   visibility?: JobVisibility;
   hiddenAt?: string | null;
