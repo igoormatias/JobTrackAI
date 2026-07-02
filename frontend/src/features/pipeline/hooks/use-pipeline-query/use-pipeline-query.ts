@@ -8,7 +8,10 @@ import type { PipelineListParams } from "@/types";
 
 import { getPipeline } from "../../services/pipeline-service";
 
-export const usePipelineQuery = (params?: PipelineListParams) => {
+export const usePipelineQuery = (
+  params?: PipelineListParams,
+  options?: { enabled?: boolean },
+) => {
   const { data: profile } = useProfile();
   const profileVersion = profile?.updatedAt ?? "none";
   const queryParams = params ?? {};
@@ -16,5 +19,6 @@ export const usePipelineQuery = (params?: PipelineListParams) => {
   return useQuery({
     queryKey: [...queryKeys.pipeline.board(queryParams), profileVersion],
     queryFn: () => getPipeline(queryParams),
+    enabled: options?.enabled ?? true,
   });
 };

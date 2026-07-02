@@ -43,14 +43,19 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {!isSidebarCollapsed ? (
           <span className="text-lg font-bold text-foreground">JobTrack AI</span>
         ) : null}
-        <Button variant="ghost" size="icon" onClick={toggleSidebarCollapsed} aria-label="Recolher sidebar">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebarCollapsed}
+          aria-label={isSidebarCollapsed ? "Expandir sidebar" : "Recolher sidebar"}
+        >
           <ChevronLeft
             className={cn("h-4 w-4 transition-transform", isSidebarCollapsed && "rotate-180")}
           />
         </Button>
       </div>
 
-      <nav className="flex-1 space-y-1 p-3">
+      <nav className="flex-1 space-y-1 p-3" aria-label="Navegação principal">
         {MAIN_NAV.map((item) => {
           const isActive = pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -59,6 +64,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={isSidebarCollapsed ? item.label : undefined}
+              title={isSidebarCollapsed ? item.label : undefined}
               className={cn(
                 "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive

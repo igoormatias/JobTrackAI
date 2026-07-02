@@ -33,6 +33,7 @@ services:
       PORT: 3333
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/jobtrack
       FRONTEND_URL: http://localhost:3000
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-local-dev-google-client-id.apps.googleusercontent.com}
       JWT_SECRET: dev-secret-change-in-production
       JWT_ACCESS_EXPIRES_IN: 15m
       JWT_REFRESH_EXPIRES_IN: 7d
@@ -63,7 +64,7 @@ services:
     environment:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3333
-      NEXT_PUBLIC_ENABLE_MSW: "true"
+      NEXT_PUBLIC_ENABLE_MSW: "false"
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
     volumes:

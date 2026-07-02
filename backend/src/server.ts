@@ -12,10 +12,11 @@ export const startServer = async (): Promise<void> => {
   const app = createApp();
   const httpServer = createServer(app);
 
-  createSocketServer(httpServer);
-
-  const scheduler = new SchedulerService();
-  scheduler.start();
+  if (env.ENABLE_V2_FEATURES) {
+    createSocketServer(httpServer);
+    const scheduler = new SchedulerService();
+    scheduler.start();
+  }
 
   await connectRedis();
 

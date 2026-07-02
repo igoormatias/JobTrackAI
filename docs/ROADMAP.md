@@ -123,10 +123,15 @@ Catálogo oficial persistido em Prisma — sem vagas fake em runtime:
 - [x] Remoção de geração in-memory em runtime
 - [x] ADR-025
 
-#### ⬜ Release Candidate (Etapa 15 — RC1)
+#### ✅ Release Candidate (Etapa 15 — RC1)
 
-- E2E tests, CI/CD, deploy staging/production
-- Performance hardening e polish final
+- CI/CD (GitHub Actions): lint, typecheck, build, test, test:integration
+- Segurança: ownership em `/tracking/*` e `/pipeline/*`, env production hardened, rate limit login
+- Build limpo: `getRouteParam` (Express 5), testes excluídos do `tsc`
+- UX: estados loading/empty/error padronizados, notificações no header, a11y nav
+- Limpeza: placeholders, repos in-memory runtime, MSW runtime removido
+- Checklist manual MVP (sem suite E2E automatizada)
+- ADR-026
 
 #### ⬜ AI Match Engine (Etapa 16)
 

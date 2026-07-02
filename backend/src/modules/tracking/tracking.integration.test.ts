@@ -15,15 +15,20 @@ const createTestTrackingRoutes = (service: TrackingService) => {
   router.use(requireAuth);
   router.get("/", controller.list);
   router.post("/", controller.create);
+  router.get("/:id", controller.getById);
   router.patch("/:id/stage", controller.moveStage);
+  router.patch("/:id/favorite", controller.toggleFavorite);
   return router;
 };
 
 describe("Tracking module integration", () => {
   let repository: InMemoryJobTrackingRepository;
   let service: TrackingService;
-  const userId = "user_0001";
-  const email = "tracking@test.com";
+
+  const userA = "user_0001";
+  const userB = "user_0002";
+  const emailA = "tracking-a@test.com";
+  const emailB = "tracking-b@test.com";
 
   beforeEach(() => {
     repository = new InMemoryJobTrackingRepository();
@@ -32,7 +37,7 @@ describe("Tracking module integration", () => {
     service = new TrackingService(repository);
   });
 
-  const authCookie = () => {
+  const authCookie = (userId: string, email: string) => {
     const token = tokenService.signAccessToken({ userId, email });
     return `jt_access=${token}`;
   };
@@ -44,7 +49,7 @@ describe("Tracking module integration", () => {
 
     const response = await request(app)
       .post("/tracking")
-      .set("Cookie", authCookie())
+      .set("Cookie", authCookie(userA, emailA))
       .send({
         job: {
           companyName: "Acme",
@@ -66,15 +71,43 @@ describe("Tracking module integration", () => {
 
     await request(app)
       .post("/tracking")
-      .set("Cookie", authCookie())
+      .set("Cookie", authCookie(userA, emailA))
       .send({
         job: { companyName: "Acme", title: "Dev", source: "manual" },
         stage: "discovery",
         stageOccurredAt: new Date().toISOString(),
       });
 
-    const response = await request(app).get("/tracking").set("Cookie", authCookie());
+    const response = await request(app).get("/tracking").set("Cookie", authCookie(userA, emailA));
     expect(response.status).toBe(200);
     expect(response.body.data.length).toBe(1);
+  });
+
+  it("denies access to another user's tracking (IDOR)", async () => {
+    const app = createIntegrationTestApp((expressApp) => {
+      expressApp.use("/tracking", createTestTrackingRoutes(service));
+    });
+
+    const created = await request(app)
+      .post("/tracking")
+      .set("Cookie", authCookie(userA, emailA))
+      .send({
+        job: { companyName: "Acme", title: "Dev", source: "manual" },
+        stage: "discovery",
+        stageOccurredAt: new Date().toISOString(),
+      });
+
+    const trackingId = created.body.data.id as string;
+
+    const getResponse = await request(app)
+      .get(`/tracking/${trackingId}`)
+      .set("Cookie", authCookie(userB, emailB));
+    expect(getResponse.status).toBe(404);
+
+    const moveResponse = await request(app)
+      .patch(`/tracking/${trackingId}/stage`)
+      .set("Cookie", authCookie(userB, emailB))
+      .send({ stage: "applied", occurredAt: new Date().toISOString() });
+    expect(moveResponse.status).toBe(404);
   });
 });

@@ -154,6 +154,7 @@ export const MultiSelect = ({
                     key={option.value}
                     type="button"
                     role="option"
+                    aria-selected={false}
                     data-multiselect-option=""
                     className="multiselect-option flex w-full cursor-pointer items-center rounded-sm px-2 py-2 text-left text-sm transition-colors focus-visible:outline-none"
                     onMouseDown={(event) => event.preventDefault()}

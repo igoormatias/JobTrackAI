@@ -5,8 +5,9 @@ description: Backend testing conventions (Vitest)
 ## Ferramentas
 
 - Runner: **Vitest**
-- Unit: `src/**/*.test.ts` (exclui `*.integration.test.ts`)
+- Unit: `src/**/*.test.ts` (exclui `*.integration.test.ts`; excluído do `tsc` build)
 - Integration: `src/**/*.integration.test.ts` (config separada)
+- CI: `.github/workflows/ci.yml` executa `test` + `test:integration` com Postgres + seed
 
 ## Estilo
 

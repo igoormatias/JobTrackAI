@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 
 import { getAuthUserId } from "../../../shared/http/get-auth-user-id.js";
+import { getRouteParam } from "../../../shared/http/get-route-param.js";
 import { ValidationError } from "../../../shared/errors/validation-error.js";
 import type { PipelineStage } from "../../../shared/domain/pipeline-stage.js";
 import type {
@@ -38,9 +39,11 @@ export class PipelineController {
       }
 
       const body = parsed.data as { stage: PipelineStage; occurredAt?: string };
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
       const data = await this.service.moveApplication(
-        getAuthUserId(req),
-        req.params.id!,
+        userId,
+        id,
         body.stage,
         body.occurredAt ?? new Date().toISOString(),
       );
@@ -53,7 +56,9 @@ export class PipelineController {
 
   favoriteApplication = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = await this.service.favoriteApplication(req.params.id!);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.favoriteApplication(userId, id);
       const response: ApplicationResponseDto = { data, message: "Favorite updated" };
       res.status(200).json(response);
     } catch (error) {
@@ -63,7 +68,9 @@ export class PipelineController {
 
   archiveApplication = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = await this.service.archiveApplication(req.params.id!);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.archiveApplication(userId, id);
       const response: ApplicationResponseDto = { data, message: "Application archived" };
       res.status(200).json(response);
     } catch (error) {
@@ -73,7 +80,9 @@ export class PipelineController {
 
   deleteApplication = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      await this.service.deleteApplication(req.params.id!);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      await this.service.deleteApplication(userId, id);
       const response: DeleteResponseDto = { message: "Application deleted" };
       res.status(200).json(response);
     } catch (error) {
@@ -83,7 +92,9 @@ export class PipelineController {
 
   getTimeline = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = await this.service.getTimeline(req.params.id!);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.getTimeline(userId, id);
       const response: TimelineResponseDto = { data };
       res.status(200).json(response);
     } catch (error) {

@@ -3,7 +3,6 @@ import type { Prisma } from "@prisma/client";
 
 import { prisma } from "../../../../database/prisma.js";
 import type { JobPriority } from "../../../../shared/domain/job-priority.js";
-import type { JobVisibility } from "../../../../shared/domain/job-visibility.js";
 import {
   matchEngineService,
   type MatchProfileInput,

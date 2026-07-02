@@ -4,6 +4,32 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [Unreleased]
 
+## [v1.0.0-rc1] — 2026-07 (Etapa 15 — Release Candidate)
+
+### Security
+
+- Enforce `userId` ownership on all `/tracking/*` and legacy `/pipeline/*` mutations
+- Production requires `JWT_SECRET` and `DATABASE_URL`
+- Rate limit on `POST /auth/login`
+
+### Quality
+
+- GitHub Actions CI (lint, typecheck, build, unit + integration tests)
+- `getRouteParam` helper for Express 5 route params
+- Exclude `*.test.ts` from backend `tsc` build
+
+### Frontend
+
+- Pipeline error state with retry; Hidden jobs skeleton/empty/error
+- Notifications header popover with mark-all-read
+- Nav a11y (`aria-current`, collapsed sidebar labels)
+- Removed placeholder pages and dead hooks
+
+### DevOps
+
+- Docker: `MSW=false`, `GOOGLE_CLIENT_ID` for backend
+- `ENABLE_V2_FEATURES=false` disables Scheduler/WebSocket boot
+
 ### Etapa 14 — Jobs Catalog
 
 - `job-catalog` module (Clean Architecture) with `JobCatalogRepository`
@@ -43,5 +69,7 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [v1.0.0-rc1] — Planned (Etapa 15)
 
-- E2E tests, CI/CD, staging/production deploy
-- Performance hardening and release polish
+~~- E2E tests, CI/CD, staging/production deploy~~
+~~- Performance hardening and release polish~~
+
+Delivered in `v1.0.0-rc1` (see CHANGELOG).

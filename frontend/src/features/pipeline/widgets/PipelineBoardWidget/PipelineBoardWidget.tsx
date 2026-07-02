@@ -6,13 +6,14 @@ import { toast } from "sonner";
 
 import { queryKeys } from "@/lib/query-client/query-keys";
 
-import type { Application, PipelineStage } from "@/types";
+import type { Application, PipelineData, PipelineStage } from "@/types";
 
 import { StageDateConfirmDialog } from "@/features/tracking/components/StageDateConfirmDialog/StageDateConfirmDialog";
 import { ScheduleInterviewDialog } from "@/features/tracking/components/ScheduleInterviewDialog";
 import { createInterview } from "@/features/tracking/services/tracking-service";
 import { useMoveTrackingStageMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 
+import { PipelineBoardSkeleton } from "../../components/PipelineBoardSkeleton";
 import { PipelineColumnNav } from "../../components/PipelineColumnNav";
 import { PipelineEmptyState } from "../../components/PipelineEmptyState";
 import { PipelineKanbanBoard } from "../../components/PipelineKanbanBoard";
@@ -27,11 +28,20 @@ import { usePipelineQuery } from "../../hooks/use-pipeline-query";
 export type PipelineBoardWidgetProps = {
   onOpenDetails: (application: Application) => void;
   suppressEmptyState?: boolean;
+  data?: PipelineData;
 };
 
-export const PipelineBoardWidget = ({ onOpenDetails, suppressEmptyState = false }: PipelineBoardWidgetProps) => {
+export const PipelineBoardWidget = ({
+  onOpenDetails,
+  suppressEmptyState = false,
+  data: dataProp,
+}: PipelineBoardWidgetProps) => {
   const { listParams } = usePipelineFilters();
-  const { data, isLoading } = usePipelineQuery(listParams);
+  const { data: queryData, isLoading: isQueryLoading } = usePipelineQuery(listParams, {
+    enabled: dataProp === undefined,
+  });
+  const data = dataProp ?? queryData;
+  const isLoading = dataProp === undefined && isQueryLoading;
   const moveMutation = useMoveTrackingStageMutation();
   const favoriteMutation = useFavoriteApplicationMutation();
   const deleteMutation = useDeleteApplicationMutation();
@@ -110,7 +120,7 @@ export const PipelineBoardWidget = ({ onOpenDetails, suppressEmptyState = false 
     setInterviewApplication(application);
   }, []);
 
-  if (isLoading || !data) return null;
+  if (isLoading || !data) return <PipelineBoardSkeleton />;
 
   if (data.totalApplications === 0) {
     if (suppressEmptyState) return null;

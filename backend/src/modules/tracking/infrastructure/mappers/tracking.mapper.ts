@@ -6,11 +6,8 @@ import type { JobVisibility } from "../../../../shared/domain/job-visibility.js"
 import type { TimelineEventType } from "../../../../shared/domain/timeline-event-type.js";
 import { parseJobMetadata } from "../../../jobs/infrastructure/mappers/job.mapper.js";
 import type {
-  CreateTrackingInput,
   JobTrackingEntity,
-  MoveTrackingStageInput,
   TrackingTimelineEvent,
-  UpdateTimelineEventInput,
 } from "../../domain/entities/job-tracking.entity.js";
 
 export const mapTimelineEvent = (event: TimelineEvent): TrackingTimelineEvent => ({

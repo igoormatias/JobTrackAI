@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 
 import { getAuthUserId } from "../../../../../shared/http/get-auth-user-id.js";
+import { getRouteParam } from "../../../../../shared/http/get-route-param.js";
 import { ValidationError } from "../../../../../shared/errors/validation-error.js";
 import { trackingService, type TrackingService } from "../../../application/tracking.service.js";
 import {
@@ -32,7 +33,9 @@ export class TrackingController {
 
   getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = await this.service.getById(req.params.id!);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.getById(userId, id);
       res.status(200).json({ data });
     } catch (error) {
       next(error);
@@ -59,7 +62,9 @@ export class TrackingController {
       const parsed = moveTrackingStageSchema.safeParse(req.body);
       if (!parsed.success) throw new ValidationError(parsed.error.message);
 
-      const data = await this.service.moveStage(req.params.id!, parsed.data);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.moveStage(userId, id, parsed.data);
       res.status(200).json({ data, message: "Stage updated" });
     } catch (error) {
       next(error);
@@ -68,7 +73,9 @@ export class TrackingController {
 
   toggleFavorite = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = await this.service.toggleFavorite(req.params.id!);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.toggleFavorite(userId, id);
       res.status(200).json({ data, message: "Favorite updated" });
     } catch (error) {
       next(error);
@@ -80,7 +87,9 @@ export class TrackingController {
       const parsed = changePrioritySchema.safeParse(req.body);
       if (!parsed.success) throw new ValidationError(parsed.error.message);
 
-      const data = await this.service.changePriority(req.params.id!, parsed.data.priority);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.changePriority(userId, id, parsed.data.priority);
       res.status(200).json({ data, message: "Priority updated" });
     } catch (error) {
       next(error);
@@ -92,7 +101,9 @@ export class TrackingController {
       const parsed = changeVisibilitySchema.safeParse(req.body);
       if (!parsed.success) throw new ValidationError(parsed.error.message);
 
-      const data = await this.service.setVisibility(req.params.id!, parsed.data.visibility);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.setVisibility(userId, id, parsed.data.visibility);
       res.status(200).json({ data, message: "Visibility updated" });
     } catch (error) {
       next(error);
@@ -104,7 +115,9 @@ export class TrackingController {
       const parsed = updateNotesSchema.safeParse(req.body);
       if (!parsed.success) throw new ValidationError(parsed.error.message);
 
-      const data = await this.service.updateNotes(req.params.id!, parsed.data.notes);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.updateNotes(userId, id, parsed.data.notes);
       res.status(200).json({ data, message: "Notes updated" });
     } catch (error) {
       next(error);
@@ -113,7 +126,9 @@ export class TrackingController {
 
   getTimeline = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = await this.service.getTimeline(req.params.id!);
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.getTimeline(userId, id);
       res.status(200).json({ data });
     } catch (error) {
       next(error);
@@ -125,11 +140,10 @@ export class TrackingController {
       const parsed = updateTimelineEventSchema.safeParse(req.body);
       if (!parsed.success) throw new ValidationError(parsed.error.message);
 
-      const data = await this.service.updateTimelineEvent(
-        req.params.id!,
-        req.params.eventId!,
-        parsed.data,
-      );
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const eventId = getRouteParam(req, "eventId");
+      const data = await this.service.updateTimelineEvent(userId, id, eventId, parsed.data);
       res.status(200).json({ data, message: "Timeline event updated" });
     } catch (error) {
       next(error);
@@ -138,7 +152,8 @@ export class TrackingController {
 
   listInterviews = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = await this.service.listInterviews(req.params.id!, getAuthUserId(req));
+      const id = getRouteParam(req, "id");
+      const data = await this.service.listInterviews(id, getAuthUserId(req));
       res.status(200).json({ data });
     } catch (error) {
       next(error);
@@ -150,7 +165,8 @@ export class TrackingController {
       const parsed = createInterviewSchema.safeParse(req.body);
       if (!parsed.success) throw new ValidationError(parsed.error.message);
 
-      const data = await this.service.createInterview(req.params.id!, getAuthUserId(req), parsed.data);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.createInterview(id, getAuthUserId(req), parsed.data);
       res.status(201).json({ data, message: "Interview scheduled" });
     } catch (error) {
       next(error);
@@ -162,9 +178,11 @@ export class TrackingController {
       const parsed = updateInterviewSchema.safeParse(req.body);
       if (!parsed.success) throw new ValidationError(parsed.error.message);
 
+      const id = getRouteParam(req, "id");
+      const interviewId = getRouteParam(req, "interviewId");
       const data = await this.service.updateInterview(
-        req.params.id!,
-        req.params.interviewId!,
+        id,
+        interviewId,
         getAuthUserId(req),
         parsed.data,
       );

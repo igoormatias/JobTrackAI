@@ -1,7 +1,7 @@
 import type { Application, DashboardActivity, DashboardChartPoint, DashboardData, DashboardInsight, Job } from "@/types";
 
 import { AREA_OPTIONS } from "@/features/onboarding/constants/areas";
-import { PIPELINE_STAGE_LABELS, PROFESSIONAL_AREAS } from "@/mocks/constants/mock-data";
+import { PIPELINE_STAGE_LABELS } from "@/features/pipeline/constants/pipeline-columns";
 
 import { sortJobsByMatchAndDate } from "./job-sorter";
 import type { RecommendationProfile } from "../types/recommendation.types";
@@ -225,9 +225,9 @@ export const buildPersonalizedDashboard = ({
         changeLabel: "próximos 7 dias",
       },
     ],
-    jobsByArea: PROFESSIONAL_AREAS.map((area) => ({
-      label: area.replace("_", " "),
-      value: areaCounts[area] ?? 0,
+    jobsByArea: AREA_OPTIONS.map((area) => ({
+      label: area.label,
+      value: areaCounts[area.value] ?? 0,
     })).filter((item) => item.value > 0),
     applicationsByStage: Object.entries(stageCounts).map(([stage, value]) => ({
       label: PIPELINE_STAGE_LABELS[stage as keyof typeof PIPELINE_STAGE_LABELS] ?? stage,

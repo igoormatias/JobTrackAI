@@ -1,6 +1,6 @@
 {
   "name": "jobtrack-ai",
-  "version": "0.1.0",
+  "version": "1.0.0-rc1",
   "private": true,
   "description": "JobTrack AI monorepo — frontend, backend and development tooling",
   "scripts": {
@@ -8,7 +8,9 @@
     "dev:local": "concurrently -n frontend,backend -c blue,green \"pnpm --dir frontend dev\" \"npm --prefix backend run dev\"",
     "build": "pnpm --dir frontend build && npm --prefix backend run build",
     "lint": "pnpm --dir frontend lint && npm --prefix backend run lint",
+    "typecheck": "pnpm --dir frontend typecheck",
     "test": "pnpm --dir frontend test && npm --prefix backend test",
+    "test:integration": "npm --prefix backend run test:integration",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",

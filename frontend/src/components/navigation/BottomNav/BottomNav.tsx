@@ -17,6 +17,7 @@ export const BottomNav = ({ className }: BottomNavProps) => {
 
   return (
     <nav
+      aria-label="Navegação principal"
       className={cn(
         "fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card pb-safe lg:hidden",
         className,
@@ -34,6 +35,7 @@ export const BottomNav = ({ className }: BottomNavProps) => {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center gap-1 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground",

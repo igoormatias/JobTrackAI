@@ -81,6 +81,7 @@ flowchart LR
 - [ ] `FRONTEND_URL` e CORS alinhados
 - [ ] `DATABASE_URL` apontando para Supabase production
 - [ ] Migrations Prisma aplicadas
+- [ ] `ENABLE_V2_FEATURES=false` (WebSocket/Scheduler desligados no MVP)
 - [ ] Health checks: `GET /health` (backend)
 
 ## Desenvolvimento local vs produção
@@ -90,7 +91,7 @@ flowchart LR
 | Frontend | `localhost:3000` | Domínio Vercel |
 | API | `localhost:3333` | Domínio API |
 | Banco | Postgres container | Supabase |
-| Mocks | MSW opcional | Desligado |
+| Mocks | MSW apenas em testes | Desligado |
 
 ## Referências
 

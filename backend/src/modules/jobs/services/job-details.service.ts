@@ -1,4 +1,3 @@
-import { NotFoundError } from "../../../shared/errors/not-found-error.js";
 import { MATCH_ENGINE_VERSION } from "../../../shared/domain/match-weights.js";
 import {
   PIPELINE_STAGE_LABELS,

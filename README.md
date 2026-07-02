@@ -140,7 +140,7 @@ npm run dev:local
 - Backend: http://localhost:3333
 - Health: http://localhost:3333/health
 
-Com `NEXT_PUBLIC_ENABLE_MSW=true`, o frontend usa mocks sem depender do backend para a maioria das telas.
+Com `NEXT_PUBLIC_ENABLE_MSW=false` (padrão), o frontend consome a API Express + Prisma. MSW é usado apenas em testes (ADR-024).
 
 ## Como utilizar Docker (desenvolvimento)
 
@@ -173,7 +173,7 @@ npm run docker:up
 ## Fluxo de desenvolvimento
 
 1. Onboarding define o perfil do usuário.
-2. Com MSW ativo, o Smart Mock Engine personaliza jobs, dashboard e notificações.
+2. O Match Engine V1 (`rules-v1`) calcula compatibilidade no backend com dados reais.
 3. Alterações em `frontend/src` e `backend/src` refletem com hot reload.
 4. Valide novas features contra [docs/MVP_SCOPE.md](docs/MVP_SCOPE.md).
 5. Atualize [docs/ROADMAP.md](docs/ROADMAP.md) ao concluir etapas.

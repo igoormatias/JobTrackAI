@@ -1,4 +1,4 @@
-import type { Job as PrismaJob, JobTracking, JobView } from "@prisma/client";
+import type { Job as PrismaJob, JobTracking } from "@prisma/client";
 
 import { prisma } from "../../../../database/prisma.js";
 import type { JobSource } from "../../../../shared/domain/job-source.js";

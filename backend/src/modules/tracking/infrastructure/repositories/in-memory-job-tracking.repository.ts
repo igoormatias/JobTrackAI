@@ -152,9 +152,15 @@ export class InMemoryJobTrackingRepository {
       .map((item) => this.enrich(item));
   }
 
-  findById(id: string): JobTrackingEntity | null {
-    const tracking = this.trackings.find((item) => item.id === id);
+  findById(userId: string, id: string): JobTrackingEntity | null {
+    const tracking = this.trackings.find((item) => item.id === id && item.userId === userId);
     return tracking ? this.enrich(tracking) : null;
+  }
+
+  private requireTracking(userId: string, id: string): JobTrackingEntity {
+    const tracking = this.findById(userId, id);
+    if (!tracking) throw new NotFoundError("Tracking not found");
+    return tracking;
   }
 
   findByUserAndJobId(userId: string, jobId: string): JobTrackingEntity | null {
@@ -202,9 +208,8 @@ export class InMemoryJobTrackingRepository {
     return this.enrich(tracking);
   }
 
-  moveStage(id: string, input: MoveTrackingStageInput): JobTrackingEntity {
-    const tracking = this.findById(id);
-    if (!tracking) throw new NotFoundError("Tracking not found");
+  moveStage(userId: string, id: string, input: MoveTrackingStageInput): JobTrackingEntity {
+    const tracking = this.requireTracking(userId, id);
 
     const fromStage = tracking.stage;
     tracking.stage = input.stage;
@@ -225,9 +230,8 @@ export class InMemoryJobTrackingRepository {
     return this.enrich(tracking);
   }
 
-  toggleFavorite(id: string): JobTrackingEntity {
-    const tracking = this.findById(id);
-    if (!tracking) throw new NotFoundError("Tracking not found");
+  toggleFavorite(userId: string, id: string): JobTrackingEntity {
+    const tracking = this.requireTracking(userId, id);
 
     tracking.isFavorite = !tracking.isFavorite;
     tracking.updatedAt = new Date().toISOString();
@@ -245,9 +249,8 @@ export class InMemoryJobTrackingRepository {
     return this.enrich(tracking);
   }
 
-  changePriority(id: string, priority: JobPriority): JobTrackingEntity {
-    const tracking = this.findById(id);
-    if (!tracking) throw new NotFoundError("Tracking not found");
+  changePriority(userId: string, id: string, priority: JobPriority): JobTrackingEntity {
+    const tracking = this.requireTracking(userId, id);
 
     const previous = tracking.priority;
     tracking.priority = priority;
@@ -268,9 +271,8 @@ export class InMemoryJobTrackingRepository {
     return this.enrich(tracking);
   }
 
-  setVisibility(id: string, visibility: JobVisibility): JobTrackingEntity {
-    const tracking = this.findById(id);
-    if (!tracking) throw new NotFoundError("Tracking not found");
+  setVisibility(userId: string, id: string, visibility: JobVisibility): JobTrackingEntity {
+    const tracking = this.requireTracking(userId, id);
 
     tracking.visibility = visibility;
     tracking.job.visibility = visibility;
@@ -289,9 +291,8 @@ export class InMemoryJobTrackingRepository {
     return this.enrich(tracking);
   }
 
-  updateNotes(id: string, notes: string | null): JobTrackingEntity {
-    const tracking = this.findById(id);
-    if (!tracking) throw new NotFoundError("Tracking not found");
+  updateNotes(userId: string, id: string, notes: string | null): JobTrackingEntity {
+    const tracking = this.requireTracking(userId, id);
 
     const hadNotes = Boolean(tracking.notes);
     tracking.notes = notes;
@@ -310,9 +311,13 @@ export class InMemoryJobTrackingRepository {
     return this.enrich(tracking);
   }
 
-  updateTimelineEvent(trackingId: string, eventId: string, input: UpdateTimelineEventInput): TrackingTimelineEvent {
-    const tracking = this.findById(trackingId);
-    if (!tracking) throw new NotFoundError("Tracking not found");
+  updateTimelineEvent(
+    userId: string,
+    trackingId: string,
+    eventId: string,
+    input: UpdateTimelineEventInput,
+  ): TrackingTimelineEvent {
+    const tracking = this.requireTracking(userId, trackingId);
 
     const event = tracking.timeline.find((item) => item.id === eventId);
     if (!event) throw new NotFoundError("Timeline event not found");
@@ -324,18 +329,57 @@ export class InMemoryJobTrackingRepository {
     return event;
   }
 
-  archive(id: string): JobTrackingEntity {
-    const tracking = this.findById(id);
-    if (!tracking) throw new NotFoundError("Tracking not found");
+  archive(userId: string, id: string): JobTrackingEntity {
+    const tracking = this.requireTracking(userId, id);
     tracking.status = "archived";
     tracking.updatedAt = new Date().toISOString();
     return this.enrich(tracking);
   }
 
-  delete(id: string): void {
-    const index = this.trackings.findIndex((item) => item.id === id);
+  delete(userId: string, id: string): void {
+    const index = this.trackings.findIndex((item) => item.id === id && item.userId === userId);
     if (index === -1) throw new NotFoundError("Tracking not found");
     this.trackings.splice(index, 1);
+  }
+
+  createInterview(
+    trackingId: string,
+    userId: string,
+    input: { scheduledAt: string; link?: string | null; notes?: string | null },
+  ) {
+    this.requireTracking(userId, trackingId);
+    return {
+      id: `interview_${trackingId}`,
+      trackingId,
+      scheduledAt: new Date(input.scheduledAt),
+      link: input.link ?? null,
+      notes: input.notes ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  }
+
+  listInterviews(trackingId: string, userId: string) {
+    this.requireTracking(userId, trackingId);
+    return [];
+  }
+
+  updateInterview(
+    trackingId: string,
+    interviewId: string,
+    userId: string,
+    input: { scheduledAt?: string; link?: string | null; notes?: string | null },
+  ) {
+    this.requireTracking(userId, trackingId);
+    return {
+      id: interviewId,
+      trackingId,
+      scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : new Date(),
+      link: input.link ?? null,
+      notes: input.notes ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
   }
 
   reset(): void {

@@ -457,6 +457,32 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 ---
 
+## ADR-026 — Release Candidate RC1 (Etapa 15)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 15)
+
+**Contexto:** Após Jobs Catalog (Etapa 14), o MVP estava funcional mas com gaps de segurança (IDOR em tracking), build (`Express 5` params), CI ausente, código morto, MSW drift no Docker, e UX inconsistente.
+
+**Decisão:**
+
+- **Sem novas features** — apenas qualidade, estabilidade e deploy readiness
+- **Ownership obrigatório** em todas as mutations/reads de `JobTracking` por `userId`
+- **`getRouteParam` helper** para `req.params` no Express 5
+- **CI GitHub Actions** — frontend + backend + prisma validate; integration tests com Postgres
+- **MSW test-only** — runtime e Docker com `NEXT_PUBLIC_ENABLE_MSW=false`
+- **V2 desligado no boot** — `ENABLE_V2_FEATURES=false` (Scheduler, WebSocket)
+- **E2E automatizado fora do RC1** — checklist manual MVP
+- Tag lógica: `v1.0.0-rc1`
+
+**Consequências:**
+
+- Rotas `PATCH /pipeline/:id/*` permanecem deprecated (mutations via `/tracking/*`)
+- Arquitetura híbrida (legado + Clean Architecture) documentada; refatoração incremental pós-RC1
+- Etapa 16 = AI Match Engine enrichment
+
+---
+
 ## Template para novas decisões
 
 ```markdown

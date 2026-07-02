@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
-import type { Application } from "@/types";
+import { EmptyState } from "@/components/feedback/EmptyState";
+import type { Application, PipelineData } from "@/types";
 
 import { AddToTrackingModal } from "@/features/tracking/components/AddToTrackingModal/AddToTrackingModal";
 import { useCreateTrackingMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
@@ -11,7 +13,6 @@ import { useCreateTrackingMutation } from "@/features/tracking/hooks/use-trackin
 import { PipelineBoardSkeleton } from "../../components/PipelineBoardSkeleton";
 import { PipelineDetailDrawer } from "../../components/PipelineDetailDrawer";
 import { PipelineDetailPanel } from "../../components/PipelineDetailPanel";
-import { PipelineEmptyState } from "../../components/PipelineEmptyState";
 import { PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
 import { usePipelineFilters } from "../../hooks/use-pipeline-filters";
 import { usePipelineQuery } from "../../hooks/use-pipeline-query";
@@ -21,7 +22,7 @@ import { PipelineToolbarWidget } from "../../widgets/PipelineToolbarWidget";
 
 export const PipelinePage = () => {
   const { listParams } = usePipelineFilters();
-  const { data, isLoading, isError } = usePipelineQuery(listParams);
+  const { data, isLoading, isError, refetch } = usePipelineQuery(listParams);
   const createTrackingMutation = useCreateTrackingMutation();
   const [selected, setSelected] = useState<Application | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -36,7 +37,16 @@ export const PipelinePage = () => {
 
   if (isError) {
     return (
-      <PipelineEmptyState variant="all" />
+      <EmptyState
+        icon={AlertCircle}
+        title="Não foi possível carregar o pipeline"
+        description="Verifique sua conexão e tente novamente."
+        action={
+          <Button type="button" variant="outline" onClick={() => void refetch()}>
+            Tentar novamente
+          </Button>
+        }
+      />
     );
   }
 
@@ -54,7 +64,11 @@ export const PipelinePage = () => {
 
       {data ? <PipelineKpisWidget kpis={data.kpis} /> : null}
       <PipelineToolbarWidget />
-      <PipelineBoardWidget onOpenDetails={openDetails} suppressEmptyState={manualModalOpen} />
+      <PipelineBoardWidget
+        data={data as PipelineData}
+        onOpenDetails={openDetails}
+        suppressEmptyState={manualModalOpen}
+      />
 
       <PipelineDetailDrawer
         application={selected}

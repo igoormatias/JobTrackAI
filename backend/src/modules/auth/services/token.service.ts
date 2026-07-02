@@ -4,7 +4,13 @@ import { env } from "../../../config/env.js";
 import { UnauthorizedError } from "../../../shared/errors/unauthorized-error.js";
 import type { AuthSessionPayload } from "../types/auth.types.js";
 
-const getSecret = (): string => env.JWT_SECRET ?? "dev-jwt-secret-change-me";
+const getSecret = (): string => {
+  if (env.JWT_SECRET) return env.JWT_SECRET;
+  if (env.NODE_ENV === "production") {
+    throw new UnauthorizedError("JWT_SECRET is not configured");
+  }
+  return "dev-jwt-secret-change-me";
+};
 
 export class TokenService {
   signAccessToken(payload: Omit<AuthSessionPayload, "type">): string {

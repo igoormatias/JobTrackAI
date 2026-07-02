@@ -30,7 +30,7 @@ describe("PipelineService", () => {
     const trackings = await trackingService.listAsync(userId);
     const applicationId = trackings[0]!.id;
 
-    const timeline = await service.getTimeline(applicationId);
+    const timeline = await service.getTimeline(userId, applicationId);
 
     expect(timeline.length).toBeGreaterThan(0);
   });

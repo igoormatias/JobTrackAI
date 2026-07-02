@@ -51,8 +51,11 @@ export class PrismaJobTrackingRepository {
     return rows.map(mapTrackingToEntity);
   }
 
-  async findById(id: string): Promise<JobTrackingEntity | null> {
-    const row = await prisma.jobTracking.findUnique({ where: { id }, include: trackingInclude });
+  async findById(userId: string, id: string): Promise<JobTrackingEntity | null> {
+    const row = await prisma.jobTracking.findFirst({
+      where: { id, userId },
+      include: trackingInclude,
+    });
     return row ? mapTrackingToEntity(row) : null;
   }
 
@@ -114,8 +117,11 @@ export class PrismaJobTrackingRepository {
     return entity;
   }
 
-  async moveStage(id: string, input: MoveTrackingStageInput): Promise<JobTrackingEntity> {
-    const current = await prisma.jobTracking.findUnique({ where: { id }, include: { job: true } });
+  async moveStage(userId: string, id: string, input: MoveTrackingStageInput): Promise<JobTrackingEntity> {
+    const current = await prisma.jobTracking.findFirst({
+      where: { id, userId },
+      include: { job: true },
+    });
     if (!current) throw new NotFoundError("Tracking not found");
 
     const fromStage = current.stage;
@@ -153,8 +159,11 @@ export class PrismaJobTrackingRepository {
     return mapTrackingToEntity(row);
   }
 
-  async toggleFavorite(id: string): Promise<JobTrackingEntity> {
-    const current = await prisma.jobTracking.findUnique({ where: { id }, include: { job: true } });
+  async toggleFavorite(userId: string, id: string): Promise<JobTrackingEntity> {
+    const current = await prisma.jobTracking.findFirst({
+      where: { id, userId },
+      include: { job: true },
+    });
     if (!current) throw new NotFoundError("Tracking not found");
 
     const isFavorite = !current.isFavorite;
@@ -187,8 +196,11 @@ export class PrismaJobTrackingRepository {
     return mapTrackingToEntity(row);
   }
 
-  async changePriority(id: string, priority: JobPriority): Promise<JobTrackingEntity> {
-    const current = await prisma.jobTracking.findUnique({ where: { id }, include: { job: true } });
+  async changePriority(userId: string, id: string, priority: JobPriority): Promise<JobTrackingEntity> {
+    const current = await prisma.jobTracking.findFirst({
+      where: { id, userId },
+      include: { job: true },
+    });
     if (!current) throw new NotFoundError("Tracking not found");
 
     const row = await prisma.jobTracking.update({
@@ -221,8 +233,8 @@ export class PrismaJobTrackingRepository {
     return mapTrackingToEntity(row);
   }
 
-  async setVisibility(id: string, visibility: JobVisibility): Promise<JobTrackingEntity> {
-    const current = await prisma.jobTracking.findUnique({ where: { id } });
+  async setVisibility(userId: string, id: string, visibility: JobVisibility): Promise<JobTrackingEntity> {
+    const current = await prisma.jobTracking.findFirst({ where: { id, userId } });
     if (!current) throw new NotFoundError("Tracking not found");
 
     const row = await prisma.jobTracking.update({
@@ -245,8 +257,8 @@ export class PrismaJobTrackingRepository {
     return mapTrackingToEntity(row);
   }
 
-  async updateNotes(id: string, notes: string | null): Promise<JobTrackingEntity> {
-    const current = await prisma.jobTracking.findUnique({ where: { id } });
+  async updateNotes(userId: string, id: string, notes: string | null): Promise<JobTrackingEntity> {
+    const current = await prisma.jobTracking.findFirst({ where: { id, userId } });
     if (!current) throw new NotFoundError("Tracking not found");
 
     const hadNotes = Boolean(current.notes);
@@ -271,10 +283,14 @@ export class PrismaJobTrackingRepository {
   }
 
   async updateTimelineEvent(
+    userId: string,
     trackingId: string,
     eventId: string,
     input: UpdateTimelineEventInput,
   ): Promise<TrackingTimelineEvent> {
+    const tracking = await prisma.jobTracking.findFirst({ where: { id: trackingId, userId } });
+    if (!tracking) throw new NotFoundError("Tracking not found");
+
     const event = await prisma.timelineEvent.findFirst({ where: { id: eventId, trackingId } });
     if (!event) throw new NotFoundError("Timeline event not found");
 
@@ -298,7 +314,10 @@ export class PrismaJobTrackingRepository {
     };
   }
 
-  async archive(id: string): Promise<JobTrackingEntity> {
+  async archive(userId: string, id: string): Promise<JobTrackingEntity> {
+    const current = await prisma.jobTracking.findFirst({ where: { id, userId } });
+    if (!current) throw new NotFoundError("Tracking not found");
+
     const row = await prisma.jobTracking.update({
       where: { id },
       data: { status: "archived" },
@@ -307,7 +326,10 @@ export class PrismaJobTrackingRepository {
     return mapTrackingToEntity(row);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(userId: string, id: string): Promise<void> {
+    const current = await prisma.jobTracking.findFirst({ where: { id, userId } });
+    if (!current) throw new NotFoundError("Tracking not found");
+
     await prisma.jobTracking.delete({ where: { id } });
   }
 

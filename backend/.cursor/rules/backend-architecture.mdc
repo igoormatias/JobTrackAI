@@ -71,9 +71,15 @@ Exemplos: `ApplicationCreated`, `PipelineStageChanged`, `SystemHealthChecked`, `
 ## Validação e tipagem
 
 - Toda entrada: **Zod** em `infrastructure/http/schemas/`
+- Route params: usar `getRouteParam(req, "id")` de `shared/http/` (Express 5)
 - Nunca validar manualmente
 - Nunca usar `any`
 - Preferir Value Objects quando fizer sentido
+
+## Segurança (mutations)
+
+- Toda rota autenticada que lê/muta recurso por ID deve validar **ownership** (`userId` do token === dono do registro)
+- Retornar `NotFoundError` (404) quando o recurso não pertence ao usuário — não revelar existência
 
 ## Checklist (novo módulo)
 

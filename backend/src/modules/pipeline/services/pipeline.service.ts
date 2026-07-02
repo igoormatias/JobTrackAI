@@ -106,31 +106,31 @@ export class PipelineService {
   }
 
   async moveApplication(
-    _userId: string,
+    userId: string,
     id: string,
     stage: PipelineStage,
     occurredAt: string,
   ): Promise<Application> {
-    const updated = await trackingService.moveStage(id, { stage, occurredAt });
+    const updated = await trackingService.moveStage(userId, id, { stage, occurredAt });
     return toApplication(updated);
   }
 
-  async favoriteApplication(id: string): Promise<Application> {
-    const updated = await trackingService.toggleFavorite(id);
+  async favoriteApplication(userId: string, id: string): Promise<Application> {
+    const updated = await trackingService.toggleFavorite(userId, id);
     return toApplication(updated);
   }
 
-  async archiveApplication(id: string): Promise<Application> {
-    const updated = await trackingService.archive(id);
+  async archiveApplication(userId: string, id: string): Promise<Application> {
+    const updated = await trackingService.archive(userId, id);
     return toApplication(updated);
   }
 
-  async deleteApplication(id: string): Promise<void> {
-    await trackingService.delete(id);
+  async deleteApplication(userId: string, id: string): Promise<void> {
+    await trackingService.delete(userId, id);
   }
 
-  async getTimeline(id: string): Promise<TimelineEvent[]> {
-    const events = await trackingService.getTimeline(id);
+  async getTimeline(userId: string, id: string): Promise<TimelineEvent[]> {
+    const events = await trackingService.getTimeline(userId, id);
     return events.map((event) => ({
       id: event.id,
       applicationId: event.trackingId,
