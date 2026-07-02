@@ -188,6 +188,36 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 
 ---
 
+## ADR-019 — Arquitetura evolutiva Clean Architecture + DDD (lightweight)
+
+**Status:** Aceito  
+**Data:** 2026-06
+
+**Contexto:** O backend usa hoje `controller → service → repository` por módulo. Funciona para o MVP, mas dificulta escalar regras de domínio, testar isoladamente e desacoplar efeitos colaterais (notificações, timeline, etc.).
+
+**Decisão:**
+
+- Adotar **Clean Architecture + DDD (lightweight)** como padrão **obrigatório para novos módulos**
+- Estrutura: `domain/`, `application/`, `infrastructure/` com Use Cases, Entities, Value Objects e Repository interfaces
+- Introduzir `EventBus` (`InMemoryEventBus`) para ações importantes
+- Criar módulo `system` como template de referência (`/health`, `/version`, `/info`)
+- **Não** refatorar módulos legados em massa — migração gradual ao receber features significativas
+
+**Motivos:**
+
+- Manter estabilidade e deploy contínuo
+- Estabelecer padrão claro sem over-engineering
+- Documentação e Cursor Rules como fonte oficial
+
+**Consequências:**
+
+- Novos módulos seguem `backend/.cursor/rules/backend-architecture.mdc`
+- Módulo `health` deprecated em favor de `system` (API `/health` mantida)
+- Exceções arquiteturais devem ser registradas neste arquivo
+- Prisma permanece restrito a `infrastructure/repositories/`
+
+---
+
 ## Template para novas decisões
 
 ```markdown

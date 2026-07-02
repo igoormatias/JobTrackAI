@@ -16,6 +16,28 @@ Backend (Express :3333) ──► Prisma ──► PostgreSQL
 
 Detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+## Arquitetura do Backend
+
+O backend segue **Clean Architecture + DDD (lightweight)** para novos módulos:
+
+```
+HTTP → Controller → Use Case → Repository (interface) → Prisma / in-memory
+                              ↓
+                         EventBus (Domain Events)
+```
+
+- **Organização:** `domain/` → `application/` → `infrastructure/` por módulo
+- **Template oficial:** módulo `system` (`GET /health`, `/version`, `/info`)
+- **Módulos legados** (`auth`, `jobs`, `pipeline`, etc.) usam `service/` até migração gradual
+- **EventBus:** `InMemoryEventBus` para desacoplar ações importantes
+
+Guias completos:
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — visão geral
+- [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md) — como criar módulos, endpoints e use cases
+- [backend/README.md](backend/README.md) — referência do backend
+- [docs/DECISIONS.md](docs/DECISIONS.md) — ADR-019 (migração evolutiva)
+
 ## Estrutura do projeto
 
 ```
@@ -85,6 +107,8 @@ npm run docker:up    # ou: docker compose up -d
 | Backend    | http://localhost:3333 |
 | Health FE  | http://localhost:3000/api/health |
 | Health BE  | http://localhost:3333/health |
+| Version BE | http://localhost:3333/version |
+| Info BE    | http://localhost:3333/info |
 | PostgreSQL | `postgres:5432` (rede interna Docker) |
 
 ### Scripts Docker
@@ -136,6 +160,7 @@ Guia completo: [docs/DEPLOY.md](docs/DEPLOY.md).
 |-----------|----------|
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Etapas do projeto |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitetura técnica |
+| [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md) | Guia do backend (Clean Architecture) |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Decisões (ADR) |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Deploy |
 

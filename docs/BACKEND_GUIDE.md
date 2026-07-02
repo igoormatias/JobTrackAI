@@ -1,63 +1,228 @@
 # JobTrack AI — Backend Guide
 
-Guia de convenções e padrões do backend Express.
+Guia oficial de convenções e padrões do backend Express. Sincronizado com `backend/.cursor/rules/backend-architecture.mdc`.
 
-## Estrutura de módulo
+## Arquitetura
 
-```
-modules/<feature>/
-  controllers/     # HTTP handlers (thin)
-  services/        # Regras de negócio
-  repositories/    # Persistência (in-memory ou Prisma)
-  dto/               # Tipos de request/response
-  schemas/           # Validação Zod
-  types/             # Tipos de domínio
-  routes/            # Express Router
-  index.ts           # Exports públicos
-```
+O backend segue **Clean Architecture + DDD (lightweight) + SOLID**, sem over-engineering.
 
-## Fluxo de requisição
+### Fluxo de dependências
 
 ```
-Route → Controller → Service → Repository
+Infrastructure → Application → Domain
 ```
 
-- Controllers validam entrada com Zod e mapeiam erros via `next(error)`
-- Services não conhecem Express
-- Repositories encapsulam acesso a dados
+Nunca inverter. Domain não importa camadas externas.
 
-## Referência: módulo Pipeline (Etapa 10)
+### Fluxo de requisição (novo padrão)
+
+```
+Route → Controller → Use Case → Repository (interface) → Repository (implementação)
+```
+
+- **Controller:** valida com Zod, chama Use Case, retorna response — sem regra de negócio
+- **Use Case:** uma responsabilidade; orquestra fluxo — sem HTTP, sem Prisma
+- **Repository (domain):** interface (port)
+- **Repository (infrastructure):** Prisma ou in-memory
+
+### Fluxo de eventos
+
+```
+Use Case → eventBus.publish(DomainEvent) → Handlers (InMemoryEventBus)
+```
+
+Preferir eventos a acoplamento direto entre módulos (ex.: `ApplicationCreated`, `PipelineStageChanged`).
+
+---
+
+## Estrutura de módulo (obrigatória para novos módulos)
+
+```
+modules/<module>/
+  domain/
+    entities/
+    repositories/      # interfaces
+    value-objects/
+    events/
+  application/
+    use-cases/
+    dto/
+    mappers/
+  infrastructure/
+    http/
+      controllers/
+      routes/
+      schemas/
+    repositories/      # implementações
+  index.ts
+```
+
+**Template canônico:** `backend/src/modules/system/`
+
+---
+
+## Como criar um novo módulo
+
+1. Criar pasta `src/modules/<nome>/` com a estrutura acima
+2. Definir **Entity** e **Value Objects** em `domain/`
+3. Definir **Repository interface** em `domain/repositories/`
+4. Implementar **Use Cases** em `application/use-cases/`
+5. Criar **DTOs** e **Mappers** em `application/`
+6. Implementar **Repository** em `infrastructure/repositories/`
+7. Criar **Controller**, **Routes** e **Schemas Zod** em `infrastructure/http/`
+8. Exportar público em `index.ts`
+9. Registrar rotas em `src/routes/index.ts`
+10. Adicionar testes unitários (use cases) e integração (rotas)
+11. Atualizar documentação se necessário
+
+---
+
+## Como criar um novo endpoint
+
+1. Criar ou reutilizar Use Case em `application/use-cases/`
+2. Adicionar método no Controller (`infrastructure/http/controllers/`)
+3. Validar entrada com Zod em `infrastructure/http/schemas/`
+4. Registrar rota em `infrastructure/http/routes/`
+5. Teste de integração com supertest
+
+---
+
+## Como criar um Use Case
+
+```typescript
+import type { UseCase } from "../../../shared/application/use-case.js";
+
+export class MeuUseCase implements UseCase<InputDto, OutputDto> {
+  constructor(private readonly repository: MeuRepository) {}
+
+  async execute(input: InputDto): Promise<OutputDto> {
+    // orquestração — uma responsabilidade
+  }
+}
+```
+
+---
+
+## Como criar um Repository
+
+**Interface (domain):**
+
+```typescript
+export interface MeuRepository {
+  findById(id: string): Promise<Entidade | null>;
+}
+```
+
+**Implementação (infrastructure):**
+
+```typescript
+export class PrismaMeuRepository implements MeuRepository {
+  async findById(id: string): Promise<Entidade | null> {
+    // Prisma aqui — nunca no Use Case
+  }
+}
+```
+
+---
+
+## Como criar um Domain Event
+
+```typescript
+import { DomainEvent } from "../../../shared/domain/domain-event.js";
+
+export class AlgoAconteceuEvent extends DomainEvent {
+  readonly eventName = "AlgoAconteceu";
+  constructor(readonly payload: { id: string }) {
+    super();
+  }
+}
+```
+
+Publicar no Use Case:
+
+```typescript
+await this.eventBus.publish(new AlgoAconteceuEvent({ id }));
+```
+
+---
+
+## Como registrar eventos
+
+No bootstrap do módulo (ex.: `routes/*.ts`):
+
+```typescript
+import { eventBus } from "../../../shared/events/event-bus.js";
+
+eventBus.subscribe("AlgoAconteceu", async (event) => {
+  // handler — log, notificação, etc.
+});
+```
+
+Implementação atual: `InMemoryEventBus` em `src/shared/events/`.
+
+---
+
+## Módulo de referência: system
+
+| Endpoint | Use Case | Descrição |
+|----------|----------|-----------|
+| `GET /health` | `GetHealthUseCase` | Status, uptime, version |
+| `GET /version` | `GetVersionUseCase` | Versão e ambiente |
+| `GET /info` | `GetInfoUseCase` | Metadados da API |
+
+Publica `SystemHealthChecked` via EventBus no health check.
+
+---
+
+## Módulos legados
+
+Módulos com `service/` (`auth`, `jobs`, `pipeline`, `profiles`, `recommendations`) **não devem ser usados como modelo para novos módulos**.
+
+Migrar gradualmente quando o módulo receber alterações significativas. Ver ADR-019.
+
+### Referência legada: Pipeline (Etapa 10)
 
 | Arquivo | Responsabilidade |
 |---------|------------------|
-| `pipeline.routes.ts` | `GET /`, `PATCH /:id/status`, `PATCH /:id/favorite`, `DELETE /:id`, `GET /:id/timeline` |
-| `pipeline.service.ts` | Filtros, KPIs, move stage, timeline |
-| `pipeline.repository.ts` | Applications in-memory (seed); pronto para Prisma |
+| `pipeline.routes.ts` | Rotas REST do kanban |
+| `pipeline.service.ts` | Filtros, KPIs, move stage |
+| `pipeline.repository.ts` | Applications in-memory |
 
-### Endpoints
+---
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `GET` | `/pipeline` | Board (colunas + KPIs + filtros via query) |
-| `PATCH` | `/pipeline/:id/status` | Move estágio; append timeline |
-| `PATCH` | `/pipeline/:id/favorite` | Toggle favorito do job |
-| `PATCH` | `/pipeline/:id/archive` | Arquiva candidatura |
-| `DELETE` | `/pipeline/:id` | Remove candidatura |
-| `GET` | `/pipeline/:id/timeline` | Eventos da candidatura |
+## Infraestrutura compartilhada
 
-Registrar rotas em `src/routes/index.ts`:
+| Caminho | Descrição |
+|---------|-----------|
+| `src/shared/application/use-case.ts` | Interface `UseCase<TInput, TOutput>` |
+| `src/shared/domain/domain-event.ts` | Classe base `DomainEvent` |
+| `src/shared/events/` | `EventBus`, `InMemoryEventBus`, singleton `eventBus` |
+| `src/shared/errors/` | Erros HTTP customizados |
 
-```typescript
-router.use("/pipeline", createPipelineRoutes());
-```
-
-Sub-rotas com `/:id/*` devem ser registradas antes de rotas genéricas conflitantes.
+---
 
 ## Testes
 
-Colocados em `services/*.test.ts` ao lado do service. Usar repositórios isolados por teste quando necessário.
+| Tipo | Local | Ferramenta |
+|------|-------|------------|
+| Unit (novos) | `application/use-cases/*.test.ts` | Vitest + mocks de repository/EventBus |
+| Unit (legado) | `services/*.test.ts` | Vitest + mocks de repository |
+| Integration | `*.integration.test.ts` | Supertest + `createApp()` |
+
+---
+
+## Regras obrigatórias
+
+- Validação: **Zod** — nunca manual
+- Prisma: somente em `infrastructure/repositories/`
+- Tipagem: nunca `any`
+- Exceções arquiteturais: documentar em `docs/DECISIONS.md`
+
+---
 
 ## Referências
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [DECISIONS.md](./DECISIONS.md)
+- [DECISIONS.md](./DECISIONS.md) (ADR-019)
+- [backend/README.md](../backend/README.md)
+- [backend/.cursor/rules/backend-architecture.mdc](../backend/.cursor/rules/backend-architecture.mdc)

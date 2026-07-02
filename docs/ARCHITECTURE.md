@@ -83,14 +83,83 @@ Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) e [BACKEND_GUIDE.md](./BACKEND_GUID
 - **Framework:** Express 5
 - **ORM:** Prisma (PostgreSQL)
 - **Validação:** Zod
-- **Módulos:** `auth`, `profiles`, `jobs`, `pipeline`, `recommendations`, `health`, providers (Gupy, LinkedIn, Programathor)
+- **Arquitetura:** Clean Architecture + DDD (lightweight) — padrão oficial para novos módulos
+- **Módulos legados:** `auth`, `profiles`, `jobs`, `pipeline`, `recommendations` (controller → service → repository)
+- **Módulo template:** `system` (`/health`, `/version`, `/info`)
+- **Eventos:** `EventBus` com `InMemoryEventBus` em `src/shared/events/`
+- **Providers:** Gupy, LinkedIn, Programathor
 - **Tempo real:** Socket.IO (preparado, não exposto no MVP)
 - **Rate limit:** `express-rate-limit` em memória (sem Redis no MVP)
 
-### Fluxo de requisição
+### Arquitetura em camadas (novos módulos)
 
 ```
-HTTP → Middlewares (CORS, helmet, rate limit) → Routes → Controller → Service → Repository/Prisma
+Infrastructure  →  Application  →  Domain
+     ↓                  ↓              ↓
+ HTTP/Prisma       Use Cases      Entities
+ Controllers        DTOs           Value Objects
+ Routes             Mappers        Repository interfaces
+ Schemas                           Domain Events
+```
+
+Dependências sempre apontam para dentro. Domain nunca importa Application nem Infrastructure.
+
+### Estrutura de módulo (padrão oficial)
+
+```
+modules/<module>/
+  domain/
+    entities/
+    repositories/      # interfaces (ports)
+    value-objects/
+    events/
+  application/
+    use-cases/
+    dto/
+    mappers/
+  infrastructure/
+    http/
+      controllers/
+      routes/
+      schemas/
+    repositories/      # implementações (Prisma, in-memory)
+  index.ts
+```
+
+Template canônico: `backend/src/modules/system/`
+
+### Fluxo de requisição (novo padrão)
+
+```
+HTTP → Middlewares → Routes → Controller → Use Case → Repository (interface)
+                                                      ↓
+                                            Repository impl (Prisma/in-memory)
+```
+
+### Fluxo de eventos
+
+```
+Use Case → eventBus.publish(DomainEvent) → Handlers inscritos (InMemoryEventBus)
+```
+
+Exemplo: `GetHealthUseCase` publica `SystemHealthChecked`.
+
+### Legado vs novo
+
+| Aspecto | Legado | Novo (obrigatório) |
+|---------|--------|---------------------|
+| Orquestração | `services/` | `application/use-cases/` |
+| Persistência | `repositories/` (classe concreta) | interface em `domain/`, impl em `infrastructure/` |
+| HTTP | `controllers/` + `routes/` | `infrastructure/http/` |
+| Prisma | preparado, in-memory hoje | somente em `infrastructure/repositories/` |
+| Eventos | acoplamento direto | `EventBus` |
+
+Módulos legados permanecem até migração gradual (ver ADR-019).
+
+### Fluxo de requisição (legado)
+
+```
+HTTP → Middlewares (CORS, helmet, rate limit) → Routes → Controller → Service → Repository
 ```
 
 ## Comunicação Frontend ↔ Backend

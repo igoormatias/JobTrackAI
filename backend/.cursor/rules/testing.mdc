@@ -5,13 +5,24 @@ description: Backend testing conventions (Vitest)
 ## Ferramentas
 
 - Runner: **Vitest**
-- Arquivos: `src/**/*.test.ts`
+- Unit: `src/**/*.test.ts` (exclui `*.integration.test.ts`)
+- Integration: `src/**/*.integration.test.ts` (config separada)
 
 ## Estilo
 
 - Use sempre:
   - `describe("X", () => { ... })`
   - `it("should ...", async () => { ... })`
+
+## Novos módulos (Clean Architecture)
+
+- Testes unitários em `application/use-cases/` (TDD).
+- Mock de **repository interface** (domain), nunca Prisma real.
+- Mock de `EventBus` quando o use case publica eventos.
+- Testes de integração via supertest + `createApp()` para rotas HTTP.
+
+## Módulos legados
+
 - Testes unitários preferidos em `service/` (TDD).
 
 ## Mocks
@@ -24,4 +35,3 @@ description: Backend testing conventions (Vitest)
 - Arrange / Act / Assert quando ficar mais legível.
 - Evitar números mágicos: prefira constantes nomeadas quando necessário.
 - Teste falhas importantes: `NotFoundError`, validação e regras de negócio.
-

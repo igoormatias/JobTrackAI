@@ -1,0 +1,100 @@
+---
+description: Arquitetura Backend - Clean Architecture, DDD lightweight, SOLID (obrigatório para novos módulos)
+globs: backend/**/*
+alwaysApply: true
+---
+
+# Arquitetura Backend (obrigatório)
+
+## Princípios
+
+- Clean Architecture + DDD (lightweight) + SOLID + Clean Code
+- Simplicidade primeiro — sem over-engineering
+- Template canônico: `backend/src/modules/system/`
+
+## Estrutura obrigatória (novos módulos)
+
+```
+src/modules/<module>/
+  domain/
+    entities/
+    repositories/      # interfaces (ports)
+    services/
+    value-objects/
+    events/
+  application/
+    use-cases/
+    dto/
+    mappers/
+  infrastructure/
+    http/
+      controllers/
+      routes/
+      schemas/
+    repositories/      # implementações (Prisma, in-memory)
+  index.ts
+```
+
+## Responsabilidades
+
+| Camada | Faz | Não faz |
+|--------|-----|---------|
+| **Controller** | Recebe request, valida com Zod, chama Use Case, retorna response | Regra de negócio, Prisma |
+| **Use Case** | Uma responsabilidade; orquestra fluxo | HTTP, Prisma direto |
+| **Repository (interface)** | Contrato de persistência | Regra de negócio |
+| **Repository (infra)** | Persistência/consultas | Regra de negócio |
+| **Domain** | Entidades, Value Objects, regras de domínio | HTTP, Prisma |
+
+## Dependências (sempre para dentro)
+
+```
+Infrastructure → Application → Domain
+```
+
+Nunca inverter. Domain não importa Application nem Infrastructure.
+
+## Prisma
+
+- Nunca em Controllers
+- Nunca em Use Cases
+- Sempre via Repository em `infrastructure/repositories/`
+
+## Eventos
+
+- Ações importantes → publicar Domain Event via `EventBus`
+- Usar `InMemoryEventBus` (`src/shared/events/`)
+- Não acoplar serviços diretamente quando um evento resolve
+
+Exemplos: `ApplicationCreated`, `PipelineStageChanged`, `SystemHealthChecked`
+
+## Validação e tipagem
+
+- Toda entrada: **Zod** em `infrastructure/http/schemas/`
+- Nunca validar manualmente
+- Nunca usar `any`
+- Preferir Value Objects quando fizer sentido
+
+## Checklist (novo módulo)
+
+- [ ] Controller
+- [ ] Use Case(s)
+- [ ] Repository (interface + implementação)
+- [ ] DTO
+- [ ] Schema Zod (se houver entrada)
+- [ ] Entity
+- [ ] Testes (unit + integration)
+- [ ] Documentação atualizada
+
+## Módulos legados
+
+Módulos com `service/` (auth, jobs, pipeline, profiles, recommendations) permanecem até migração gradual. **Novos módulos NÃO podem usar `service/`** — usar `use-cases/`.
+
+## Exceções
+
+Qualquer exceção arquitetural deve ser documentada em `docs/DECISIONS.md` com motivo claro.
+
+## Referências
+
+- `docs/ARCHITECTURE.md`
+- `docs/BACKEND_GUIDE.md`
+- `backend/README.md`

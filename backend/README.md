@@ -136,77 +136,167 @@ Responsável por:
 
 # 🏗 Arquitetura
 
-O projeto segue arquitetura modular baseada em Domínio.
+O backend segue **Clean Architecture + DDD (lightweight) + SOLID**. Simplicidade primeiro — sem over-engineering.
+
+Documentação oficial sincronizada com `backend/.cursor/rules/backend-architecture.mdc`.
+
+## Camadas e dependências
+
+```
+Infrastructure  →  Application  →  Domain
+```
+
+| Camada | Responsabilidade | Exemplos |
+|--------|------------------|----------|
+| **Domain** | Entidades, Value Objects, regras, interfaces de repository, domain events | `SystemInfo`, `AppVersion`, `SystemInfoRepository` |
+| **Application** | Use Cases, DTOs, mappers | `GetHealthUseCase`, `HealthResponseDto` |
+| **Infrastructure** | HTTP, Prisma, implementações de repository | `SystemController`, `StaticSystemInfoRepository` |
+
+**Regras:**
+- Controllers nunca contêm regra de negócio
+- Use Cases nunca usam Prisma diretamente
+- Prisma somente em `infrastructure/repositories/`
+- Validação exclusiva com Zod
+- Nunca usar `any`
+
+## Estrutura do projeto
 
 ```
 src/
-
-├── app/
-│
+├── app.ts
+├── server.ts
 ├── config/
-│
-├── database/
-│
-├── modules/
-│
-│── auth/
-│── users/
-│── profiles/
-│── jobs/
-│── companies/
-│── applications/
-│── pipeline/
-│── notifications/
-│── websocket/
-│── scheduler/
-│── health/
-│
-├── providers/
-│
-│── gupy/
-│── linkedin/
-│── programathor/
-│
-├── shared/
-│
+├── database/              # Prisma client
 ├── middlewares/
-│
-├── utils/
-│
-└── server.ts
+├── routes/                # Registro central de rotas
+├── modules/
+│   ├── system/            # Template canônico (nova arquitetura)
+│   ├── auth/              # Legado
+│   ├── jobs/              # Legado
+│   ├── pipeline/          # Legado
+│   ├── profiles/          # Legado
+│   └── recommendations/   # Legado
+├── providers/             # Integrações externas (Gupy, LinkedIn, etc.)
+├── shared/
+│   ├── application/       # UseCase interface
+│   ├── domain/            # DomainEvent base
+│   ├── events/            # EventBus + InMemoryEventBus
+│   └── errors/
+└── utils/
 ```
 
-Cada módulo é completamente isolado.
+## Estrutura de um módulo (novo padrão — obrigatório)
+
+```
+modules/<module>/
+  domain/
+    entities/
+    repositories/      # interfaces (ports)
+    value-objects/
+    events/
+  application/
+    use-cases/
+    dto/
+    mappers/
+  infrastructure/
+    http/
+      controllers/
+      routes/
+      schemas/
+    repositories/      # implementações
+  index.ts
+```
+
+**Template de referência:** `src/modules/system/`
+
+## Módulo system (template canônico)
+
+| Endpoint | Use Case | Descrição |
+|----------|----------|-----------|
+| `GET /health` | `GetHealthUseCase` | `{ status, uptime, version }` |
+| `GET /version` | `GetVersionUseCase` | `{ version, name, environment }` |
+| `GET /info` | `GetInfoUseCase` | Metadados da API e módulos |
+
+Publica `SystemHealthChecked` via EventBus.
+
+## Módulos legados (deprecated para novos)
+
+Módulos existentes usam `controller → service → repository`. Permanecem funcionais até migração gradual (ADR-019).
+
+```
+modules/<feature>/
+  controllers/
+  services/        # equivalente a use-cases
+  repositories/
+  routes/
+  schemas/
+  dto/
+  index.ts
+```
+
+## Fluxo de requisição
+
+**Novo padrão:**
+
+```
+HTTP → Middlewares → Routes → Controller → Use Case → Repository → Response
+```
+
+**Legado:**
+
+```
+HTTP → Middlewares → Routes → Controller → Service → Repository → Response
+```
+
+## Fluxo de eventos
+
+```
+Use Case → eventBus.publish(DomainEvent) → Handlers inscritos
+```
+
+Implementação: `InMemoryEventBus` em `src/shared/events/`.
+
+Exemplos futuros: `ApplicationCreated`, `PipelineStageChanged`, `InterviewScheduled`.
 
 ---
 
-# 📦 Estrutura de um módulo
+# 📘 Guias de desenvolvimento
 
+## Como criar um novo módulo
+
+1. Copiar estrutura de `src/modules/system/`
+2. Definir entities, value objects e repository interface em `domain/`
+3. Implementar use cases em `application/use-cases/`
+4. Implementar repository em `infrastructure/repositories/`
+5. Criar controller, routes e schemas em `infrastructure/http/`
+6. Registrar em `src/routes/index.ts`
+7. Adicionar testes unitários + integração
+8. Atualizar docs se necessário
+
+## Como criar um novo endpoint
+
+1. Use Case em `application/use-cases/`
+2. Método no Controller + schema Zod
+3. Rota em `infrastructure/http/routes/`
+4. Teste de integração
+
+## Como criar um Domain Event
+
+1. Estender `DomainEvent` em `domain/events/`
+2. Publicar no Use Case via `eventBus.publish()`
+3. Registrar handler no bootstrap do módulo (`routes/*.ts`)
+
+## Como registrar eventos
+
+```typescript
+import { eventBus } from "../../shared/events/event-bus.js";
+
+eventBus.subscribe("MeuEvento", async (event) => {
+  // handler
+});
 ```
-jobs/
 
-controllers/
-
-routes/
-
-services/
-
-repositories/
-
-schemas/
-
-dto/
-
-entities/
-
-types/
-
-utils/
-
-constants/
-```
-
-Cada módulo contém todas as responsabilidades daquele domínio.
+Ver guia completo: [docs/BACKEND_GUIDE.md](../docs/BACKEND_GUIDE.md)
 
 ---
 
