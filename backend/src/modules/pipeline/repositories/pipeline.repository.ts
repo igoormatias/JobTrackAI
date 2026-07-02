@@ -6,11 +6,12 @@ import {
   type PipelineStage,
 } from "../constants/pipeline-stages.js";
 import type { Application, ApplicationStatus, TimelineEvent } from "../types/pipeline.types.js";
+import type { TimelineEventType } from "../../../shared/domain/timeline-event-type.js";
 
 const createTimelineEvent = (
   applicationId: string,
   index: number,
-  type: string,
+  type: TimelineEventType,
   title: string,
   occurredAt: string,
   metadata?: Record<string, unknown>,

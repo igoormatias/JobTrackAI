@@ -14,7 +14,7 @@ export const getJobSourceLabel = (source: string): string => {
     gupy: "Gupy",
     linkedin: "LinkedIn",
     programathor: "ProgramaThor",
-    internal: "Interna",
+    manual: "Manual",
   };
 
   return labels[source] ?? source;

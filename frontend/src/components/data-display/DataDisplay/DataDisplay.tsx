@@ -119,7 +119,7 @@ export const MultiSelect = ({
             </button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[var(--radix-popover-trigger-width)] p-0 text-popover-foreground"
+            className="w-var(--radix-popover-trigger-width) p-0 text-popover-foreground"
             align="start"
             onOpenAutoFocus={(event) => event.preventDefault()}
           >

@@ -1,6 +1,10 @@
+import type { JobPriority } from "../../../shared/domain/job-priority.js";
+import type { JobSource } from "../../../shared/domain/job-source.js";
+import type { JobVisibility } from "../../../shared/domain/job-visibility.js";
+
 export type JobEngagementState = "new" | "viewed" | "favorited" | "applied" | "rejected";
 
-export type JobSource = "gupy" | "linkedin" | "programathor" | "internal";
+export type { JobPriority, JobSource, JobVisibility };
 
 export type JobStatus = "active" | "closed" | "expired";
 
@@ -56,6 +60,9 @@ export type Job = {
   sourceUrl: string;
   status: JobStatus;
   isFavorite: boolean;
+  priority?: JobPriority;
+  visibility?: JobVisibility;
+  hiddenAt?: string | null;
   engagementState: JobEngagementState;
   matchScore: MatchScore;
   publishedAt: string;
@@ -66,7 +73,7 @@ export type Job = {
 export type JobListParams = {
   cursor?: string;
   limit?: number;
-  sortBy?: "match" | "date" | "salary" | "title" | "company";
+  sortBy?: "match" | "date" | "salary" | "title" | "company" | "priority";
   sortDirection?: "asc" | "desc";
   q?: string;
   search?: string;
@@ -82,6 +89,8 @@ export type JobListParams = {
   dateFrom?: string;
   dateTo?: string;
   isFavorite?: boolean;
+  visibility?: "visible" | "hidden" | "all";
+  priority?: "high" | "medium" | "low";
   sources?: JobSource[];
 };
 

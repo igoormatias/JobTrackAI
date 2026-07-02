@@ -1,0 +1,44 @@
+---
+description: Domínio oficial do JobTrack AI — enums, entidades e regras de negócio (ADR-022)
+alwaysApply: true
+---
+
+# Domínio oficial (ADR-022)
+
+Toda nova funcionalidade deve seguir o domínio documentado em `docs/DECISIONS.md` (ADR-022) e `docs/API_CONTRACT.md`.
+
+## Proibições
+
+- **Nunca** implementar candidatura interna ou transformar o sistema em ATS
+- **Nunca** usar um único status para representar favorito, prioridade, visibilidade e estágio do pipeline
+- **Nunca** criar fluxo separado para vagas manuais — mesmo fluxo das importadas
+
+## Enums oficiais
+
+| Enum | Valores |
+|------|---------|
+| `JobPriority` | `HIGH` · `MEDIUM` · `LOW` |
+| `JobVisibility` | `VISIBLE` · `HIDDEN` |
+| `JobSource` | `gupy` · `linkedin` · `programathor` · `manual` |
+| `TimelineEventType` | `created` · `stage_changed` · `priority_changed` · `favorited` · `unfavorited` · `hidden` · `restored` · `note_added` · `note_updated` · `applied` · `interview_scheduled` · `offer_received` · `rejected` |
+
+## Entidades
+
+**JobEngagement** (relação usuário × vaga): `isFavorite`, `priority`, `visibility`, `hiddenAt`
+
+**Application** (pipeline): `stage`, `lastStageUpdatedAt`, `notes`, `timeline`, `status`
+
+## Regras
+
+- Favorito com destaque visual (borda/badge/background — Design System), nunca apenas ícone
+- `lastStageUpdatedAt` atualizado automaticamente em cada movimentação de card no pipeline
+- Timeline registra automaticamente: mudança de status, prioridade, favorito, visibilidade, observações
+- Estágio `"favorite"` no pipeline é **legado** — alvo: remoção na Etapa 12
+
+## Referências
+
+- `docs/DECISIONS.md` — ADR-022
+- `docs/API_CONTRACT.md`
+- `docs/MVP_SCOPE.md`
+- Backend enums: `backend/src/shared/domain/`
+- Frontend types: `frontend/src/types/`

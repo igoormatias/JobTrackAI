@@ -6,13 +6,14 @@ export const JOB_SORT_OPTIONS: { value: JobSortField; label: string }[] = [
   { value: "salary", label: "Maior salário" },
   { value: "company", label: "Empresa" },
   { value: "title", label: "Nome da vaga" },
+  { value: "priority", label: "Prioridade" },
 ];
 
 export const JOB_SOURCE_OPTIONS: { value: JobSource; label: string }[] = [
   { value: "gupy", label: "Gupy" },
   { value: "linkedin", label: "LinkedIn" },
   { value: "programathor", label: "ProgramaThor" },
-  { value: "internal", label: "Interna" },
+  { value: "manual", label: "Manual" },
 ];
 
 export const JOB_AREA_OPTIONS: { value: ProfessionalArea; label: string }[] = [

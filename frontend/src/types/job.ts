@@ -3,13 +3,21 @@ import type { MatchScore } from "./match";
 import type { ProfessionalArea, Seniority, WorkModality } from "./profile";
 import type { Technology } from "./technology";
 
-export type JobSource = "gupy" | "linkedin" | "programathor" | "internal";
+export type JobPriority = "HIGH" | "MEDIUM" | "LOW";
+
+export type JobVisibility = "VISIBLE" | "HIDDEN";
+
+export type JobSource = "gupy" | "linkedin" | "programathor" | "manual";
 
 export type JobStatus = "active" | "closed" | "expired";
 
 export type JobEngagementState = "new" | "viewed" | "favorited" | "applied" | "rejected";
 
 export type EmploymentType = "clt" | "pj" | "contract" | "internship";
+
+export const DEFAULT_JOB_PRIORITY: JobPriority = "MEDIUM";
+
+export const DEFAULT_JOB_VISIBILITY: JobVisibility = "VISIBLE";
 
 export type Job = {
   id: string;
@@ -33,6 +41,9 @@ export type Job = {
   sourceUrl: string;
   status: JobStatus;
   isFavorite: boolean;
+  priority?: JobPriority;
+  visibility?: JobVisibility;
+  hiddenAt?: string | null;
   engagementState: JobEngagementState;
   matchScore: MatchScore;
   publishedAt: string;

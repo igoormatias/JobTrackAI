@@ -4,7 +4,17 @@
 
 O usuário **candidata-se na plataforma de origem**. O backend não substitui Gupy, LinkedIn ou Programathor.
 
-**Documentação:** [PRODUCT_VISION.md](../docs/PRODUCT_VISION.md) · [MVP_SCOPE.md](../docs/MVP_SCOPE.md) · [API_CONTRACT.md](../docs/API_CONTRACT.md)
+**Documentação:** [PRODUCT_VISION.md](../docs/PRODUCT_VISION.md) · [MVP_SCOPE.md](../docs/MVP_SCOPE.md) · [API_CONTRACT.md](../docs/API_CONTRACT.md) · ADR-022
+
+### Domínio oficial (Etapa 10.7)
+
+Enums em `src/shared/domain/`:
+
+- `JobPriority`, `JobVisibility`, `JobSource` (inclui `manual`), `TimelineEventType`
+
+Campos planejados em `Job`: `priority`, `visibility`, `hiddenAt`. Em `Application`: `lastStageUpdatedAt`.
+
+Endpoints documentados em `API_CONTRACT.md` — implementação na Etapa 12 (sem novas rotas nesta etapa).
 
 ---
 
@@ -14,12 +24,12 @@ O JobTrack AI backend centraliza a lógica de:
 
 - Autenticação (Google OAuth)
 - Perfil simplificado
-- Listagem e engajamento com vagas (favoritar, visualizar — **não aplicar**)
+- Listagem e engajamento com vagas (favoritar, prioridade, visibilidade, visualizar — **não aplicar**)
 - Match Score
 - Pipeline de **acompanhamento manual**
 - Notificações internas
 
-**Fora do MVP (V2):** providers reais, scheduler, WebSocket, IA, analytics.
+**Fora do MVP (V2):** providers reais, scheduler, Match Engine real, WebSocket, IA, analytics.
 
 ---
 
@@ -739,15 +749,24 @@ Sincronizado com [docs/ROADMAP.md](../docs/ROADMAP.md).
 
 ## MVP
 
-- Auth, perfil simplificado, jobs (listagem/favoritos), pipeline manual
-- Match Score (MSW; engine real em evolução)
-- Notificações internas, entrevistas
+- Auth, perfil simplificado, jobs (listagem/favoritos/prioridade/visibilidade), pipeline manual
+- Match Score (MSW; engine real em **V2**)
+- Cadastro manual de vagas (contrato — Etapa 12)
+- Notificações internas, entrevistas (Etapas 12–13)
 - **Não inclui:** providers reais, WebSocket, aplicar vagas pela API
+
+### Próximas etapas
+
+| Etapa | Nome |
+|-------|------|
+| 12 | Pipeline Refinado |
+| 13 | Release Candidate MVP |
 
 ## V2
 
-- Providers (Gupy, LinkedIn, Programathor)
+- Providers (Gupy, LinkedIn, Programathor), importação por URL
 - Scheduler, WebSocket
+- **Match Engine real**
 - IA, Analytics, Machine Learning
 - Internacionalização, integrações avançadas
 

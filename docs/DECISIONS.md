@@ -98,11 +98,13 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 
 ## ADR-009 — `engagementState` computado server-side
 
-**Status:** Aceito (Etapa 08)
+**Status:** Aceito (Etapa 08) — **parcialmente superseded por ADR-022**
 
 **Decisão:** Estados de vaga (`new`, `viewed`, `favorited`, `applied`, `rejected`) são derivados no MSW/backend e retornados no objeto `Job`.
 
 **Motivos:** Componentes permanecem apresentacionais; regras centralizadas para futura API real.
+
+**Nota (ADR-022):** `engagementState` será simplificado na Etapa 12. O valor `applied` está **deprecated** — candidatura ocorre na plataforma de origem; acompanhamento via pipeline manual. Favorito, prioridade e visibilidade passam a ser atributos independentes em `JobEngagement`.
 
 ---
 
@@ -158,9 +160,11 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 
 ## ADR-015 — Contrato `/pipeline` como API pública
 
-**Status:** Aceito (Etapa 10)
+**Status:** Aceito (Etapa 10) — **estágios alvo atualizados em ADR-022**
 
 **Decisão:** A UI consome apenas endpoints `/pipeline/*`. A entidade interna continua sendo `Application`; `/applications` permanece legado interno até remoção futura.
+
+**Nota (ADR-022):** O estágio `"favorite"` no Kanban é **legado** e será removido na Etapa 12. Estágios alvo: `applied → hr → technical_interview → manager → client → offer → hired | rejected`. Favoritos são exclusivamente `JobEngagement.isFavorite`.
 
 ---
 
@@ -248,6 +252,7 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 - Toda nova feature passa pelo filtro em `MVP_SCOPE.md` e `.cursor/rules/mvp-product-scope.mdc`
 - Divergências de código (`POST /apply`, botão "Aplicar") documentadas como dívida técnica
 - Documentação oficial: `PRODUCT_VISION.md`, `MVP_SCOPE.md`, `API_CONTRACT.md`
+- Refinamento complementar: **ADR-022** (domínio oficial Etapa 10.7)
 
 ---
 
@@ -272,6 +277,97 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 - Repositories in-memory de profile removidos; auth usa Prisma em produção e in-memory em testes
 - Navegação agrupada: Minha Conta > Perfil / Preferências
 - `GET /profile` retorna `user` read-only no DTO
+
+---
+
+## ADR-022 — Refinamento do Domínio (Etapa 10.7)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 10.7)
+
+**Contexto:** Após ADR-020, o produto foi redefinido como Career Tracker, mas o domínio ainda misturava conceitos (estágio `"favorite"` no pipeline vs. `isFavorite` booleano; ausência de prioridade e visibilidade; timeline limitada; cadastro manual não documentado). Era necessário consolidar o modelo antes das implementações das Etapas 12–13.
+
+**Decisão:**
+
+### Visão do produto
+
+JobTrack AI **não** é plataforma de candidatura nem ATS. É um **Career Tracker** que centraliza vagas, organiza a busca, prioriza oportunidades e acompanha processos seletivos. Toda candidatura ocorre na plataforma de origem.
+
+### Modelo de domínio — atributos independentes
+
+Nunca utilizar um único status para representar todos os estados. O domínio divide-se em duas camadas:
+
+**A. `JobEngagement`** (relação usuário × vaga):
+
+| Atributo | Tipo | Default |
+|----------|------|---------|
+| `isFavorite` | `boolean` | `false` |
+| `priority` | `HIGH \| MEDIUM \| LOW` | `MEDIUM` |
+| `visibility` | `VISIBLE \| HIDDEN` | `VISIBLE` |
+| `hiddenAt` | `string \| null` | `null` |
+
+**B. `Application`** (acompanhamento da jornada seletiva):
+
+| Atributo | Tipo | Notas |
+|----------|------|-------|
+| `stage` | `PipelineStage` | Estágio atual |
+| `lastStageUpdatedAt` | `string` | Atualizado automaticamente em cada movimentação |
+| `notes` | `string \| null` | Observações livres |
+| `timeline` | `TimelineEvent[]` | Histórico auditável |
+| `status` | `active \| archived \| withdrawn` | Estado da entrada |
+
+Exemplo válido: vaga favorita + prioridade HIGH + estágio `technical_interview` + visível.
+
+### Pipeline
+
+O Pipeline **não representa candidatura** — apenas acompanhamento manual da jornada.
+
+**Fluxo oficial:**
+
+```
+Encontrou vaga → Favoritou → Definiu prioridade → Abriu vaga (origem)
+  → Aplicou na plataforma original → Adicionou ao Pipeline
+  → Atualizou estágio (DnD) → Timeline + lastStageUpdatedAt automáticos
+```
+
+**Estágio `"favorite"` legado:** permanece no código até Etapa 12; alvo é remoção da coluna Kanban.
+
+### Ações MVP em vagas
+
+| Ação | Endpoint |
+|------|----------|
+| Favoritar / desfavoritar | `PATCH /jobs/:id/favorite` |
+| Definir prioridade | `PATCH /jobs/:id/priority` |
+| Ocultar / restaurar | `PATCH /jobs/:id/visibility` |
+| Abrir vaga | `sourceUrl` no client (sem endpoint) |
+
+### Cadastro manual de vagas (MVP)
+
+`POST /jobs` com `source: "manual"`. Campos: empresa, cargo, URL, descrição, data da candidatura, status inicial, observações. Mesmo fluxo das vagas importadas — nunca fluxo separado.
+
+### Timeline — tipos oficiais
+
+`TimelineEventType`: `created`, `stage_changed`, `priority_changed`, `favorited`, `unfavorited`, `hidden`, `restored`, `note_added`, `note_updated`, `applied`, `interview_scheduled`, `offer_received`, `rejected`.
+
+`occurredAt` editável via `PATCH /pipeline/:id/timeline/:eventId` (implementação Etapa 12).
+
+### Importação futura (V2)
+
+Importar por URL e Providers automáticos — fora do MVP.
+
+**Motivos:**
+
+- Evitar refatorações futuras ao implementar Etapas 12–13
+- Separar claramente engajamento com vaga vs. acompanhamento seletivo
+- Preparar timeline para IA e Analytics (V2)
+
+**Consequências:**
+
+- Contratos de types/schemas atualizados de forma aditiva (Etapa 10.7)
+- UI, persistência Prisma e endpoints novos ficam para Etapas 12–13
+- Toda nova feature deve seguir este domínio oficial
+- Documentação: `PRODUCT_VISION.md`, `MVP_SCOPE.md`, `API_CONTRACT.md`, `ARCHITECTURE.md`
+- Cursor Rules: `mvp-product-scope.mdc`, `domain-model.mdc`
 
 ---
 

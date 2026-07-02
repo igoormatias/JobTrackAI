@@ -13,12 +13,15 @@ Detalhes: [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md)
 ## O que o sistema faz
 
 - Centraliza, busca e filtra vagas de múltiplas fontes
-- Permite favoritar vagas e abrir na plataforma original
-- Calcula Match Score personalizado
-- Oferece dashboard com visão da busca
+- Permite favoritar, priorizar e ocultar vagas
+- Abre vagas na plataforma original (nunca candidatura interna)
+- Cadastro manual de vagas com mesmo fluxo das importadas
+- Calcula Match Score personalizado (MSW no MVP)
+- Dashboard com visão da busca
 - Pipeline manual para acompanhar a jornada seletiva
+- Timeline automática de eventos
 - Gestão de entrevistas no contexto do pipeline
-- Notificações sobre eventos internos (nova vaga, status, entrevista, recomendação)
+- Notificações sobre eventos internos
 - Perfil simplificado (Google + dados profissionais)
 
 ## O que o sistema NÃO faz
@@ -34,24 +37,30 @@ Lista completa: [docs/MVP_SCOPE.md](docs/MVP_SCOPE.md)
 ## Fluxo do usuário
 
 ```
-Encontrou vaga → Favoritou → Abriu vaga (origem) → Aplicou na plataforma original
-  → Adicionou ao Pipeline → Atualizou status manualmente
+Encontrou vaga → Favoritou → Definiu prioridade → Abriu vaga (origem)
+  → Aplicou na plataforma original → Adicionou ao Pipeline → Atualizou estágio manualmente
 ```
 
 ## Escopo do MVP
 
 | Incluído | Excluído (V2+) |
 |----------|----------------|
-| Jobs, filtros, favoritos, abrir vaga | Aplicar pela plataforma |
-| Dashboard, Match Score | Providers reais, WebSocket |
-| Pipeline manual, entrevistas | IA, Analytics, ML |
-| Notificações internas | Upload currículo, perfil público |
-| Perfil simplificado | i18n, integrações avançadas |
+| Jobs, filtros, favoritos, prioridade, ocultar, abrir vaga | Aplicar pela plataforma |
+| Cadastro manual de vagas, pipeline, timeline | Providers reais, Match Engine real |
+| Dashboard, Match Score (MSW) | WebSocket, Scheduler |
+| Notificações internas, entrevistas | IA, Analytics, ML |
+| Perfil simplificado | Upload currículo, perfil público, i18n |
 
 ## Roadmap
 
-- **MVP** — concluir Profile, Notificações, Entrevistas, Match Engine real, deploy
-- **V2** — Providers, Scheduler, WebSocket, IA, Analytics, ML, i18n
+| Etapa | Nome | Status |
+|-------|------|--------|
+| 10.7 | Product Refinement (domínio oficial) | Concluída |
+| 11 | Minha Conta | Concluída |
+| 12 | Pipeline Refinado | Próxima |
+| 13 | Release Candidate MVP | Pendente |
+
+- **V2** — Providers, Scheduler, Match Engine real, WebSocket, IA, Analytics, ML, i18n
 
 Ver [docs/ROADMAP.md](docs/ROADMAP.md)
 
@@ -75,7 +84,7 @@ Clean Architecture + DDD (lightweight) para novos módulos. Template: módulo `s
 
 - [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md)
 - [backend/README.md](backend/README.md)
-- ADR-019 (arquitetura) · ADR-020 (escopo produto)
+- ADR-019 (arquitetura) · ADR-020 (escopo produto) · ADR-022 (domínio refinado)
 
 ## Estrutura do projeto
 
@@ -194,7 +203,7 @@ Guia: [docs/DEPLOY.md](docs/DEPLOY.md)
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitetura técnica |
 | [docs/FRONTEND_GUIDE.md](docs/FRONTEND_GUIDE.md) | Guia frontend |
 | [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md) | Guia backend |
-| [docs/DECISIONS.md](docs/DECISIONS.md) | ADRs (ADR-020 = escopo produto) |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | ADRs (ADR-020 = escopo · ADR-022 = domínio) |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Deploy |
 
 ## Licença

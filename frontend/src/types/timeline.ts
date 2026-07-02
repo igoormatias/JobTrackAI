@@ -1,9 +1,15 @@
 export type TimelineEventType =
   | "created"
-  | "applied"
   | "stage_changed"
-  | "interview_scheduled"
+  | "priority_changed"
+  | "favorited"
+  | "unfavorited"
+  | "hidden"
+  | "restored"
   | "note_added"
+  | "note_updated"
+  | "applied"
+  | "interview_scheduled"
   | "offer_received"
   | "rejected";
 

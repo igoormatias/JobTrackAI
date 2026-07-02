@@ -4,7 +4,7 @@ Guia oficial de convenções e padrões do backend Express. Sincronizado com `ba
 
 **Escopo MVP:** [MVP_SCOPE.md](./MVP_SCOPE.md) · **API:** [API_CONTRACT.md](./API_CONTRACT.md) · **Visão:** [PRODUCT_VISION.md](./PRODUCT_VISION.md)
 
-Toda nova feature backend deve passar pelo filtro MVP: ajuda o usuário a encontrar vagas ou acompanhar seu processo seletivo?
+Toda nova feature backend deve passar pelo filtro MVP: ajuda o usuário a **encontrar vagas**, **organizar vagas**, **priorizar vagas** ou **acompanhar processos seletivos**?
 
 ## Arquitetura
 
@@ -214,15 +214,34 @@ Auth faz `upsert` de `User` + `UserSettings` default no login Google.
 
 ---
 
+## Domínio oficial (ADR-022)
+
+Enums compartilhados em `src/shared/domain/`:
+
+| Arquivo | Export |
+|---------|--------|
+| `job-priority.ts` | `JobPriority`, `JOB_PRIORITIES` |
+| `job-visibility.ts` | `JobVisibility`, `JOB_VISIBILITIES` |
+| `timeline-event-type.ts` | `TimelineEventType`, `TIMELINE_EVENT_TYPES` |
+| `job-source.ts` | `JobSource`, `JOB_SOURCES` (inclui `manual`) |
+
+**JobEngagement** (campos em `Job`): `isFavorite`, `priority`, `visibility`, `hiddenAt`
+
+**Application** (pipeline): `stage`, `lastStageUpdatedAt`, `notes`, `timeline`, `status`
+
+Contratos planejados documentados em [API_CONTRACT.md](./API_CONTRACT.md). Implementação de endpoints na Etapa 12.
+
+---
+
 ## Jobs (escopo MVP)
 
-Ações MVP: listar, filtrar, favoritar, marcar visualizada. Abrir vaga usa `sourceUrl` no frontend — sem endpoint dedicado.
+Ações MVP: listar, filtrar, favoritar, definir prioridade, ocultar/restaurar, cadastro manual, marcar visualizada. Abrir vaga usa `sourceUrl` no frontend — sem endpoint dedicado.
 
 `POST /jobs/:id/apply` e `DELETE /jobs/:id/apply` são **legados/deprecated** — fora do escopo MVP. Não expandir.
 
 ## Pipeline (acompanhamento manual)
 
-O pipeline **não** representa candidatura automática. Endpoints permitem ao usuário mover status, favoritar, arquivar e consultar timeline manualmente.
+O pipeline **não** representa candidatura automática. Endpoints permitem ao usuário adicionar ao acompanhamento, mover estágio, favoritar, atualizar notas, arquivar e consultar timeline manualmente. `lastStageUpdatedAt` atualizado automaticamente em movimentações.
 
 Ver [API_CONTRACT.md](./API_CONTRACT.md#pipeline-acompanhamento-manual).
 
@@ -239,6 +258,7 @@ Código preparado em `src/providers/`, `src/config/socket.ts`, `src/modules/sche
 | Caminho | Descrição |
 |---------|-----------|
 | `src/shared/application/use-case.ts` | Interface `UseCase<TInput, TOutput>` |
+| `src/shared/domain/` | Enums oficiais: `JobPriority`, `JobVisibility`, `TimelineEventType`, `JobSource` |
 | `src/shared/domain/domain-event.ts` | Classe base `DomainEvent` |
 | `src/shared/events/` | `EventBus`, `InMemoryEventBus`, singleton `eventBus` |
 | `src/shared/errors/` | Erros HTTP customizados |
@@ -270,6 +290,6 @@ Código preparado em `src/providers/`, `src/config/socket.ts`, `src/modules/sche
 - [MVP_SCOPE.md](./MVP_SCOPE.md)
 - [API_CONTRACT.md](./API_CONTRACT.md)
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [DECISIONS.md](./DECISIONS.md) — ADR-019, ADR-020
+- [DECISIONS.md](./DECISIONS.md) — ADR-019 · ADR-020 · ADR-022
 - [backend/README.md](../backend/README.md)
 - [backend/.cursor/rules/backend-architecture.mdc](../backend/.cursor/rules/backend-architecture.mdc)

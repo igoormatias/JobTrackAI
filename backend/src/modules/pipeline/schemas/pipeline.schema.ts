@@ -22,3 +22,22 @@ export const pipelineListQuerySchema = z.object({
 export const moveApplicationSchema = z.object({
   stage: pipelineStageSchema,
 });
+
+export const updateApplicationNotesSchema = z.object({
+  notes: z.string().nullable(),
+});
+
+export const createPipelineApplicationSchema = z.object({
+  jobId: z.string().min(1),
+  stage: pipelineStageSchema.optional(),
+  notes: z.string().optional(),
+  appliedAt: z.string().datetime().optional(),
+});
+
+export const updateTimelineEventSchema = z.object({
+  occurredAt: z.string().datetime(),
+});
+
+export type UpdateApplicationNotesInput = z.infer<typeof updateApplicationNotesSchema>;
+export type CreatePipelineApplicationInput = z.infer<typeof createPipelineApplicationSchema>;
+export type UpdateTimelineEventInput = z.infer<typeof updateTimelineEventSchema>;

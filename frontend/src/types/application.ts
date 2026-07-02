@@ -44,6 +44,7 @@ export type Application = {
   timeline: TimelineEvent[];
   appliedAt: string;
   updatedAt: string;
+  lastStageUpdatedAt?: string;
 };
 
 export type UpdateApplicationPayload = {

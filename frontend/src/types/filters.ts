@@ -4,6 +4,10 @@ import type { NotificationType } from "./notification";
 import type { PipelineStage } from "./application";
 import type { ProfessionalArea, Seniority, WorkModality } from "./profile";
 
+export type JobVisibilityFilter = "visible" | "hidden" | "all";
+
+export type JobPriorityFilter = "high" | "medium" | "low";
+
 export type JobListParams = {
   cursor?: string;
   limit?: number;
@@ -27,6 +31,8 @@ export type JobListParams = {
   dateFrom?: string;
   dateTo?: string;
   isFavorite?: boolean;
+  visibility?: JobVisibilityFilter;
+  priority?: JobPriorityFilter;
   sources?: JobSource[];
 };
 

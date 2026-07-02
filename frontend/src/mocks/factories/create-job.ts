@@ -3,6 +3,7 @@ import { subDays } from "date-fns";
 
 import { SKILLS_BY_AREA } from "@/features/onboarding/constants/skills-by-area";
 import type { Company, Job, JobSource, ProfessionalArea, Technology } from "@/types";
+import { DEFAULT_JOB_PRIORITY, DEFAULT_JOB_VISIBILITY } from "@/types/job";
 
 import {
   JOB_TITLES_BY_AREA,
@@ -85,6 +86,10 @@ export const createJob = ({ index, company, area, isFavorite = false }: CreateJo
     sourceUrl: `https://${source}.com.br/vagas/${index}`,
     status: "active",
     isFavorite,
+    // @domain-refinement-10.7 — campos oficiais; defaults até Etapa 12
+    priority: DEFAULT_JOB_PRIORITY,
+    visibility: DEFAULT_JOB_VISIBILITY,
+    hiddenAt: null,
     engagementState: isFavorite ? "favorited" : "new",
     matchScore: createMatchScore({ score: 70 }),
     publishedAt,

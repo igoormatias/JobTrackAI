@@ -3,7 +3,8 @@
 Este documento acompanha as etapas do MVP e evoluções planejadas (V2). Atualize sempre que uma etapa for concluída.
 
 **Visão do produto:** [PRODUCT_VISION.md](./PRODUCT_VISION.md)  
-**Escopo MVP:** [MVP_SCOPE.md](./MVP_SCOPE.md)
+**Escopo MVP:** [MVP_SCOPE.md](./MVP_SCOPE.md)  
+**Domínio oficial:** [DECISIONS.md](./DECISIONS.md) — ADR-022
 
 ## Legenda
 
@@ -15,7 +16,7 @@ Este documento acompanha as etapas do MVP e evoluções planejadas (V2). Atualiz
 
 ## MVP
 
-Objetivo: Career Tracker — centralizar vagas, ajudar a encontrar oportunidades e acompanhar manualmente a jornada seletiva. O usuário **candidata-se sempre na plataforma de origem**.
+Objetivo: Career Tracker — centralizar vagas, ajudar a encontrar oportunidades, priorizar oportunidades e acompanhar manualmente a jornada seletiva. O usuário **candidata-se sempre na plataforma de origem**.
 
 ### Infraestrutura e base
 
@@ -34,6 +35,10 @@ Docker Compose para desenvolvimento (frontend, backend, PostgreSQL 17), health c
 #### ✅ Product Alignment (Etapa 10.6)
 
 Visão do produto, escopo MVP consolidado, documentação sincronizada, Cursor Rules de escopo, ADR-020.
+
+#### ✅ Product Refinement (Etapa 10.7)
+
+Domínio oficial refinado: favorito, prioridade, visibilidade, timeline, cadastro manual. Contratos de types/schemas atualizados. ADR-022. Cursor Rules de domínio.
 
 ### Frontend — features MVP
 
@@ -73,13 +78,27 @@ Kanban de acompanhamento manual com drag and drop, KPIs, filtros, drawer/panel d
 
 Perfil simplificado + Preferências (`features/account`, Prisma User/Profile/UserSettings, módulos `profiles` e `settings` em Clean Architecture).
 
-#### ⬜ Notificações
+#### ⬜ Pipeline Refinado (Etapa 12)
 
-Feed de notificações internas (nova vaga, mudança de status, entrevista, recomendação).
+Implementação do domínio refinado (ADR-022):
 
-#### ⬜ Entrevistas
+- Prioridade (HIGH/MEDIUM/LOW) com filtros, ordenação e indicadores visuais
+- Visibilidade (ocultar/restaurar) com filtros
+- Cadastro manual de vagas (`POST /jobs`)
+- Adicionar ao pipeline (`POST /pipeline`)
+- Timeline automática completa + edição de `occurredAt`
+- `lastStageUpdatedAt` automático em movimentações
+- Remover estágio `"favorite"` do Kanban
+- Botão **Abrir vaga** substituindo "Aplicar"
+- Destaque visual de favoritos (borda/badge/background)
 
-Gestão de entrevistas no contexto do pipeline.
+#### ⬜ Release Candidate MVP (Etapa 13)
+
+- Notificações (feed de eventos internos)
+- Entrevistas (gestão no contexto do pipeline)
+- Performance (bundle, cache, prefetch)
+- Testes (E2E e integração ampliada)
+- Deploy (CI/CD, staging/production)
 
 ### Backend — MVP
 
@@ -87,30 +106,22 @@ Gestão de entrevistas no contexto do pipeline.
 
 Clean Architecture + módulo `system` template, EventBus, Cursor Rules.
 
-#### ⬜ Match Engine (real)
+#### ✅ Contratos de domínio (Etapa 10.7)
 
-Substituir regras do Smart Mock Engine por algoritmo no backend (`/recommendations`).
+Enums e types oficiais: `JobPriority`, `JobVisibility`, `TimelineEventType`, `JobSource.manual`. Schemas Zod para endpoints planejados.
 
 ### Qualidade e entrega MVP
 
-#### ⬜ Performance
-
-Otimizações de bundle, cache, prefetch e métricas.
-
-#### ⬜ Testes
-
-Cobertura E2E e integração ampliada.
-
-#### ⬜ Deploy
-
-CI/CD completo, ambientes staging/production documentados em [DEPLOY.md](./DEPLOY.md).
+Cobertos na Etapa 13 (Release Candidate).
 
 ### Alinhamento de código pendente
 
 Dívida documentada em [MVP_SCOPE.md](./MVP_SCOPE.md#dívida-técnica-documentada-alinhamento-futuro):
 
-- [ ] Botão "Aplicar" → **Abrir vaga** (`JobCard`, Job Details)
-- [ ] Deprecar `POST /jobs/:id/apply` no código
+- [ ] Botão "Aplicar" → **Abrir vaga** (`JobCard`, Job Details) — Etapa 12
+- [ ] Deprecar `POST /jobs/:id/apply` no código — Etapa 12
+- [ ] Remover estágio `"favorite"` do pipeline Kanban — Etapa 12
+- [ ] Implementar prioridade, visibilidade, cadastro manual — Etapa 12
 - [ ] Remover ou mover etapa `blockedSkills` do onboarding
 - [ ] Alinhar `engagementState: applied` com fluxo manual do pipeline
 
@@ -123,14 +134,16 @@ Funcionalidades **fora do MVP**. Não implementar antes de concluir o escopo MVP
 ### Integrações e infraestrutura
 
 - ⬜ **Providers** — integração real com Gupy, LinkedIn, Programathor
+- ⬜ **Importação por URL** — cadastrar vaga a partir de link externo
 - ⬜ **Scheduler** — busca automática e atualização de vagas
 - ⬜ **WebSocket** — atualizações em tempo real (Socket.IO preparado)
 - ⬜ **Integrações avançadas** — novas fontes e normalização em produção
 
 ### Inteligência e dados
 
+- ⬜ **Match Engine (real)** — substituir Smart Mock Engine por algoritmo no backend
 - ⬜ **IA** — resumos de vagas, insights com LLM
-- ⬜ **Analytics** — métricas de uso e conversão
+- ⬜ **Analytics** — métricas de uso e conversão (usa timeline como fonte)
 - ⬜ **Machine Learning** — match avançado e recomendações
 
 ### Produto

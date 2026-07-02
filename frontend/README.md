@@ -17,7 +17,20 @@ O **JobTrack AI** é um **Career Tracker inteligente** — centraliza vagas de m
 
 O sistema **não substitui** as plataformas originais. O usuário candidata-se **diretamente na plataforma de origem** (Gupy, LinkedIn, Programathor, etc.).
 
-Visão completa: [docs/PRODUCT_VISION.md](../docs/PRODUCT_VISION.md) · Escopo MVP: [docs/MVP_SCOPE.md](../docs/MVP_SCOPE.md)
+Visão completa: [docs/PRODUCT_VISION.md](../docs/PRODUCT_VISION.md) · Escopo MVP: [docs/MVP_SCOPE.md](../docs/MVP_SCOPE.md) · Domínio: [docs/DECISIONS.md](../docs/DECISIONS.md) (ADR-022)
+
+### Domínio oficial (Etapa 10.7)
+
+Types compartilhados em `src/types/`:
+
+| Conceito | Type | Valores |
+|----------|------|---------|
+| Prioridade | `JobPriority` | `HIGH` · `MEDIUM` · `LOW` |
+| Visibilidade | `JobVisibility` | `VISIBLE` · `HIDDEN` |
+| Origem | `JobSource` | inclui `manual` |
+| Timeline | `TimelineEventType` | Ver `API_CONTRACT.md` |
+
+Favoritos devem ter destaque visual (borda/badge/background — Design System). Contratos planejados em `features/jobs/types/job-contracts.types.ts` e `features/pipeline/types/pipeline-contracts.types.ts` (implementação Etapa 12).
 
 O projeto foi pensado para atender profissionais de tecnologia como:
 

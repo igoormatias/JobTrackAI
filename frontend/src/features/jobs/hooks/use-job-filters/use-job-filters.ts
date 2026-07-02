@@ -20,7 +20,7 @@ import {
 import type { JobUrlFilters } from "../../types/job-url-filters";
 import { hasActiveJobFilters, urlFiltersToJobListParams } from "../../utils/job-list-params";
 
-const sortValues = ["match", "date", "salary", "company", "title"] as const;
+const sortValues = ["match", "date", "salary", "company", "title", "priority"] as const;
 const dirValues = ["asc", "desc"] as const;
 
 const jobFiltersParsers = {

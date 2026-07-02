@@ -6,10 +6,15 @@ Guia da arquitetura frontend para features do monorepo.
 
 ## Escopo MVP (frontend)
 
-Toda nova feature deve ajudar o usuário a **encontrar vagas** ou **acompanhar seu processo seletivo**. Caso contrário, documentar em V2 e não implementar.
+Toda nova feature deve ajudar o usuário a **encontrar vagas**, **organizar vagas**, **priorizar vagas** ou **acompanhar processos seletivos**. Caso contrário, documentar em V2 e não implementar.
 
 - **Abrir vaga** — botão oficial redireciona para `sourceUrl` (plataforma original)
-- **Pipeline** — acompanhamento manual; DnD atualiza status pelo usuário
+- **Prioridade** — independente do pipeline; HIGH/MEDIUM/LOW
+- **Visibilidade** — ocultar ≠ excluir; filtro para restaurar
+- **Favoritos** — destaque visual (borda/badge/background — Design System)
+- **Cadastro manual** — mesmo fluxo das vagas importadas (`source: "manual"`)
+- **Pipeline** — acompanhamento manual; DnD atualiza estágio e `lastStageUpdatedAt`
+- **Timeline** — eventos automáticos; `occurredAt` editável (Etapa 12)
 - **Notificações** — apenas eventos internos do JobTrack AI
 - **Perfil** — campos MVP em [MVP_SCOPE.md](./MVP_SCOPE.md#perfil-mvp); foto via Google OAuth
 
@@ -51,6 +56,9 @@ JobsPage
 | Ação | Implementação alvo |
 |------|-------------------|
 | Favoritar | `PATCH /jobs/:id/favorite` |
+| Definir prioridade | `PATCH /jobs/:id/priority` *(planejado)* |
+| Ocultar / restaurar | `PATCH /jobs/:id/visibility` *(planejado)* |
+| Cadastro manual | `POST /jobs` *(planejado)* |
 | Marcar visualizada | `POST /jobs/:id/view` |
 | Abrir vaga | `window.open(job.sourceUrl)` — plataforma original |
 
@@ -132,8 +140,18 @@ O Pipeline **não representa candidatura** — o usuário adiciona entradas e at
 ### Fluxo do usuário
 
 ```
-Favoritou → Abriu vaga → Aplicou na origem → Adicionou ao Pipeline → Atualizou status (DnD)
+Favoritou → Definiu prioridade → Abriu vaga → Aplicou na origem
+  → Adicionou ao Pipeline → Atualizou estágio (DnD) → Timeline automática
 ```
+
+### Domínio — types oficiais
+
+| Type | Arquivo | Valores |
+|------|---------|---------|
+| `JobPriority` | `types/job.ts` | `HIGH` · `MEDIUM` · `LOW` |
+| `JobVisibility` | `types/job.ts` | `VISIBLE` · `HIDDEN` |
+| `TimelineEventType` | `types/timeline.ts` | Ver API_CONTRACT |
+| `JobSource` | `types/job.ts` | inclui `manual` |
 
 ### Organização
 
@@ -189,6 +207,6 @@ MSW handlers espelham backend; usados no Vitest. Testes de componentes/hooks ao 
 - [MVP_SCOPE.md](./MVP_SCOPE.md)
 - [API_CONTRACT.md](./API_CONTRACT.md)
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [DECISIONS.md](./DECISIONS.md) — ADR-020, ADR-021
+- [DECISIONS.md](./DECISIONS.md) — ADR-020 · ADR-021 · ADR-022
 - [ROADMAP.md](./ROADMAP.md)
 - Assets visuais: [`assets/`](../assets/)

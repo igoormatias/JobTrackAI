@@ -6,7 +6,7 @@ Documento oficial da visão e princípios do produto. Fonte de verdade para deci
 
 ## Problema
 
-Profissionais em busca de emprego precisam acompanhar vagas espalhadas em múltiplas plataformas (Gupy, LinkedIn, Programathor e outras). Cada fonte tem seu próprio fluxo de candidatura, e organizar a jornada — o que foi visto, favoritado, aplicado e em qual etapa está cada processo — torna-se difícil sem uma ferramenta central.
+Profissionais em busca de emprego precisam acompanhar vagas espalhadas em múltiplas plataformas (Gupy, LinkedIn, Programathor e outras). Cada fonte tem seu próprio fluxo de candidatura, e organizar a jornada — o que foi visto, favoritado, priorizado e em qual etapa está cada processo — torna-se difícil sem uma ferramenta central.
 
 ## Objetivo
 
@@ -14,13 +14,21 @@ Oferecer um **Career Tracker inteligente** que centraliza oportunidades e ajuda 
 
 ## Visão oficial
 
-**JobTrack AI** é uma plataforma para centralizar vagas provenientes de diferentes plataformas (Gupy, LinkedIn, Programathor e futuras integrações) e ajudar o usuário a organizar sua jornada de busca por emprego.
+**JobTrack AI NÃO é uma plataforma de candidatura.**
 
-O sistema **não substitui** as plataformas originais.
+**JobTrack AI NÃO substitui** Gupy, LinkedIn, Programathor ou qualquer outro portal.
+
+**JobTrack AI** é um **Career Tracker** — centraliza vagas provenientes de diferentes plataformas e ajuda o usuário a organizar sua jornada de busca por emprego.
 
 O usuário continua realizando sua candidatura **diretamente na plataforma de origem**.
 
-O JobTrack AI atua como um **Career Tracker inteligente**.
+### O que o JobTrack AI faz
+
+- Centralizar vagas de múltiplas fontes
+- Organizar a busca por emprego
+- Priorizar oportunidades
+- Acompanhar processos seletivos
+- Gerenciar entrevistas no contexto do pipeline
 
 ## Público-alvo
 
@@ -31,14 +39,40 @@ Profissionais em transição ou busca ativa de emprego, com foco inicial em áre
 1. **Simplicidade** — MVP enxuto, sem feature creep.
 2. **Plataforma de origem** — candidatura sempre fora do JobTrack AI.
 3. **Acompanhamento manual** — o pipeline reflete o que o usuário registra, não automatiza candidaturas externas.
-4. **Match como guia** — Match Score ajuda a priorizar vagas, não substitui a decisão do usuário.
-5. **Notificações internas** — alertas sobre eventos do próprio JobTrack AI, nunca controle de candidatura externa.
+4. **Atributos independentes** — favorito, prioridade, visibilidade e estágio do pipeline são dimensões ortogonais; nunca um único status monolítico.
+5. **Match como guia** — Match Score ajuda a priorizar vagas, não substitui a decisão do usuário.
+6. **Notificações internas** — alertas sobre eventos do próprio JobTrack AI, nunca controle de candidatura externa.
+
+## Domínio — atributos independentes
+
+O domínio divide-se em duas camadas (ver ADR-022):
+
+**JobEngagement** (relação usuário × vaga):
+
+| Atributo | Valores |
+|----------|---------|
+| `isFavorite` | `boolean` |
+| `priority` | `HIGH` · `MEDIUM` · `LOW` |
+| `visibility` | `VISIBLE` · `HIDDEN` |
+| `hiddenAt` | `string \| null` |
+
+**Application** (acompanhamento da jornada seletiva):
+
+| Atributo | Valores |
+|----------|---------|
+| `stage` | Estágio do pipeline |
+| `lastStageUpdatedAt` | Data da última movimentação |
+| `notes` | Observações livres |
+| `timeline` | Histórico de eventos |
+| `status` | `active` · `archived` · `withdrawn` |
+
+**Exemplo:** uma vaga pode ser favorita, prioridade alta, em entrevista técnica e visível — ao mesmo tempo.
 
 ## Escopo resumido
 
 Ver [MVP_SCOPE.md](./MVP_SCOPE.md) para lista completa do que está dentro e fora do MVP.
 
-**No MVP:** centralizar, buscar, filtrar e favoritar vagas; abrir vaga na origem; dashboard; match score; pipeline manual; entrevistas; notificações; perfil simplificado.
+**No MVP:** centralizar, buscar, filtrar e favoritar vagas; priorizar; ocultar/restaurar; abrir vaga na origem; cadastro manual de vagas; dashboard; match score; pipeline manual; entrevistas; notificações; perfil simplificado.
 
 **Fora do MVP:** aplicar pela plataforma, currículo, perfil público, integrações em tempo real, IA, analytics e demais itens listados em MVP_SCOPE.
 
@@ -49,13 +83,15 @@ Encontrou vaga
       ↓
 Favoritou
       ↓
+Definiu prioridade
+      ↓
 Abriu vaga (plataforma original)
       ↓
 Aplicou na plataforma original
       ↓
 Adicionou ao Pipeline (manual)
       ↓
-Atualizou status manualmente
+Atualizou estágio manualmente
 ```
 
 ## Pipeline
@@ -84,7 +120,7 @@ Campos oficiais: ver [MVP_SCOPE.md](./MVP_SCOPE.md#perfil-mvp).
 ## Roadmap
 
 - [ROADMAP.md](./ROADMAP.md) — etapas MVP e V2
-- [DECISIONS.md](./DECISIONS.md) — ADR-020 (redefinição de escopo)
+- [DECISIONS.md](./DECISIONS.md) — ADR-020 (redefinição de escopo) · ADR-022 (refinamento do domínio)
 
 ## Documentos relacionados
 

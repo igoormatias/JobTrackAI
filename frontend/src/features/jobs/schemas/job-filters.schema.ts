@@ -14,6 +14,8 @@ export const jobFiltersSchema = z.object({
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),
   isFavorite: z.boolean().optional(),
+  visibility: z.enum(["visible", "hidden", "all"]).optional(),
+  priority: z.enum(["high", "medium", "low"]).optional(),
   sources: z.array(z.string()).optional(),
 });
 

@@ -4,7 +4,7 @@ Documento oficial do que **faz** e **não faz** parte do MVP. Toda nova funciona
 
 Pergunta gate (obrigatória):
 
-> *Esta funcionalidade ajuda diretamente o usuário a encontrar vagas ou acompanhar seu processo seletivo?*
+> *Esta funcionalidade ajuda diretamente o usuário a **encontrar vagas**, **organizar vagas**, **priorizar vagas** ou **acompanhar processos seletivos**?*
 
 Se a resposta for **não**, a funcionalidade **não** deve ser implementada no MVP — documentar em V2 ([ROADMAP.md](./ROADMAP.md)).
 
@@ -16,12 +16,16 @@ Se a resposta for **não**, a funcionalidade **não** deve ser implementada no M
 |------------------|-----------|
 | Centralizar vagas | Agregar oportunidades de múltiplas fontes (via MSW/fixtures no MVP; providers reais em V2) |
 | Buscar vagas | Busca global com debounce e filtros na URL |
-| Filtrar vagas | Área, senioridade, modalidade, skills, empresa, fonte, etc. |
-| Favoritar vagas | Salvar vagas para revisão posterior |
+| Filtrar vagas | Área, senioridade, modalidade, skills, empresa, fonte, prioridade, visibilidade, etc. |
+| Favoritar vagas | Salvar vagas para revisão posterior com destaque visual (Design System) |
+| Priorizar vagas | Alta, média ou baixa — independente do pipeline |
+| Ocultar / restaurar vagas | Ocultar da listagem padrão sem excluir do banco |
 | Abrir vaga na origem | Botão **Abrir vaga** redireciona para a plataforma original (`sourceUrl`) |
-| Dashboard | KPIs, melhores vagas, entrevistas, timeline resumida |
-| Match Score | Compatibilidade perfil × vaga (MSW no MVP; backend real em evolução) |
-| Pipeline manual | Kanban para acompanhamento da jornada; status atualizado pelo usuário |
+| Cadastro manual de vagas | Usuário registra vagas manualmente com mesmo fluxo das importadas |
+| Dashboard | KPIs (favoritas, alta prioridade, ocultadas, em processo, entrevistas), melhores vagas, timeline resumida |
+| Match Score | Compatibilidade perfil × vaga (MSW no MVP; backend real em V2) |
+| Pipeline manual | Kanban para acompanhamento da jornada; estágio atualizado pelo usuário |
+| Timeline automática | Eventos registrados em mudanças de status, prioridade, favorito, visibilidade e observações |
 | Gestão de entrevistas | Registrar e acompanhar entrevistas no contexto do pipeline |
 | Notificações | Eventos internos do JobTrack AI apenas |
 | Perfil simplificado | Campos listados abaixo |
@@ -44,9 +48,29 @@ Se a resposta for **não**, a funcionalidade **não** deve ser implementada no M
 | Ação | MVP |
 |------|-----|
 | Favoritar | Sim |
-| Marcar visualizada | Sim |
+| Remover favorito | Sim |
+| Definir prioridade | Sim |
+| Ocultar vaga | Sim |
+| Restaurar vaga | Sim |
 | Abrir vaga (link externo) | Sim |
+| Marcar visualizada | Sim |
+| Cadastro manual | Sim |
 | Aplicar pela plataforma JobTrack AI | **Não** |
+
+### Cadastro manual de vagas (MVP)
+
+| Campo | Obrigatório |
+|-------|-------------|
+| Empresa | Sim |
+| Cargo | Sim |
+| URL da vaga | Sim |
+| Descrição | Sim |
+| Data da candidatura | Não |
+| Status inicial | Não |
+| Observações | Não |
+| Origem | `manual` |
+
+Vagas manuais utilizam **exatamente o mesmo fluxo** das vagas importadas.
 
 ### Notificações MVP (eventos internos)
 
@@ -74,8 +98,10 @@ Estas funcionalidades **não** fazem parte do MVP. Podem existir no futuro (V2+)
 | Compartilhamento de perfil | V2+ |
 | Sistema ATS | V2+ |
 | Cadastro manual de empresas | V2+ |
+| Importação por URL | V2 |
 | Providers reais (Gupy, LinkedIn, Programathor) | V2 |
 | Scheduler (busca automática de vagas) | V2 |
+| Match Engine real (backend) | V2 |
 | WebSocket / tempo real | V2 |
 | IA (resumos, insights com LLM) | V2 |
 | Analytics | V2 |
@@ -94,12 +120,15 @@ O código atual ainda contém elementos **fora do escopo MVP** que serão alinha
 
 | Item | Estado atual | Alvo |
 |------|--------------|------|
-| Botão "Aplicar" no `JobCard` | Existe na UI | Substituir por **Abrir vaga** |
+| Botão "Aplicar" no `JobCard` / Job Details | Existe na UI | Substituir por **Abrir vaga** |
 | `POST /jobs/:id/apply` | Endpoint legado | Deprecated — fora do escopo MVP |
+| Estágio `"favorite"` no pipeline Kanban | Coluna ativa | Remover na Etapa 12; favorito = `isFavorite` |
 | Etapa `blockedSkills` no onboarding | 8ª etapa opcional | Fora do escopo MVP — remover ou mover para V2 |
 | `engagementState: applied` | Marca aplicação via API | Alinhar com fluxo manual do pipeline |
+| `priority`, `visibility`, `hiddenAt` | Ausentes no código | Implementar na Etapa 12 |
+| Cadastro manual (`POST /jobs`) | Ausente | Implementar na Etapa 12 |
 
-Estes itens **não** devem ser expandidos. Novas implementações devem seguir o escopo deste documento.
+Estes itens **não** devem ser expandidos. Novas implementações devem seguir o escopo deste documento e o domínio oficial (ADR-022).
 
 ---
 
@@ -107,6 +136,7 @@ Estes itens **não** devem ser expandidos. Novas implementações devem seguir o
 
 - [PRODUCT_VISION.md](./PRODUCT_VISION.md)
 - [API_CONTRACT.md](./API_CONTRACT.md)
-- [DECISIONS.md](./DECISIONS.md) — ADR-020
+- [DECISIONS.md](./DECISIONS.md) — ADR-020 · ADR-022
 - [ROADMAP.md](./ROADMAP.md)
 - `.cursor/rules/mvp-product-scope.mdc` — regra obrigatória no Cursor
+- `.cursor/rules/domain-model.mdc` — domínio oficial

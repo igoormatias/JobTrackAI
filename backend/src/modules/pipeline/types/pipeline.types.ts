@@ -1,16 +1,17 @@
 import type { PipelineStage } from "../constants/pipeline-stages.js";
-
-export type ApplicationStatus = "active" | "archived" | "withdrawn";
+import type { TimelineEventType } from "../../../shared/domain/timeline-event-type.js";
 
 export type TimelineEvent = {
   id: string;
   applicationId: string;
-  type: string;
+  type: TimelineEventType;
   title: string;
   description?: string | null;
   occurredAt: string;
   metadata?: Record<string, unknown> | null;
 };
+
+export type ApplicationStatus = "active" | "archived" | "withdrawn";
 
 export type PipelineApplicationJob = {
   id: string;
@@ -50,6 +51,7 @@ export type Application = {
   timeline: TimelineEvent[];
   appliedAt: string;
   updatedAt: string;
+  lastStageUpdatedAt?: string;
 };
 
 export type PipelineColumn = {
