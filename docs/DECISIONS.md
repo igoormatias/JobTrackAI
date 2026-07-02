@@ -218,6 +218,39 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 
 ---
 
+## ADR-020 — Redefinição do Escopo do Produto
+
+**Status:** Aceito  
+**Data:** 2026-06 (Etapa 10.6)
+
+**Contexto:** Documentação e código descreviam aplicação de vagas pela plataforma, perfil amplo, integrações em tempo real e pipeline como "candidatura". Isso gerava feature creep e desalinhamento com a visão de Career Tracker.
+
+**Decisão:**
+
+- MVP = **Career Tracker** — centralizar vagas, match score, pipeline manual
+- Candidatura **sempre** na plataforma de origem (botão **Abrir vaga**)
+- Pipeline = acompanhamento manual da jornada, não candidatura automática
+- Perfil simplificado (Google nome/foto + 6 campos profissionais)
+- Notificações = eventos internos apenas
+
+**Removido do MVP:**
+
+- Aplicação pela plataforma, upload de currículo, carta de apresentação
+- Perfil público, LinkedIn/GitHub/portfólio, idiomas, certificações
+- Rede social, compartilhamento de perfil, ATS, cadastro manual de empresas
+
+**Permanece V2:**
+
+- Providers reais, Scheduler, WebSocket, IA, Analytics, ML, i18n, integrações avançadas
+
+**Consequências:**
+
+- Toda nova feature passa pelo filtro em `MVP_SCOPE.md` e `.cursor/rules/mvp-product-scope.mdc`
+- Divergências de código (`POST /apply`, botão "Aplicar") documentadas como dívida técnica
+- Documentação oficial: `PRODUCT_VISION.md`, `MVP_SCOPE.md`, `API_CONTRACT.md`
+
+---
+
 ## Template para novas decisões
 
 ```markdown

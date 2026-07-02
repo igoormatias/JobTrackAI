@@ -1,23 +1,25 @@
 # 🚀 JobTrack AI - Backend
 
-> Backend responsável por toda a inteligência da plataforma JobTrack AI.
+> Backend do **Career Tracker** JobTrack AI — centraliza vagas, calcula match e suporta acompanhamento manual do pipeline.
 
-O backend foi desenvolvido seguindo princípios de arquitetura limpa, escalabilidade e alta performance, sendo responsável por autenticação, gerenciamento de usuários, agregação de vagas, cálculo de compatibilidade (Match Score), pipeline de candidaturas, atualizações em tempo real e integrações com múltiplas fontes de vagas.
+O usuário **candidata-se na plataforma de origem**. O backend não substitui Gupy, LinkedIn ou Programathor.
+
+**Documentação:** [PRODUCT_VISION.md](../docs/PRODUCT_VISION.md) · [MVP_SCOPE.md](../docs/MVP_SCOPE.md) · [API_CONTRACT.md](../docs/API_CONTRACT.md)
 
 ---
 
 # 📖 Sobre
 
-O JobTrack AI não é apenas uma API de vagas.
+O JobTrack AI backend centraliza a lógica de:
 
-Ele centraliza toda a lógica de negócio da plataforma, permitindo:
+- Autenticação (Google OAuth)
+- Perfil simplificado
+- Listagem e engajamento com vagas (favoritar, visualizar — **não aplicar**)
+- Match Score
+- Pipeline de **acompanhamento manual**
+- Notificações internas
 
-- Buscar vagas em múltiplas fontes
-- Normalizar diferentes formatos de dados
-- Calcular Match Score personalizado
-- Gerenciar candidaturas
-- Atualizar usuários em tempo real
-- Servir como Backend for Frontend (BFF)
+**Fora do MVP (V2):** providers reais, scheduler, WebSocket, IA, analytics.
 
 ---
 
@@ -348,13 +350,11 @@ Essas informações são utilizadas pelo Match Engine.
 
 ---
 
-# 💼 Agregador de Vagas
+# 💼 Agregador de Vagas (V2)
 
-O sistema suporta múltiplas fontes.
+Providers reais (Gupy, LinkedIn, Programathor) estão planejados para **V2**. No MVP, vagas vêm de MSW/fixtures no frontend.
 
-Cada integração é completamente desacoplada.
-
-Exemplo:
+Estrutura preparada em `src/providers/`:
 
 ```
 providers/
@@ -734,63 +734,25 @@ Detalhes: [docs/DEPLOY.md](../docs/DEPLOY.md).
 
 # 🗺 Roadmap
 
-## 🚀 MVP
+Sincronizado com [docs/ROADMAP.md](../docs/ROADMAP.md).
 
-### Infraestrutura
+## MVP
 
-- [ ] Configuração do projeto
-- [ ] Express + TypeScript
-- [ ] Prisma
-- [ ] PostgreSQL
-- [ ] ESLint
-- [ ] Prettier
-- [ ] Husky
+- Auth, perfil simplificado, jobs (listagem/favoritos), pipeline manual
+- Match Score (MSW; engine real em evolução)
+- Notificações internas, entrevistas
+- **Não inclui:** providers reais, WebSocket, aplicar vagas pela API
 
-### Autenticação
+## V2
 
-- [ ] Google OAuth
-- [ ] JWT
-- [ ] Refresh Token
-
-### Usuário
-
-- [ ] Perfil
-- [ ] Preferências
-
-### Vagas
-
-- [ ] Integração Gupy
-- [ ] Integração LinkedIn
-- [ ] Integração Programathor
-- [ ] Normalização
-
-### Match
-
-- [ ] Match Engine
-- [ ] Score
-
-### Dashboard
-
-- [ ] Estatísticas
-
-### Pipeline
-
-- [ ] CRUD
-- [ ] Histórico
-
-### Tempo Real
-
-- [ ] WebSocket
-- [ ] Activity Center
-
-### Testes
-
-- [ ] Unitários
-- [ ] Integração
+- Providers (Gupy, LinkedIn, Programathor)
+- Scheduler, WebSocket
+- IA, Analytics, Machine Learning
+- Internacionalização, integrações avançadas
 
 ---
 
-## 🤖 v2
+## 🤖 v2 (legado — ver docs/ROADMAP.md)
 
 - [ ] IA
 - [ ] Resumo das vagas

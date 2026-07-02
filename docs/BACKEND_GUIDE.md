@@ -2,6 +2,10 @@
 
 Guia oficial de convenções e padrões do backend Express. Sincronizado com `backend/.cursor/rules/backend-architecture.mdc`.
 
+**Escopo MVP:** [MVP_SCOPE.md](./MVP_SCOPE.md) · **API:** [API_CONTRACT.md](./API_CONTRACT.md) · **Visão:** [PRODUCT_VISION.md](./PRODUCT_VISION.md)
+
+Toda nova feature backend deve passar pelo filtro MVP: ajuda o usuário a encontrar vagas ou acompanhar seu processo seletivo?
+
 ## Arquitetura
 
 O backend segue **Clean Architecture + DDD (lightweight) + SOLID**, sem over-engineering.
@@ -190,6 +194,26 @@ Migrar gradualmente quando o módulo receber alterações significativas. Ver AD
 
 ---
 
+## Jobs (escopo MVP)
+
+Ações MVP: listar, filtrar, favoritar, marcar visualizada. Abrir vaga usa `sourceUrl` no frontend — sem endpoint dedicado.
+
+`POST /jobs/:id/apply` e `DELETE /jobs/:id/apply` são **legados/deprecated** — fora do escopo MVP. Não expandir.
+
+## Pipeline (acompanhamento manual)
+
+O pipeline **não** representa candidatura automática. Endpoints permitem ao usuário mover status, favoritar, arquivar e consultar timeline manualmente.
+
+Ver [API_CONTRACT.md](./API_CONTRACT.md#pipeline-acompanhamento-manual).
+
+## Notificações
+
+Apenas eventos **internos** do JobTrack AI (nova vaga, mudança de status, entrevista, recomendação). Backend em evolução; MSW implementado no frontend.
+
+## Providers / WebSocket / Scheduler
+
+Código preparado em `src/providers/`, `src/config/socket.ts`, `src/modules/scheduler/` — **V2**, não MVP.
+
 ## Infraestrutura compartilhada
 
 | Caminho | Descrição |
@@ -222,7 +246,10 @@ Migrar gradualmente quando o módulo receber alterações significativas. Ver AD
 
 ## Referências
 
+- [PRODUCT_VISION.md](./PRODUCT_VISION.md)
+- [MVP_SCOPE.md](./MVP_SCOPE.md)
+- [API_CONTRACT.md](./API_CONTRACT.md)
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [DECISIONS.md](./DECISIONS.md) (ADR-019)
+- [DECISIONS.md](./DECISIONS.md) — ADR-019, ADR-020
 - [backend/README.md](../backend/README.md)
 - [backend/.cursor/rules/backend-architecture.mdc](../backend/.cursor/rules/backend-architecture.mdc)

@@ -1,5 +1,11 @@
 # Frontend Architecture Rules
 
+## Escopo MVP (obrigatório)
+
+Antes de implementar: *"Esta funcionalidade ajuda o usuário a encontrar vagas ou acompanhar seu processo seletivo?"*
+
+Se não → documentar em V2, não implementar. Ver [`.cursor/rules/mvp-product-scope.mdc`](../../.cursor/rules/mvp-product-scope.mdc) e [docs/MVP_SCOPE.md](../../docs/MVP_SCOPE.md).
+
 ## 🎯 Objetivo
 
 Garantir código **previsível, consistente e escalável**.

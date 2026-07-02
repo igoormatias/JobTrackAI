@@ -2,6 +2,17 @@
 
 Guia da arquitetura frontend para features do monorepo.
 
+**Escopo MVP:** [MVP_SCOPE.md](./MVP_SCOPE.md) · **Visão:** [PRODUCT_VISION.md](./PRODUCT_VISION.md)
+
+## Escopo MVP (frontend)
+
+Toda nova feature deve ajudar o usuário a **encontrar vagas** ou **acompanhar seu processo seletivo**. Caso contrário, documentar em V2 e não implementar.
+
+- **Abrir vaga** — botão oficial redireciona para `sourceUrl` (plataforma original)
+- **Pipeline** — acompanhamento manual; DnD atualiza status pelo usuário
+- **Notificações** — apenas eventos internos do JobTrack AI
+- **Perfil** — campos MVP em [MVP_SCOPE.md](./MVP_SCOPE.md#perfil-mvp); foto via Google OAuth
+
 ## Estrutura padrão de feature
 
 ```
@@ -30,10 +41,20 @@ JobsPage
     → JobCard (apresentação)
   → useJobFilters (nuqs + debounce)
   → useInfiniteJobs (React Query infinite)
-  → useJobMutations (favorite / apply / view)
+  → useJobMutations (favorite / view / openJob)
   → jobs-service
-  → MSW handlers / backend GET|PATCH|POST|DELETE /jobs
+  → MSW handlers / backend GET|PATCH|POST /jobs
 ```
+
+### Ações MVP em vagas
+
+| Ação | Implementação alvo |
+|------|-------------------|
+| Favoritar | `PATCH /jobs/:id/favorite` |
+| Marcar visualizada | `POST /jobs/:id/view` |
+| Abrir vaga | `window.open(job.sourceUrl)` — plataforma original |
+
+`POST /jobs/:id/apply` é **legado/deprecated** — fora do escopo MVP.
 
 ### Organização dos componentes
 
@@ -73,6 +94,11 @@ JobDetailsPage
   → MSW handlers / backend GET /jobs/:id/*
 ```
 
+### Ações na detail page
+
+- **Favoritar** e **marcar visualizada** — mutations existentes
+- **Abrir vaga** — ação primária no mobile (`JobDetailsBottomActions`); redireciona para plataforma original
+
 ### Organização dos componentes
 
 | Componente | Responsabilidade |
@@ -82,18 +108,14 @@ JobDetailsPage
 | `JobLearningGapsCard` | Gaps com badges de importância |
 | `JobDescriptionCard` | Seções da descrição |
 | `JobInsightsCard` | Insights gerados no servidor |
-| `JobPipelineTimeline` | Timeline do pipeline (quando há candidatura) |
+| `JobPipelineTimeline` | Timeline do pipeline (quando há entrada) |
 | `JobRelatedJobsSection` | Até 5 `JobCard` compact |
-| `JobDetailsBottomActions` | Barra fixa mobile (salvar + candidatar) |
+| `JobDetailsBottomActions` | Barra fixa mobile (salvar + **abrir vaga**) |
 | `JobDetailsSidebarWidget` | Match, insights, empresa, related, timeline (desktop) |
 
 ### Queries paralelas
 
 Cada seção consome seu endpoint dedicado via React Query. Hooks secundários usam `enabled` após o job principal carregar.
-
-### Match score na detail page
-
-Na rota `/jobs/[id]`, o score vem de `GET /jobs/:id/match` via `JobMatchScoreCircle`. Nunca calculado no componente.
 
 ## Feature Pipeline (Etapa 10)
 
@@ -105,6 +127,14 @@ PipelinePage
   → backend GET|PATCH|DELETE /pipeline/*
 ```
 
+O Pipeline **não representa candidatura** — o usuário adiciona entradas e atualiza status manualmente após aplicar na plataforma original.
+
+### Fluxo do usuário
+
+```
+Favoritou → Abriu vaga → Aplicou na origem → Adicionou ao Pipeline → Atualizou status (DnD)
+```
+
 ### Organização
 
 | Componente | Responsabilidade |
@@ -113,19 +143,30 @@ PipelinePage
 | `PipelineApplicationCard` | Card com match, ações rápidas |
 | `PipelineColumnNav` | Navegação por coluna no mobile |
 | `PipelineDetailDrawer` / `PipelineDetailPanel` | Detalhe sem sair do pipeline |
-| `PipelineApplicationTimeline` | Histórico da candidatura |
+| `PipelineApplicationTimeline` | Histórico da jornada |
 
 ### Optimistic updates
 
 `useMoveApplicationMutation` atualiza cache local e faz rollback em erro.
 
-### Testes
+## Notificações
 
-MSW handlers espelham backend; usados no Vitest (`pipeline.handlers.test.ts`). Testes de componentes/hooks ao lado dos módulos.
+Eventos **internos** apenas: nova vaga, mudança de status, entrevista próxima, recomendação. Nunca controlar candidatura externa.
+
+## Perfil
+
+Campos MVP: nome e foto (Google), área, senioridade, competências, modalidade, localização, pretensão salarial. Sem upload de foto.
+
+## Testes
+
+MSW handlers espelham backend; usados no Vitest. Testes de componentes/hooks ao lado dos módulos.
 
 ## Referências
 
+- [PRODUCT_VISION.md](./PRODUCT_VISION.md)
+- [MVP_SCOPE.md](./MVP_SCOPE.md)
+- [API_CONTRACT.md](./API_CONTRACT.md)
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [DECISIONS.md](./DECISIONS.md)
+- [DECISIONS.md](./DECISIONS.md) — ADR-020
 - [ROADMAP.md](./ROADMAP.md)
 - Assets visuais: [`assets/`](../assets/)

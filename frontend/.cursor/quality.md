@@ -1,6 +1,10 @@
 # Frontend Quality Rules
 
-> Fonte canônica de arquitetura: [rules.md](./rules.md) · Checklist agents: [../AGENTS.md](../AGENTS.md)
+> Fonte canônica: [rules.md](./rules.md) · Escopo MVP: [../../docs/MVP_SCOPE.md](../../docs/MVP_SCOPE.md)
+
+## Escopo MVP
+
+Nova feature deve estar em `docs/MVP_SCOPE.md`. Pergunta gate: ajuda a encontrar vagas ou acompanhar processo seletivo? Se não → V2 apenas.
 
 ## 🎯 Objetivo
 

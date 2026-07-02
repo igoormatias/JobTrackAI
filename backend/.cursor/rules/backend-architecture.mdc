@@ -11,6 +11,7 @@ alwaysApply: true
 - Clean Architecture + DDD (lightweight) + SOLID + Clean Code
 - Simplicidade primeiro — sem over-engineering
 - Template canônico: `backend/src/modules/system/`
+- Respeitar escopo MVP: `.cursor/rules/mvp-product-scope.mdc` (ADR-020)
 
 ## Estrutura obrigatória (novos módulos)
 

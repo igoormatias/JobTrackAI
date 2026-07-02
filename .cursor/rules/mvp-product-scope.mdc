@@ -1,0 +1,37 @@
+---
+description: Filtro obrigatório de escopo MVP — toda nova funcionalidade deve passar por esta pergunta
+alwaysApply: true
+---
+
+# Escopo MVP (obrigatório)
+
+Antes de implementar qualquer funcionalidade, responda:
+
+> **Esta funcionalidade ajuda diretamente o usuário a encontrar vagas ou acompanhar seu processo seletivo?**
+
+- Se **NÃO** → **não implementar no MVP**. Documentar em V2: `docs/ROADMAP.md` e `docs/MVP_SCOPE.md`.
+- Se **SIM** → validar contra `docs/MVP_SCOPE.md` antes de codar.
+
+## Visão do produto
+
+JobTrack AI é um **Career Tracker**. Centraliza vagas; o usuário **candidata-se na plataforma de origem**.
+
+## Princípios MVP
+
+- **Abrir vaga** — botão oficial redireciona para `sourceUrl`; nunca aplicar pela plataforma
+- **Pipeline manual** — acompanhamento da jornada; não é candidatura automática
+- **Perfil simplificado** — nome/foto via Google OAuth; sem upload de imagem
+- **Notificações** — apenas eventos internos do JobTrack AI
+
+## Fora do MVP (não implementar)
+
+Aplicação pela plataforma, upload de currículo, perfil público, LinkedIn/GitHub no perfil, ATS, providers reais, WebSocket, Scheduler, IA, Analytics, ML, i18n.
+
+Lista completa: `docs/MVP_SCOPE.md`
+
+## Referências
+
+- `docs/PRODUCT_VISION.md`
+- `docs/MVP_SCOPE.md`
+- `docs/API_CONTRACT.md`
+- `docs/DECISIONS.md` — ADR-020

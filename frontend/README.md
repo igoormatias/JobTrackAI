@@ -13,11 +13,11 @@
 
 ## 📖 Sobre o projeto
 
-O **JobTrack AI** é uma plataforma moderna para gerenciamento de carreira.
+O **JobTrack AI** é um **Career Tracker inteligente** — centraliza vagas de múltiplas plataformas e ajuda o usuário a organizar sua jornada de busca por emprego.
 
-Mais do que um simples agregador de vagas, o objetivo é permitir que qualquer profissional acompanhe toda sua jornada de contratação em um único lugar.
+O sistema **não substitui** as plataformas originais. O usuário candidata-se **diretamente na plataforma de origem** (Gupy, LinkedIn, Programathor, etc.).
 
-A plataforma busca vagas em múltiplas fontes, calcula automaticamente o nível de compatibilidade entre o perfil do usuário e cada oportunidade e oferece um pipeline completo para acompanhar candidaturas.
+Visão completa: [docs/PRODUCT_VISION.md](../docs/PRODUCT_VISION.md) · Escopo MVP: [docs/MVP_SCOPE.md](../docs/MVP_SCOPE.md)
 
 O projeto foi pensado para atender profissionais de tecnologia como:
 
@@ -64,16 +64,9 @@ Configuração inicial do perfil profissional.
 
 ## 💼 Busca de vagas
 
-Integração com múltiplas fontes.
+Vagas centralizadas de múltiplas fontes (Gupy, LinkedIn, Programathor — providers reais em **V2**; MVP usa MSW/fixtures).
 
-Exemplos:
-
-- Gupy
-- LinkedIn
-- Programathor
-- (Novas fontes futuramente)
-
-Cada vaga passa por um processo de normalização antes de ser exibida.
+Cada vaga passa por normalização antes de ser exibida. Ação principal: **Abrir vaga** na plataforma original.
 
 ---
 
@@ -115,9 +108,9 @@ Salvar vagas para visualizar posteriormente.
 
 ---
 
-## 📋 Pipeline de Candidaturas
+## 📋 Pipeline (acompanhamento manual)
 
-Gerencie todo o processo seletivo.
+Acompanhe sua jornada seletiva. O Pipeline **não representa a candidatura** — apenas o registro manual do que você fez na plataforma de origem.
 
 Status disponíveis:
 
@@ -140,33 +133,22 @@ Cada candidatura possui:
 
 ---
 
-## 🔔 Activity Center
+## 🔔 Notificações
 
-Central de atividades da aplicação.
+Eventos **internos** do JobTrack AI:
 
-Exemplos:
+- Novas vagas encontradas
+- Mudança manual de status no pipeline
+- Entrevista próxima
+- Nova recomendação
 
-- Novas vagas
-- Mudança no pipeline
-- Novas recomendações
-- Próximas entrevistas
-- Atualizações futuras da IA
+Nunca controla candidatura externa.
 
 ---
 
-## ⚡ Atualização em Tempo Real
+## ⚡ Atualização em Tempo Real (V2)
 
-Utilizando WebSocket.
-
-Enquanto a plataforma estiver aberta:
-
-- Novas vagas aparecem automaticamente
-- Dashboard é atualizado
-- Lista de vagas é sincronizada
-- Notificações são exibidas
-- Contadores são atualizados
-
-Sem necessidade de atualizar a página.
+WebSocket e sincronização automática estão planejados para **V2**. No MVP, dados são carregados via React Query com refresh manual ou revalidação.
 
 ---
 
@@ -202,16 +184,15 @@ Indicadores:
 
 ---
 
-## 👤 Perfil
+## 👤 Perfil (MVP)
 
-Gerenciamento do perfil profissional.
+Perfil simplificado:
 
-- Competências
-- Área
-- Senioridade
-- Localização
-- Pretensão salarial
-- Preferências
+- Nome e foto (Google OAuth — sem upload)
+- Área profissional, senioridade, competências
+- Modalidade preferida, localização, pretensão salarial
+
+Campos completos: [docs/MVP_SCOPE.md](../docs/MVP_SCOPE.md#perfil-mvp)
 
 ---
 
@@ -469,19 +450,19 @@ Salvar vaga
 
 ↓
 
-Aplicar
+Abrir vaga (plataforma original)
 
 ↓
 
-Pipeline
+Aplicar na plataforma original
 
 ↓
 
-Entrevistas
+Adicionar ao Pipeline (manual)
 
 ↓
 
-Oferta
+Atualizar status (manual)
 ```
 
 ---
@@ -651,7 +632,7 @@ Serviços globais em `frontend/src/services/`. Mocks MSW em `frontend/src/mocks/
 - [x] Filtros avançados (URL)
 - [x] Ordenação
 - [x] Infinite scroll
-- [x] Favoritos e aplicar
+- [x] Favoritos e abrir vaga (alvo; botão "Aplicar" = dívida técnica)
 - [x] Detalhes (Etapa 09)
 
 ### Pipeline
@@ -661,11 +642,10 @@ Serviços globais em `frontend/src/services/`. Mocks MSW em `frontend/src/mocks/
 - [x] Timeline
 - [x] Histórico
 
-### Tempo Real
+### Tempo Real (V2)
 
 - [ ] WebSocket
-- [ ] Activity Center
-- [ ] Toasts
+- [ ] Activity Center em tempo real
 - [ ] Atualização automática
 
 ### Testes
@@ -676,27 +656,30 @@ Serviços globais em `frontend/src/services/`. Mocks MSW em `frontend/src/mocks/
 
 ---
 
-## 🤖 v2
+## 🤖 V2
 
+- [ ] Providers reais (Gupy, LinkedIn, Programathor)
+- [ ] Scheduler
+- [ ] WebSocket / tempo real
 - [ ] IA para resumo das vagas
-- [ ] Comparação currículo x vaga
-- [ ] Recomendações inteligentes
-- [ ] Insights personalizados
-- [ ] Analytics
-- [ ] Calendário de entrevistas
+- [ ] Analytics e Machine Learning
+- [ ] Internacionalização (i18n)
+- [ ] Integrações avançadas
+- [ ] Upload de currículo
+- [ ] Comparação currículo × vaga
+- [ ] Perfil público, LinkedIn/GitHub/portfólio
+- [ ] Calendário de entrevistas avançado
 
 ---
 
-## 🚀 v3
+## 🚀 V3
 
 - [ ] Push Notifications
 - [ ] Aplicativo Mobile
-- [ ] Integrações
 - [ ] Dashboard avançado
 - [ ] IA para preparação de entrevistas
 - [ ] Recomendações de carreira
 - [ ] Gamificação
-- [ ] Marketplace de currículos
 
 ---
 

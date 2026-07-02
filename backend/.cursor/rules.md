@@ -1,6 +1,9 @@
 # Backend Rules (API)
 
-> **Arquitetura oficial:** ver [`backend-architecture.mdc`](./rules/backend-architecture.mdc) — obrigatório para todos os novos módulos.
+> **Arquitetura:** [`backend-architecture.mdc`](./rules/backend-architecture.mdc)  
+> **Escopo MVP:** [`.cursor/rules/mvp-product-scope.mdc`](../.cursor/rules/mvp-product-scope.mdc) · [docs/MVP_SCOPE.md](../docs/MVP_SCOPE.md)
+
+Antes de implementar: *"Esta funcionalidade ajuda o usuário a encontrar vagas ou acompanhar seu processo seletivo?"* Se não → V2, não MVP.
 
 ## Padrão novo (obrigatório para módulos novos)
 

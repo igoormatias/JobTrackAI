@@ -1,6 +1,6 @@
 # Core Frontend Rules
 
-> Detalhes completos: [rules.md](./rules.md) · Qualidade: [quality.md](./quality.md) · Agents: [../AGENTS.md](../AGENTS.md)
+> Detalhes completos: [rules.md](./rules.md) · Qualidade: [quality.md](./quality.md) · Escopo MVP: [../../docs/MVP_SCOPE.md](../../docs/MVP_SCOPE.md)
 
 ## Estrutura
 

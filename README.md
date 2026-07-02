@@ -1,6 +1,59 @@
 # JobTrack AI
 
-Plataforma moderna de acompanhamento de carreira — monorepo com frontend Next.js, backend Express e PostgreSQL.
+Plataforma **Career Tracker** para centralizar vagas de múltiplas fontes e organizar a jornada de busca por emprego.
+
+## Visão do produto
+
+JobTrack AI centraliza vagas provenientes de diferentes plataformas (Gupy, LinkedIn, Programathor e futuras integrações) e ajuda o usuário a organizar sua busca por emprego.
+
+O sistema **não substitui** as plataformas originais. O usuário continua realizando sua candidatura **diretamente na plataforma de origem**.
+
+Detalhes: [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md)
+
+## O que o sistema faz
+
+- Centraliza, busca e filtra vagas de múltiplas fontes
+- Permite favoritar vagas e abrir na plataforma original
+- Calcula Match Score personalizado
+- Oferece dashboard com visão da busca
+- Pipeline manual para acompanhar a jornada seletiva
+- Gestão de entrevistas no contexto do pipeline
+- Notificações sobre eventos internos (nova vaga, status, entrevista, recomendação)
+- Perfil simplificado (Google + dados profissionais)
+
+## O que o sistema NÃO faz
+
+- Não aplica vagas pela plataforma JobTrack AI
+- Não faz upload de currículo ou carta de apresentação
+- Não oferece perfil público, rede social ou ATS
+- Não integra LinkedIn/GitHub/portfólio no perfil (V2)
+- Não busca vagas em tempo real via providers reais no MVP (V2)
+
+Lista completa: [docs/MVP_SCOPE.md](docs/MVP_SCOPE.md)
+
+## Fluxo do usuário
+
+```
+Encontrou vaga → Favoritou → Abriu vaga (origem) → Aplicou na plataforma original
+  → Adicionou ao Pipeline → Atualizou status manualmente
+```
+
+## Escopo do MVP
+
+| Incluído | Excluído (V2+) |
+|----------|----------------|
+| Jobs, filtros, favoritos, abrir vaga | Aplicar pela plataforma |
+| Dashboard, Match Score | Providers reais, WebSocket |
+| Pipeline manual, entrevistas | IA, Analytics, ML |
+| Notificações internas | Upload currículo, perfil público |
+| Perfil simplificado | i18n, integrações avançadas |
+
+## Roadmap
+
+- **MVP** — concluir Profile, Notificações, Entrevistas, Match Engine real, deploy
+- **V2** — Providers, Scheduler, WebSocket, IA, Analytics, ML, i18n
+
+Ver [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ## Arquitetura
 
@@ -14,29 +67,15 @@ Frontend (Next.js :3000) ──► React Query ──► MSW (dev) ou API REST
 Backend (Express :3333) ──► Prisma ──► PostgreSQL
 ```
 
-Detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Detalhes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-## Arquitetura do Backend
+### Backend
 
-O backend segue **Clean Architecture + DDD (lightweight)** para novos módulos:
+Clean Architecture + DDD (lightweight) para novos módulos. Template: módulo `system`.
 
-```
-HTTP → Controller → Use Case → Repository (interface) → Prisma / in-memory
-                              ↓
-                         EventBus (Domain Events)
-```
-
-- **Organização:** `domain/` → `application/` → `infrastructure/` por módulo
-- **Template oficial:** módulo `system` (`GET /health`, `/version`, `/info`)
-- **Módulos legados** (`auth`, `jobs`, `pipeline`, etc.) usam `service/` até migração gradual
-- **EventBus:** `InMemoryEventBus` para desacoplar ações importantes
-
-Guias completos:
-
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — visão geral
-- [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md) — como criar módulos, endpoints e use cases
-- [backend/README.md](backend/README.md) — referência do backend
-- [docs/DECISIONS.md](docs/DECISIONS.md) — ADR-019 (migração evolutiva)
+- [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md)
+- [backend/README.md](backend/README.md)
+- ADR-019 (arquitetura) · ADR-020 (escopo produto)
 
 ## Estrutura do projeto
 
@@ -45,12 +84,11 @@ Guias completos:
 ├── frontend/          # Next.js 15, React 19, MSW, features
 ├── backend/           # Express 5, Prisma, módulos REST
 ├── assets/            # Prints de referência UI
-├── docs/              # ROADMAP, ARCHITECTURE, DECISIONS, DEPLOY
+├── docs/              # Documentação oficial
 ├── docker/            # Dockerfiles (somente desenvolvimento)
-├── .github/
+├── .cursor/rules/     # Cursor Rules (incl. escopo MVP)
 ├── package.json       # Scripts do monorepo
 ├── docker-compose.yml
-├── vercel.json
 └── README.md
 ```
 
@@ -89,23 +127,21 @@ npm run dev:local
 
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3333
-- Health backend: http://localhost:3333/health
+- Health: http://localhost:3333/health
 
 Com `NEXT_PUBLIC_ENABLE_MSW=true`, o frontend usa mocks sem depender do backend para a maioria das telas.
 
 ## Como utilizar Docker (desenvolvimento)
 
 ```bash
-# Na raiz do repositório
-npm install          # scripts do monorepo (concurrently)
-npm run docker:up    # ou: docker compose up -d
+npm install
+npm run docker:up
 ```
 
 | Serviço    | URL |
 |------------|-----|
 | Frontend   | http://localhost:3000 |
 | Backend    | http://localhost:3333 |
-| Health FE  | http://localhost:3000/api/health |
 | Health BE  | http://localhost:3333/health |
 | Version BE | http://localhost:3333/version |
 | Info BE    | http://localhost:3333/info |
@@ -121,22 +157,15 @@ npm run docker:up    # ou: docker compose up -d
 | `npm run docker:logs` | Logs em tempo real |
 | `npm run docker:restart` | Reinicia serviços |
 
-Volume persistente: `jobtrack_postgres_data`.
-
-**Prisma:** migrations não rodam automaticamente. Quando houver models:
-
-```bash
-docker compose exec backend npx prisma migrate dev
-```
-
-Referência de variáveis: [.env.docker.example](.env.docker.example).
+**Prisma:** migrations não rodam automaticamente. Referência: [.env.docker.example](.env.docker.example).
 
 ## Fluxo de desenvolvimento
 
 1. Onboarding define o perfil do usuário.
 2. Com MSW ativo, o Smart Mock Engine personaliza jobs, dashboard e notificações.
-3. Alterações em `frontend/src` e `backend/src` refletem com hot reload (local ou Docker).
-4. Atualize [docs/ROADMAP.md](docs/ROADMAP.md) ao concluir etapas.
+3. Alterações em `frontend/src` e `backend/src` refletem com hot reload.
+4. Valide novas features contra [docs/MVP_SCOPE.md](docs/MVP_SCOPE.md).
+5. Atualize [docs/ROADMAP.md](docs/ROADMAP.md) ao concluir etapas.
 
 ## Scripts do monorepo
 
@@ -146,22 +175,26 @@ npm run lint       # lint em ambos
 npm run test       # testes em ambos
 ```
 
-Scripts específicos: ver [frontend/README.md](frontend/README.md) e [backend/README.md](backend/README.md).
+Scripts específicos: [frontend/README.md](frontend/README.md) · [backend/README.md](backend/README.md)
 
 ## Deploy
 
 Produção: **Vercel** (frontend) + **Vercel Services** (backend) + **Supabase PostgreSQL**.
 
-Guia completo: [docs/DEPLOY.md](docs/DEPLOY.md).
+Guia: [docs/DEPLOY.md](docs/DEPLOY.md)
 
 ## Documentação
 
 | Documento | Conteúdo |
 |-----------|----------|
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Etapas do projeto |
+| [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md) | Visão e princípios do produto |
+| [docs/MVP_SCOPE.md](docs/MVP_SCOPE.md) | Escopo in/out do MVP |
+| [docs/API_CONTRACT.md](docs/API_CONTRACT.md) | Contrato REST oficial |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | MVP e V2 |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitetura técnica |
-| [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md) | Guia do backend (Clean Architecture) |
-| [docs/DECISIONS.md](docs/DECISIONS.md) | Decisões (ADR) |
+| [docs/FRONTEND_GUIDE.md](docs/FRONTEND_GUIDE.md) | Guia frontend |
+| [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md) | Guia backend |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | ADRs (ADR-020 = escopo produto) |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Deploy |
 
 ## Licença
