@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select";
-import { Switch } from "@/components/ui/Switch";
 import { useTheme } from "@/providers/theme-provider";
 import type { UserSettings } from "@/types";
 
@@ -34,8 +33,6 @@ const toFormValues = (settings: UserSettings): AccountSettingsFormValues => ({
   theme: settings.theme,
   jobRefreshFrequency: settings.jobRefreshFrequency,
   dashboardNotificationInterval: settings.dashboardNotificationInterval,
-  showCompatibleJobsOnly: settings.showCompatibleJobsOnly,
-  showSalaryWhenAvailable: settings.showSalaryWhenAvailable,
 });
 
 export const SettingsForm = ({ settings, isSaving = false, onSubmit }: SettingsFormProps) => {
@@ -134,28 +131,6 @@ export const SettingsForm = ({ settings, isSaving = false, onSubmit }: SettingsF
           <p className="text-xs text-muted-foreground">
             Notificações internas exibidas enquanto a plataforma está aberta — não são push nem e-mail.
           </p>
-        </div>
-
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
-          <div>
-            <p className="text-sm font-medium">Mostrar apenas vagas compatíveis</p>
-            <p className="text-xs text-muted-foreground">Filtra vagas com maior aderência ao seu perfil.</p>
-          </div>
-          <Switch
-            checked={watch("showCompatibleJobsOnly")}
-            onCheckedChange={(checked) => setValue("showCompatibleJobsOnly", checked, { shouldDirty: true })}
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
-          <div>
-            <p className="text-sm font-medium">Mostrar salário quando disponível</p>
-            <p className="text-xs text-muted-foreground">Exibe faixas salariais informadas pelas vagas.</p>
-          </div>
-          <Switch
-            checked={watch("showSalaryWhenAvailable")}
-            onCheckedChange={(checked) => setValue("showSalaryWhenAvailable", checked, { shouldDirty: true })}
-          />
         </div>
       </div>
 

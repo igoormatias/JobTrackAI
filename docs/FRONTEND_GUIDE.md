@@ -177,14 +177,16 @@ Feature unificada para Perfil e Preferências (Etapa 11). Rotas: `/profile`, `/s
 
 ```
 features/account/
-  components/profile/   ProfileForm, ProfileReadOnlyFields
-  components/settings/  SettingsForm
-  hooks/                useAccountProfile, useAccountSettings
-  schemas/              account-profile.schema, account-settings.schema
-  pages/                ProfilePage, SettingsPage
+  components/   AccountTabsNav, ProfileForm, SettingsForm, UnsavedChangesBar
+  hooks/        useAccountProfile, useAccountSettings
+  queries/      useProfileQuery, useSettingsQuery (+ mutations)
+  services/     account-profile-service, account-settings-service
+  schemas/      account-profile.schema, account-settings.schema
+  pages/        ProfilePage, SettingsPage
 ```
 
-- Hooks legados em `features/profile` e `features/settings` permanecem para React Query (`useProfile`, `useSettings`)
+- Abas **Perfil | Preferências** via `AccountTabsNav` nas rotas `/profile` e `/settings`
+- Hooks legados em `features/profile` e `features/settings` re-exportam de `features/account/queries`
 - `ThemeProvider` suporta `dark | light | system` — sincronizado com `PATCH /settings`
 - Navegação: grupo colapsável **Minha Conta** na sidebar; mobile: link **Conta** → `/profile`
 - Formulários: React Hook Form + Zod; barra de alterações não salvas
@@ -195,7 +197,7 @@ Read-only (Google): nome, e-mail, foto. Editáveis: área, senioridade, competê
 
 ### Preferências (campos MVP)
 
-Tema, atualização automática de vagas, intervalo de notificações internas no dashboard, toggles de vagas compatíveis e exibição de salário.
+Tema, atualização automática de vagas e intervalo de notificações internas no dashboard.
 
 ---
 

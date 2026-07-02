@@ -43,8 +43,6 @@ describe("accountSettingsSchema", () => {
       theme: "system",
       jobRefreshFrequency: "1h",
       dashboardNotificationInterval: "30m",
-      showCompatibleJobsOnly: true,
-      showSalaryWhenAvailable: false,
     });
 
     expect(result.success).toBe(true);

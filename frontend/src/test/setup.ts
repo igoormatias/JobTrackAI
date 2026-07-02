@@ -12,6 +12,14 @@ beforeAll(() => {
   server.listen({ onUnhandledRequest: "error" });
 });
 
+class ResizeObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+global.ResizeObserver = ResizeObserverMock;
+
 afterEach(() => {
   cleanup();
   server.resetHandlers();

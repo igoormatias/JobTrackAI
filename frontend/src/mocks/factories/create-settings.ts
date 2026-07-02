@@ -13,7 +13,5 @@ export const createSettings = ({ userId, id }: CreateSettingsInput): UserSetting
   theme: "dark",
   jobRefreshFrequency: "1h",
   dashboardNotificationInterval: "1h",
-  showCompatibleJobsOnly: false,
-  showSalaryWhenAvailable: true,
   updatedAt: new Date().toISOString(),
 });

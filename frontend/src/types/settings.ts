@@ -6,18 +6,9 @@ export type UserSettings = {
   theme: "dark" | "light" | "system";
   jobRefreshFrequency: RefreshFrequency;
   dashboardNotificationInterval: RefreshFrequency;
-  showCompatibleJobsOnly: boolean;
-  showSalaryWhenAvailable: boolean;
   updatedAt: string;
 };
 
 export type UpdateSettingsPayload = Partial<
-  Pick<
-    UserSettings,
-    | "theme"
-    | "jobRefreshFrequency"
-    | "dashboardNotificationInterval"
-    | "showCompatibleJobsOnly"
-    | "showSalaryWhenAvailable"
-  >
+  Pick<UserSettings, "theme" | "jobRefreshFrequency" | "dashboardNotificationInterval">
 >;

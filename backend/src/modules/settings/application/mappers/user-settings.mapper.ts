@@ -24,8 +24,6 @@ export class UserSettingsMapper {
       theme: toThemePreference(record.theme),
       jobRefreshFrequency: toRefreshFrequency(record.jobRefreshFrequency),
       dashboardNotificationInterval: toRefreshFrequency(record.dashboardNotificationInterval),
-      showCompatibleJobsOnly: record.showCompatibleJobsOnly,
-      showSalaryWhenAvailable: record.showSalaryWhenAvailable,
       updatedAt: record.updatedAt.toISOString(),
     };
   }

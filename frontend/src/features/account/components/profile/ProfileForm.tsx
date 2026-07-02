@@ -22,7 +22,7 @@ import {
 import { getSkillsForArea } from "@/features/onboarding/constants/skills-by-area";
 import { SalaryStep } from "@/features/onboarding/components/steps/SalaryStep";
 import type { OnboardingFormState } from "@/features/onboarding/types/onboarding.types";
-import type { AccountProfile, UpdateProfilePayload } from "@/types";
+import type { AccountProfile } from "@/types";
 
 import { AccountLocationFields } from "./AccountLocationFields";
 import { UnsavedChangesBar } from "../UnsavedChangesBar";
@@ -37,9 +37,13 @@ export type ProfileFormProps = {
   onSubmit: (values: AccountProfileFormValues) => void;
 };
 
+const ACCOUNT_SENIORITIES = ["junior", "mid", "senior", "specialist", "lead"] as const;
+
 const toFormValues = (profile: AccountProfile): AccountProfileFormValues => ({
   area: profile.area,
-  seniority: profile.seniority,
+  seniority: ACCOUNT_SENIORITIES.includes(profile.seniority as (typeof ACCOUNT_SENIORITIES)[number])
+    ? (profile.seniority as AccountProfileFormValues["seniority"])
+    : null,
   modality: profile.modality,
   locationPreference: profile.locationPreference ?? {
     scope: "country",

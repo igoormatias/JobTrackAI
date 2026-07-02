@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 
+import { AccountTabsNav } from "./AccountTabsNav";
+
 export type AccountSectionLayoutProps = {
   title: string;
   description: string;
@@ -20,6 +22,7 @@ export const AccountSectionLayout = ({
 }: AccountSectionLayoutProps) => (
   <div className={cn("space-y-6 pb-24", className)}>
     <PageHeader title={title} description={description} />
+    <AccountTabsNav />
     {children}
   </div>
 );

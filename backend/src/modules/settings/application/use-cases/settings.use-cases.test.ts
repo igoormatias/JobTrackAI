@@ -20,8 +20,6 @@ class InMemorySettingsRepository implements UserSettingsRepository {
       theme: "dark",
       jobRefreshFrequency: "1h",
       dashboardNotificationInterval: "1h",
-      showCompatibleJobsOnly: false,
-      showSalaryWhenAvailable: true,
       updatedAt: new Date().toISOString(),
     };
     this.settings.set(userId, settings);

@@ -6,8 +6,6 @@ export const updateSettingsSchema = z.object({
   theme: z.enum(["dark", "light", "system"]).optional(),
   jobRefreshFrequency: refreshFrequencySchema.optional(),
   dashboardNotificationInterval: refreshFrequencySchema.optional(),
-  showCompatibleJobsOnly: z.boolean().optional(),
-  showSalaryWhenAvailable: z.boolean().optional(),
 });
 
 export type UpdateSettingsSchemaInput = z.infer<typeof updateSettingsSchema>;

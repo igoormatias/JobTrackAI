@@ -270,7 +270,7 @@ Registro de decisões técnicas relevantes. Adicione novas entradas quando houve
 - Módulo greenfield `settings` + evento `SettingsUpdated`
 - Feature frontend `features/account` (Perfil + Preferências)
 - Auth faz `upsert` de User + default UserSettings no login Google
-- Preferências MVP: tema (`system` suportado), refresh de vagas, intervalo dashboard, toggles de compatibilidade/salário
+- Preferências MVP: tema (`system` suportado), refresh de vagas, intervalo dashboard
 
 **Consequências:**
 

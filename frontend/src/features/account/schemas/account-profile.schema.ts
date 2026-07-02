@@ -19,7 +19,7 @@ const professionalAreaSchema = z.enum([
   "other",
 ]);
 
-const senioritySchema = z.enum(["intern", "junior", "mid", "senior", "specialist", "lead", "staff"]);
+const senioritySchema = z.enum(["junior", "mid", "senior", "specialist", "lead"]);
 
 const workModalitySchema = z.enum(["remote", "hybrid", "onsite", "any"]);
 

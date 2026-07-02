@@ -43,7 +43,5 @@ model UserSettings {
   theme                         String   @default("dark")
   jobRefreshFrequency           String   @default("1h")
   dashboardNotificationInterval String   @default("1h")
-  showCompatibleJobsOnly        Boolean  @default(false)
-  showSalaryWhenAvailable       Boolean  @default(true)
   updatedAt                     DateTime @updatedAt
 }

@@ -109,7 +109,7 @@ Estas funcionalidades **não** fazem parte do MVP. Podem existir no futuro (V2+)
 | Internacionalização (i18n) | V2 |
 | Integrações avançadas | V2 |
 | Settings avançados (push, e-mail, i18n) | V2 |
-| Preferências básicas (tema, refresh, toggles) | **MVP** — Etapa 11 |
+| Preferências básicas (tema, refresh, intervalo dashboard) | **MVP** — Etapa 11 |
 | Upload de foto de perfil | Fora do MVP |
 
 ---

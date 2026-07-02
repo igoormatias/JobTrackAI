@@ -1,9 +1,9 @@
 "use client";
 
-import { useProfile, useUpdateProfile } from "@/features/profile";
 import { useCurrentUser } from "@/features/auth";
 import type { AccountProfile, UpdateProfilePayload } from "@/types";
 
+import { useProfileQuery, useUpdateProfileMutation } from "../../queries";
 import type { AccountProfileFormValues } from "../../schemas/account-profile.schema";
 
 const buildLocationLabel = (values: AccountProfileFormValues): string => {
@@ -20,8 +20,8 @@ const toAccountProfile = (profile: AccountProfile, userFallback: AccountProfile[
 });
 
 export const useAccountProfile = () => {
-  const profileQuery = useProfile();
-  const updateMutation = useUpdateProfile();
+  const profileQuery = useProfileQuery();
+  const updateMutation = useUpdateProfileMutation();
   const { user } = useCurrentUser();
 
   const userFallback: AccountProfile["user"] = {

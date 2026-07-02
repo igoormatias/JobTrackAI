@@ -78,6 +78,14 @@ Kanban de acompanhamento manual com drag and drop, KPIs, filtros, drawer/panel d
 
 Perfil simplificado + Preferências (`features/account`, Prisma User/Profile/UserSettings, módulos `profiles` e `settings` em Clean Architecture).
 
+**Entregue:**
+
+- [x] Abas Perfil / Preferências na área da conta (`AccountTabsNav`)
+- [x] Estrutura `queries/` e `services/` em `features/account`
+- [x] Testes de componentes e hooks
+- [x] Alinhamento de schemas (senioridade, labels)
+- [x] Integração React Query + Backend + Prisma + EventBus
+
 #### ⬜ Pipeline Refinado (Etapa 12)
 
 Implementação do domínio refinado (ADR-022):

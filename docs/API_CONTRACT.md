@@ -92,8 +92,6 @@ Favorito, prioridade e visibilidade são **ortogonais** ao estágio do pipeline.
 | `theme` | string | `dark` \| `light` \| `system` |
 | `jobRefreshFrequency` | string | `15m` \| `30m` \| `1h` \| `2h` \| `manual` |
 | `dashboardNotificationInterval` | string | mesmo enum acima |
-| `showCompatibleJobsOnly` | boolean | — |
-| `showSalaryWhenAvailable` | boolean | — |
 
 **Fora do MVP:** push, e-mail, i18n (`language`).
 

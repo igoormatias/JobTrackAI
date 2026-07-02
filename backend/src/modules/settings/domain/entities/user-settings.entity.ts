@@ -8,18 +8,9 @@ export type UserSettingsEntity = {
   theme: ThemePreference;
   jobRefreshFrequency: RefreshFrequency;
   dashboardNotificationInterval: RefreshFrequency;
-  showCompatibleJobsOnly: boolean;
-  showSalaryWhenAvailable: boolean;
   updatedAt: string;
 };
 
 export type UpdateUserSettingsInput = Partial<
-  Pick<
-    UserSettingsEntity,
-    | "theme"
-    | "jobRefreshFrequency"
-    | "dashboardNotificationInterval"
-    | "showCompatibleJobsOnly"
-    | "showSalaryWhenAvailable"
-  >
+  Pick<UserSettingsEntity, "theme" | "jobRefreshFrequency" | "dashboardNotificationInterval">
 >;

@@ -2,14 +2,14 @@
 
 import { useEffect } from "react";
 
-import { useSettings, useUpdateSettings } from "@/features/settings";
 import { useTheme } from "@/providers/theme-provider";
 
+import { useSettingsQuery, useUpdateSettingsMutation } from "../../queries";
 import type { AccountSettingsFormValues } from "../../schemas/account-settings.schema";
 
 export const useAccountSettings = () => {
-  const settingsQuery = useSettings();
-  const updateMutation = useUpdateSettings();
+  const settingsQuery = useSettingsQuery();
+  const updateMutation = useUpdateSettingsMutation();
   const { setTheme } = useTheme();
 
   useEffect(() => {
