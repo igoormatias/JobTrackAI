@@ -91,6 +91,18 @@ JobDetailsPage → MainWidget / SidebarWidget → Hooks paralelos → job-detail
 - **Match na detail page:** apenas via `/match` (não recalculado na UI)
 - **Layout:** coluna única no mobile com bottom actions; grid `1fr + 360px` com sidebar sticky no desktop
 - **Mutations:** reutiliza `useJobMutations` (favoritar, marcar visualizada, **abrir vaga**)
+- **Análise IA (Etapa 18):** `CareerAnalysisCard` na sidebar — botão manual; `GET/POST /ai/career-analysis/:trackingId`
+
+### Feature AI Career (Etapa 18)
+
+```
+CareerAnalysisCard → useCareerAnalysisQuery / useGenerateCareerAnalysisMutation → career-analysis-service → /ai/*
+```
+
+- **Trigger:** apenas clique do usuário (nunca no mount)
+- **Match score:** permanece `rules-v1`; IA explica via `matchExplanation`
+- **Cache:** badge "Cache" quando `cached: true`; `AIAnalysis` no backend
+- **Skills:** `skillNames` no perfil + sync para `UserSkill` (catálogo normalizado)
 
 ### Feature Pipeline (Etapa 10)
 
@@ -116,7 +128,7 @@ Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) e [BACKEND_GUIDE.md](./BACKEND_GUID
 - **ORM:** Prisma (PostgreSQL)
 - **Validação:** Zod
 - **Arquitetura:** Clean Architecture + DDD (lightweight) — padrão oficial para novos módulos
-- **Módulos Clean Architecture:** `system`, `profiles`, `settings`, `job-catalog`, `job-aggregation`
+- **Módulos Clean Architecture:** `system`, `profiles`, `settings`, `job-catalog`, `job-aggregation`, `ai`
 - **Providers:** `src/providers/*` (adapters) → orquestrados por `job-aggregation` → `job-catalog` (Prisma)
 - **Módulos legados:** `auth`, `jobs`, `pipeline`, `recommendations` (controller → service; jobs delega catálogo ao `job-catalog`)
 - **Job Catalog (Etapa 14):** catálogo oficial via Prisma seed (~400 vagas); `JobCatalogRepository` + `PrismaJobCatalogRepository`; Providers alimentam o mesmo `Job` na V2
@@ -125,6 +137,19 @@ Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) e [BACKEND_GUIDE.md](./BACKEND_GUID
 - **Importação por URL:** interfaces preparadas, **V2**
 - **Tempo real:** Socket.IO — **preparado, V2** (não exposto no MVP)
 - **Rate limit:** `express-rate-limit` em memória (sem Redis no MVP)
+
+### Módulo AI Career (Etapa 18)
+
+```
+POST /ai/career-analysis/:trackingId → CareerAnalysisService
+  → cache (AIAnalysis + contentHash)
+  → miss: SkillNormalizer + PromptBuilder/Compressor → GeminiProvider
+  → match input from MatchEngineService (rules-v1, never recalculated by IA)
+```
+
+- **Skills:** `Skill`, `SkillAlias`, `UserSkill`; sync a partir de `skillNames` no onboarding/perfil
+- **Provider:** `GeminiProvider` em `infrastructure/providers/`; port `AIProviderPort`
+- **Sem API key:** `503 AI_NOT_CONFIGURED` — app funciona sem IA
 
 ### Arquitetura em camadas (novos módulos)
 

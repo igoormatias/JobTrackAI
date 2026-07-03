@@ -20,6 +20,8 @@ model User {
   trackings     JobTracking[]
   notifications Notification[]
   jobViews      JobView[]
+  userSkills    UserSkill[]
+  aiUsageLogs   AIAnalysisUsageLog[]
 }
 
 model Job {
@@ -144,6 +146,7 @@ model JobTracking {
   updatedAt          DateTime        @updatedAt
   timelineEvents     TimelineEvent[]
   interviews         Interview[]
+  aiAnalyses         AIAnalysis[]
 
   @@unique([userId, jobId])
   @@index([userId, stage])
@@ -220,4 +223,71 @@ model UserSettings {
   jobRefreshFrequency           String   @default("1h")
   dashboardNotificationInterval String   @default("1h")
   updatedAt                     DateTime @updatedAt
+}
+
+model Skill {
+  id         String       @id @default(cuid())
+  slug       String       @unique
+  name       String
+  status     String       @default("OFFICIAL")
+  area       String?
+  aliases    SkillAlias[]
+  userSkills UserSkill[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model SkillAlias {
+  id        String @id @default(cuid())
+  aliasSlug String @unique
+  skillId   String
+  skill     Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@index([skillId])
+}
+
+model UserSkill {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillId String
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  level   String @default("INTERMEDIATE")
+  status  String @default("OFFICIAL")
+
+  @@unique([userId, skillId])
+  @@index([userId])
+}
+
+model AIAnalysis {
+  id                 String      @id @default(cuid())
+  trackingId         String
+  tracking           JobTracking @relation(fields: [trackingId], references: [id], onDelete: Cascade)
+  contentHash        String
+  result             Json
+  provider           String      @default("gemini")
+  model              String
+  promptVersion      String
+  matchEngineVersion String
+  confidence         Float?
+  generatedAt        DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  @@unique([trackingId, contentHash])
+  @@index([trackingId, generatedAt])
+}
+
+model AIAnalysisUsageLog {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackingId       String?
+  wasCached        Boolean  @default(false)
+  durationMs       Int?
+  model            String?
+  promptTokens     Int?
+  completionTokens Int?
+  createdAt        DateTime @default(now())
+
+  @@index([userId, createdAt])
 }

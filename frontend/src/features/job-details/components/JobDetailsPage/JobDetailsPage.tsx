@@ -135,6 +135,8 @@ export const JobDetailsPage = () => {
           company={company}
           relatedJobs={relatedJobs}
           timeline={timeline}
+          trackingId={job.trackingId}
+          onAddToPipeline={handleAddToPipeline}
         />
       </div>
 

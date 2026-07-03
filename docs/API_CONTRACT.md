@@ -260,6 +260,47 @@ Contrato alvo (MSW implementado; backend em evolução):
 
 ---
 
+## AI Career Intelligence (Etapa 18)
+
+Análise de carreira **on-demand** para processos no pipeline. O match score permanece no engine `rules-v1`; a IA apenas interpreta e recomenda.
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| `GET` | `/ai/career-analysis/:trackingId` | Sim | Última análise salva ou `204` se inexistente |
+| `POST` | `/ai/career-analysis/:trackingId` | Sim + rate limit | Gera análise (cache-first). Query `refresh=true` força nova chamada ao provider |
+
+**Ownership:** `trackingId` deve pertencer ao usuário autenticado (404 se IDOR).
+
+**Rate limits (cache miss):** `AI_CAREER_DAILY_LIMIT` (default 5/dia UTC), `AI_CAREER_DEBOUNCE_MS` (default 15s).
+
+**Resposta `data`:**
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `summary` | string | Resumo executivo |
+| `matchExplanation` | string | Explicação do match (não recalcula score) |
+| `strengths` | string[] | Pontos fortes |
+| `weaknesses` | string[] | Pontos de atenção |
+| `missingSkills` | string[] | Lacunas de skills |
+| `learningRecommendations` | string[] | Recomendações de estudo |
+| `interviewPreparation` | string[] | Preparação para entrevista |
+| `careerInsights` | string[] | Insights de carreira |
+| `nextSteps` | string[] | Próximos passos |
+| `confidence` | number | 0–1 |
+| `generatedAt` | ISO string | Timestamp da análise |
+| `provider` | string | Ex.: `gemini` |
+| `model` | string | Modelo usado |
+| `engineVersion` | `"ai-career-v1"` | Versão do módulo IA |
+| `matchEngineVersion` | string | Ex.: `rules-v1` |
+| `cached` | boolean | `true` se servido do cache |
+| `stale` | boolean? | `true` se hash mudou mas `refresh=false` |
+
+**Erros:** `AI_NOT_CONFIGURED` (503), `AI_PROVIDER_ERROR` (502), `AI_RATE_LIMIT_EXCEEDED` (429), `AI_DEBOUNCE` (429).
+
+Ver [AI.md](./AI.md) e ADR-028 em [DECISIONS.md](./DECISIONS.md).
+
+---
+
 ## Importação futura (V2)
 
 | Funcionalidade | Descrição |

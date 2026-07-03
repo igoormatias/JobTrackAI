@@ -4,6 +4,14 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [Unreleased]
 
+### Added (Etapa 18 — AI Career Intelligence)
+
+- Módulo `ai` + Gemini (`GEMINI_API_KEY`, `GEMINI_MODEL`, `PROMPT_VERSION`)
+- Skills Catalog: `Skill`, `SkillAlias`, `UserSkill` + `SkillNormalizer`
+- Cache `AIAnalysis` + observabilidade `AIAnalysisUsageLog`
+- `POST/GET /ai/career-analysis/:trackingId`
+- Frontend: `CareerAnalysisCard` on-demand em Job Details e Pipeline
+
 ### Added (Etapa 17 — Job Aggregation Engine)
 
 - Módulo `job-aggregation` com normalização, dedup, validação e persistência

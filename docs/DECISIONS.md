@@ -506,7 +506,29 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 - Runtime em produção depende de sync ou seed dev explícito
 - LinkedIn/Programathor retornam `health: degraded` até implementação real (V2+)
-- Etapa 18 = AI Match Engine (renumerada)
+- Etapa 18 = AI Career Intelligence
+
+---
+
+## ADR-028 — AI Career Intelligence (Etapa 18)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 18)
+
+**Contexto:** Usuários precisam de explicações e recomendações contextualizadas por vaga/tracking, sem substituir o Match Engine determinístico.
+
+**Decisão:**
+
+- Módulo `ai` com port `AIProviderPort` e `GeminiProvider`
+- Match Score permanece `rules-v1`; IA produz `engineVersion: ai-career-v1` apenas na análise
+- Cache `AIAnalysis` por `(trackingId, contentHash)` + `PROMPT_VERSION`
+- Trigger manual — nunca auto-run em listagens
+- `skillNames` mantido; `UserSkill` sincronizado em background
+
+**Consequências:**
+
+- App funcional sem `GEMINI_API_KEY` (503 `AI_NOT_CONFIGURED` no POST)
+- Free Tier: rate limit + debounce em cache miss; meta >90% cache hit
 
 ---
 

@@ -1,6 +1,6 @@
 # JobTrack AI — Implementation Status
 
-Last updated: Etapa 17 (Job Aggregation Engine).  
+Last updated: Etapa 18 (AI Career Intelligence).  
 Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 
 | Module | Frontend | Backend API | Prisma | Tests | Notes |
@@ -11,7 +11,8 @@ Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 | Jobs (catalog) | ✅ | ✅ | ✅ Job | ✅ | Providers + seed opcional |
 | Job Aggregation | — | ✅ | ✅ Registry/Execution/Import | ✅ | Gupy real; stubs LinkedIn/Programathor |
 | Job Details | ✅ | ✅ | ✅ | ✅ | Match V1; related via catalog |
-| Match Engine | ✅ types | ✅ | — | ✅ | `rules-v1`; AI enriches in Etapa 18 |
+| Match Engine | ✅ types | ✅ | — | ✅ | `rules-v1`; AI enriches explanation only |
+| AI Career | ✅ | ✅ | ✅ Skill/AIAnalysis | ✅ | Gemini on-demand; cache-first; Etapa 18 |
 | Job Tracking | ✅ | ✅ | ✅ | ✅ | Ownership enforced (IDOR fix) |
 | Timeline | ✅ | ✅ | ✅ TimelineEvent | ✅ | |
 | Interviews | ✅ | ✅ | ✅ Interview | ✅ | Sub-resource of tracking |
@@ -55,5 +56,5 @@ Validated flows (no regressions expected):
 
 - Providers (Gupy, LinkedIn, Programathor) — V2
 - Scheduler / WebSocket — V2 (`ENABLE_V2_FEATURES=false` default)
-- AI Match enrichment — Etapa 16
+- AI Match enrichment — Etapa 16 (superseded by on-demand Etapa 18)
 - E2E automatizado — deferred; checklist manual only

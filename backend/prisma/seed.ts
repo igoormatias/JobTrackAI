@@ -2,10 +2,14 @@ import { PrismaClient } from "@prisma/client";
 
 import { CATALOG_SEED_SKIP_THRESHOLD } from "./seeders/catalog-data.js";
 import { buildCatalogJobs } from "./seeders/catalog-jobs.seeder.js";
+import { seedSkillsCatalog } from "./seeders/skills-catalog.seeder.js";
 
 const prisma = new PrismaClient();
 
 async function main(): Promise<void> {
+  await seedSkillsCatalog(prisma);
+  console.log("Skills catalog seeded (if empty).");
+
   const seedCatalog = process.env.SEED_CATALOG === "true";
   const force = process.env.SEED_FORCE === "true";
 

@@ -12,6 +12,7 @@ import { createRecommendationRoutes } from "../modules/recommendations/routes/re
 import { createSettingsRoutes } from "../modules/settings/infrastructure/http/routes/settings.routes.js";
 import { createSystemRoutes } from "../modules/system/infrastructure/http/routes/system.routes.js";
 import { createProviderRoutes } from "../modules/job-aggregation/infrastructure/http/routes/provider.routes.js";
+import { createAiRoutes } from "../modules/ai/infrastructure/http/routes/ai.routes.js";
 
 export const createRoutes = (): Router => {
   const router = Router();
@@ -28,6 +29,7 @@ export const createRoutes = (): Router => {
   router.use("/notifications", createNotificationRoutes());
   router.use("/recommendations", createRecommendationRoutes());
   router.use("/providers", createProviderRoutes());
+  router.use("/ai", createAiRoutes());
 
   return router;
 };

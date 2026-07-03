@@ -143,10 +143,14 @@ Catálogo oficial persistido em Prisma — sem vagas fake em runtime:
 - Remoção `blockedSkills` do onboarding
 - ADR-027
 
-#### ⬜ AI Match Engine (Etapa 18)
+#### ✅ AI Career Intelligence (Etapa 18)
 
-- Enriquecimento AI sobre contrato `engineVersion` (explicações, learning tips)
-- Sem breaking changes no frontend
+- Módulo `ai` (Clean Architecture) + Gemini via `AIProvider`
+- Skills Catalog (`Skill`, `SkillAlias`, `UserSkill`) + `SkillNormalizer`
+- Cache persistente `AIAnalysis` + `PROMPT_VERSION`
+- `POST/GET /ai/career-analysis/:trackingId` (on-demand)
+- UX: botão "Gerar análise IA" em Job Details e Pipeline
+- ADR-028
 
 ---
 

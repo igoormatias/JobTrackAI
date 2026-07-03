@@ -35,3 +35,15 @@ export const providerRunRateLimiter = rateLimit({
     message: "Too many provider sync requests, please try again later",
   },
 });
+
+export const aiCareerRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: "error",
+    code: "RATE_LIMIT_EXCEEDED",
+    message: "Too many AI analysis requests, please try again later",
+  },
+});

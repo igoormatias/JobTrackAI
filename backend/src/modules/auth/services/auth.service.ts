@@ -10,6 +10,7 @@ import type { OnboardingCompleteInput } from "../schemas/auth.schemas.js";
 import type { AuthPermissions, AuthProfile, AuthUser } from "../types/auth.types.js";
 import { createGoogleAuthService, type GoogleAuthService } from "./google-auth.service.js";
 import { tokenService, type TokenService } from "./token.service.js";
+import { syncUserSkillsFromNames } from "../../ai/application/sync-user-skills.runner.js";
 
 const ACCESS_COOKIE = "jt_access";
 const REFRESH_COOKIE = "jt_refresh";
@@ -139,6 +140,8 @@ export class AuthService {
     if (!updated) {
       throw new UnauthorizedError("User not found");
     }
+
+    await syncUserSkillsFromNames(userId, input.skills).catch(() => undefined);
 
     const { profile: _savedProfile, ...user } = updated;
 

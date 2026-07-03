@@ -4,6 +4,7 @@ import { NotFoundError } from "../../../../shared/errors/not-found-error.js";
 import { ProfileUpdatedEvent } from "../../domain/events/profile-updated.event.js";
 import type { UpdateProfileInput } from "../../domain/entities/profile.entity.js";
 import type { ProfileRepository } from "../../domain/repositories/profile.repository.js";
+import { syncUserSkillsFromNames } from "../../../ai/application/sync-user-skills.runner.js";
 import type { ProfileResponseDto } from "../dto/profile-response.dto.js";
 
 type UpdateProfileCommand = {
@@ -36,6 +37,10 @@ export class UpdateProfileUseCase implements UseCase<UpdateProfileCommand, Profi
         profile: updated,
       }),
     );
+
+    if (input.skillNames?.length) {
+      await syncUserSkillsFromNames(userId, input.skillNames).catch(() => undefined);
+    }
 
     return {
       data: withUser,

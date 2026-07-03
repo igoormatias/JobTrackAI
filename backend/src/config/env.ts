@@ -37,6 +37,12 @@ const envSchema = z
       .enum(["true", "false"])
       .default("false")
       .transform((v) => v === "true"),
+    GEMINI_API_KEY: z.string().optional(),
+    GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
+    PROMPT_VERSION: z.string().default("career-v1"),
+    GEMINI_TIMEOUT_MS: z.coerce.number().default(30_000),
+    AI_CAREER_DAILY_LIMIT: z.coerce.number().default(5),
+    AI_CAREER_DEBOUNCE_MS: z.coerce.number().default(15_000),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === "production") {

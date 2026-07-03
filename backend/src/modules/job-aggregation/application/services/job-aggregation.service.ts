@@ -1,7 +1,6 @@
 import { logger } from "../../../../config/logger.js";
 import type { JobCatalogRepository } from "../../../job-catalog/domain/repositories/job-catalog.repository.js";
 import type { CatalogJobUpsertInput } from "../../../job-catalog/domain/value-objects/catalog-list-filters.js";
-import type { JobImportRecord } from "../../domain/entities/job-import.entity.js";
 import type { ProviderExecution } from "../../domain/entities/provider-execution.entity.js";
 import type { JobProviderPort } from "../../domain/ports/job-provider.port.js";
 import type { DedupLookupRepository } from "../../domain/repositories/dedup-lookup.repository.js";

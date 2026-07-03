@@ -28,10 +28,13 @@ JobTrack AI **não** é plataforma de candidatura nem ATS.
 - **Timeline** — eventos automáticos para futura IA/Analytics
 - **Perfil simplificado** — nome/foto via Google OAuth; sem upload de imagem
 - **Notificações** — apenas eventos internos do JobTrack AI
+- **Análise IA on-demand (Etapa 18)** — botão manual em Job Details / Pipeline; cache persistente; não substitui match `rules-v1`
 
 ## Fora do MVP (não implementar)
 
-Aplicação pela plataforma, upload de currículo, perfil público, LinkedIn/GitHub no perfil, ATS, importação por URL, WebSocket, Match Engine real (IA), Analytics, ML, i18n.
+Aplicação pela plataforma, upload de currículo, perfil público, LinkedIn/GitHub no perfil, ATS, importação por URL, WebSocket, Analytics, ML, i18n.
+
+**IA automática / ranking por IA** permanece V2. Análise de carreira **on-demand** (Etapa 18) está no MVP.
 
 **Providers (Etapa 17):** Gupy real + scheduler interno fazem parte do MVP. LinkedIn/Programathor fetch real permanece V2+.
 

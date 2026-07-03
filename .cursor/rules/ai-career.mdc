@@ -1,0 +1,36 @@
+---
+description: Regras do módulo AI Career Intelligence (Etapa 18)
+globs:
+  - backend/src/modules/ai/**
+  - frontend/src/features/ai/**
+---
+
+# AI Career Intelligence (v1.1)
+
+## Princípios
+
+- **Manual only** — nunca disparar análise IA no mount; apenas no clique do usuário.
+- **Match score** — permanece `rules-v1`; IA explica, não decide nem recalcula score.
+- **Cache-first** — `AIAnalysis` + `computeAnalysisHash`; provider só em cache miss (ou `refresh=true`).
+- **Clean Architecture** — `GeminiProvider` só em `infrastructure/providers/`; use cases dependem de ports.
+
+## Skills
+
+- `skillNames` no onboarding/perfil permanece fonte de escrita.
+- `UserSkill` é derivado via `SyncUserSkillsUseCase` (paralelo, sem breaking change).
+
+## Prompts
+
+- Montar em `infrastructure/prompts/` (`PromptBuilder`, `PromptCompressor`, parser Zod).
+- Nunca strings de prompt inline em provider ou use case.
+
+## Env
+
+- `GEMINI_API_KEY` opcional — sem key: `AI_NOT_CONFIGURED` (503); app funciona sem IA.
+- `PROMPT_VERSION`, `GEMINI_MODEL`, `AI_CAREER_DAILY_LIMIT`, `AI_CAREER_DEBOUNCE_MS`.
+
+## Referências
+
+- `docs/AI.md`
+- `docs/DECISIONS.md` — ADR-028
+- `docs/API_CONTRACT.md` — `/ai/career-analysis/:trackingId`
