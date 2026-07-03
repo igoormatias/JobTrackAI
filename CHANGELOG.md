@@ -4,6 +4,15 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [Unreleased]
 
+### Added (Etapa 20 — Production Stabilization Vercel)
+
+- Logger JSON em produção/Vercel; `pino-pretty` apenas em dev
+- Env validation reforçada (`AUTH_SECRET` alias, mensagens claras)
+- Health check com database + AI skipped
+- Request logging estruturado (correlation ID)
+- Frontend: logout `onSettled`, interceptor 401/500 sessão, `NEXT_PUBLIC_API_URL=/api/backend`
+- `docs/DEPLOYMENT.md`, `docs/PRODUCTION_AUDIT.md`
+
 ### Added (Etapa 19 — UX Stabilization & Smart Job Matching)
 
 - Match Engine `rules-v2` — área/cargo dominam; cap incompatível ≤ 30

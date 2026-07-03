@@ -14,7 +14,8 @@ export class SystemController {
   getHealth = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const health = await this.getHealthUseCase.execute();
-      res.status(200).json(health);
+      const statusCode = health.status === "error" ? 503 : 200;
+      res.status(statusCode).json(health);
     } catch (error) {
       next(error);
     }

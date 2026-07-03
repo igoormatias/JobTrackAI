@@ -1,6 +1,8 @@
 # JobTrack AI — Deploy
 
-Guia de deploy para ambientes de produção. Docker local **não** é usado em produção.
+Guia de deploy para ambientes de produção. **Guia completo:** [DEPLOYMENT.md](./DEPLOYMENT.md) · **Auditoria:** [PRODUCTION_AUDIT.md](./PRODUCTION_AUDIT.md)
+
+Docker local **não** é usado em produção.
 
 ## Visão geral
 
@@ -23,7 +25,7 @@ Guia de deploy para ambientes de produção. Docker local **não** é usado em p
 
 | Variável | Descrição |
 |----------|-----------|
-| `NEXT_PUBLIC_API_URL` | URL pública da API (ex.: `https://api.jobtrack.ai`) |
+| `NEXT_PUBLIC_API_URL` | URL da API — produção Vercel: `/api/backend` |
 | `NEXT_PUBLIC_ENABLE_MSW` | `false` em produção |
 
 ## Backend (Vercel Services)

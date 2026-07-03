@@ -564,7 +564,8 @@ npm run docker:up
 ```
 
 - Frontend: http://localhost:3000
-- API: `NEXT_PUBLIC_API_URL=http://localhost:3333`
+- API local: `NEXT_PUBLIC_API_URL=http://localhost:3333`
+- API produção Vercel: `NEXT_PUBLIC_API_URL=/api/backend`
 - MSW ativo por padrão (`NEXT_PUBLIC_ENABLE_MSW=true`)
 - Health: http://localhost:3000/api/health
 - Hot reload via volumes montados

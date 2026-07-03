@@ -190,7 +190,11 @@ Scripts específicos: [frontend/README.md](frontend/README.md) · [backend/READM
 
 ## Deploy
 
-Produção: **Vercel** (frontend) + **Vercel Services** (backend) + **Supabase PostgreSQL**.
+Produção: **Vercel** (frontend + backend monorepo) + **Supabase PostgreSQL**.
+
+- Guia completo: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+- Auditoria: [docs/PRODUCTION_AUDIT.md](docs/PRODUCTION_AUDIT.md)
+- `NEXT_PUBLIC_API_URL=/api/backend` em produção
 
 Guia: [docs/DEPLOY.md](docs/DEPLOY.md)
 
@@ -207,6 +211,7 @@ Guia: [docs/DEPLOY.md](docs/DEPLOY.md)
 | [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md) | Guia backend |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | ADRs (ADR-020 = escopo · ADR-022 = domínio) |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Deploy |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Guia completo Vercel + env vars |
 
 ## Licença
 

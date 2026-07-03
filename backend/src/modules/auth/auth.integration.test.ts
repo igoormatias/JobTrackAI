@@ -44,6 +44,13 @@ describe("Auth routes", () => {
     expect(response.body.data.user.name).toBe("Matias Silva");
   });
 
+  it("GET /auth/me returns 401 without session", async () => {
+    const app = createApp();
+    const response = await request(app).get("/auth/me");
+    expect(response.status).toBe(401);
+    expect(response.body.code).toBe("UNAUTHORIZED");
+  });
+
   it("POST /auth/logout clears session", async () => {
     const app = createApp();
     const agent = request.agent(app);

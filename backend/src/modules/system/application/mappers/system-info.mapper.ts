@@ -9,6 +9,11 @@ export const SystemInfoMapper = {
       status: systemInfo.status.toString() as HealthResponseDto["status"],
       uptime: systemInfo.uptime,
       version: systemInfo.version.toString(),
+      checks: {
+        database: { status: "skipped", message: "Use GetHealthUseCase for live checks" },
+        environment: { status: "ok" },
+        ai: { status: "skipped" },
+      },
     };
   },
 

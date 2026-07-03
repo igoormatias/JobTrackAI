@@ -228,9 +228,11 @@ HTTP → Middlewares (CORS, helmet, rate limit) → Routes → Controller → Se
 |----------|----------|---------|-------|
 | Dev (MSW) | `:3000` | opcional `:3333` | Fixtures + engine |
 | Dev (Docker) | `:3000` | `:3333` | Postgres + API real parcial |
-| Produção | Vercel | Vercel Services | Supabase PostgreSQL |
+| Produção | Vercel (`/`) | Vercel Services (`/api/backend`) | Supabase PostgreSQL |
 
-Variável chave: `NEXT_PUBLIC_API_URL` (sempre acessível pelo browser, ex.: `http://localhost:3333`).
+Variável chave: `NEXT_PUBLIC_API_URL` — local: `http://localhost:3333`; **produção Vercel: `/api/backend`** (mesmo domínio, cookies).
+
+Ver [DEPLOYMENT.md](./DEPLOYMENT.md) e [PRODUCTION_AUDIT.md](./PRODUCTION_AUDIT.md).
 
 ## Banco de dados
 
@@ -238,12 +240,13 @@ Variável chave: `NEXT_PUBLIC_API_URL` (sempre acessível pelo browser, ex.: `ht
 - **Produção:** Supabase PostgreSQL
 - **Prisma:** schema em `backend/prisma/schema.prisma`; migrations executadas manualmente pelo desenvolvedor
 
-## Autenticação (alvo)
+## Autenticação
 
 - Google OAuth
-- JWT + Refresh Token
-- Sessão via **cookies HttpOnly** (não localStorage)
-- CORS com `credentials: true`
+- JWT + Refresh Token em cookies `jt_access` / `jt_refresh` (HttpOnly, secure em production)
+- `GET /auth/me` → 200 ou 401 (nunca 500 por sessão ausente)
+- Frontend: interceptor limpa sessão em 401; logout sempre limpa estado local (`onSettled`)
+- CORS com `credentials: true`; `FRONTEND_URL` deve coincidir com domínio Vercel
 
 ## O que não faz parte do MVP
 

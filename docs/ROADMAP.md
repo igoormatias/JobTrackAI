@@ -160,6 +160,15 @@ Catálogo oficial persistido em Prisma — sem vagas fake em runtime:
 - Dashboard, JobCard, AppShell, busca estável (`searchDraft`)
 - `docs/MATCH_ENGINE.md` + ADR-029 + Cursor Rule `match-engine.mdc`
 
+#### ✅ Production Stabilization (Etapa 20)
+
+- Logger environment-aware (sem `pino-pretty` na Vercel)
+- Env validation com mensagens claras + aliases `AUTH_SECRET`
+- Health check com Prisma (`GET /health` → 503 se DB down)
+- Request logger com correlation ID
+- Auth: `/auth/me` 401, logout idempotente, frontend session sync
+- `docs/DEPLOYMENT.md`, `docs/PRODUCTION_AUDIT.md`, Cursor Rule `production-deploy.mdc`
+
 ---
 
 #### ~~Release Candidate MVP (Etapa 13)~~ — renumerado para Etapas 13–15

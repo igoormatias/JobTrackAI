@@ -4,8 +4,13 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 
-import { env } from "./config/env.js";
-import { errorMiddleware, globalRateLimiter, notFoundMiddleware } from "./middlewares/index.js";
+import { getCorsOrigins } from "./config/env.js";
+import {
+  errorMiddleware,
+  globalRateLimiter,
+  notFoundMiddleware,
+  requestLoggerMiddleware,
+} from "./middlewares/index.js";
 import { createRoutes } from "./routes/index.js";
 
 const apiMountPath = process.env.VERCEL ? "/api/backend" : "/";
@@ -16,13 +21,14 @@ export const createApp = () => {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.FRONTEND_URL,
+      origin: getCorsOrigins(),
       credentials: true,
     }),
   );
   app.use(compression());
   app.use(cookieParser());
   app.use(express.json());
+  app.use(requestLoggerMiddleware);
   app.use(globalRateLimiter);
 
   app.use(apiMountPath, createRoutes());

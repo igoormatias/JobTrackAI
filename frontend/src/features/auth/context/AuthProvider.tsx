@@ -10,10 +10,14 @@ import {
   useState,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 
 import { getCurrentUser } from "@/features/auth/services/auth-service";
 import type { AuthPermissions, AuthProfile, AuthResponse, AuthSession, AuthUser } from "@/features/auth/types";
-import { AUTH_SESSION_EXPIRED_EVENT } from "@/features/auth/utils/auth-utils";
+import {
+  AUTH_SESSION_EXPIRED_EVENT,
+  AUTH_SESSION_INVALID_EVENT,
+} from "@/features/auth/utils/auth-utils";
 import { isProtectedRoute } from "@/features/auth/utils/middleware-utils";
 
 type AuthContextValue = {
@@ -72,24 +76,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setAuthState(response);
     } catch (authError) {
       setAuthState(null);
-      setError(authError instanceof Error ? authError : new Error("Unable to load session"));
+      const message =
+        authError instanceof Error ? authError.message : "Unable to load session";
+      setError(new Error(message));
+
+      if (isAxiosError(authError)) {
+        const status = authError.response?.status;
+        if (status === 401 || status === 500) {
+          router.replace("/login");
+        }
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [setAuthState]);
+  }, [router, setAuthState]);
 
   useEffect(() => {
     void refreshAuth();
   }, [refreshAuth]);
 
   useEffect(() => {
-    const handleSessionExpired = () => {
+    const handleSessionEnded = () => {
       setAuthState(null);
-      router.replace("/session-expired");
+      router.replace("/login");
     };
 
-    window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionExpired);
-    return () => window.removeEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionExpired);
+    window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionEnded);
+    window.addEventListener(AUTH_SESSION_INVALID_EVENT, handleSessionEnded);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionEnded);
+      window.removeEventListener(AUTH_SESSION_INVALID_EVENT, handleSessionEnded);
+    };
   }, [router, setAuthState]);
 
   useEffect(() => {

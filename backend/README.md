@@ -727,7 +727,7 @@ Documentação: [README.md](../README.md) e [docs/DEPLOY.md](../docs/DEPLOY.md).
 
 Produção via **Vercel Services** + **Supabase PostgreSQL**. Sem Docker em produção.
 
-Detalhes: [docs/DEPLOY.md](../docs/DEPLOY.md).
+Detalhes: [docs/DEPLOY.md](../docs/DEPLOY.md) · [docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md).
 
 ---
 

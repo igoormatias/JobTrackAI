@@ -11,8 +11,13 @@ describe("System module integration", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({
-      status: "ok",
+      status: expect.stringMatching(/^(ok|error)$/),
       version: expect.any(String),
+      checks: {
+        database: expect.objectContaining({ status: expect.any(String) }),
+        environment: expect.objectContaining({ status: expect.any(String) }),
+        ai: expect.objectContaining({ status: expect.any(String) }),
+      },
     });
     expect(typeof response.body.uptime).toBe("number");
   });

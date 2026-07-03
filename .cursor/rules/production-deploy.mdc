@@ -1,0 +1,27 @@
+---
+description: Production deploy rules — Vercel, env-aware config, standardized errors
+globs:
+  - backend/src/**
+  - frontend/src/lib/api-client/**
+  - frontend/src/features/auth/**
+  - vercel.json
+  - docs/DEPLOY*.md
+alwaysApply: false
+---
+
+# Production Deploy
+
+## Regras obrigatórias
+
+1. **Nunca** usar bibliotecas exclusivas de desenvolvimento em produção (`pino-pretty` só com `LOG_PRETTY` e sem `VERCEL`)
+2. Toda configuração deve ser **environment-aware** (`NODE_ENV`, `VERCEL`, `LOG_LEVEL`)
+3. Toda API deve retornar erros padronizados via `AppError` + `errorMiddleware`
+4. **Nunca** retornar HTTP 500 para ausência de autenticação — usar `UnauthorizedError` (401)
+5. `GET /auth/me` → 200 ou 401 apenas
+6. Frontend produção: `NEXT_PUBLIC_API_URL=/api/backend`
+7. Logout deve limpar cookies (backend) e estado local (frontend) mesmo se API falhar
+
+## Referências
+
+- [docs/DEPLOYMENT.md](../../docs/DEPLOYMENT.md)
+- [docs/PRODUCTION_AUDIT.md](../../docs/PRODUCTION_AUDIT.md)

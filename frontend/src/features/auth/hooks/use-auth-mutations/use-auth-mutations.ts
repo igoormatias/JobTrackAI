@@ -38,7 +38,7 @@ export const useLogoutMutation = () => {
 
   return useMutation({
     mutationFn: logout,
-    onSuccess: () => {
+    onSettled: () => {
       setAuthState(null);
       void queryClient.clear();
       router.replace("/login");

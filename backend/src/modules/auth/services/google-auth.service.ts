@@ -1,6 +1,7 @@
 import { OAuth2Client } from "google-auth-library";
 
 import { env } from "../../../config/env.js";
+import { UnauthorizedError } from "../../../shared/errors/unauthorized-error.js";
 import type { GoogleUser } from "../types/auth.types.js";
 
 export type GoogleAuthService = {
@@ -15,25 +16,32 @@ export class GoogleAuthServiceImpl implements GoogleAuthService {
   }
 
   verifyIdToken = async (idToken: string): Promise<GoogleUser> => {
-    const ticket = await this.client.verifyIdToken({
-      idToken,
-      audience: env.GOOGLE_CLIENT_ID,
-    });
+    try {
+      const ticket = await this.client.verifyIdToken({
+        idToken,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
 
-    const payload = ticket.getPayload();
-    if (!payload?.email || !payload.sub) {
-      throw new Error("Invalid Google token payload");
+      const payload = ticket.getPayload();
+      if (!payload?.email || !payload.sub) {
+        throw new UnauthorizedError("Invalid Google token payload");
+      }
+
+      return {
+        sub: payload.sub,
+        email: payload.email,
+        name: payload.name ?? payload.email,
+        picture: payload.picture ?? null,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        throw error;
+      }
+      throw new UnauthorizedError("Invalid or expired Google token");
     }
-
-    return {
-      sub: payload.sub,
-      email: payload.email,
-      name: payload.name ?? payload.email,
-      picture: payload.picture ?? null,
-    };
   };
 }
 
 export const createGoogleAuthService = (): GoogleAuthService => {
-  return new GoogleAuthServiceImpl(env.GOOGLE_CLIENT_ID);
+  return new GoogleAuthServiceImpl(env.GOOGLE_CLIENT_ID!);
 };

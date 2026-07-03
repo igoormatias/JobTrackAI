@@ -48,8 +48,8 @@ export class AuthService {
   }
 
   clearAuthCookies(res: Response): void {
-    res.clearCookie(ACCESS_COOKIE, cookieOptions);
-    res.clearCookie(REFRESH_COOKIE, cookieOptions);
+    res.clearCookie(ACCESS_COOKIE, { ...cookieOptions, maxAge: 0 });
+    res.clearCookie(REFRESH_COOKIE, { ...cookieOptions, maxAge: 0 });
   }
 
   private buildPermissions(user: AuthUser): AuthPermissions {

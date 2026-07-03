@@ -39,11 +39,12 @@ describe("GetHealthUseCase", () => {
     const useCase = new GetHealthUseCase(repository, eventBus);
     const result = await useCase.execute();
 
-    expect(result).toEqual({
-      status: "ok",
-      uptime: 42,
-      version: "1.0.0",
-    });
+    expect(result.status).toBe("ok");
+    expect(result.uptime).toBe(42);
+    expect(result.version).toBe("1.0.0");
+    expect(result.checks).toBeDefined();
+    expect(result.checks.database).toBeDefined();
+    expect(result.checks.environment.status).toBe("ok");
     expect(eventBus.publish).toHaveBeenCalledWith(expect.any(SystemHealthCheckedEvent));
   });
 });
