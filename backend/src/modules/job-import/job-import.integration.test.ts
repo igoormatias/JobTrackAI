@@ -120,4 +120,37 @@ describe("Job import module integration", () => {
 
     expect(response.status).toBe(401);
   });
+
+  it("POST /jobs/import/preview falls back to career page when gupy api returns 404", async () => {
+    const memedHtml = `<html><body><div>Candidaturas encerradas</div><script type="application/ld+json">{"@context":"http://schema.org","@type":"JobPosting","datePosted":"2026-03-10","description":"&lt;p&gt;A Memed é healthtech.&lt;/p&gt;","hiringOrganization":{"@type":"Organization","name":"Memed"},"jobLocation":{"@type":"Place","address":{"@type":"PostalAddress","streetAddress":"Brasil","addressCountry":"Brasil"},"additionalProperty":{"@type":"PropertyValue","value":"TELECOMMUTE"}},"title":"Frontend Engineer Sênior – React","validThrough":"2026-07-27"}</script></body></html>`;
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("employability-portal.gupy.io")) {
+          return { ok: false, status: 404, json: async () => ({}) };
+        }
+        if (url.includes("memed.gupy.io")) {
+          return { ok: true, status: 200, text: async () => memedHtml };
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    const response = await request(app)
+      .post("/jobs/import/preview")
+      .set("Cookie", authCookie())
+      .send({ url: "https://memed.gupy.io/jobs/10970184" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({
+      title: "Frontend Engineer Sênior – React",
+      company: "Memed",
+      sourceUrl: "https://memed.gupy.io/jobs/10970184",
+      externalId: "10970184",
+      modality: "remote",
+    });
+    expect(response.body.data.warnings).toHaveLength(1);
+  });
 });

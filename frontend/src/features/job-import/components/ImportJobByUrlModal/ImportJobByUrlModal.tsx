@@ -112,7 +112,17 @@ export const ImportJobByUrlModal = ({
           ) : null}
 
           {preview ? (
-            <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
+            <div className="space-y-3">
+              {preview.warnings?.map((warning) => (
+                <p
+                  key={warning}
+                  className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200"
+                  role="status"
+                >
+                  {warning}
+                </p>
+              ))}
+              <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
               <p className="font-semibold text-foreground">{preview.title}</p>
               <p className="text-muted-foreground">{preview.company}</p>
               {preview.location ? (
@@ -122,6 +132,7 @@ export const ImportJobByUrlModal = ({
                 <p className="text-muted-foreground capitalize">{preview.modality}</p>
               ) : null}
               <p className="mt-2 line-clamp-3 text-muted-foreground">{preview.description}</p>
+            </div>
             </div>
           ) : null}
 

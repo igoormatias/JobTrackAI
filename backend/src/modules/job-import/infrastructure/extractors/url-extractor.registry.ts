@@ -1,6 +1,5 @@
 import { ValidationError } from "../../../../shared/errors/validation-error.js";
-import type { NormalizedJob } from "../../../job-aggregation/domain/entities/normalized-job.entity.js";
-import type { UrlJobExtractor } from "../../domain/ports/url-job-extractor.port.js";
+import type { UrlJobExtractResult, UrlJobExtractor } from "../../domain/ports/url-job-extractor.port.js";
 import { gupyUrlExtractor } from "./gupy-url.extractor.js";
 import { linkedinUrlExtractor } from "./linkedin-url.extractor.js";
 import { programathorUrlExtractor } from "./programathor-url.extractor.js";
@@ -24,7 +23,7 @@ export class UrlExtractorRegistry {
     return extractor;
   }
 
-  async extract(url: string): Promise<NormalizedJob> {
+  async extract(url: string): Promise<UrlJobExtractResult> {
     return this.resolve(url).extract(url);
   }
 }

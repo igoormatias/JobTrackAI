@@ -3,10 +3,14 @@ import { NotFoundError } from "../../../../shared/errors/not-found-error.js";
 import { ServiceUnavailableError } from "../../../../shared/errors/service-unavailable-error.js";
 import { ValidationError } from "../../../../shared/errors/validation-error.js";
 import { GUPY_HEADERS } from "../../../../providers/gupy/gupy.constants.js";
+import {
+  GUPY_PAGE_HEADERS,
+  parseGupyJobFromPageHtml,
+} from "../../../../providers/gupy/gupy-page.parser.js";
 import { gupyProvider } from "../../../../providers/gupy/gupy.provider.js";
 import type { GupyRawJob } from "../../../../providers/gupy/gupy.types.js";
 import { isGupyJobUrl, parseGupyJobUrl } from "../../../../providers/gupy/gupy-url.utils.js";
-import type { UrlJobExtractor } from "../../domain/ports/url-job-extractor.port.js";
+import type { UrlJobExtractResult, UrlJobExtractor } from "../../domain/ports/url-job-extractor.port.js";
 
 const GUPY_JOB_API_URL = "https://employability-portal.gupy.io/api/v1/jobs";
 
@@ -33,7 +37,7 @@ export class GupyUrlExtractor implements UrlJobExtractor {
     return isGupyJobUrl(url);
   }
 
-  async extract(url: string): Promise<NormalizedJob> {
+  async extract(url: string): Promise<UrlJobExtractResult> {
     const parsed = parseGupyJobUrl(url);
     if (!parsed) {
       throw new ValidationError(
@@ -53,7 +57,7 @@ export class GupyUrlExtractor implements UrlJobExtractor {
     }
 
     if (response.status === 404) {
-      throw new NotFoundError("Gupy job not found or no longer available");
+      return this.extractFromCareerPage(sourceUrl);
     }
 
     if (!response.ok) {
@@ -65,7 +69,35 @@ export class GupyUrlExtractor implements UrlJobExtractor {
       throw new ValidationError("Gupy job response is missing required fields");
     }
 
-    return gupyProvider.normalize(toGupyRawJob(body, sourceUrl));
+    return { job: gupyProvider.normalize(toGupyRawJob(body, sourceUrl)) };
+  }
+
+  private async extractFromCareerPage(sourceUrl: string): Promise<UrlJobExtractResult> {
+    let pageResponse: Response;
+    try {
+      pageResponse = await fetch(sourceUrl, { headers: GUPY_PAGE_HEADERS });
+    } catch (error) {
+      throw new ServiceUnavailableError(
+        error instanceof Error ? `Gupy career page unavailable: ${error.message}` : "Gupy career page unavailable",
+      );
+    }
+
+    if (!pageResponse.ok) {
+      throw new NotFoundError("Gupy job not found or no longer available");
+    }
+
+    const html = await pageResponse.text();
+    const parsed = parseGupyJobFromPageHtml(html, sourceUrl);
+    if (!parsed) {
+      throw new NotFoundError("Gupy job not found or no longer available");
+    }
+
+    const job = gupyProvider.normalize(parsed.raw);
+
+    return {
+      job: { ...job, description: parsed.description },
+      warnings: parsed.warnings.length > 0 ? parsed.warnings : undefined,
+    };
   }
 }
 

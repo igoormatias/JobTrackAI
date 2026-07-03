@@ -1,6 +1,5 @@
-import type { NormalizedJob } from "../../../job-aggregation/domain/entities/normalized-job.entity.js";
 import { ValidationError } from "../../../../shared/errors/validation-error.js";
-import type { UrlJobExtractor } from "../../domain/ports/url-job-extractor.port.js";
+import type { UrlJobExtractResult, UrlJobExtractor } from "../../domain/ports/url-job-extractor.port.js";
 
 const PROGRAMATHOR_JOB_PATTERN = /programathor\.com\.br/i;
 
@@ -15,7 +14,7 @@ export class ProgramathorUrlExtractor implements UrlJobExtractor {
     }
   }
 
-  async extract(_url: string): Promise<NormalizedJob> {
+  async extract(_url: string): Promise<UrlJobExtractResult> {
     throw new ValidationError(
       "Programathor URL import is not supported yet. Add the job manually or use a Gupy link.",
     );

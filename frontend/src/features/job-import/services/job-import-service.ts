@@ -11,6 +11,7 @@ export type JobImportPreview = {
   location: string | null;
   externalId: string;
   provider: string;
+  warnings?: string[];
 };
 
 export type ConfirmJobImportPayload = {

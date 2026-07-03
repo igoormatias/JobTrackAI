@@ -14,6 +14,7 @@ export type JobImportPreviewDto = {
   location: string | null;
   externalId: string;
   provider: string;
+  warnings?: string[];
 };
 
 export type PreviewJobFromUrlInput = {
@@ -28,7 +29,8 @@ export class PreviewJobFromUrlUseCase {
   constructor(private readonly registry: UrlExtractorRegistry = urlExtractorRegistry) {}
 
   async execute(input: PreviewJobFromUrlInput): Promise<PreviewJobFromUrlResponse> {
-    const normalized = jobNormalizer.ensureContentHash(await this.registry.extract(input.url));
+    const extracted = await this.registry.extract(input.url);
+    const normalized = jobNormalizer.ensureContentHash(extracted.job);
     const validation = jobValidator.validate(normalized);
 
     if (!validation.valid) {
@@ -48,6 +50,7 @@ export class PreviewJobFromUrlUseCase {
         location: job.location ?? null,
         externalId: job.externalId,
         provider: job.provider,
+        warnings: extracted.warnings,
       },
     };
   }

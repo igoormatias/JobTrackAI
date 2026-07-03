@@ -38,7 +38,7 @@ export class ConfirmJobImportUseCase {
   ) {}
 
   async execute(input: ConfirmJobImportInput): Promise<ConfirmJobImportResponse> {
-    const normalized = jobNormalizer.ensureContentHash(await this.registry.extract(input.url));
+    const normalized = jobNormalizer.ensureContentHash((await this.registry.extract(input.url)).job);
     const validation = jobValidator.validate(normalized);
 
     if (!validation.valid) {

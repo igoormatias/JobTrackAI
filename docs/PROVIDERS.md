@@ -33,6 +33,7 @@ Após sync:
 - **Página da empresa:** `https://{company}.gupy.io/jobs/{id}` (ex.: [afya.gupy.io/jobs/11299164](https://afya.gupy.io/jobs/11299164))
 - Importação por URL persiste a **URL original** colada pelo usuário em `sourceUrl`
 - API de detalhe: `employability-portal.gupy.io/api/v1/jobs/{id}`
+- **Fallback:** se a API retorna 404 (vaga encerrada/arquivada), o extractor busca a página pública e extrai dados do JSON-LD `JobPosting` (`gupy-page.parser.ts`). O preview inclui aviso quando candidaturas estão encerradas.
 
 ## Env
 
