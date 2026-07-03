@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../../database/prisma.js";
 import type { JobPriority } from "../../../../shared/domain/job-priority.js";
 import {
+  isAreaCompatible,
   matchEngineService,
   type MatchProfileInput,
 } from "../../../match/domain/services/match-engine.service.js";
@@ -255,6 +256,22 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
 
     const ctx = await this.loadUserContext(filters.userId);
     let jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
+
+    if (filters.profile?.area) {
+      jobs = jobs.filter((job) =>
+        isAreaCompatible(filters.profile!, {
+          title: job.title,
+          area: job.area,
+          seniority: job.seniority,
+          modality: job.modality,
+          location: job.location,
+          salaryMin: job.salaryMin,
+          salaryMax: job.salaryMax,
+          technologies: job.technologies,
+          requirements: job.requirements,
+        }),
+      );
+    }
 
     if (filters.matchMin !== undefined) {
       jobs = jobs.filter((job) => job.matchScore.score >= filters.matchMin!);

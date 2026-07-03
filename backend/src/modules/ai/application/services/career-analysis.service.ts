@@ -162,6 +162,7 @@ export class CareerAnalysisService {
     };
 
     const matchJob = {
+      title: context.job.title ?? "",
       area: context.job.area,
       seniority: context.job.seniority,
       modality: context.job.modality,

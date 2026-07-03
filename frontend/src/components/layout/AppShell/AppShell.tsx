@@ -24,11 +24,11 @@ export const AppShell = ({ children, headerTitle, className }: AppShellProps) =>
     <div className={cn("flex min-h-screen bg-background", className)}>
       <Sidebar />
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <AppHeader title={headerTitle} />
 
         <motion.main
-          className="flex-1 pb-20 lg:pb-6"
+          className="min-w-0 flex-1 pb-20 lg:pb-6"
           {...(reducedMotion ? {} : pageTransition)}
         >
           <Container className="py-6">{children}</Container>

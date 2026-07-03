@@ -8,7 +8,7 @@ import {
   parseAsStringLiteral,
   useQueryStates,
 } from "nuqs";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import type { JobSortField, JobSource, ProfessionalArea, Seniority, SortDirection, WorkModality } from "@/types";
@@ -48,7 +48,22 @@ export const useJobFilters = () => {
     shallow: true,
   });
 
-  const debouncedSearch = useDebouncedValue(urlState.search, 300);
+  const [searchDraft, setSearchDraft] = useState(urlState.search);
+  const debouncedSearch = useDebouncedValue(searchDraft, 300);
+  const previousUrlSearch = useRef(urlState.search);
+
+  useEffect(() => {
+    if (urlState.search !== debouncedSearch) {
+      void setUrlState({ search: debouncedSearch });
+    }
+  }, [debouncedSearch, setUrlState, urlState.search]);
+
+  useEffect(() => {
+    if (previousUrlSearch.current !== urlState.search) {
+      setSearchDraft(urlState.search);
+      previousUrlSearch.current = urlState.search;
+    }
+  }, [urlState.search]);
 
   const urlFilters = useMemo<JobUrlFilters>(
     () => ({
@@ -75,6 +90,7 @@ export const useJobFilters = () => {
   const listParams = useMemo(() => urlFiltersToJobListParams(urlFilters), [urlFilters]);
 
   const clearFilters = () => {
+    setSearchDraft("");
     void setUrlState({
       search: "",
       sort: DEFAULT_JOB_SORT,
@@ -102,7 +118,7 @@ export const useJobFilters = () => {
     listParams,
     hasActiveFilters: hasActiveJobFilters(urlFilters),
     clearFilters,
-    searchInputValue: urlState.search,
-    setSearchInputValue: (value: string) => void setUrlState({ search: value }),
+    searchInputValue: searchDraft,
+    setSearchInputValue: setSearchDraft,
   };
 };

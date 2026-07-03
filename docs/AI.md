@@ -3,7 +3,7 @@
 ## Princípios
 
 - IA **nunca** substitui regras de negócio
-- Match Score permanece **Match Engine `rules-v1`**
+- Match Score permanece **Match Engine `rules-v2`**
 - IA interpreta, explica e recomenda **on-demand** (botão manual)
 - Cache persistente antes de chamar Gemini (meta >90% cache hit no Free Tier)
 

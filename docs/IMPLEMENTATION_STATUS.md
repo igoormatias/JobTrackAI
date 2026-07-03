@@ -1,6 +1,6 @@
 # JobTrack AI — Implementation Status
 
-Last updated: Etapa 18 (AI Career Intelligence).  
+Last updated: Etapa 19 (UX Stabilization & Smart Job Matching).  
 Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 
 | Module | Frontend | Backend API | Prisma | Tests | Notes |
@@ -10,8 +10,8 @@ Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 | Profile / Settings | ✅ | ✅ | ✅ | ✅ | Clean Architecture; `features/account/` |
 | Jobs (catalog) | ✅ | ✅ | ✅ Job | ✅ | Providers + seed opcional |
 | Job Aggregation | — | ✅ | ✅ Registry/Execution/Import | ✅ | Gupy real; stubs LinkedIn/Programathor |
-| Job Details | ✅ | ✅ | ✅ | ✅ | Match V1; related via catalog |
-| Match Engine | ✅ types | ✅ | — | ✅ | `rules-v1`; AI enriches explanation only |
+| Job Details | ✅ | ✅ | ✅ | ✅ | Match rules-v2; related via catalog |
+| Match Engine | ✅ types | ✅ | — | ✅ | `rules-v2`; JobTitleNormalizer + SkillMatcher |
 | AI Career | ✅ | ✅ | ✅ Skill/AIAnalysis | ✅ | Gemini on-demand; cache-first; Etapa 18 |
 | Job Tracking | ✅ | ✅ | ✅ | ✅ | Ownership enforced (IDOR fix) |
 | Timeline | ✅ | ✅ | ✅ TimelineEvent | ✅ | |

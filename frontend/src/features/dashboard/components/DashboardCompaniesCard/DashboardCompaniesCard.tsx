@@ -18,7 +18,7 @@ export type DashboardCompaniesCardProps = {
 };
 
 export const DashboardCompaniesCard = ({ companies }: DashboardCompaniesCardProps) => (
-  <Card className="h-full">
+  <Card className="h-full min-w-0">
     <CardHeader>
       <CardTitle className="text-base">Empresas recorrentes</CardTitle>
     </CardHeader>

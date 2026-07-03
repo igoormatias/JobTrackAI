@@ -152,6 +152,14 @@ Catálogo oficial persistido em Prisma — sem vagas fake em runtime:
 - UX: botão "Gerar análise IA" em Job Details e Pipeline
 - ADR-028
 
+#### ✅ UX Stabilization & Smart Job Matching (Etapa 19)
+
+- Match Engine `rules-v2` — área/cargo dominam; cap incompatível ≤ 30
+- `JobTitleNormalizer` + `SkillMatcher` (aliases síncronos)
+- Auditoria UX responsiva (`docs/UX_AUDIT_ETAPA19.md`)
+- Dashboard, JobCard, AppShell, busca estável (`searchDraft`)
+- `docs/MATCH_ENGINE.md` + ADR-029 + Cursor Rule `match-engine.mdc`
+
 ---
 
 #### ~~Release Candidate MVP (Etapa 13)~~ — renumerado para Etapas 13–15

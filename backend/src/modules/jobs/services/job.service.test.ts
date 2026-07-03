@@ -36,10 +36,16 @@ vi.mock("../../job-catalog/application/use-cases/catalog-jobs.use-cases.js", () 
   getCatalogJobUseCase: { execute: vi.fn() },
 }));
 
+vi.mock("../../job-catalog/application/mappers/match-profile.mapper.js", () => ({
+  loadMatchProfileForUser: vi.fn(),
+}));
+
 import {
   getCatalogJobUseCase,
   listCatalogJobsUseCase,
 } from "../../job-catalog/application/use-cases/catalog-jobs.use-cases.js";
+import { loadMatchProfileForUser } from "../../job-catalog/application/mappers/match-profile.mapper.js";
+import type { JobCatalogRepository } from "../../job-catalog/domain/repositories/job-catalog.repository.js";
 
 describe("JobService", () => {
   beforeEach(() => {
@@ -66,5 +72,32 @@ describe("JobService", () => {
     const job = await service.getJobById("user_1", "job_0002");
 
     expect(job.id).toBe("job_0002");
+  });
+
+  it("passes user profile when finding related jobs", async () => {
+    const findRelated = vi.fn().mockResolvedValue([]);
+    const catalogRepo = { findRelated } as unknown as JobCatalogRepository;
+    const matchProfile = {
+      area: "frontend",
+      seniority: "senior",
+      modality: "remote",
+      location: "São Paulo",
+      skillNames: ["React"],
+    };
+
+    vi.mocked(loadMatchProfileForUser).mockResolvedValue(matchProfile);
+
+    const service = new JobService(undefined, catalogRepo);
+    await service.findRelatedJobs("user_1", sampleJob("job_0003"), 5);
+
+    expect(loadMatchProfileForUser).toHaveBeenCalledWith("user_1");
+    expect(findRelated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "user_1",
+        jobId: "job_0003",
+        profile: matchProfile,
+        limit: 5,
+      }),
+    );
   });
 });

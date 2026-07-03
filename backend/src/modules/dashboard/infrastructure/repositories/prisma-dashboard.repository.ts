@@ -2,6 +2,7 @@ import type { Job, Profile } from "@prisma/client";
 
 import { prisma } from "../../../../database/prisma.js";
 import {
+  isAreaCompatible,
   matchEngineService,
   type MatchJobInput,
   type MatchProfileInput,
@@ -54,6 +55,7 @@ const toMatchProfileInput = (profile: Profile | null): MatchProfileInput => ({
 const toMatchJobInput = (job: Job): MatchJobInput => {
   const metadata = parseJobMetadata(job.metadata);
   return {
+    title: job.title,
     area: job.area,
     seniority: job.seniority,
     modality: job.modality,
@@ -235,7 +237,10 @@ export class PrismaDashboardRepository implements DashboardRepository {
     ]);
 
     const matchProfile = toMatchProfileInput(profile);
-    const jobsWithMatch = catalogJobs
+    const eligibleJobs = profile?.area
+      ? catalogJobs.filter((job) => isAreaCompatible(matchProfile, toMatchJobInput(job)))
+      : catalogJobs;
+    const jobsWithMatch = eligibleJobs
       .map((job) => ({
         job,
         match: matchEngineService.compute(matchProfile, toMatchJobInput(job)),

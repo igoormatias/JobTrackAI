@@ -13,7 +13,7 @@ export const DashboardKpiCard = memo(({ kpi }: DashboardKpiCardProps) => {
   const Icon = config?.icon;
 
   return (
-    <Card className="border-border/60 bg-card/80">
+    <Card className="min-w-0 border-border/60 bg-card/80">
       <CardContent className="p-4 lg:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-3">

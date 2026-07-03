@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { FAVORITE_JOB_BADGE_CLASS, FAVORITE_JOB_SURFACE_CLASS } from "@/features/jobs/constants/jobs-constants";
 import { formatModality, getCompanyInitials } from "@/features/jobs/utils/job-formatters";
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
 import { cn } from "@/lib/utils";
@@ -37,11 +38,13 @@ const PipelineApplicationCardComponent = ({
   isPending,
 }: PipelineApplicationCardProps) => {
   const { job } = application;
+  const stageUpdatedAt = application.lastStageUpdatedAt ?? application.appliedAt;
 
   return (
     <Card
       className={cn(
-        "cursor-grab transition-shadow active:cursor-grabbing",
+        "cursor-grab border transition-shadow active:cursor-grabbing",
+        job.isFavorite ? FAVORITE_JOB_SURFACE_CLASS : "border-border/60",
         isDragging && "opacity-60 shadow-lg",
         isPending && "opacity-70",
       )}
@@ -54,7 +57,10 @@ const PipelineApplicationCardComponent = ({
             <AvatarFallback>{getCompanyInitials(job.company.name)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-foreground">{job.title}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="truncate font-semibold text-foreground">{job.title}</p>
+              {job.isFavorite ? <Badge className={FAVORITE_JOB_BADGE_CLASS}>Favorita</Badge> : null}
+            </div>
             <p className="truncate text-sm text-muted-foreground">{job.company.name}</p>
           </div>
         </div>
@@ -75,8 +81,8 @@ const PipelineApplicationCardComponent = ({
 
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline">{PIPELINE_STAGE_LABELS[application.stage]}</Badge>
-          <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(application.updatedAt), { addSuffix: true, locale: ptBR })}
+          <span className="text-xs text-muted-foreground" data-testid="pipeline-stage-updated-at">
+            {formatDistanceToNow(new Date(stageUpdatedAt), { addSuffix: true, locale: ptBR })}
           </span>
         </div>
 

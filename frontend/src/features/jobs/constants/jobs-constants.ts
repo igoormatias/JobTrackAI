@@ -63,6 +63,9 @@ export const DEFAULT_JOB_LIST_LIMIT = 20;
 export const DEFAULT_JOB_SORT: JobSortField = "match";
 export const DEFAULT_JOB_SORT_DIRECTION: SortDirection = "desc";
 
+export const FAVORITE_JOB_SURFACE_CLASS = "border-amber-500/50 bg-amber-500/5";
+export const FAVORITE_JOB_BADGE_CLASS = "bg-amber-500/15 text-amber-700 dark:text-amber-300";
+
 export const JOBS_LAYOUT = {
   page: "space-y-6",
   toolbar: "space-y-4",

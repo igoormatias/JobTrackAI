@@ -1,4 +1,5 @@
 import { NotFoundError } from "../../../shared/errors/not-found-error.js";
+import { loadMatchProfileForUser } from "../../job-catalog/application/mappers/match-profile.mapper.js";
 import {
   getCatalogJobUseCase,
   listCatalogJobsUseCase,
@@ -38,11 +39,13 @@ export class JobService {
   }
 
   async findRelatedJobs(userId: string, job: Job, limit = 5): Promise<Job[]> {
+    const profile = await loadMatchProfileForUser(userId);
     return this.catalogRepo.findRelated({
       userId,
       jobId: job.id,
       area: job.area,
       technologySlugs: job.technologies.map((tech) => tech.slug),
+      profile,
       limit,
     });
   }

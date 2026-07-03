@@ -173,7 +173,7 @@ npm run docker:up
 ## Fluxo de desenvolvimento
 
 1. Onboarding define o perfil do usuário.
-2. O Match Engine V1 (`rules-v1`) calcula compatibilidade no backend com dados reais.
+2. O Match Engine (`rules-v2`) calcula compatibilidade no backend com dados reais — área e cargo têm peso dominante sobre tecnologias isoladas.
 3. Alterações em `frontend/src` e `backend/src` refletem com hot reload.
 4. Valide novas features contra [docs/MVP_SCOPE.md](docs/MVP_SCOPE.md).
 5. Atualize [docs/ROADMAP.md](docs/ROADMAP.md) ao concluir etapas.

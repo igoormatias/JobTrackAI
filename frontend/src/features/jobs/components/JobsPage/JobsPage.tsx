@@ -90,7 +90,7 @@ export const JobsPage = () => {
     }
   };
 
-  if (isLoading && jobs.length === 0) {
+  if (isLoading && !data) {
     return <JobsPageSkeleton />;
   }
 

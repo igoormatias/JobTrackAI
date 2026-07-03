@@ -28,7 +28,7 @@ JobTrack AI **não** é plataforma de candidatura nem ATS.
 - **Timeline** — eventos automáticos para futura IA/Analytics
 - **Perfil simplificado** — nome/foto via Google OAuth; sem upload de imagem
 - **Notificações** — apenas eventos internos do JobTrack AI
-- **Análise IA on-demand (Etapa 18)** — botão manual em Job Details / Pipeline; cache persistente; não substitui match `rules-v1`
+- **Análise IA on-demand (Etapa 18)** — botão manual em Job Details / Pipeline; cache persistente; não substitui match `rules-v2`
 
 ## Fora do MVP (não implementar)
 

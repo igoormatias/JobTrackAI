@@ -14,7 +14,7 @@ export type DashboardTopJobsSectionProps = {
 };
 
 export const DashboardTopJobsSection = ({ jobs }: DashboardTopJobsSectionProps) => (
-  <Card className="h-full">
+  <Card className="h-full w-full min-w-0">
     <CardHeader>
       <CardTitle className="text-base">Melhores vagas</CardTitle>
     </CardHeader>

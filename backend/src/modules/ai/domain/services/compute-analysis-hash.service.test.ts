@@ -28,11 +28,11 @@ const baseSnapshot = (): AnalysisSnapshot => ({
     score: 80,
     matchedSkills: ["react"],
     missingSkills: ["docker"],
-    engineVersion: "rules-v1",
+    engineVersion: "rules-v2",
   },
   meta: {
     promptVersion: "career-v1",
-    matchEngineVersion: "rules-v1",
+    matchEngineVersion: "rules-v2",
     model: "gemini-2.5-flash",
   },
 });

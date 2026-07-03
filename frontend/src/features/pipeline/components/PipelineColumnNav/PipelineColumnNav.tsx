@@ -12,7 +12,7 @@ export type PipelineColumnNavProps = {
 };
 
 export const PipelineColumnNav = ({ activeStage, counts, onChange }: PipelineColumnNavProps) => (
-  <div className="flex gap-2 overflow-x-auto pb-2 lg:hidden" role="tablist" aria-label="Colunas do pipeline">
+  <div className="scrollbar-app flex gap-2 overflow-x-auto pb-2 lg:hidden" role="tablist" aria-label="Colunas do pipeline">
     {PIPELINE_COLUMN_CONFIG.map((column) => (
       <button
         key={column.stage}

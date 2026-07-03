@@ -48,7 +48,7 @@ export const JobsFilterFields = ({ urlState, setUrlState, companies }: JobsFilte
 
     <section className="space-y-3">
       <h4 className="text-sm font-medium">Empresa</h4>
-      <div className="max-h-40 space-y-2 overflow-y-auto">
+      <div className="max-h-40 space-y-2 overflow-y-auto scrollbar-app pr-1">
         {companies.slice(0, 12).map((company) => (
           <label key={company.id} className="flex items-center gap-2 text-sm">
             <Checkbox

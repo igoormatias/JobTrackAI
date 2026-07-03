@@ -47,7 +47,7 @@ PROCESSO SELETIVO:
 - Notas: ${compressed.tracking.notes ?? "nenhuma"}
 - Timeline recente: ${compressed.timeline.map((e) => `${e.type}: ${e.title}`).join(" | ") || "vazia"}
 
-MATCH ENGINE (rules-v1):
+MATCH ENGINE (rules-v2):
 - Score: ${compressed.match.score}%
 - Skills compatíveis: ${compressed.match.matchedSkills.join(", ") || "nenhuma"}
 - Skills em falta: ${compressed.match.missingSkills.join(", ") || "nenhuma"}

@@ -99,6 +99,7 @@ export const mapPrismaJobToDomain = (
 export const toMatchJobInput = (record: PrismaJob) => {
   const meta = parseJobMetadata(record.metadata);
   return {
+    title: record.title,
     area: record.area,
     seniority: record.seniority,
     modality: record.modality,

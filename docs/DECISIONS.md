@@ -532,6 +532,30 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 ---
 
+## ADR-029 — Match Engine rules-v2 (Etapa 19)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 19)
+
+**Contexto:** O `rules-v1` priorizava skills (+15 cada) com área em apenas +5, sem penalidade. Vagas DevOps com React apareciam para perfis Frontend no dashboard e catálogo.
+
+**Decisão:**
+
+- **`rules-v2`** substitui `rules-v1` como `MATCH_ENGINE_VERSION`
+- **`JobTitleNormalizer`** — inferência de área a partir do título com aliases estáticos
+- **`SkillMatcher`** — aliases síncronos (ReactJS→React, etc.) no módulo match
+- **Área-first** — `job.area` autoritativo; cap score ≤ 30 quando incompatível
+- **Pré-filtro** no catálogo (sort=match) e dashboard quando `profile.area` definido
+- IA continua explicando match; cache invalidado pela nova versão do engine
+
+**Consequências:**
+
+- Documentação em `docs/MATCH_ENGINE.md`
+- Cursor Rule `.cursor/rules/match-engine.mdc`
+- Frontend exibe `rules-v2` em badges de match
+
+---
+
 ## Template para novas decisões
 
 ```markdown

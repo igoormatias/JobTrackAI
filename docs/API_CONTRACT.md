@@ -262,7 +262,7 @@ Contrato alvo (MSW implementado; backend em evolução):
 
 ## AI Career Intelligence (Etapa 18)
 
-Análise de carreira **on-demand** para processos no pipeline. O match score permanece no engine `rules-v1`; a IA apenas interpreta e recomenda.
+Análise de carreira **on-demand** para processos no pipeline. O match score permanece no engine `rules-v2`; a IA apenas interpreta e recomenda.
 
 | Método | Rota | Auth | Descrição |
 |--------|------|------|-----------|
@@ -291,7 +291,7 @@ Análise de carreira **on-demand** para processos no pipeline. O match score per
 | `provider` | string | Ex.: `gemini` |
 | `model` | string | Modelo usado |
 | `engineVersion` | `"ai-career-v1"` | Versão do módulo IA |
-| `matchEngineVersion` | string | Ex.: `rules-v1` |
+| `matchEngineVersion` | string | Ex.: `rules-v2` |
 | `cached` | boolean | `true` se servido do cache |
 | `stale` | boolean? | `true` se hash mudou mas `refresh=false` |
 

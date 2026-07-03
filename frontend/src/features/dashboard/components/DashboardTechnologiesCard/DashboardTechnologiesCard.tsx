@@ -12,7 +12,7 @@ export const DashboardTechnologiesCard = ({ technologies }: DashboardTechnologie
   const maxValue = Math.max(...technologies.map((item) => item.value), 1);
 
   return (
-    <Card className="h-full">
+    <Card className="h-full min-w-0">
       <CardHeader>
         <CardTitle className="text-base">Competências mais encontradas</CardTitle>
       </CardHeader>

@@ -1,4 +1,6 @@
 import { MATCH_ENGINE_VERSION, MATCH_WEIGHTS } from "../../../../shared/domain/match-weights.js";
+import { jobTitleNormalizer } from "./job-title-normalizer.service.js";
+import { skillMatcher } from "./skill-matcher.service.js";
 
 export type MatchReasonDto = {
   id: string;
@@ -37,6 +39,7 @@ export type MatchProfileInput = {
 };
 
 export type MatchJobInput = {
+  title?: string;
   area?: string | null;
   seniority?: string | null;
   modality?: string | null;
@@ -59,8 +62,6 @@ const SENIORITY_RANK: Record<string, number> = {
 
 const COMMON_MISSING_PRIORITY = ["Docker", "AWS", "Kafka", "Kubernetes", "GraphQL", "Terraform"];
 
-const normalize = (value: string): string => value.toLowerCase().trim();
-
 const getJobTerms = (job: MatchJobInput): string[] => {
   const techNames = job.technologies.map((tech) => tech.name);
   return [...techNames, ...job.requirements];
@@ -73,27 +74,58 @@ const getMatchLabel = (score: number): MatchResultDto["label"] => {
   return "low";
 };
 
+export const isAreaCompatible = (
+  profile: MatchProfileInput,
+  job: MatchJobInput,
+): boolean => {
+  if (!profile.area) return true;
+  if (job.area) {
+    return job.area === profile.area;
+  }
+  const inferredArea = jobTitleNormalizer.inferArea(job.title ?? "");
+  if (inferredArea) {
+    return inferredArea === profile.area;
+  }
+  return true;
+};
+
 export class MatchEngineService {
   compute(profile: MatchProfileInput, job: MatchJobInput): MatchResultDto {
     const weights = MATCH_WEIGHTS;
     let score = weights.baseScore;
     const reasons: MatchReasonDto[] = [];
 
-    const jobTerms = getJobTerms(job).map(normalize);
-    const matchedSkills = profile.skillNames.filter((skill) => {
-      const normalized = normalize(skill);
-      return jobTerms.some((term) => term.includes(normalized) || normalized.includes(term));
-    });
+    const jobTerms = getJobTerms(job);
+    const requirementSet = new Set(job.requirements.map((r) => skillMatcher.canonicalize(r)));
+    const matchedSkills = skillMatcher.findMatches(profile.skillNames, jobTerms);
 
-    matchedSkills.forEach((skill, index) => {
-      score += weights.skillMatch;
-      reasons.push({ id: `reason_skill_${index}`, label: `${skill} encontrado`, matched: true });
-    });
+    const areaCompatible = isAreaCompatible(profile, job);
+    const inferredArea = jobTitleNormalizer.inferArea(job.title ?? "");
 
     if (profile.area && job.area && profile.area === job.area) {
-      score += 5;
-      reasons.push({ id: "reason_area", label: "Área compatível", matched: true });
+      score += weights.areaMatch;
+      reasons.push({ id: "reason_area", label: "Área compatível com seu perfil", matched: true });
+    } else if (profile.area && inferredArea && inferredArea === profile.area) {
+      score += weights.titleAreaMatch;
+      reasons.push({
+        id: "reason_title_area",
+        label: "Cargo compatível com seu perfil",
+        matched: true,
+      });
+    } else if (profile.area && !areaCompatible) {
+      reasons.push({
+        id: "reason_area_mismatch",
+        label: "Área incompatível com seu perfil",
+        matched: false,
+      });
     }
+
+    matchedSkills.forEach((skill, index) => {
+      const isRequired = requirementSet.has(skillMatcher.canonicalize(skill));
+      const delta = isRequired ? weights.requiredSkillMatch : weights.desiredSkillMatch;
+      score += delta;
+      reasons.push({ id: `reason_skill_${index}`, label: `${skill} encontrado`, matched: true });
+    });
 
     const modalityMatch =
       !profile.modality || profile.modality === "any" || profile.modality === job.modality;
@@ -118,16 +150,23 @@ export class MatchEngineService {
       reasons.push({ id: "reason_salary", label: "Pretensão compatível", matched: true });
     }
 
-    if (!this.isSeniorityCompatible(profile, job) && profile.seniority) {
+    if (this.isSeniorityCompatible(profile, job) && profile.seniority) {
+      score += weights.seniorityMatch;
+      reasons.push({ id: "reason_seniority", label: "Senioridade compatível", matched: true });
+    } else if (!this.isSeniorityCompatible(profile, job) && profile.seniority) {
       score += weights.seniorityMismatchPenalty;
       reasons.push({ id: "reason_seniority", label: "Senioridade incompatível", matched: false });
     }
 
-    const finalScore = Math.max(0, Math.min(100, score));
-    const profileSkills = new Set(profile.skillNames.map(normalize));
+    let finalScore = Math.max(0, Math.min(100, score));
+    if (profile.area && !areaCompatible) {
+      finalScore = Math.min(finalScore, weights.areaIncompatibleScoreCap);
+    }
+
+    const profileSlugs = new Set(skillMatcher.canonicalizeMany(profile.skillNames));
     const missing = job.technologies
       .map((t) => t.name)
-      .filter((name) => !profileSkills.has(normalize(name)));
+      .filter((name) => !profileSlugs.has(skillMatcher.canonicalize(name)));
     const prioritized = [
       ...missing.filter((name) => COMMON_MISSING_PRIORITY.includes(name)),
       ...missing.filter((name) => !COMMON_MISSING_PRIORITY.includes(name)),
@@ -140,7 +179,7 @@ export class MatchEngineService {
       missingSkills: prioritized.map((name, index) => ({
         id: `missing_${index + 1}`,
         name,
-        slug: name.toLowerCase().replace(/\s+/g, "-").replace(/\./g, ""),
+        slug: skillMatcher.canonicalize(name),
       })),
       reasons,
       engineVersion: MATCH_ENGINE_VERSION,

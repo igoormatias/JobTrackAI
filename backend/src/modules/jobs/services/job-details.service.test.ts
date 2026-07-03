@@ -49,7 +49,7 @@ describe("JobDetailsService", () => {
 
     expect(match.matchScore.score).toBe(88);
     expect(match.compatibilityLabel).toBeTruthy();
-    expect(match.engineVersion).toBe("rules-v1");
+    expect(match.engineVersion).toBe("rules-v2");
   });
 
   it("returns related jobs from catalog query", async () => {

@@ -27,7 +27,7 @@ const sampleDto: CareerAnalysisResponseDto = {
   provider: "gemini",
   model: "gemini-2.5-flash",
   engineVersion: "ai-career-v1",
-  matchEngineVersion: "rules-v1",
+  matchEngineVersion: "rules-v2",
   cached: false,
 };
 

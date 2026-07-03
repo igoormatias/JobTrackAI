@@ -14,16 +14,17 @@ export type DashboardInterviewsCardProps = {
 };
 
 export const DashboardInterviewsCard = ({ interviews }: DashboardInterviewsCardProps) => (
-  <Card className="h-full">
+  <Card className="h-full w-full min-w-0">
     <CardHeader>
       <CardTitle className="text-base">Próximas entrevistas</CardTitle>
     </CardHeader>
-    <CardContent>
+    <CardContent className="min-w-0">
       {interviews.length === 0 ? (
         <EmptyState
           icon={Calendar}
           title="Nenhuma entrevista agendada"
           description="Quando você avançar no pipeline, suas entrevistas aparecerão aqui."
+          className="py-8"
         />
       ) : (
         <ul className="space-y-4">
@@ -33,11 +34,13 @@ export const DashboardInterviewsCard = ({ interviews }: DashboardInterviewsCardP
               className="rounded-lg border border-border/60 p-3"
             >
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-medium text-foreground">{interview.jobTitle}</p>
-                  <p className="text-sm text-muted-foreground">{interview.companyName}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium text-foreground">{interview.jobTitle}</p>
+                  <p className="truncate text-sm text-muted-foreground">{interview.companyName}</p>
                 </div>
-                <Badge variant="secondary">{interview.status}</Badge>
+                <Badge variant="secondary" className="shrink-0">
+                  {interview.status}
+                </Badge>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 {formatInterviewDate(interview.scheduledAt)} · {formatInterviewTime(interview.scheduledAt)}

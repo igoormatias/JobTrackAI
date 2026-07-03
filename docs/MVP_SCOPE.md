@@ -23,8 +23,8 @@ Se a resposta for **não**, a funcionalidade **não** deve ser implementada no M
 | Abrir vaga na origem | Botão **Abrir vaga** redireciona para a plataforma original (`sourceUrl`) |
 | Cadastro manual de vagas | Usuário registra vagas manualmente com mesmo fluxo das importadas |
 | Dashboard | KPIs (favoritas, alta prioridade, ocultadas, em processo, entrevistas), melhores vagas, timeline resumida |
-| Match Score | Compatibilidade perfil × vaga (Match Engine V1 `rules-v1` no backend) |
-| Análise de carreira IA | On-demand por tracking (Etapa 18) — explica match, gaps, entrevista; **não** substitui `rules-v1` |
+| Match Score | Compatibilidade perfil × vaga (Match Engine `rules-v2` no backend) |
+| Análise de carreira IA | On-demand por tracking (Etapa 18) — explica match, gaps, entrevista; **não** substitui `rules-v2` |
 | Pipeline manual | Kanban para acompanhamento da jornada; estágio atualizado pelo usuário |
 | Timeline automática | Eventos registrados em mudanças de status, prioridade, favorito, visibilidade e observações |
 | Gestão de entrevistas | Registrar e acompanhar entrevistas no contexto do pipeline |

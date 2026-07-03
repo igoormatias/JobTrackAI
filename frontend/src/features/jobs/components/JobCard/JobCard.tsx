@@ -15,7 +15,7 @@ import { formatSalaryRange } from "@/features/dashboard/utils/format-salary-rang
 import { cn } from "@/lib/utils";
 import type { Job } from "@/types";
 
-import { JOB_ENGAGEMENT_LABELS } from "../../constants/jobs-constants";
+import { JOB_ENGAGEMENT_LABELS, FAVORITE_JOB_BADGE_CLASS, FAVORITE_JOB_SURFACE_CLASS } from "../../constants/jobs-constants";
 import { formatPublishedAgo, getCompanyInitials, getJobSourceLabel } from "../../utils/job-formatters";
 
 export type JobCardProps = {
@@ -54,7 +54,7 @@ export const JobCard = memo(
       <Card
         className={cn(
           "border",
-          job.isFavorite ? "border-amber-500/50 bg-amber-500/5" : engagementBorderClass[job.engagementState],
+          job.isFavorite ? FAVORITE_JOB_SURFACE_CLASS : engagementBorderClass[job.engagementState],
           className,
         )}
       >
@@ -74,19 +74,19 @@ export const JobCard = memo(
                     {JOB_ENGAGEMENT_LABELS[job.engagementState]}
                   </Badge>
                   {job.isFavorite ? (
-                    <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300">Favorita</Badge>
+                    <Badge className={FAVORITE_JOB_BADGE_CLASS}>Favorita</Badge>
                   ) : null}
                 </div>
                 <p className="truncate text-sm text-muted-foreground">
                   {job.company.name} · {job.modality} · {job.location}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="truncate text-xs text-muted-foreground">
                   {formatSalaryRange(job.salaryMin, job.salaryMax, job.currency)} · {getJobSourceLabel(job.source)} ·{" "}
                   Publicado {formatPublishedAgo(job.publishedAt)}
                 </p>
               </div>
             </div>
-            <MatchScoreBadge matchScore={job.matchScore} />
+            <MatchScoreBadge matchScore={job.matchScore} className="shrink-0" />
           </div>
 
           {!isCompact ? (
@@ -113,7 +113,7 @@ export const JobCard = memo(
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <Button
               type="button"
               size="sm"
@@ -121,12 +121,13 @@ export const JobCard = memo(
               onClick={() => onFavorite?.(job)}
               disabled={isFavoritePending}
               aria-label={job.isFavorite ? "Desfavoritar vaga" : "Salvar vaga"}
+              className="w-full sm:w-auto"
             >
               <Bookmark className={cn("mr-1 h-4 w-4", job.isFavorite && "fill-current")} />
               {job.isFavorite ? "Salvo" : "Salvar"}
             </Button>
-            <Link href={`/jobs/${job.id}`} onClick={() => onViewDetails?.(job)}>
-              <Button type="button" size="sm" variant="outline">
+            <Link href={`/jobs/${job.id}`} onClick={() => onViewDetails?.(job)} className="w-full sm:w-auto">
+              <Button type="button" size="sm" variant="outline" className="w-full sm:w-auto">
                 <ExternalLink className="mr-1 h-4 w-4" />
                 Ver detalhes
               </Button>
@@ -136,11 +137,12 @@ export const JobCard = memo(
               size="sm"
               variant="outline"
               onClick={() => onOpenJob?.(job)}
+              className="w-full sm:w-auto"
             >
               <ExternalLink className="mr-1 h-4 w-4" />
               Abrir vaga
             </Button>
-            <Button type="button" size="sm" onClick={() => onAddToPipeline?.(job)}>
+            <Button type="button" size="sm" onClick={() => onAddToPipeline?.(job)} className="w-full sm:w-auto">
               Adicionar ao Pipeline
             </Button>
           </div>

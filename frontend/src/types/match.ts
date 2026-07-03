@@ -10,7 +10,7 @@ export type MissingSkill = {
   slug: string;
 };
 
-export type MatchEngineVersion = "rules-v1";
+export type MatchEngineVersion = "rules-v1" | "rules-v2";
 
 export type MatchScore = {
   score: number;

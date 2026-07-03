@@ -100,7 +100,7 @@ CareerAnalysisCard → useCareerAnalysisQuery / useGenerateCareerAnalysisMutatio
 ```
 
 - **Trigger:** apenas clique do usuário (nunca no mount)
-- **Match score:** permanece `rules-v1`; IA explica via `matchExplanation`
+- **Match score:** `rules-v2` (`JobTitleNormalizer`, `SkillMatcher`, área-first); IA explica via `matchExplanation`
 - **Cache:** badge "Cache" quando `cached: true`; `AIAnalysis` no backend
 - **Skills:** `skillNames` no perfil + sync para `UserSkill` (catálogo normalizado)
 
@@ -144,7 +144,7 @@ Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) e [BACKEND_GUIDE.md](./BACKEND_GUID
 POST /ai/career-analysis/:trackingId → CareerAnalysisService
   → cache (AIAnalysis + contentHash)
   → miss: SkillNormalizer + PromptBuilder/Compressor → GeminiProvider
-  → match input from MatchEngineService (rules-v1, never recalculated by IA)
+  → match input from MatchEngineService (rules-v2, never recalculated by IA)
 ```
 
 - **Skills:** `Skill`, `SkillAlias`, `UserSkill`; sync a partir de `skillNames` no onboarding/perfil

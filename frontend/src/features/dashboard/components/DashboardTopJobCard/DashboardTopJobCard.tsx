@@ -12,7 +12,7 @@ export type DashboardTopJobCardProps = {
 };
 
 export const DashboardTopJobCard = memo(({ job }: DashboardTopJobCardProps) => (
-  <div className="space-y-3">
+  <div className="min-w-0 space-y-3">
     <JobCard job={job} variant="compact" />
     <div className="flex justify-end">
       <Link href={`/jobs/${job.id}`}>

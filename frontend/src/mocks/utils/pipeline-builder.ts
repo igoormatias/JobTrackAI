@@ -174,7 +174,6 @@ export const toggleApplicationFavorite = (id: string): Application | null => {
   const updated: Application = {
     ...current,
     job: { ...enrichApplicationJob(current, store.jobs).job, isFavorite },
-    updatedAt: new Date().toISOString(),
   };
 
   store.applications[index] = updated;

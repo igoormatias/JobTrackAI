@@ -11,7 +11,7 @@ export const MatchExplanation = ({ matchExplanation, matchScore }: MatchExplanat
       <h4 className="text-sm font-semibold text-foreground">Match explicado</h4>
       {matchScore !== undefined ? (
         <Badge variant="secondary" className="text-xs">
-          {matchScore}% · rules-v1
+          {matchScore}% · rules-v2
         </Badge>
       ) : null}
     </div>

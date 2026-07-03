@@ -1,0 +1,35 @@
+---
+description: Match Engine rules-v2 — normalização de cargo e skills, área-first
+globs:
+  - backend/src/modules/match/**
+  - backend/src/shared/domain/match-weights.ts
+  - backend/src/modules/job-catalog/**
+  - backend/src/modules/dashboard/**
+alwaysApply: false
+---
+
+# Match Engine (rules-v2)
+
+## Regras obrigatórias
+
+1. **Nunca** comparar cargos por texto livre — sempre usar `JobTitleNormalizer`
+2. **Sempre** usar `SkillMatcher` para comparar tecnologias no match engine
+3. **Área > cargo/título > skills** — área incompatível cap score ≤ 30
+4. **Nunca** recomendar vagas incompatíveis apenas porque compartilham uma tecnologia
+5. Toda recomendação passa pelo `MatchEngineService` (`rules-v2`)
+
+## Arquivos centrais
+
+- `backend/src/modules/match/domain/services/match-engine.service.ts`
+- `backend/src/modules/match/domain/services/job-title-normalizer.service.ts`
+- `backend/src/modules/match/domain/services/skill-matcher.service.ts`
+- `backend/src/shared/domain/match-weights.ts`
+- `docs/MATCH_ENGINE.md`
+
+## MatchJobInput
+
+Deve incluir `title` além de `area`, skills e metadados.
+
+## Pré-filtro
+
+Quando `profile.area` está definido, filtrar vagas com `isAreaCompatible` antes de ranquear (dashboard e catálogo sort=match).

@@ -4,6 +4,14 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [Unreleased]
 
+### Added (Etapa 19 — UX Stabilization & Smart Job Matching)
+
+- Match Engine `rules-v2` — área/cargo dominam; cap incompatível ≤ 30
+- `JobTitleNormalizer` + `SkillMatcher` (aliases síncronos)
+- Pré-filtro por área no catálogo (sort=match) e dashboard
+- UX responsiva: AppShell, dashboard grid, JobCard, busca estável
+- `docs/MATCH_ENGINE.md`, `docs/UX_AUDIT_ETAPA19.md`, ADR-029
+
 ### Added (Etapa 18 — AI Career Intelligence)
 
 - Módulo `ai` + Gemini (`GEMINI_API_KEY`, `GEMINI_MODEL`, `PROMPT_VERSION`)

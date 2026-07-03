@@ -182,7 +182,9 @@ Opções:
 
 ## 📊 Dashboard
 
-Resumo completo da busca.
+Resumo completo da busca. Melhores vagas usam Match Engine `rules-v2` (área-first) via API de jobs.
+
+**Etapa 19:** layout responsivo com `min-w-0` / `items-stretch`; busca com `searchDraft` local (sem perda de foco).
 
 Indicadores:
 

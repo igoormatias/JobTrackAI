@@ -8,13 +8,15 @@ describe("JobWhyThisJobCard", () => {
     render(
       <JobWhyThisJobCard
         reasons={[
-          { id: "r1", label: "React", matched: true },
-          { id: "r2", label: "AWS", matched: false },
+          { id: "r1", label: "Cargo compatível com seu perfil", matched: true },
+          { id: "r2", label: "React encontrado", matched: true },
+          { id: "r3", label: "AWS", matched: false },
         ]}
       />,
     );
 
-    expect(screen.getByText(/React/)).toBeInTheDocument();
+    expect(screen.getByText(/Cargo compatível com seu perfil/)).toBeInTheDocument();
+    expect(screen.getByText(/React encontrado/)).toBeInTheDocument();
     expect(screen.queryByText(/AWS/)).not.toBeInTheDocument();
   });
 });

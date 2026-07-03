@@ -25,7 +25,7 @@ O JobTrack AI backend centraliza a lógica de:
 - Autenticação (Google OAuth)
 - Perfil simplificado
 - Listagem e engajamento com vagas (favoritar, prioridade, visibilidade, visualizar — **não aplicar**)
-- Match Score
+- Match Score (`rules-v2` — [MATCH_ENGINE.md](../docs/MATCH_ENGINE.md))
 - Pipeline de **acompanhamento manual**
 - Notificações internas
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { queryKeys } from "@/lib/query-client/query-keys";
@@ -24,5 +24,6 @@ export const useInfiniteJobs = (params: JobListParams) => {
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => (lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined),
+    placeholderData: keepPreviousData,
   });
 };

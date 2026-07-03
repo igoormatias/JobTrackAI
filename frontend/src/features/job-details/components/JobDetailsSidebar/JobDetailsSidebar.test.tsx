@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { createQueryWrapper } from "@/test/query-wrapper";
+
 import { JobDetailsSidebarWidget } from "../../widgets/JobDetailsSidebarWidget";
 
 vi.mock("next/link", () => ({
@@ -11,6 +13,7 @@ vi.mock("next/link", () => ({
 
 describe("JobDetailsSidebar", () => {
   it("renders match and insights", () => {
+    const { Wrapper } = createQueryWrapper();
     render(
       <JobDetailsSidebarWidget
         match={{
@@ -42,6 +45,7 @@ describe("JobDetailsSidebar", () => {
         relatedJobs={[]}
         timeline={[]}
       />,
+      { wrapper: Wrapper },
     );
 
     expect(screen.getByText("91%")).toBeInTheDocument();

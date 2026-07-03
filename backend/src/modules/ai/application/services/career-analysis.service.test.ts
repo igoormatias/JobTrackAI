@@ -59,7 +59,7 @@ const storedRecord = (overrides: Partial<CareerAnalysisRecord> = {}): CareerAnal
   provider: "gemini",
   model: "gemini-2.5-flash",
   promptVersion: "career-v1",
-  matchEngineVersion: "rules-v1",
+  matchEngineVersion: "rules-v2",
   confidence: 0.8,
   generatedAt: new Date("2026-01-01"),
   ...overrides,

@@ -12,10 +12,19 @@ import type { useJobFilters } from "../../hooks/use-job-filters";
 export type JobsFilterSheetProps = {
   filters: ReturnType<typeof useJobFilters>;
   companies: { id: string; name: string }[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
-export const JobsFilterSheet = ({ filters, companies }: JobsFilterSheetProps) => {
-  const [open, setOpen] = useState(false);
+export const JobsFilterSheet = ({
+  filters,
+  companies,
+  open: controlledOpen,
+  onOpenChange,
+}: JobsFilterSheetProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const { clearFilters, hasActiveFilters } = filters;
 
   return (
@@ -32,7 +41,7 @@ export const JobsFilterSheet = ({ filters, companies }: JobsFilterSheetProps) =>
         title="Filtros de vagas"
         description="Refine os resultados de acordo com seu perfil."
       >
-        <div className="space-y-4 overflow-y-auto px-1 pb-6">
+        <div className="scrollbar-app space-y-4 overflow-y-auto px-1 pb-6">
           <JobsFilterFields
             urlState={filters.urlState}
             setUrlState={filters.setUrlState}

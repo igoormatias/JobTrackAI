@@ -10,7 +10,7 @@ globs:
 ## Princípios
 
 - **Manual only** — nunca disparar análise IA no mount; apenas no clique do usuário.
-- **Match score** — permanece `rules-v1`; IA explica, não decide nem recalcula score.
+- **Match score** — permanece `rules-v2`; IA explica, não decide nem recalcula score.
 - **Cache-first** — `AIAnalysis` + `computeAnalysisHash`; provider só em cache miss (ou `refresh=true`).
 - **Clean Architecture** — `GeminiProvider` só em `infrastructure/providers/`; use cases dependem de ports.
 
