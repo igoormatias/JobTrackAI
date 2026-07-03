@@ -23,7 +23,6 @@ export const authResponseSchema = z.object({
       seniority: z.string().optional(),
       location: z.string().optional(),
       skills: z.array(z.string()).optional(),
-      blockedSkills: z.array(z.string()).optional(),
     })
     .nullable(),
   permissions: z.object({

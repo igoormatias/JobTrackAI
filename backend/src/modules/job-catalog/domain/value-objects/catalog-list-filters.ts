@@ -50,6 +50,7 @@ export type CatalogJobUpsertInput = {
   sourceUrl?: string | null;
   source: string;
   externalId?: string | null;
+  contentHash?: string | null;
   area?: string | null;
   seniority?: string | null;
   modality?: string | null;

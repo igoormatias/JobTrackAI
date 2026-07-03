@@ -31,7 +31,9 @@ JobTrack AI **não** é plataforma de candidatura nem ATS.
 
 ## Fora do MVP (não implementar)
 
-Aplicação pela plataforma, upload de currículo, perfil público, LinkedIn/GitHub no perfil, ATS, providers reais, importação por URL, WebSocket, Scheduler, Match Engine real, IA, Analytics, ML, i18n.
+Aplicação pela plataforma, upload de currículo, perfil público, LinkedIn/GitHub no perfil, ATS, importação por URL, WebSocket, Match Engine real (IA), Analytics, ML, i18n.
+
+**Providers (Etapa 17):** Gupy real + scheduler interno fazem parte do MVP. LinkedIn/Programathor fetch real permanece V2+.
 
 Lista completa: `docs/MVP_SCOPE.md`
 

@@ -17,7 +17,6 @@ const toMatchProfile = async (userId: string): Promise<MatchProfileInput | null>
     locationPreference: profile.locationPreference as MatchProfileInput["locationPreference"],
     salaryExpectation: profile.salaryExpectation as MatchProfileInput["salaryExpectation"],
     skillNames: profile.skillNames,
-    blockedSkills: profile.blockedSkills,
   };
 };
 

@@ -38,7 +38,6 @@ const onboardingStepSchema = z.enum([
   "modality",
   "location",
   "salary",
-  "blockedSkills",
   "summary",
 ]);
 
@@ -77,9 +76,7 @@ const mvpProfileFieldsSchema = z.object({
   onboardingCompleted: z.boolean().optional(),
 });
 
-export const createProfileSchema = mvpProfileFieldsSchema.extend({
-  blockedSkills: z.array(z.string()).optional(),
-});
+export const createProfileSchema = mvpProfileFieldsSchema;
 
 export const updateProfileSchema = mvpProfileFieldsSchema.partial();
 

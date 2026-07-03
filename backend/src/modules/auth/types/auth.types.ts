@@ -29,7 +29,6 @@ export type AuthProfile = {
     acceptsRelocation: boolean;
   };
   skills?: string[];
-  blockedSkills?: string[];
   modality?: string;
 };
 

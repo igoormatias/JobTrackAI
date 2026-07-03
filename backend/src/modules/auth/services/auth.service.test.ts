@@ -75,7 +75,6 @@ describe("AuthService", () => {
         acceptsRelocation: false,
       },
       skills: ["React", "TypeScript"],
-      blockedSkills: ["PHP"],
     });
 
     expect(completed.data.user.onboardingCompleted).toBe(true);

@@ -245,14 +245,29 @@ Contrato alvo (MSW implementado; backend em evolução):
 
 ---
 
+## Providers (Etapa 17)
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| `GET` | `/providers` | Sim | Lista providers registrados |
+| `GET` | `/providers/statistics` | Sim | Totais, jobs por provider, execuções recentes |
+| `GET` | `/providers/history` | Sim | Histórico de execuções (cursor) |
+| `GET` | `/providers/health` | Sim | Health check por provider |
+| `POST` | `/providers/run` | Sim + rate limit | Executa todos os providers habilitados |
+| `POST` | `/providers/run/:provider` | Sim + rate limit | Executa um provider |
+
+**Dashboard (`GET /dashboard`):** inclui `jobSync` com `lastSyncAt`, `totalCatalogJobs`, `jobsByProvider`, `recentExecutions`, `providerErrors24h`.
+
+---
+
 ## Importação futura (V2)
 
 | Funcionalidade | Descrição |
 |----------------|-----------|
 | Importar por URL | Cadastrar vaga a partir de link externo com parsing automático |
-| Providers automáticos | Integração com Gupy, LinkedIn, Programathor via scheduler |
+| LinkedIn / Programathor fetch real | Substituir stubs por integração completa |
 
-Fora do MVP. Documentar implementação em [ROADMAP.md](./ROADMAP.md).
+Fora do escopo Etapa 17. Ver [PROVIDERS.md](./PROVIDERS.md).
 
 ---
 

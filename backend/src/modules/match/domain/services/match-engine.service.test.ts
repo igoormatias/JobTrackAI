@@ -9,7 +9,6 @@ const baseProfile: MatchProfileInput = {
   modality: "remote",
   location: "São Paulo",
   skillNames: ["React", "TypeScript", "Next.js"],
-  blockedSkills: [],
 };
 
 const baseJob: MatchJobInput = {
@@ -45,12 +44,5 @@ describe("MatchEngineService", () => {
   it("includes missing skills from job technologies", () => {
     const result = engine.compute(baseProfile, baseJob);
     expect(result.missingSkills.some((s) => s.name === "Docker")).toBe(true);
-  });
-
-  it("penalizes blocked skills present in job", () => {
-    const profile = { ...baseProfile, blockedSkills: ["Docker"] };
-    const withBlock = engine.compute(profile, baseJob);
-    const without = engine.compute(baseProfile, baseJob);
-    expect(withBlock.score).toBeLessThan(without.score);
   });
 });

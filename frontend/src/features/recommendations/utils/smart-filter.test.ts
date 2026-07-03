@@ -13,7 +13,6 @@ const profile: RecommendationProfile = {
   salaryBand: "8k_12k",
   salaryExpectation: { min: 8000, max: 12000, currency: "BRL" },
   skillNames: ["React"],
-  blockedSkills: [],
 };
 
 const baseJob = (area: Job["area"], tech: string, id: string): Job =>

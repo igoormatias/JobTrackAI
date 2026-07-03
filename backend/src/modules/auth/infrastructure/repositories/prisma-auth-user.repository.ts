@@ -19,7 +19,6 @@ const mapProfileToAuthProfile = (profile: Profile | null): AuthProfile | null =>
     location: profile.location,
     locationPreference: profile.locationPreference as AuthProfile["locationPreference"],
     skills: profile.skillNames,
-    blockedSkills: profile.blockedSkills,
     modality: profile.modality ?? undefined,
   };
 };
@@ -108,7 +107,6 @@ export class PrismaAuthUserRepository implements AuthUserRepository {
         salaryBand: profile.salaryBand ?? null,
         salaryExpectation: profile.salaryExpectation ?? undefined,
         skillNames: profile.skills ?? [],
-        blockedSkills: profile.blockedSkills ?? [],
         onboardingCompleted,
       },
       update: {
@@ -120,7 +118,6 @@ export class PrismaAuthUserRepository implements AuthUserRepository {
         salaryBand: profile.salaryBand ?? null,
         salaryExpectation: profile.salaryExpectation ?? undefined,
         skillNames: profile.skills ?? [],
-        blockedSkills: profile.blockedSkills ?? [],
         onboardingCompleted,
       },
     });

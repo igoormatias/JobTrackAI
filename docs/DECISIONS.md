@@ -483,6 +483,33 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 ---
 
+## ADR-027 — Job Aggregation Engine (Etapa 17)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 17)
+
+**Contexto:** O catálogo MVP dependia de seed estático (~400 vagas). Para evoluir o produto, vagas devem ser importadas de providers reais com normalização, deduplicação e histórico de execução.
+
+**Decisão:**
+
+- Novo módulo `job-aggregation` (Clean Architecture) como orquestrador único de providers
+- **Gupy** com `search()` real; **LinkedIn** e **Programathor** com arquitetura completa + stub
+- Tabelas `JobProviderRegistry`, `ProviderExecution`, `JobImport`; `Job.contentHash` para dedup
+- Endpoints `GET/POST /providers/*` com auth + rate limit
+- Scheduler interno opcional (`ENABLE_SCHEDULER`, `SYNC_INTERVAL`)
+- Seed condicional (`SEED_CATALOG=false` em produção)
+- Remoção de `blockedSkills` do onboarding e Match Engine
+
+**Motivos:** Centralizar importação sem acoplar use cases a `fetch`/Prisma; permitir sync manual e automático; preparar novos providers.
+
+**Consequências:**
+
+- Runtime em produção depende de sync ou seed dev explícito
+- LinkedIn/Programathor retornam `health: degraded` até implementação real (V2+)
+- Etapa 18 = AI Match Engine (renumerada)
+
+---
+
 ## Template para novas decisões
 
 ```markdown

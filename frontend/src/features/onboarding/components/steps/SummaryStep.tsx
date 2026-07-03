@@ -51,18 +51,6 @@ export const SummaryStep = ({ form, onEdit }: SummaryStepProps) => (
     <SummaryCard title="Pretensão salarial" onEdit={() => onEdit("salary")}>
       {getSalaryBandLabel(form.salaryBand)}
     </SummaryCard>
-
-    <SummaryCard title="Competências que não deseja" onEdit={() => onEdit("blockedSkills")}>
-      {form.blockedSkills.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {form.blockedSkills.map((skill) => (
-            <Chip key={skill}>{skill}</Chip>
-          ))}
-        </div>
-      ) : (
-        "Nenhuma selecionada"
-      )}
-    </SummaryCard>
   </div>
 );
 

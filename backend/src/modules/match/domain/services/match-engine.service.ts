@@ -34,7 +34,6 @@ export type MatchProfileInput = {
   } | null;
   salaryExpectation?: { min: number; max: number; currency: "BRL" } | null;
   skillNames: string[];
-  blockedSkills: string[];
 };
 
 export type MatchJobInput = {
@@ -117,17 +116,6 @@ export class MatchEngineService {
     if (this.isSalaryCompatible(profile, job)) {
       score += weights.salaryMatch;
       reasons.push({ id: "reason_salary", label: "Pretensão compatível", matched: true });
-    }
-
-    const blockedInJob = profile.blockedSkills.filter((blocked) => {
-      const normalized = normalize(blocked);
-      return jobTerms.some((term) => term.includes(normalized) || normalized.includes(term));
-    });
-    if (blockedInJob.length > 0) {
-      score += weights.blockedSkillPenalty * blockedInJob.length;
-      blockedInJob.forEach((skill, index) => {
-        reasons.push({ id: `reason_blocked_${index}`, label: `${skill} bloqueado`, matched: false });
-      });
     }
 
     if (!this.isSeniorityCompatible(profile, job) && profile.seniority) {

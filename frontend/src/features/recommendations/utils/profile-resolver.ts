@@ -12,7 +12,6 @@ export const mapAuthProfileToRecommendation = (authProfile: AuthProfile): Recomm
   salaryBand: (authProfile.salaryBand as RecommendationProfile["salaryBand"]) ?? null,
   salaryExpectation: authProfile.salaryExpectation ?? null,
   skillNames: authProfile.skills ?? [],
-  blockedSkills: authProfile.blockedSkills ?? [],
 });
 
 export const mapProfileToRecommendation = (profile: Profile): RecommendationProfile => ({
@@ -24,7 +23,6 @@ export const mapProfileToRecommendation = (profile: Profile): RecommendationProf
   salaryBand: profile.salaryBand,
   salaryExpectation: profile.salaryExpectation,
   skillNames: profile.skillNames.length > 0 ? profile.skillNames : profile.skills.map((s) => s.name),
-  blockedSkills: profile.blockedSkills,
 });
 
 export const createEmptyRecommendationProfile = (): RecommendationProfile => ({
@@ -36,7 +34,6 @@ export const createEmptyRecommendationProfile = (): RecommendationProfile => ({
   salaryBand: null,
   salaryExpectation: null,
   skillNames: [],
-  blockedSkills: [],
 });
 
 export const resolveActiveProfile = (

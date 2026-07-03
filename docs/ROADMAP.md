@@ -133,7 +133,17 @@ Catálogo oficial persistido em Prisma — sem vagas fake em runtime:
 - Checklist manual MVP (sem suite E2E automatizada)
 - ADR-026
 
-#### ⬜ AI Match Engine (Etapa 16)
+#### ✅ Job Aggregation Engine (Etapa 17)
+
+- Módulo `job-aggregation` (Clean Architecture)
+- Gupy provider real; LinkedIn/Programathor arquitetura + stub
+- Normalização, deduplicação, scheduler interno
+- Endpoints `GET/POST /providers/*`
+- Dashboard sincronização; seed opcional (`SEED_CATALOG`)
+- Remoção `blockedSkills` do onboarding
+- ADR-027
+
+#### ⬜ AI Match Engine (Etapa 18)
 
 - Enriquecimento AI sobre contrato `engineVersion` (explicações, learning tips)
 - Sem breaking changes no frontend
@@ -170,7 +180,7 @@ Dívida documentada em [MVP_SCOPE.md](./MVP_SCOPE.md#dívida-técnica-documentad
 - [ ] Deprecar `POST /jobs/:id/apply` no código — Etapa 12
 - [ ] Remover estágio `"favorite"` do pipeline Kanban — Etapa 12
 - [ ] Implementar prioridade, visibilidade, cadastro manual — Etapa 12
-- [ ] Remover ou mover etapa `blockedSkills` do onboarding
+- [x] Remover etapa `blockedSkills` do onboarding — Etapa 17
 - [ ] Alinhar `engagementState: applied` com fluxo manual do pipeline
 
 ---
@@ -181,9 +191,7 @@ Funcionalidades **fora do MVP**. Não implementar antes de concluir o escopo MVP
 
 ### Integrações e infraestrutura
 
-- ⬜ **Providers** — integração real com Gupy, LinkedIn, Programathor
 - ⬜ **Importação por URL** — cadastrar vaga a partir de link externo
-- ⬜ **Scheduler** — busca automática e atualização de vagas
 - ⬜ **WebSocket** — atualizações em tempo real (Socket.IO preparado)
 - ⬜ **Integrações avançadas** — novas fontes e normalização em produção
 

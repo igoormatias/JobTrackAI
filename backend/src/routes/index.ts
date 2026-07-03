@@ -11,6 +11,7 @@ import { createProfileRoutes } from "../modules/profiles/infrastructure/http/rou
 import { createRecommendationRoutes } from "../modules/recommendations/routes/recommendation.routes.js";
 import { createSettingsRoutes } from "../modules/settings/infrastructure/http/routes/settings.routes.js";
 import { createSystemRoutes } from "../modules/system/infrastructure/http/routes/system.routes.js";
+import { createProviderRoutes } from "../modules/job-aggregation/infrastructure/http/routes/provider.routes.js";
 
 export const createRoutes = (): Router => {
   const router = Router();
@@ -26,6 +27,7 @@ export const createRoutes = (): Router => {
   router.use("/dashboard", createDashboardRoutes());
   router.use("/notifications", createNotificationRoutes());
   router.use("/recommendations", createRecommendationRoutes());
+  router.use("/providers", createProviderRoutes());
 
   return router;
 };

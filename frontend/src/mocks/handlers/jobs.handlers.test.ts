@@ -48,7 +48,6 @@ describe("jobs handlers", () => {
       seniority: "senior",
       modality: "remote",
       skillNames: ["React", "TypeScript"],
-      blockedSkills: [],
       onboardingCompleted: true,
     });
 

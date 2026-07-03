@@ -62,7 +62,6 @@ export const onboardingCompleteSchema = z.object({
   salaryBand: salaryBandSchema,
   salaryExpectation: salaryRangeSchema,
   skills: z.array(z.string()).min(1).max(15),
-  blockedSkills: z.array(z.string()).default([]),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

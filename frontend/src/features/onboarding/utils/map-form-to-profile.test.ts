@@ -17,7 +17,6 @@ const createProfile = (overrides: Partial<Profile> = {}): Profile => ({
   salaryBand: null,
   skills: [],
   skillNames: [],
-  blockedSkills: [],
   technologies: [],
   avoidedTechnologies: [],
   bio: "",
@@ -64,13 +63,11 @@ describe("mapProfileToForm", () => {
     const profile = createProfile({
       skillNames: [],
       skills: undefined,
-      blockedSkills: undefined,
     });
 
     expect(mapProfileToForm(profile as Profile)).toMatchObject({
       area: "frontend",
       skills: [],
-      blockedSkills: [],
     });
   });
 });

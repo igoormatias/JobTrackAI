@@ -28,7 +28,6 @@ export class ProfileMapper {
       salaryExpectation: parseJson<SalaryRange>(record.salaryExpectation),
       salaryBand: (record.salaryBand as Profile["salaryBand"]) ?? null,
       skillNames: record.skillNames,
-      blockedSkills: record.blockedSkills,
       bio: "",
       linkedinUrl: null,
       githubUrl: null,

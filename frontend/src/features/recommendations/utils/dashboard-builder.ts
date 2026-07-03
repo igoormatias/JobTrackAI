@@ -239,6 +239,13 @@ export const buildPersonalizedDashboard = ({
     upcomingInterviews,
     insight,
     applicationsTimeline: buildApplicationsTimeline(applications),
+    jobSync: {
+      lastSyncAt: null,
+      totalCatalogJobs: sortedJobs.length,
+      jobsByProvider: [],
+      providerErrors24h: 0,
+      recentExecutions: [],
+    },
     generatedAt: new Date().toISOString(),
   };
 };

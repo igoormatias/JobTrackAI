@@ -35,7 +35,6 @@ export const mapFormToProfilePayload = (
     salaryBand,
     salaryExpectation,
     skillNames: form.skills,
-    blockedSkills: form.blockedSkills,
     onboardingProgress,
     extensions: {},
   };
@@ -51,7 +50,6 @@ export const mapProfileToForm = (profile: Profile): OnboardingFormState => ({
     acceptsRelocation: false,
   },
   salaryBand: profile.salaryBand ?? "",
-  blockedSkills: profile.blockedSkills ?? [],
 });
 
 export const mapFormToCompletePayload = (form: OnboardingFormState): OnboardingCompletePayload => ({
@@ -63,5 +61,4 @@ export const mapFormToCompletePayload = (form: OnboardingFormState): OnboardingC
   salaryBand: form.salaryBand as SalaryBand,
   salaryExpectation: salaryBandToRange(form.salaryBand as SalaryBand),
   skills: form.skills,
-  blockedSkills: form.blockedSkills,
 });

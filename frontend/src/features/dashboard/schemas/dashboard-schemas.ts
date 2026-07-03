@@ -44,6 +44,30 @@ export const dashboardDataSchema = z.object({
   ),
   topTechnologies: z.array(chartPointSchema),
   topCompanies: z.array(chartPointSchema),
+  jobSync: z.object({
+    lastSyncAt: z.string().nullable(),
+    totalCatalogJobs: z.number(),
+    jobsByProvider: z.array(
+      z.object({
+        provider: z.string(),
+        count: z.number(),
+      }),
+    ),
+    providerErrors24h: z.number(),
+    recentExecutions: z.array(
+      z.object({
+        id: z.string(),
+        providerName: z.string(),
+        status: z.string(),
+        startedAt: z.string(),
+        finishedAt: z.string().nullable(),
+        importedCount: z.number(),
+        duplicateCount: z.number(),
+        failedCount: z.number(),
+        errorMessage: z.string().nullable(),
+      }),
+    ),
+  }),
   generatedAt: z.string(),
 });
 

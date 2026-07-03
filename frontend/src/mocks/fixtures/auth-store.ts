@@ -72,7 +72,6 @@ export const completeOnboardingAuthStore = (payload: OnboardingCompletePayload):
       location: payload.location,
       locationPreference: payload.locationPreference,
       skills: payload.skills,
-      blockedSkills: payload.blockedSkills,
     },
   };
 

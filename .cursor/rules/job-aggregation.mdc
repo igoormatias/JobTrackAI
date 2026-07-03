@@ -1,0 +1,29 @@
+---
+description: Job Aggregation Engine — providers, normalização e persistência
+globs: backend/src/modules/job-aggregation/**,backend/src/providers/**
+alwaysApply: false
+---
+
+# Job Aggregation (Etapa 17)
+
+## Regras obrigatórias
+
+1. **Nunca** acessar provider (`src/providers/*`) fora do módulo `job-aggregation` ou dos adapters em `infrastructure/providers/`.
+2. **Sempre** normalizar via `NormalizedJob` antes de persistir.
+3. **Nunca** persistir payload raw do provider no banco.
+4. Use cases dependem de **ports** (repositories, `JobProviderPort`), não de Prisma/fetch.
+5. Deduplicação via `DedupStrategy` — não duplicar lógica em controllers.
+
+## Fluxo oficial
+
+`search → normalize → validate → dedup → upsertCatalogJob`
+
+## Providers MVP
+
+- Gupy: implementação real
+- LinkedIn / Programathor: stub + `health()` degraded
+
+## Seed vs runtime
+
+- Produção: catálogo populado por `POST /providers/run` ou scheduler
+- Dev fallback: `SEED_CATALOG=true npm run prisma:seed`

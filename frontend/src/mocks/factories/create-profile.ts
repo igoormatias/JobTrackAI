@@ -54,7 +54,6 @@ export const createProfile = ({
     salaryBand: "12k_15k",
     skills: techNames.slice(0, 6).map((name, index) => createSkill(name, index + 1)),
     skillNames: techNames.slice(0, 6),
-    blockedSkills: avoided,
     technologies: techNames.map((name, index) => createTechnology(name, index + 1)),
     avoidedTechnologies: avoided.map((name, index) => createTechnology(name, index + 100)),
     bio: "Profissional com experiência em produtos digitais, arquitetura frontend e integrações de APIs.",

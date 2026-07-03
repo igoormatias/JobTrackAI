@@ -34,6 +34,7 @@ model Job {
   sourceUrl   String?
   source      String
   externalId  String?
+  contentHash String?
   area        String?
   seniority   String?
   modality    String?
@@ -61,6 +62,56 @@ model Job {
   @@index([source])
   @@index([publishedAt])
   @@index([status])
+  @@index([contentHash])
+  @@index([sourceUrl])
+}
+
+model JobProviderRegistry {
+  id           String    @id @default(cuid())
+  name         String    @unique
+  displayName  String
+  enabled      Boolean   @default(true)
+  lastHealthAt DateTime?
+  lastRunAt    DateTime?
+  config       Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model ProviderExecution {
+  id              String       @id @default(cuid())
+  providerName    String
+  status          String
+  startedAt       DateTime     @default(now())
+  finishedAt      DateTime?
+  durationMs      Int?
+  foundCount      Int          @default(0)
+  importedCount   Int          @default(0)
+  duplicateCount  Int          @default(0)
+  failedCount     Int          @default(0)
+  errorMessage    String?
+  jobImports      JobImport[]
+
+  @@index([providerName, startedAt])
+  @@index([status])
+}
+
+model JobImport {
+  id           String            @id @default(cuid())
+  executionId  String
+  execution    ProviderExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  providerName String
+  externalId   String?
+  sourceUrl    String?
+  contentHash  String?
+  status       String
+  jobId        String?
+  errorMessage String?
+  createdAt    DateTime          @default(now())
+
+  @@index([executionId])
+  @@index([providerName])
+  @@index([contentHash])
 }
 
 model JobView {
@@ -156,7 +207,6 @@ model Profile {
   salaryBand          String?
   salaryExpectation   Json?
   skillNames          String[] @default([])
-  blockedSkills       String[] @default([])
   onboardingCompleted Boolean  @default(false)
   onboardingProgress  Json?
   updatedAt           DateTime @updatedAt

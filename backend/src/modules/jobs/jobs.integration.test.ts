@@ -39,7 +39,6 @@ describe.skipIf(!hasDatabase)("Jobs module integration (Prisma)", () => {
       salaryBand: "mid",
       salaryExpectation: { min: 8000, max: 15000, currency: "BRL" },
       skills: ["React", "TypeScript"],
-      blockedSkills: [],
     });
 
     const probe = await agent.get("/jobs?limit=1");

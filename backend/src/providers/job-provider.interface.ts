@@ -1,18 +1,28 @@
-export type JobFetchParams = {
+import type { NormalizedJob } from "../modules/job-aggregation/domain/entities/normalized-job.entity.js";
+import type { ProviderHealthStatus } from "../modules/job-aggregation/domain/value-objects/provider-health-status.vo.js";
+
+export type ProviderSearchParams = {
   keywords?: string;
   location?: string;
   workplaceTypes?: string;
   limit?: number;
   offset?: number;
-  page?: number;
 };
 
-export type JobProviderResult = {
+export type ProviderRawResult = {
   jobs: unknown[];
   hasMore: boolean;
 };
 
 export interface JobProvider {
-  readonly name: string;
-  fetchJobs(params: JobFetchParams): Promise<JobProviderResult>;
+  readonly providerName: string;
+  search(params: ProviderSearchParams): Promise<ProviderRawResult>;
+  normalize(raw: unknown): NormalizedJob;
+  health(): Promise<ProviderHealthStatus>;
 }
+
+/** @deprecated Use ProviderSearchParams */
+export type JobFetchParams = ProviderSearchParams;
+
+/** @deprecated Use ProviderRawResult */
+export type JobProviderResult = ProviderRawResult;

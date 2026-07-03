@@ -116,7 +116,8 @@ Ver [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) e [BACKEND_GUIDE.md](./BACKEND_GUID
 - **ORM:** Prisma (PostgreSQL)
 - **Validação:** Zod
 - **Arquitetura:** Clean Architecture + DDD (lightweight) — padrão oficial para novos módulos
-- **Módulos Clean Architecture:** `system`, `profiles`, `settings`, `job-catalog`
+- **Módulos Clean Architecture:** `system`, `profiles`, `settings`, `job-catalog`, `job-aggregation`
+- **Providers:** `src/providers/*` (adapters) → orquestrados por `job-aggregation` → `job-catalog` (Prisma)
 - **Módulos legados:** `auth`, `jobs`, `pipeline`, `recommendations` (controller → service; jobs delega catálogo ao `job-catalog`)
 - **Job Catalog (Etapa 14):** catálogo oficial via Prisma seed (~400 vagas); `JobCatalogRepository` + `PrismaJobCatalogRepository`; Providers alimentam o mesmo `Job` na V2
 - **Eventos:** `EventBus` com `InMemoryEventBus` em `src/shared/events/`

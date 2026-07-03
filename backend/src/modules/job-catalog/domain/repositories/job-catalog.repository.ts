@@ -21,5 +21,5 @@ export interface JobCatalogRepository {
   findById(id: string, context: UserJobContextQuery): Promise<Job | null>;
   findRelated(query: RelatedJobsQuery): Promise<Job[]>;
   upsertCatalogJob(data: CatalogJobUpsertInput): Promise<Job>;
-  upsertManyCatalogJobs(data: CatalogJobUpsertInput[]): Promise<number>;
+  upsertManyCatalogJobs(data: CatalogJobUpsertInput[]): Promise<{ imported: number; updated: number }>;
 }

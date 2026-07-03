@@ -68,10 +68,6 @@ export const salaryStepSchema = z.object({
   salaryBand: salaryBandSchema,
 });
 
-export const blockedSkillsStepSchema = z.object({
-  blockedSkills: z.array(z.string()),
-});
-
 export const onboardingFormSchema = z.object({
   area: professionalAreaSchema,
   skills: z.array(z.string()).min(1).max(15),
@@ -79,7 +75,6 @@ export const onboardingFormSchema = z.object({
   modality: workModalitySchema,
   locationPreference: profileLocationSchema,
   salaryBand: salaryBandSchema,
-  blockedSkills: z.array(z.string()),
 });
 
 export const stepSchemas: Record<OnboardingStep, z.ZodTypeAny> = {
@@ -89,7 +84,6 @@ export const stepSchemas: Record<OnboardingStep, z.ZodTypeAny> = {
   modality: modalityStepSchema,
   location: locationStepSchema,
   salary: salaryStepSchema,
-  blockedSkills: blockedSkillsStepSchema,
   summary: onboardingFormSchema,
 };
 

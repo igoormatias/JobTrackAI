@@ -54,7 +54,6 @@ export type OnboardingStepId =
   | "modality"
   | "location"
   | "salary"
-  | "blockedSkills"
   | "summary";
 
 export type OnboardingProgress = {
@@ -78,7 +77,6 @@ export type Profile = {
   salaryBand: SalaryBand | null;
   skills: Skill[];
   skillNames: string[];
-  blockedSkills: string[];
   technologies: Technology[];
   avoidedTechnologies: Technology[];
   bio: string;
@@ -109,7 +107,6 @@ export type CreateProfilePayload = {
   salaryBand?: SalaryBand | null;
   salaryExpectation?: SalaryRange | null;
   skillNames?: string[];
-  blockedSkills?: string[];
   onboardingProgress?: OnboardingProgress | null;
   onboardingCompleted?: boolean;
   headline?: string;
@@ -131,7 +128,6 @@ export type UpdateProfilePayload = Partial<
     | "salaryExpectation"
     | "salaryBand"
     | "skillNames"
-    | "blockedSkills"
     | "skills"
     | "technologies"
     | "avoidedTechnologies"

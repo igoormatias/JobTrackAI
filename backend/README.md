@@ -92,14 +92,16 @@ Redis não faz parte do MVP. Ver [docs/DECISIONS.md](../docs/DECISIONS.md).
 
 ## Scheduler
 
-- Node Cron
+Provider sync (Etapa 17):
 
-Responsável por:
+| Env | Default | Descrição |
+|-----|---------|-----------|
+| `ENABLE_SCHEDULER` | `false` | Liga sync automático de providers |
+| `SYNC_INTERVAL` | `3600000` | Intervalo em ms |
+| `ENABLE_PROVIDER_GUPY` | `true` | Habilita Gupy |
+| `SEED_CATALOG` | `false` | Seed ~400 vagas (dev fallback) |
 
-- Buscar novas vagas
-- Atualizar fontes
-- Limpeza de cache
-- Tarefas agendadas
+Sync manual: `POST /providers/run` (auth). Ver [docs/PROVIDERS.md](../docs/PROVIDERS.md).
 
 ---
 

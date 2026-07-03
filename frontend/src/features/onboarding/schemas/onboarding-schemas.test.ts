@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { createInitialFormState } from "../types/onboarding.types";
 import {
   areaStepSchema,
-  blockedSkillsStepSchema,
   locationStepSchema,
   modalityStepSchema,
   onboardingFormSchema,
@@ -42,9 +41,8 @@ describe("onboarding schemas", () => {
     ).toBe(false);
   });
 
-  it("validates salary and blocked skills steps", () => {
+  it("validates salary step", () => {
     expect(salaryStepSchema.safeParse({ salaryBand: "8k_12k" }).success).toBe(true);
-    expect(blockedSkillsStepSchema.safeParse({ blockedSkills: [] }).success).toBe(true);
   });
 
   it("validates complete onboarding form", () => {

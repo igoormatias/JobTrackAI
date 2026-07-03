@@ -4,6 +4,20 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [Unreleased]
 
+### Added (Etapa 17 — Job Aggregation Engine)
+
+- Módulo `job-aggregation` com normalização, dedup, validação e persistência
+- Gupy provider real; LinkedIn/Programathor stubs com `health()`
+- Endpoints `/providers/*` (list, statistics, history, health, run)
+- Scheduler interno (`ENABLE_SCHEDULER`, `SYNC_INTERVAL`)
+- Dashboard: widget sincronização de vagas (`jobSync`)
+- `SEED_CATALOG` condicional (default `false`)
+- Prisma: `JobProviderRegistry`, `ProviderExecution`, `JobImport`, `Job.contentHash`
+
+### Removed
+
+- Etapa onboarding `blockedSkills` ("Competências que não deseja") e penalidade no Match Engine
+
 ## [v1.0.0-rc1] — 2026-07 (Etapa 15 — Release Candidate)
 
 ### Security

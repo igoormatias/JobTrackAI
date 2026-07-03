@@ -52,7 +52,6 @@ export const mergeDraftWithProfile = (
       "modality",
       "location",
       "salary",
-      "blockedSkills",
       "summary",
     ];
     return steps.indexOf(step);

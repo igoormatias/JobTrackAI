@@ -16,7 +16,6 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   "modality",
   "location",
   "salary",
-  "blockedSkills",
   "summary",
 ];
 
@@ -27,7 +26,6 @@ export type OnboardingFormState = {
   modality: WorkModality | "";
   locationPreference: ProfileLocation;
   salaryBand: SalaryBand | "";
-  blockedSkills: string[];
 };
 
 export const createInitialFormState = (): OnboardingFormState => ({
@@ -40,7 +38,6 @@ export const createInitialFormState = (): OnboardingFormState => ({
     acceptsRelocation: false,
   },
   salaryBand: "",
-  blockedSkills: [],
 });
 
 export const STEP_TITLES: Record<OnboardingStep, string> = {
@@ -50,7 +47,6 @@ export const STEP_TITLES: Record<OnboardingStep, string> = {
   modality: "Qual modelo de trabalho prefere?",
   location: "Onde você deseja trabalhar?",
   salary: "Qual sua pretensão salarial?",
-  blockedSkills: "Competências que NÃO deseja",
   summary: "Revise seu perfil profissional",
 };
 
@@ -61,6 +57,5 @@ export const STEP_HELP: Record<OnboardingStep, string> = {
   modality: "Escolha a modalidade de trabalho que você prefere ou aceita.",
   location: "Defina onde você busca oportunidades e se aceita mudança.",
   salary: "Selecione a faixa salarial que representa sua pretensão.",
-  blockedSkills: "Opcional: marque tecnologias ou competências que não deseja trabalhar.",
   summary: "Confira todas as informações antes de finalizar seu perfil.",
 };

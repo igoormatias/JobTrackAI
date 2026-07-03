@@ -35,17 +35,6 @@ const findMatchingSkills = (profile: RecommendationProfile, job: Job): string[] 
   });
 };
 
-const findBlockedSkillsInJob = (profile: RecommendationProfile, job: Job): string[] => {
-  if (profile.blockedSkills.length === 0) return [];
-
-  const jobTerms = getJobTerms(job).map(normalize);
-
-  return profile.blockedSkills.filter((blocked) => {
-    const normalized = normalize(blocked);
-    return jobTerms.some((term) => term.includes(normalized) || normalized.includes(term));
-  });
-};
-
 const isModalityCompatible = (profile: RecommendationProfile, job: Job): boolean => {
   if (!profile.modality || profile.modality === "any") return true;
   return profile.modality === job.modality;
@@ -161,18 +150,6 @@ export const computeMatchScore = (job: Job, profile: RecommendationProfile): Mat
       id: "reason_salary",
       label: "Pretensão compatível",
       matched: true,
-    });
-  }
-
-  const blockedInJob = findBlockedSkillsInJob(profile, job);
-  if (blockedInJob.length > 0) {
-    score += weights.blockedSkillPenalty * blockedInJob.length;
-    blockedInJob.forEach((skill, index) => {
-      reasons.push({
-        id: `reason_blocked_${index}`,
-        label: `${skill} bloqueado`,
-        matched: false,
-      });
     });
   }
 

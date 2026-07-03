@@ -23,3 +23,15 @@ export const authLoginRateLimiter = rateLimit({
     message: "Too many login attempts, please try again later",
   },
 });
+
+export const providerRunRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: "error",
+    code: "RATE_LIMIT_EXCEEDED",
+    message: "Too many provider sync requests, please try again later",
+  },
+});

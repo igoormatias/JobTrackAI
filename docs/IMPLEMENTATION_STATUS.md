@@ -1,21 +1,22 @@
 # JobTrack AI — Implementation Status
 
-Last updated: Etapa 15 (Release Candidate RC1).  
+Last updated: Etapa 17 (Job Aggregation Engine).  
 Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 
 | Module | Frontend | Backend API | Prisma | Tests | Notes |
 |--------|----------|-------------|--------|-------|-------|
 | Auth | ✅ | ✅ | ✅ User | ✅ | Google OAuth real; rate limit login |
-| Onboarding | ✅ | ✅ | ✅ Profile | ✅ | |
+| Onboarding | ✅ | ✅ | ✅ Profile | ✅ | `blockedSkills` removido (Etapa 17) |
 | Profile / Settings | ✅ | ✅ | ✅ | ✅ | Clean Architecture; `features/account/` |
-| Jobs (catalog) | ✅ | ✅ | ✅ Job seed ~400 | ✅ | Integration tests (Prisma, CI) |
+| Jobs (catalog) | ✅ | ✅ | ✅ Job | ✅ | Providers + seed opcional |
+| Job Aggregation | — | ✅ | ✅ Registry/Execution/Import | ✅ | Gupy real; stubs LinkedIn/Programathor |
 | Job Details | ✅ | ✅ | ✅ | ✅ | Match V1; related via catalog |
-| Match Engine | ✅ types | ✅ | — | ✅ | `rules-v1`; AI enriches in Etapa 16 |
+| Match Engine | ✅ types | ✅ | — | ✅ | `rules-v1`; AI enriches in Etapa 18 |
 | Job Tracking | ✅ | ✅ | ✅ | ✅ | Ownership enforced (IDOR fix) |
 | Timeline | ✅ | ✅ | ✅ TimelineEvent | ✅ | |
 | Interviews | ✅ | ✅ | ✅ Interview | ✅ | Sub-resource of tracking |
 | Pipeline | ✅ | ✅ view | ✅ via tracking | ✅ | Read-only Kanban; legacy mutations deprecated |
-| Dashboard | ✅ | ✅ | ✅ aggregates | ✅ | No Smart Mock Engine |
+| Dashboard | ✅ | ✅ | ✅ aggregates + jobSync | ✅ | Widget sincronização providers |
 | Notifications | ✅ | ✅ | ✅ Notification | ✅ | Header popover + mark read |
 | Companies | ✅ | ✅ | derived from Job | ✅ | No separate model |
 | MSW | 🧪 | — | — | 🧪 | Tests only (ADR-024) |
@@ -24,8 +25,11 @@ Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 ## Runtime data flow
 
 ```
-Browser → React Query → Express :3333 → Job Catalog (Prisma) → PostgreSQL
+Browser → React Query → Express :3333 → Job Catalog (Prisma) ← Job Aggregation ← Providers
+                                                              → PostgreSQL
 ```
+
+Sync manual: `POST /providers/run` · Automático: `ENABLE_SCHEDULER=true`
 
 ## RC1 quality gates
 

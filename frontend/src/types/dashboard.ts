@@ -44,6 +44,24 @@ export type DashboardInsight = {
   trendPercent?: number;
 };
 
+export type DashboardJobSync = {
+  lastSyncAt: string | null;
+  totalCatalogJobs: number;
+  jobsByProvider: Array<{ provider: string; count: number }>;
+  providerErrors24h: number;
+  recentExecutions: Array<{
+    id: string;
+    providerName: string;
+    status: string;
+    startedAt: string;
+    finishedAt: string | null;
+    importedCount: number;
+    duplicateCount: number;
+    failedCount: number;
+    errorMessage: string | null;
+  }>;
+};
+
 export type DashboardData = {
   kpis: DashboardKpi[];
   jobsByArea: DashboardChartPoint[];
@@ -54,5 +72,6 @@ export type DashboardData = {
   upcomingInterviews: DashboardInterview[];
   insight: DashboardInsight;
   applicationsTimeline: DashboardChartPoint[];
+  jobSync: DashboardJobSync;
   generatedAt: string;
 };

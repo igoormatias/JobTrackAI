@@ -46,7 +46,6 @@ export class PrismaProfileRepository implements ProfileRepository {
         salaryBand: input.salaryBand ?? null,
         salaryExpectation: toJsonInput(input.salaryExpectation),
         skillNames: input.skillNames ?? [],
-        blockedSkills: input.blockedSkills ?? [],
         onboardingProgress: toJsonInput(input.onboardingProgress),
         onboardingCompleted: input.onboardingCompleted ?? false,
       },
@@ -72,7 +71,6 @@ export class PrismaProfileRepository implements ProfileRepository {
             ? { salaryExpectation: toJsonInput(input.salaryExpectation) }
             : {}),
           ...(input.skillNames !== undefined ? { skillNames: input.skillNames } : {}),
-          ...(input.blockedSkills !== undefined ? { blockedSkills: input.blockedSkills } : {}),
           ...(input.onboardingProgress !== undefined
             ? { onboardingProgress: toJsonInput(input.onboardingProgress) }
             : {}),

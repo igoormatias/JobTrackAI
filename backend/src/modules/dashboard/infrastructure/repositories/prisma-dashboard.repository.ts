@@ -49,7 +49,6 @@ const toMatchProfileInput = (profile: Profile | null): MatchProfileInput => ({
   locationPreference: profile?.locationPreference as MatchProfileInput["locationPreference"],
   salaryExpectation: profile?.salaryExpectation as MatchProfileInput["salaryExpectation"],
   skillNames: profile?.skillNames ?? [],
-  blockedSkills: profile?.blockedSkills ?? [],
 });
 
 const toMatchJobInput = (job: Job): MatchJobInput => {
@@ -144,6 +143,11 @@ export class PrismaDashboardRepository implements DashboardRepository {
       trackings,
       catalogJobs,
       profile,
+      totalCatalogJobs,
+      jobsByProviderGroups,
+      lastSyncExecution,
+      providerErrors24h,
+      recentExecutions,
     ] = await Promise.all([
       prisma.jobTracking.count({ where: { userId, isFavorite: true } }),
       prisma.jobTracking.count({ where: { userId, priority: "HIGH" } }),
@@ -196,6 +200,38 @@ export class PrismaDashboardRepository implements DashboardRepository {
         take: 80,
       }),
       prisma.profile.findUnique({ where: { userId } }),
+      prisma.job.count({ where: { isCatalog: true } }),
+      prisma.job.groupBy({
+        by: ["source"],
+        where: { isCatalog: true },
+        _count: { _all: true },
+      }),
+      prisma.providerExecution.findFirst({
+        where: { finishedAt: { not: null } },
+        orderBy: { finishedAt: "desc" },
+        select: { finishedAt: true },
+      }),
+      prisma.providerExecution.count({
+        where: {
+          status: "failed",
+          startedAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
+        },
+      }),
+      prisma.providerExecution.findMany({
+        orderBy: { startedAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          providerName: true,
+          status: true,
+          startedAt: true,
+          finishedAt: true,
+          importedCount: true,
+          duplicateCount: true,
+          failedCount: true,
+          errorMessage: true,
+        },
+      }),
     ]);
 
     const matchProfile = toMatchProfileInput(profile);
@@ -314,6 +350,26 @@ export class PrismaDashboardRepository implements DashboardRepository {
         jobsWithMatch.map(({ job, match }) => ({ score: match.score, area: job.area })),
       ),
       applicationsTimeline: buildApplicationsTimeline(trackings),
+      jobSync: {
+        lastSyncAt: lastSyncExecution?.finishedAt?.toISOString() ?? null,
+        totalCatalogJobs,
+        jobsByProvider: jobsByProviderGroups.map((group) => ({
+          provider: group.source,
+          count: group._count._all,
+        })),
+        providerErrors24h,
+        recentExecutions: recentExecutions.map((execution) => ({
+          id: execution.id,
+          providerName: execution.providerName,
+          status: execution.status,
+          startedAt: execution.startedAt.toISOString(),
+          finishedAt: execution.finishedAt?.toISOString() ?? null,
+          importedCount: execution.importedCount,
+          duplicateCount: execution.duplicateCount,
+          failedCount: execution.failedCount,
+          errorMessage: execution.errorMessage,
+        })),
+      },
       generatedAt: now.toISOString(),
     };
   }

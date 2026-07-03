@@ -10,7 +10,6 @@ export type RecommendationProfile = {
   salaryBand: SalaryBand | null;
   salaryExpectation: SalaryRange | null;
   skillNames: string[];
-  blockedSkills: string[];
 };
 
 export type MatchWeights = {
@@ -18,7 +17,6 @@ export type MatchWeights = {
   modalityMatch: number;
   locationMatch: number;
   salaryMatch: number;
-  blockedSkillPenalty: number;
   seniorityMismatchPenalty: number;
   baseScore: number;
 };

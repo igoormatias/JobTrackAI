@@ -25,7 +25,6 @@ const mockProfile: AccountProfile = {
   salaryBand: "8k_12k",
   skills: [],
   skillNames: ["React"],
-  blockedSkills: [],
   technologies: [],
   avoidedTechnologies: [],
   bio: "",

@@ -17,7 +17,6 @@ const createEmptyProfile = (userId: string): Profile => ({
   salaryExpectation: null,
   salaryBand: null,
   skillNames: [],
-  blockedSkills: [],
   bio: "",
   linkedinUrl: null,
   githubUrl: null,
@@ -59,7 +58,6 @@ export class InMemoryProfileRepository implements ProfileRepository {
       id: `profile_${userId}`,
       userId,
       skillNames: input.skillNames ?? [],
-      blockedSkills: input.blockedSkills ?? [],
       updatedAt: new Date().toISOString(),
     };
 

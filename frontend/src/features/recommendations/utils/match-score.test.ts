@@ -13,7 +13,6 @@ const frontendProfile: RecommendationProfile = {
   salaryBand: "8k_12k",
   salaryExpectation: { min: 8000, max: 12000, currency: "BRL" },
   skillNames: ["React", "TypeScript", "Next.js"],
-  blockedSkills: ["PHP"],
 };
 
 const createTestJob = (overrides: Partial<Job> = {}): Job =>
@@ -57,19 +56,6 @@ describe("computeMatchScore", () => {
     expect(score.score).toBeGreaterThanOrEqual(75);
     expect(score.reasons.some((reason) => reason.label.includes("React encontrado"))).toBe(true);
     expect(score.reasons.some((reason) => reason.label.includes("Modalidade compatível"))).toBe(true);
-  });
-
-  it("applies blocked skill penalty", () => {
-    const score = computeMatchScore(
-      createTestJob({
-        technologies: [{ id: "t4", name: "PHP", slug: "php" }],
-        requirements: ["PHP"],
-      }),
-      frontendProfile,
-    );
-
-    expect(score.reasons.some((reason) => reason.label.includes("PHP bloqueado"))).toBe(true);
-    expect(score.score).toBeLessThan(computeMatchScore(createTestJob(), frontendProfile).score);
   });
 
   it("applies seniority mismatch penalty", () => {

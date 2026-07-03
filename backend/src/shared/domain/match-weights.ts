@@ -3,7 +3,6 @@ export const MATCH_WEIGHTS = {
   modalityMatch: 10,
   locationMatch: 10,
   salaryMatch: 10,
-  blockedSkillPenalty: -40,
   seniorityMismatchPenalty: -25,
   baseScore: 50,
 } as const;

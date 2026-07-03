@@ -112,7 +112,6 @@ export const authHandlers = [
       salaryBand: payload.salaryBand as SalaryBand,
       salaryExpectation: payload.salaryExpectation,
       skillNames: payload.skills,
-      blockedSkills: payload.blockedSkills,
       onboardingCompleted: true,
     };
 

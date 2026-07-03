@@ -29,7 +29,6 @@ export type AuthProfile = {
   location?: string;
   locationPreference?: AuthProfileLocation;
   skills?: string[];
-  blockedSkills?: string[];
   modality?: "remote" | "hybrid" | "onsite" | "any";
 };
 
@@ -69,5 +68,4 @@ export type OnboardingCompletePayload = {
     currency: "BRL";
   };
   skills: string[];
-  blockedSkills: string[];
 };

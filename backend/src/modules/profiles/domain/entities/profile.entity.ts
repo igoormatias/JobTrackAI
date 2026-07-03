@@ -45,7 +45,6 @@ export type OnboardingStepId =
   | "modality"
   | "location"
   | "salary"
-  | "blockedSkills"
   | "summary";
 
 export type OnboardingProgress = {
@@ -73,7 +72,6 @@ export type Profile = {
   salaryExpectation: SalaryRange | null;
   salaryBand: SalaryBand | null;
   skillNames: string[];
-  blockedSkills: string[];
   bio: string;
   linkedinUrl: string | null;
   githubUrl: string | null;
@@ -100,7 +98,6 @@ export type CreateProfileInput = {
   salaryBand?: SalaryBand | null;
   salaryExpectation?: SalaryRange | null;
   skillNames?: string[];
-  blockedSkills?: string[];
   onboardingProgress?: OnboardingProgress | null;
   onboardingCompleted?: boolean;
 };

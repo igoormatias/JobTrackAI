@@ -11,6 +11,7 @@ import { DashboardApplicationsChart } from "../DashboardApplicationsChart";
 import { DashboardCompaniesCard } from "../DashboardCompaniesCard";
 import { DashboardInsightCard } from "../DashboardInsightCard";
 import { DashboardInterviewsCard } from "../DashboardInterviewsCard";
+import { DashboardJobSyncCard } from "../DashboardJobSyncCard";
 import { DashboardKpiGrid } from "../DashboardKpiGrid";
 import { DashboardSkeleton } from "../DashboardSkeleton";
 import { DashboardTechnologiesCard } from "../DashboardTechnologiesCard";
@@ -64,6 +65,9 @@ export const DashboardPage = () => {
         </div>
         <div className={DASHBOARD_LAYOUT.technologies}>
           <DashboardTechnologiesCard technologies={data.topTechnologies} />
+        </div>
+        <div className={DASHBOARD_LAYOUT.companies}>
+          <DashboardJobSyncCard jobSync={data.jobSync} />
         </div>
       </div>
     </div>

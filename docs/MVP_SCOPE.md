@@ -14,7 +14,7 @@ Se a resposta for **não**, a funcionalidade **não** deve ser implementada no M
 
 | Responsabilidade | Descrição |
 |------------------|-----------|
-| Centralizar vagas | Catálogo oficial Prisma (~400 vagas seed); providers reais em V2 |
+| Centralizar vagas | Catálogo via Job Aggregation (providers) + seed opcional em dev (`SEED_CATALOG`) |
 | Buscar vagas | Busca global com debounce e filtros na URL |
 | Filtrar vagas | Área, senioridade, modalidade, skills, empresa, fonte, prioridade, visibilidade, etc. |
 | Favoritar vagas | Salvar vagas para revisão posterior com destaque visual (Design System) |
@@ -99,8 +99,8 @@ Estas funcionalidades **não** fazem parte do MVP. Podem existir no futuro (V2+)
 | Sistema ATS | V2+ |
 | Cadastro manual de empresas | V2+ |
 | Importação por URL | V2 |
-| Providers reais (Gupy, LinkedIn, Programathor) | V2 |
-| Scheduler (busca automática de vagas) | V2 |
+| ~~Providers reais (Gupy, LinkedIn, Programathor)~~ | **Etapa 17** — Gupy real; demais stubs |
+| ~~Scheduler (busca automática de vagas)~~ | **Etapa 17** — scheduler interno opcional |
 | Match Engine real (backend) | V2 |
 | WebSocket / tempo real | V2 |
 | IA (resumos, insights com LLM) | V2 |
@@ -123,7 +123,7 @@ O código atual ainda contém elementos **fora do escopo MVP** que serão alinha
 | Botão "Aplicar" no `JobCard` / Job Details | Existe na UI | Substituir por **Abrir vaga** |
 | `POST /jobs/:id/apply` | Endpoint legado | Deprecated — fora do escopo MVP |
 | Estágio `"favorite"` no pipeline Kanban | Coluna ativa | Remover na Etapa 12; favorito = `isFavorite` |
-| Etapa `blockedSkills` no onboarding | 8ª etapa opcional | Fora do escopo MVP — remover ou mover para V2 |
+| Etapa `blockedSkills` no onboarding | Removido na Etapa 17 | — |
 | `engagementState: applied` | Marca aplicação via API | Alinhar com fluxo manual do pipeline |
 | `priority`, `visibility`, `hiddenAt` | Ausentes no código | Implementar na Etapa 12 |
 | Cadastro manual (`POST /jobs`) | Ausente | Implementar na Etapa 12 |

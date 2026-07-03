@@ -13,7 +13,6 @@ const createEmptyProfile = (userId: string): Profile => ({
   salaryBand: null,
   skills: [],
   skillNames: [],
-  blockedSkills: [],
   technologies: [],
   avoidedTechnologies: [],
   bio: "",
@@ -38,7 +37,6 @@ export const createUserProfile = (userId: string, payload: CreateProfilePayload)
     id: `profile_${userId}`,
     userId,
     skillNames: payload.skillNames ?? [],
-    blockedSkills: payload.blockedSkills ?? [],
     extensions: payload.extensions ?? {},
     updatedAt: new Date().toISOString(),
   };
@@ -55,7 +53,6 @@ export const updateUserProfile = (userId: string, payload: UpdateProfilePayload)
     ...existing,
     ...payload,
     skillNames: payload.skillNames ?? existing.skillNames,
-    blockedSkills: payload.blockedSkills ?? existing.blockedSkills,
     extensions: {
       ...existing.extensions,
       ...(payload.extensions ?? {}),

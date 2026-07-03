@@ -15,8 +15,6 @@ const getStepPayload = (step: OnboardingStep, form: OnboardingFormState) => {
       return { locationPreference: form.locationPreference };
     case "salary":
       return { salaryBand: form.salaryBand };
-    case "blockedSkills":
-      return { blockedSkills: form.blockedSkills };
     case "summary":
       return {
         area: form.area,
@@ -25,7 +23,6 @@ const getStepPayload = (step: OnboardingStep, form: OnboardingFormState) => {
         modality: form.modality,
         locationPreference: form.locationPreference,
         salaryBand: form.salaryBand,
-        blockedSkills: form.blockedSkills,
       };
     default:
       return {};

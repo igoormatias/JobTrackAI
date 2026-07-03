@@ -16,6 +16,27 @@ const envSchema = z
       .enum(["true", "false"])
       .default("false")
       .transform((v) => v === "true"),
+    ENABLE_SCHEDULER: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((v) => v === "true"),
+    SYNC_INTERVAL: z.coerce.number().default(3_600_000),
+    ENABLE_PROVIDER_GUPY: z
+      .enum(["true", "false"])
+      .default("true")
+      .transform((v) => v === "true"),
+    ENABLE_PROVIDER_LINKEDIN: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((v) => v === "true"),
+    ENABLE_PROVIDER_PROGRAMATHOR: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((v) => v === "true"),
+    SEED_CATALOG: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((v) => v === "true"),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === "production") {

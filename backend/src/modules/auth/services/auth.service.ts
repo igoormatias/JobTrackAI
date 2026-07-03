@@ -129,7 +129,6 @@ export class AuthService {
       salaryExpectation: input.salaryExpectation,
       location: input.location,
       skills: input.skills,
-      blockedSkills: input.blockedSkills,
       modality: input.modality,
       locationPreference: input.locationPreference,
       salaryBand: input.salaryBand,

@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { OnboardingStepper } from "../../components/OnboardingStepper";
 import {
   AreaStep,
-  BlockedSkillsStep,
   LocationStep,
   ModalityStep,
   SalaryStep,
@@ -59,7 +58,7 @@ export const OnboardingPage = () => {
             error={stepError}
             onChange={(area) => {
               if (area !== form.area) {
-                updateForm({ area, skills: [], blockedSkills: [] });
+                updateForm({ area, skills: [] });
               } else {
                 updateForm({ area });
               }
@@ -100,14 +99,6 @@ export const OnboardingPage = () => {
             form={form}
             error={stepError}
             onChange={(salaryBand) => updateForm({ salaryBand })}
-          />
-        ) : null}
-
-        {step === "blockedSkills" ? (
-          <BlockedSkillsStep
-            form={form}
-            error={stepError}
-            onChange={(blockedSkills) => updateForm({ blockedSkills })}
           />
         ) : null}
 

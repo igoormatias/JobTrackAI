@@ -164,10 +164,33 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
     return this.mapWithContext(record, ctx, null);
   }
 
-  async upsertManyCatalogJobs(data: CatalogJobUpsertInput[]): Promise<number> {
-    if (data.length === 0) return 0;
-    const result = await prisma.job.createMany({ data: data.map((item) => this.toCreateInput(item)), skipDuplicates: true });
-    return result.count;
+  async upsertManyCatalogJobs(data: CatalogJobUpsertInput[]): Promise<{ imported: number; updated: number }> {
+    if (data.length === 0) return { imported: 0, updated: 0 };
+
+    let imported = 0;
+    let updated = 0;
+
+    await prisma.$transaction(async (tx) => {
+      for (const item of data) {
+        if (!item.externalId) continue;
+
+        const existing = await tx.job.findUnique({
+          where: { source_externalId: { source: item.source, externalId: item.externalId } },
+          select: { id: true },
+        });
+
+        await tx.job.upsert({
+          where: { source_externalId: { source: item.source, externalId: item.externalId } },
+          create: this.toCreateInput(item) as Prisma.JobCreateInput,
+          update: this.toUpdateInput(item),
+        });
+
+        if (existing) updated += 1;
+        else imported += 1;
+      }
+    });
+
+    return { imported, updated };
   }
 
   private toCreateInput(data: CatalogJobUpsertInput): Prisma.JobCreateManyInput {
@@ -182,6 +205,7 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
       sourceUrl: data.sourceUrl,
       source: data.source,
       externalId: data.externalId,
+      contentHash: data.contentHash,
       area: data.area,
       seniority: data.seniority,
       modality: data.modality,
@@ -204,6 +228,7 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
       slug: data.slug,
       description: data.description,
       sourceUrl: data.sourceUrl,
+      contentHash: data.contentHash,
       area: data.area,
       seniority: data.seniority,
       modality: data.modality,

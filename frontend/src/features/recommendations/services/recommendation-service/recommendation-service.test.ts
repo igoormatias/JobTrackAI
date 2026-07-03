@@ -13,7 +13,6 @@ const frontendProfile: RecommendationProfile = {
   salaryBand: "8k_12k",
   salaryExpectation: { min: 8000, max: 12000, currency: "BRL" },
   skillNames: ["React", "TypeScript"],
-  blockedSkills: [],
 };
 
 describe("recommendation-service", () => {
