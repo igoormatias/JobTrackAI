@@ -43,6 +43,39 @@ describe("Job import module integration", () => {
     expect(response.body.message).toMatch(/unsupported job url/i);
   });
 
+  it("POST /jobs/import/preview returns preview for gupy career page url", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          id: 11299164,
+          name: "Desenvolvedor(a) Front-end Sênior | React & Next.js",
+          careerPageName: "Afya",
+          city: "São Paulo",
+          state: "SP",
+          workplaceType: "remote",
+          publishedDate: "2025-06-01T00:00:00.000Z",
+        }),
+      }),
+    );
+
+    const response = await request(app)
+      .post("/jobs/import/preview")
+      .set("Cookie", authCookie())
+      .send({ url: "https://afya.gupy.io/jobs/11299164" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({
+      title: "Desenvolvedor(a) Front-end Sênior | React & Next.js",
+      company: "Afya",
+      source: "gupy",
+      sourceUrl: "https://afya.gupy.io/jobs/11299164",
+      externalId: "11299164",
+    });
+  });
+
   it("POST /jobs/import/preview returns preview for gupy portal url", async () => {
     vi.stubGlobal(
       "fetch",

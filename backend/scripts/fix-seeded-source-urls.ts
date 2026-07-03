@@ -22,20 +22,27 @@ async function main(): Promise<void> {
   }
 
   let fixed = 0;
-  for (const job of toFix) {
-    const match = job.externalId!.match(/(\d+)$/);
-    const index = match ? Number(match[1]) : 0;
-    const numericId = String(10_000 + index);
-    const sourceUrl = `https://portal.gupy.io/job/${numericId}`;
+  const batchSize = 25;
 
-    await prisma.job.update({
-      where: { id: job.id },
-      data: {
-        externalId: numericId,
-        sourceUrl,
-      },
-    });
-    fixed += 1;
+  for (let i = 0; i < toFix.length; i += batchSize) {
+    const batch = toFix.slice(i, i + batchSize);
+    await prisma.$transaction(
+      batch.map((job) => {
+        const match = job.externalId!.match(/(\d+)$/);
+        const index = match ? Number(match[1]) : 0;
+        const numericId = String(10_000 + index);
+        const sourceUrl = `https://portal.gupy.io/job/${numericId}`;
+
+        return prisma.job.update({
+          where: { id: job.id },
+          data: {
+            externalId: numericId,
+            sourceUrl,
+          },
+        });
+      }),
+    );
+    fixed += batch.length;
   }
 
   console.log(`Fixed ${fixed} Gupy seeded job URLs.`);

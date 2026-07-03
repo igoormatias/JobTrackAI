@@ -18,7 +18,7 @@ export class UrlExtractorRegistry {
     const extractor = this.extractors.find((item) => item.supports(url));
     if (!extractor) {
       throw new ValidationError(
-        "Unsupported job URL. Supported sources: Gupy (portal.gupy.io/job/{id}). LinkedIn and Programathor coming soon.",
+        "Unsupported job URL. Supported: Gupy (portal.gupy.io/job/{id} or {company}.gupy.io/jobs/{id}). LinkedIn and Programathor coming soon.",
       );
     }
     return extractor;

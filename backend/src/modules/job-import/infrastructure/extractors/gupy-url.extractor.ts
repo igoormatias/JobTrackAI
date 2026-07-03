@@ -1,30 +1,19 @@
 import type { NormalizedJob } from "../../../job-aggregation/domain/entities/normalized-job.entity.js";
-import { normalizeSourceUrl } from "../../../job-aggregation/domain/services/job-normalizer.service.js";
 import { NotFoundError } from "../../../../shared/errors/not-found-error.js";
 import { ServiceUnavailableError } from "../../../../shared/errors/service-unavailable-error.js";
 import { ValidationError } from "../../../../shared/errors/validation-error.js";
 import { GUPY_HEADERS } from "../../../../providers/gupy/gupy.constants.js";
 import { gupyProvider } from "../../../../providers/gupy/gupy.provider.js";
 import type { GupyRawJob } from "../../../../providers/gupy/gupy.types.js";
+import { isGupyJobUrl, parseGupyJobUrl } from "../../../../providers/gupy/gupy-url.utils.js";
 import type { UrlJobExtractor } from "../../domain/ports/url-job-extractor.port.js";
 
 const GUPY_JOB_API_URL = "https://employability-portal.gupy.io/api/v1/jobs";
-const GUPY_PORTAL_JOB_PATTERN = /portal\.gupy\.io\/job\/(\d+)/i;
 
 type GupyJobDetailResponse = GupyRawJob & {
   id?: number;
   careerPageName?: string;
   name?: string;
-};
-
-export const parseGupyPortalJobId = (url: string): string | null => {
-  try {
-    const parsed = new URL(url.trim());
-    const match = parsed.href.match(GUPY_PORTAL_JOB_PATTERN);
-    return match?.[1] ?? null;
-  } catch {
-    return null;
-  }
 };
 
 const toGupyRawJob = (raw: GupyJobDetailResponse, sourceUrl: string): GupyRawJob => ({
@@ -41,16 +30,18 @@ export class GupyUrlExtractor implements UrlJobExtractor {
   readonly source = "gupy" as const;
 
   supports(url: string): boolean {
-    return parseGupyPortalJobId(url) !== null;
+    return isGupyJobUrl(url);
   }
 
   async extract(url: string): Promise<NormalizedJob> {
-    const jobId = parseGupyPortalJobId(url);
-    if (!jobId) {
-      throw new ValidationError("Invalid Gupy job URL. Expected https://portal.gupy.io/job/{id}");
+    const parsed = parseGupyJobUrl(url);
+    if (!parsed) {
+      throw new ValidationError(
+        "Invalid Gupy job URL. Supported: https://portal.gupy.io/job/{id} or https://{company}.gupy.io/jobs/{id}",
+      );
     }
 
-    const sourceUrl = normalizeSourceUrl(`https://portal.gupy.io/job/${jobId}`);
+    const { jobId, sourceUrl } = parsed;
 
     let response: Response;
     try {
@@ -79,3 +70,6 @@ export class GupyUrlExtractor implements UrlJobExtractor {
 }
 
 export const gupyUrlExtractor = new GupyUrlExtractor();
+
+// Re-export for tests that imported parseGupyPortalJobId
+export { parseGupyJobUrl as parseGupyPortalJobId } from "../../../../providers/gupy/gupy-url.utils.js";

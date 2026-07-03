@@ -29,9 +29,10 @@ Após sync:
 
 ## URLs Gupy
 
-- API retorna `jobUrl` — usar diretamente como `sourceUrl`
-- Seed dev: IDs numéricos (`10001+`), nunca `gupy_job_XXXX`
-- Portal: `https://portal.gupy.io/job/{numericId}`
+- **Portal:** `https://portal.gupy.io/job/{id}`
+- **Página da empresa:** `https://{company}.gupy.io/jobs/{id}` (ex.: [afya.gupy.io/jobs/11299164](https://afya.gupy.io/jobs/11299164))
+- Importação por URL persiste a **URL original** colada pelo usuário em `sourceUrl`
+- API de detalhe: `employability-portal.gupy.io/api/v1/jobs/{id}`
 
 ## Env
 
