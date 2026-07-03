@@ -1,4 +1,4 @@
-import type { GupyRawJob } from "./gupy.types.js";
+import type { GupyRawJob, GupyWorkplaceType } from "./gupy.types.js";
 
 type JobPostingJsonLd = {
   "@type"?: string;
@@ -32,7 +32,7 @@ export const stripHtmlTags = (html: string): string =>
     .replace(/[ \t]{2,}/g, " ")
     .trim();
 
-const mapWorkplaceType = (value?: string): string | undefined => {
+const mapWorkplaceType = (value?: string): GupyWorkplaceType | undefined => {
   if (!value) return undefined;
   const normalized = value.toUpperCase();
   if (normalized.includes("TELECOMMUTE") || normalized.includes("REMOTE")) return "remote";

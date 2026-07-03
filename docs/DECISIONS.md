@@ -579,6 +579,39 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 ---
 
+## ADR-031 — Resume Intelligence (Etapa 22)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 22 — pós-MVP)
+
+**Contexto:** Após conclusão do MVP (Etapas 1–21), o produto evolui para otimizar aderência do currículo às vagas desejadas. Upload de currículo estava explicitamente fora do MVP (ADR-020); passa a ser escopo pós-MVP.
+
+**Decisão:**
+
+- **Currículo Inteligente** (UI) / módulo `resume` (código) — perfil profissional estruturado, não arquivo bruto
+- **Nunca alterar currículo automaticamente** — IA gera sugestões; usuário aceita, edita ou rejeita
+- **Versionamento imutável** — toda alteração confirmada cria `ResumeVersion`
+- **Cache-first Gemini** — hash `(resumeVersion + job + profile + promptVersion + model)` antes de chamar API
+- **Match Engine `rules-v2`** permanece fonte do match score; IA interpreta gaps e ATS
+- **Skills Catalog** — normalização via `SkillNormalizer`; slugs oficiais no JSON estruturado
+- **Fronteira Etapa 18** — `/ai/career-analysis/:trackingId` inalterado; análise currículo×vaga via `/resume/analyze-job`
+- Upload PDF/DOCX/TXT parse in-memory (sem R2 v1); persistir apenas JSON estruturado
+
+**Motivos:**
+
+- Ajuda usuário a priorizar vagas e acompanhar processos com currículo mais aderente
+- Reutiliza AIProvider, Match Engine, job-import, Skills Catalog
+- Transparência e controle do usuário sobre versão final
+
+**Consequências:**
+
+- `docs/RESUME_INTELLIGENCE.md`
+- Cursor Rule `.cursor/rules/resume-intelligence.mdc`
+- MVP_SCOPE atualizado — upload/análise de currículo em pós-MVP implementado
+- UI: menu **Currículo Inteligente** em Minha Conta; rotas `/resume/*`
+
+---
+
 ## Template para novas decisões
 
 ```markdown

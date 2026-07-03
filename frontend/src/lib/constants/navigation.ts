@@ -1,5 +1,6 @@
 import {
   Briefcase,
+  FileText,
   Kanban,
   LayoutDashboard,
   Settings,
@@ -31,6 +32,7 @@ export const ACCOUNT_NAV: NavGroup = {
   children: [
     { href: "/profile", label: "Perfil", icon: User },
     { href: "/settings", label: "Preferências", icon: Settings },
+    { href: "/resume", label: "Currículo Inteligente", icon: FileText },
   ],
 };
 

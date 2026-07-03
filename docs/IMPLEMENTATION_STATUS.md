@@ -1,6 +1,6 @@
 # JobTrack AI — Implementation Status
 
-Last updated: Etapa 21 (Product Polish & UX).  
+Last updated: Etapa 22 (Currículo Inteligente / Resume Intelligence v1.4).  
 Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 
 | Module | Frontend | Backend API | Prisma | Tests | Notes |
@@ -21,6 +21,7 @@ Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 | Notifications | ✅ | ✅ | ✅ Notification | ✅ | Header popover + mark read |
 | Companies | ✅ | ✅ | derived from Job | ✅ | No separate model |
 | Job Import (URL) | ✅ | ✅ | ✅ Job | ✅ | Gupy extractor; Etapa 21 |
+| Resume Intelligence | ✅ | ✅ | ✅ Resume* | ✅ | Currículo Inteligente; Etapa 22 |
 | Realtime | ✅ polling | ✅ socket* | — | ✅ | *Socket local only; Vercel polling |
 | CI/CD | ✅ | ✅ | ✅ validate | ✅ | `.github/workflows/ci.yml` |
 

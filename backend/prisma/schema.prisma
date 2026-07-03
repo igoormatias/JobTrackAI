@@ -23,6 +23,10 @@ model User {
   jobViews      JobView[]
   userSkills    UserSkill[]
   aiUsageLogs   AIAnalysisUsageLog[]
+  resume        Resume?
+  resumeImports ResumeImport[]
+  resumeAnalyses ResumeAnalysis[]
+  resumeAnalysisUsageLogs ResumeAnalysisUsageLog[]
 }
 
 model Job {
@@ -286,6 +290,112 @@ model AIAnalysisUsageLog {
   userId           String
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   trackingId       String?
+  wasCached        Boolean  @default(false)
+  durationMs       Int?
+  model            String?
+  promptTokens     Int?
+  completionTokens Int?
+  createdAt        DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Resume {
+  id               String           @id @default(cuid())
+  userId           String           @unique
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentVersionId String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  versions         ResumeVersion[]
+  analyses         ResumeAnalysis[]
+}
+
+model ResumeVersion {
+  id                 String             @id @default(cuid())
+  resumeId           String
+  resume             Resume             @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  versionNumber      Int
+  content            Json
+  contentHash        String
+  source             String
+  createdAt          DateTime           @default(now())
+  imports            ResumeImport[]
+  analyses           ResumeAnalysis[]
+  appliedSuggestions ResumeSuggestion[] @relation("AppliedVersion")
+
+  @@unique([resumeId, versionNumber])
+  @@index([resumeId, versionNumber(sort: Desc)])
+  @@index([contentHash])
+}
+
+model ResumeImport {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  format        String
+  status        String
+  rawTextLength Int            @default(0)
+  fileHash      String?
+  errorMessage  String?
+  versionId     String?
+  version       ResumeVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  createdAt     DateTime       @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model ResumeAnalysis {
+  id                 String             @id @default(cuid())
+  userId             String
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeId           String
+  resume             Resume             @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resumeVersionId    String
+  resumeVersion      ResumeVersion      @relation(fields: [resumeVersionId], references: [id], onDelete: Cascade)
+  jobSourceUrl       String
+  jobExternalId      String?
+  jobTitle           String?
+  jobCompany         String?
+  contentHash        String
+  result             Json
+  matchScore         Int                @default(0)
+  atsScore           Int                @default(0)
+  provider           String             @default("gemini")
+  model              String
+  promptVersion      String
+  matchEngineVersion String
+  generatedAt        DateTime           @default(now())
+  suggestions        ResumeSuggestion[]
+
+  @@unique([userId, contentHash])
+  @@index([userId, generatedAt])
+  @@index([resumeVersionId])
+}
+
+model ResumeSuggestion {
+  id               String         @id @default(cuid())
+  analysisId       String
+  analysis         ResumeAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  type             String
+  section          String
+  reason           String
+  impact           String
+  suggestedText    String
+  status           String         @default("pending")
+  appliedVersionId String?
+  appliedVersion   ResumeVersion? @relation("AppliedVersion", fields: [appliedVersionId], references: [id], onDelete: SetNull)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([analysisId, status])
+}
+
+model ResumeAnalysisUsageLog {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysisId       String?
   wasCached        Boolean  @default(false)
   durationMs       Int?
   model            String?

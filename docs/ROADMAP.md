@@ -188,6 +188,16 @@ Catálogo oficial persistido em Prisma — sem vagas fake em runtime:
 
 ---
 
+### ✅ Currículo Inteligente / Resume Intelligence v1.4 (Etapa 22)
+
+- Módulo `resume` — currículo estruturado, versionamento, upload PDF/DOCX/TXT
+- Análise currículo × vaga (Match Engine + Gemini + cache)
+- Sugestões com aceitar/rejeitar/editar (nunca auto-aplicar)
+- UI **Currículo Inteligente** em Minha Conta
+- ADR-031 + `docs/RESUME_INTELLIGENCE.md`
+
+---
+
 #### ~~Release Candidate MVP (Etapa 13)~~ — renumerado para Etapas 13–15
 
 ~~- Notificações (feed de eventos internos)~~

@@ -1,0 +1,33 @@
+---
+description: Currículo Inteligente (Resume Intelligence) — regras obrigatórias Etapa 22
+globs: backend/src/modules/resume/**,frontend/src/features/resume/**
+alwaysApply: false
+---
+
+# Currículo Inteligente (Resume Intelligence)
+
+## Princípios
+
+1. **Nunca alterar currículo automaticamente** — IA gera sugestões; usuário aceita, edita ou rejeita
+2. **Toda alteração confirmada** cria nova `ResumeVersion` (histórico imutável)
+3. **Persistir JSON estruturado** — nunca salvar apenas texto bruto como fonte de verdade
+4. **Skills Catalog** — normalizar via `SkillNormalizer`; slugs oficiais em `hardSkills`/`softSkills`
+5. **Cache antes do Gemini** — consultar hash persistente; respeitar cota gratuita
+6. **Match score** — sempre `Match Engine rules-v2`; IA não recalcula score
+7. **Observabilidade** — logar tempo, cache hit/miss, tokens, modelo; **nunca** logar conteúdo do currículo
+8. **IA não altera regras de negócio** — apenas interpreta, estrutura e sugere
+
+## UI
+
+- Menu: **Currículo Inteligente** (PT-BR)
+- Rotas: `/resume/*` (técnico EN)
+
+## Fronteira Etapa 18
+
+- `/ai/career-analysis/:trackingId` — inalterado (contexto pipeline)
+- `/resume/analyze-job` — análise currículo × URL da vaga
+
+## Referências
+
+- `docs/RESUME_INTELLIGENCE.md`
+- ADR-031

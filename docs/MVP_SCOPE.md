@@ -89,7 +89,7 @@ Estas funcionalidades **não** fazem parte do MVP. Podem existir no futuro (V2+)
 | Funcionalidade | Destino |
 |----------------|---------|
 | Aplicação de vagas pela plataforma | Fora do MVP |
-| Upload de currículo | V2+ |
+| Upload de currículo | **Etapa 22 (pós-MVP)** — ver ADR-031 |
 | Carta de apresentação | V2+ |
 | Perfil público | V2+ |
 | LinkedIn / GitHub / portfólio no perfil | V2+ |

@@ -27,7 +27,9 @@ export const BottomNav = ({ className }: BottomNavProps) => {
         {MOBILE_NAV.map((item) => {
           const isActive =
             item.href === "/profile"
-              ? pathname.startsWith("/profile") || pathname.startsWith("/settings")
+              ? pathname.startsWith("/profile") ||
+                pathname.startsWith("/settings") ||
+                pathname.startsWith("/resume")
               : pathname.startsWith(item.href);
           const Icon = item.icon;
 

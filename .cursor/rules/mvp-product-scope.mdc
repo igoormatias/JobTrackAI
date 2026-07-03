@@ -32,7 +32,9 @@ JobTrack AI **não** é plataforma de candidatura nem ATS.
 
 ## Fora do MVP (não implementar)
 
-Aplicação pela plataforma, upload de currículo, perfil público, LinkedIn/GitHub no perfil, ATS, importação por URL, WebSocket, Analytics, ML, i18n.
+Aplicação pela plataforma, perfil público, LinkedIn/GitHub no perfil, ATS, Analytics, ML, i18n.
+
+**Pós-MVP (Etapa 22):** upload de currículo e Currículo Inteligente — ver `docs/RESUME_INTELLIGENCE.md` e ADR-031.
 
 **IA automática / ranking por IA** permanece V2. Análise de carreira **on-demand** (Etapa 18) está no MVP.
 
