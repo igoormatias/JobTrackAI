@@ -56,15 +56,21 @@ Requisições usam `withCredentials: true` — **mesmo domínio** obrigatório p
 ## Supabase + Prisma
 
 1. Criar projeto Supabase.
-2. `DATABASE_URL` = connection pooler (porta 6543, `?pgbouncer=true`).
-3. `DIRECT_DATABASE_URL` = conexão direta (porta 5432) para migrations.
-4. Antes do deploy:
+2. `DATABASE_URL` = connection pooler **transaction** (porta **6543**, `?pgbouncer=true`).
+3. `DIRECT_DATABASE_URL` = conexão para migrations (porta **5432**):
+   - Preferido: `postgresql://postgres:PASSWORD@db.<project>.supabase.co:5432/postgres?sslmode=require`
+   - Se `db.*` não for acessível (rede/Vercel): use o **session pooler** do Supabase (porta **5432** no host `aws-0-<region>.pooler.supabase.com`, usuário `postgres.<project>`).
+4. Antes do deploy (ou automaticamente no `build` do backend na Vercel):
 
 ```bash
 cd backend
 pnpm exec prisma generate
 pnpm exec prisma migrate deploy
 ```
+
+**Obrigatório na Vercel (backend):** `DIRECT_DATABASE_URL` com host `db.<project>.supabase.co:5432` (não use o pooler 6543 para migrations). O script `build` já executa `prisma migrate deploy` — sem `DIRECT_DATABASE_URL` o deploy falha antes de ir ao ar.
+
+**GitHub Actions:** workflow `deploy-migrations.yml` — configure secrets `DATABASE_URL` e `DIRECT_DATABASE_URL` no repositório.
 
 ---
 
@@ -118,6 +124,7 @@ Se `database.status` = `error` → HTTP **503**.
 | CORS error | `FRONTEND_URL` incorreto | Igualar ao domínio Vercel |
 | Logout não limpa | API falha + frontend só `onSuccess` | Corrigido: `onSettled` limpa sempre |
 | Health ok, dados falham | Pooler vs direct URL | Verificar `DATABASE_URL` |
+| 500 login `table User does not exist` | Migrations não aplicadas no Supabase | `DIRECT_DATABASE_URL` + `pnpm exec prisma migrate deploy` |
 
 ---
 
@@ -126,6 +133,7 @@ Se `database.status` = `error` → HTTP **503**.
 - [ ] `NEXT_PUBLIC_ENABLE_MSW=false`
 - [ ] `NEXT_PUBLIC_API_URL=/api/backend`
 - [ ] `FRONTEND_URL` = URL real do frontend
-- [ ] Migrations aplicadas
+- [ ] `DIRECT_DATABASE_URL` configurada (migrations no build)
+- [ ] Migrations aplicadas (`prisma migrate deploy` — automático no build do backend)
 - [ ] `GET /api/backend/health` → 200
 - [ ] Login / logout / dashboard manual

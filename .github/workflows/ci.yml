@@ -50,6 +50,7 @@ jobs:
     env:
       NODE_ENV: test
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/jobtrack_test
+      DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/jobtrack_test
       JWT_SECRET: ci-test-jwt-secret
       GOOGLE_CLIENT_ID: test-google-client-id.apps.googleusercontent.com
       FRONTEND_URL: http://localhost:3000
