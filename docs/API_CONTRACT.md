@@ -312,6 +312,26 @@ Fora do escopo Etapa 17. Ver [PROVIDERS.md](./PROVIDERS.md).
 
 ---
 
+## Currículo Inteligente (`/resume`) — Etapa 22
+
+Auth obrigatória. Ver [RESUME_INTELLIGENCE.md](./RESUME_INTELLIGENCE.md).
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/resume` | Currículo ativo + versão atual |
+| PUT | `/resume` | Salvar editor → nova versão |
+| POST | `/resume/upload` | multipart `file` (PDF/DOCX/TXT) |
+| POST | `/resume/import/text` | `{ text }` — colar currículo |
+| GET | `/resume/versions` | Listar versões |
+| POST | `/resume/versions/:id/restore` | Restaurar versão |
+| POST | `/resume/analyze-job` | `{ url }` — análise currículo × vaga |
+| GET | `/resume/history` | Análises + imports |
+| GET | `/resume/analyses/:id` | Análise + sugestões |
+| POST | `/resume/suggestions/:id/apply` | Aceitar sugestão (opcional `{ editedText }`) |
+| POST | `/resume/suggestions/:id/reject` | Rejeitar sugestão |
+
+---
+
 ## Engajamento de vaga (`engagementState`)
 
 Estados retornados pelo servidor (legado — ver ADR-022):

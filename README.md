@@ -27,7 +27,8 @@ Detalhes: [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md)
 ## O que o sistema NÃO faz
 
 - Não aplica vagas pela plataforma JobTrack AI
-- Não faz upload de currículo ou carta de apresentação
+- Não aplica vagas pela plataforma (candidatura na origem)
+- **Currículo Inteligente (Etapa 22):** upload, editor, análise × vaga, sugestões com confirmação
 - Não oferece perfil público, rede social ou ATS
 - Não integra LinkedIn/GitHub/portfólio no perfil (V2)
 - Não busca vagas em tempo real via providers reais no MVP (V2)

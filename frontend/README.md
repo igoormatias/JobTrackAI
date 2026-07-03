@@ -344,6 +344,7 @@ src/
 │── jobs/
 │── pipeline/
 │── account/       # Minha Conta — Perfil + Preferências (Etapa 11)
+│── resume/        # Currículo Inteligente (Etapa 22)
 │── profile/       # hooks legados (useProfile)
 │── notifications/
 │── settings/      # hooks legados (useSettings)

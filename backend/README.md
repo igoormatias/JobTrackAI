@@ -28,6 +28,9 @@ O JobTrack AI backend centraliza a lógica de:
 - Match Score (`rules-v2` — [MATCH_ENGINE.md](../docs/MATCH_ENGINE.md))
 - Pipeline de **acompanhamento manual**
 - Notificações internas
+- **Currículo Inteligente (Etapa 22):** módulo `resume` — upload, versionamento, análise × vaga, sugestões
+
+Documentação: [RESUME_INTELLIGENCE.md](../docs/RESUME_INTELLIGENCE.md)
 
 **Fora do MVP (V2):** providers reais, scheduler, Match Engine real, WebSocket, IA, analytics.
 

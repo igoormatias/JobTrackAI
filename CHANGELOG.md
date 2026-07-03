@@ -4,6 +4,14 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [Unreleased]
 
+### Added (Etapa 22 — Currículo Inteligente / Resume Intelligence v1.4)
+
+- Módulo `resume`: currículo estruturado, versionamento, upload PDF/DOCX/TXT, colar texto
+- Análise currículo × vaga (`POST /resume/analyze-job`) — Match Engine + Gemini + cache
+- Sugestões com aceitar/rejeitar/editar (nunca auto-aplicar)
+- UI **Currículo Inteligente** em Minha Conta (`/resume/*`)
+- ADR-031 · `docs/RESUME_INTELLIGENCE.md`
+
 ### Added (Etapa 21 — Product Polish & UX)
 
 - Identidade visual: logo SVG, favicon, OG image
