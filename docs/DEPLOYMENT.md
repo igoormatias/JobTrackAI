@@ -113,6 +113,7 @@ Se `database.status` = `error` → HTTP **503**.
 | Sintoma | Causa | Solução |
 |---------|-------|---------|
 | 500 em todas as rotas | `pino-pretty` no serverless | Logger usa JSON quando `VERCEL=1` |
+| 500 no login (`X-Forwarded-For` / trust proxy) | `express-rate-limit` sem `trust proxy` na Vercel | `app.set("trust proxy", 1)` quando `VERCEL=1` |
 | Login ok, APIs falham | `NEXT_PUBLIC_API_URL` errada | Usar `/api/backend` |
 | CORS error | `FRONTEND_URL` incorreto | Igualar ao domínio Vercel |
 | Logout não limpa | API falha + frontend só `onSuccess` | Corrigido: `onSettled` limpa sempre |

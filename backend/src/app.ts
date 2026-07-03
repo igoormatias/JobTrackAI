@@ -18,6 +18,11 @@ const apiMountPath = process.env.VERCEL ? "/api/backend" : "/";
 export const createApp = () => {
   const app = express();
 
+  // Vercel sits behind a reverse proxy (X-Forwarded-For). Required for rate-limit and cookies.
+  if (process.env.VERCEL) {
+    app.set("trust proxy", 1);
+  }
+
   app.use(helmet());
   app.use(
     cors({
