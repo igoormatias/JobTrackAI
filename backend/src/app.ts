@@ -8,6 +8,8 @@ import { env } from "./config/env.js";
 import { errorMiddleware, globalRateLimiter, notFoundMiddleware } from "./middlewares/index.js";
 import { createRoutes } from "./routes/index.js";
 
+const apiMountPath = process.env.VERCEL ? "/api/backend" : "/";
+
 export const createApp = () => {
   const app = express();
 
@@ -23,10 +25,14 @@ export const createApp = () => {
   app.use(express.json());
   app.use(globalRateLimiter);
 
-  app.use(createRoutes());
+  app.use(apiMountPath, createRoutes());
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);
 
   return app;
 };
+
+const app = createApp();
+
+export default app;
