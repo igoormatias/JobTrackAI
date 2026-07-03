@@ -9,8 +9,16 @@ describe("catalog-where.builder", () => {
     expect(where.AND).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          OR: [{ isCatalog: true }, { userId: "user_1" }],
-          status: "active",
+          AND: [
+            { OR: [{ isCatalog: true }, { userId: "user_1" }] },
+            expect.objectContaining({
+              status: "active",
+              OR: expect.arrayContaining([
+                { expiresAt: null },
+                expect.objectContaining({ expiresAt: expect.any(Object) }),
+              ]),
+            }),
+          ],
         }),
         { area: { in: ["frontend"] } },
       ]),

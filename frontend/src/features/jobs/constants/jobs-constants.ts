@@ -1,12 +1,13 @@
 import type { JobSortField, JobSource, ProfessionalArea, Seniority, SortDirection, WorkModality } from "@/types";
 
 export const JOB_SORT_OPTIONS: { value: JobSortField; label: string }[] = [
+  { value: "recent", label: "Mais recentes" },
   { value: "match", label: "Maior Match" },
-  { value: "date", label: "Mais recentes" },
+  { value: "priority", label: "Prioridade" },
+  { value: "date", label: "Data de publicação" },
   { value: "salary", label: "Maior salário" },
   { value: "company", label: "Empresa" },
   { value: "title", label: "Nome da vaga" },
-  { value: "priority", label: "Prioridade" },
 ];
 
 export const JOB_SOURCE_OPTIONS: { value: JobSource; label: string }[] = [
@@ -60,7 +61,7 @@ export const JOB_ENGAGEMENT_LABELS = {
 
 export const DEFAULT_JOB_LIST_LIMIT = 20;
 
-export const DEFAULT_JOB_SORT: JobSortField = "match";
+export const DEFAULT_JOB_SORT: JobSortField = "recent";
 export const DEFAULT_JOB_SORT_DIRECTION: SortDirection = "desc";
 
 export const FAVORITE_JOB_SURFACE_CLASS = "border-amber-500/50 bg-amber-500/5";

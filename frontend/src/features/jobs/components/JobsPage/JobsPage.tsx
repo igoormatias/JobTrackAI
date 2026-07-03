@@ -1,12 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { Link2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Button } from "@/components/ui/Button";
+import { ImportJobByUrlModal } from "@/features/job-import/components/ImportJobByUrlModal/ImportJobByUrlModal";
 import { AddToTrackingModal } from "@/features/tracking/components/AddToTrackingModal/AddToTrackingModal";
 import { useCreateTrackingMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 import { listCompanies } from "@/services/companies-service";
+import { openJobUrl } from "@/lib/jobs/open-job-url";
 import { queryKeys } from "@/lib/query-client/query-keys";
 import type { Job, JobSortField, SortDirection } from "@/types";
 
@@ -33,6 +37,7 @@ export const JobsPage = () => {
   const createTrackingMutation = useCreateTrackingMutation();
   const [trackingJob, setTrackingJob] = useState<Job | null>(null);
   const [trackingModalOpen, setTrackingModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   const { data: companiesData } = useQuery({
     queryKey: queryKeys.companies.list({ limit: 30 }),
@@ -74,9 +79,7 @@ export const JobsPage = () => {
   };
 
   const handleOpenJob = (job: Job) => {
-    if (job.sourceUrl) {
-      window.open(job.sourceUrl, "_blank", "noopener,noreferrer");
-    }
+    openJobUrl({ sourceUrl: job.sourceUrl, status: job.status });
   };
 
   const handleAddToPipeline = (job: Job) => {
@@ -99,6 +102,12 @@ export const JobsPage = () => {
       <PageHeader
         title="Explorar Vagas"
         description="Oportunidades personalizadas com base no seu perfil profissional."
+        actions={
+          <Button type="button" variant="outline" onClick={() => setImportModalOpen(true)}>
+            <Link2 className="size-4" aria-hidden />
+            Importar por URL
+          </Button>
+        }
       />
       <JobsToolbarWidget filters={filters} companies={companies} />
       <JobsResultsWidget
@@ -137,6 +146,12 @@ export const JobsPage = () => {
             { onSuccess: () => setTrackingModalOpen(false) },
           );
         }}
+      />
+
+      <ImportJobByUrlModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        defaultAddToPipeline
       />
     </div>
   );

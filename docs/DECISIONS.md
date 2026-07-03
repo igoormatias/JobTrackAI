@@ -556,6 +556,29 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 ---
 
+## ADR-030 — Product Polish & Realtime híbrido (Etapa 21)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 21)
+
+**Contexto:** Pós-MVP, elevar qualidade do produto: URLs confiáveis, vagas frescas, SEO, import por URL, notificações. Vercel serverless não suporta WebSocket persistente.
+
+**Decisão:**
+
+- **`sourceUrl`** permanece campo único; nunca reconstruir URLs de provider
+- **Job freshness** — `expiresAt`, `lastCheckedAt`, `markStaleByProvider` no sync
+- **Sort default `recent`** — publishedAt → match → priority
+- **URL import** — módulo `job-import` com extractors por provider
+- **Realtime híbrido** — Socket.IO em `server.ts` (local); **polling** React Query na Vercel
+- **PWA/SEO** — manifest + metadata; sem service worker offline nesta etapa
+
+**Consequências:**
+
+- `docs/PROVIDERS.md`, `docs/WEBSOCKET.md`, `docs/PWA.md`, `docs/SEO.md`
+- Cursor Rules: `job-url-persistence`, `job-freshness`, `job-sorting`, `url-import-normalization`
+
+---
+
 ## Template para novas decisões
 
 ```markdown

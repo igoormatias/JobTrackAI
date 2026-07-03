@@ -1,0 +1,14 @@
+---
+description: Job freshness — hide expired/closed jobs from listings
+globs:
+  - backend/src/modules/job-catalog/**
+  - backend/src/modules/job-aggregation/**
+  - backend/src/modules/dashboard/**
+alwaysApply: false
+---
+
+# Job freshness
+
+- Catalog queries must filter `status = active` AND (`expiresAt IS NULL OR expiresAt > now()`).
+- Provider sync sets `lastCheckedAt` on every check; `markStaleByProvider` closes missing jobs.
+- Never recommend or list `closed` / `expired` jobs in search, dashboard top jobs, or match results.

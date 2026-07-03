@@ -2,6 +2,10 @@ import { Router } from "express";
 
 import { providerRunRateLimiter } from "../../../../../middlewares/rate-limit.js";
 import { requireAuth } from "../../../../../middlewares/auth-middleware.js";
+import { eventBus } from "../../../../../shared/events/event-bus.js";
+import { JobSyncNotificationService } from "../../../../notifications/application/job-sync-notification.service.js";
+import { NotificationService } from "../../../../notifications/application/notification.service.js";
+import { prismaNotificationRepository } from "../../../../notifications/infrastructure/repositories/prisma-notification.repository.js";
 import { prismaJobCatalogRepository } from "../../../../job-catalog/infrastructure/repositories/prisma-job-catalog.repository.js";
 import { GetProviderHistoryUseCase, GetProviderStatisticsUseCase } from "../../../application/use-cases/get-provider-stats.use-cases.js";
 import { GetProvidersHealthUseCase, GetProvidersUseCase } from "../../../application/use-cases/get-providers.use-cases.js";
@@ -14,15 +18,20 @@ import { prismaProviderRegistryRepository } from "../../repositories/prisma-prov
 import { createProviderMap } from "../../providers/provider-registry.js";
 import { ProviderController } from "../controllers/provider.controller.js";
 
-const buildAggregationService = (): JobAggregationService =>
-  new JobAggregationService(
+const buildAggregationService = (): JobAggregationService => {
+  const notificationService = new NotificationService(prismaNotificationRepository, eventBus);
+  const jobSyncNotifications = new JobSyncNotificationService(notificationService, eventBus);
+
+  return new JobAggregationService(
     createProviderMap(),
     prismaProviderExecutionRepository,
     prismaJobImportRepository,
     prismaProviderRegistryRepository,
     prismaJobCatalogRepository,
     prismaDedupLookupRepository,
+    jobSyncNotifications,
   );
+};
 
 export const createProviderRoutes = (): Router => {
   const router = Router();

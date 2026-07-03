@@ -1,5 +1,19 @@
 import { DomainEvent } from "../../../../shared/domain/domain-event.js";
 
+export class NotificationCreatedEvent extends DomainEvent {
+  readonly eventName = "notification_created";
+
+  constructor(
+    readonly payload: {
+      userId: string;
+      notificationId: string;
+      type: string;
+    },
+  ) {
+    super();
+  }
+}
+
 export class ProcessCreatedEvent extends DomainEvent {
   readonly eventName = "process_created";
 
@@ -75,6 +89,22 @@ export class InterviewReminderEvent extends DomainEvent {
       jobTitle: string;
       companyName: string;
       scheduledAt: string;
+    },
+  ) {
+    super();
+  }
+}
+
+export class JobClosedEvent extends DomainEvent {
+  readonly eventName = "job_closed";
+
+  constructor(
+    readonly payload: {
+      userId: string;
+      jobId: string;
+      trackingId: string;
+      jobTitle: string;
+      companyName: string;
     },
   ) {
     super();

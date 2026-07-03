@@ -130,6 +130,14 @@ export class PrismaDashboardRepository implements DashboardRepository {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 86_400_000);
 
+    const lastSyncExecution = await prisma.providerExecution.findFirst({
+      where: { finishedAt: { not: null } },
+      orderBy: { finishedAt: "desc" },
+      select: { finishedAt: true },
+    });
+
+    const lastSyncAt = lastSyncExecution?.finishedAt ?? null;
+
     const [
       favoritesCount,
       highPriorityCount,
@@ -147,9 +155,12 @@ export class PrismaDashboardRepository implements DashboardRepository {
       profile,
       totalCatalogJobs,
       jobsByProviderGroups,
-      lastSyncExecution,
       providerErrors24h,
       recentExecutions,
+      expiredJobsCount,
+      closedJobsCount,
+      newJobsSinceLastSync,
+      newCompaniesCount,
     ] = await Promise.all([
       prisma.jobTracking.count({ where: { userId, isFavorite: true } }),
       prisma.jobTracking.count({ where: { userId, priority: "HIGH" } }),
@@ -208,11 +219,6 @@ export class PrismaDashboardRepository implements DashboardRepository {
         where: { isCatalog: true },
         _count: { _all: true },
       }),
-      prisma.providerExecution.findFirst({
-        where: { finishedAt: { not: null } },
-        orderBy: { finishedAt: "desc" },
-        select: { finishedAt: true },
-      }),
       prisma.providerExecution.count({
         where: {
           status: "failed",
@@ -234,6 +240,36 @@ export class PrismaDashboardRepository implements DashboardRepository {
           errorMessage: true,
         },
       }),
+      prisma.job.count({
+        where: {
+          isCatalog: true,
+          status: "active",
+          expiresAt: { lt: now },
+        },
+      }),
+      prisma.job.count({
+        where: { isCatalog: true, status: "closed" },
+      }),
+      lastSyncAt
+        ? prisma.job.count({
+            where: {
+              isCatalog: true,
+              createdAt: { gte: lastSyncAt },
+            },
+          })
+        : Promise.resolve(0),
+      lastSyncAt
+        ? prisma.job
+            .findMany({
+              where: {
+                isCatalog: true,
+                createdAt: { gte: lastSyncAt },
+              },
+              select: { companySlug: true, companyName: true },
+              distinct: ["companySlug"],
+            })
+            .then((rows) => rows.length)
+        : Promise.resolve(0),
     ]);
 
     const matchProfile = toMatchProfileInput(profile);
@@ -356,13 +392,17 @@ export class PrismaDashboardRepository implements DashboardRepository {
       ),
       applicationsTimeline: buildApplicationsTimeline(trackings),
       jobSync: {
-        lastSyncAt: lastSyncExecution?.finishedAt?.toISOString() ?? null,
+        lastSyncAt: lastSyncAt?.toISOString() ?? null,
         totalCatalogJobs,
         jobsByProvider: jobsByProviderGroups.map((group) => ({
           provider: group.source,
           count: group._count._all,
         })),
         providerErrors24h,
+        expiredJobsCount,
+        closedJobsCount,
+        newJobsSinceLastSync,
+        newCompaniesCount,
         recentExecutions: recentExecutions.map((execution) => ({
           id: execution.id,
           providerName: execution.providerName,

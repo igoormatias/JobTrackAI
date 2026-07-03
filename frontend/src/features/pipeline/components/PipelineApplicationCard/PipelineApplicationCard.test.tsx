@@ -24,6 +24,7 @@ const baseApplication: Application = {
     area: "frontend",
     technologies: [{ id: "t1", name: "React", slug: "react" }],
     sourceUrl: "https://example.com",
+    status: "active",
     isFavorite: false,
     updatedAt: "2026-06-01T12:00:00.000Z",
     matchScore: {

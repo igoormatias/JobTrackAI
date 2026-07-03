@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Link2 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import type { Application, PipelineData } from "@/types";
 
+import { ImportJobByUrlModal } from "@/features/job-import/components/ImportJobByUrlModal/ImportJobByUrlModal";
 import { AddToTrackingModal } from "@/features/tracking/components/AddToTrackingModal/AddToTrackingModal";
 import { useCreateTrackingMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 
@@ -27,6 +28,7 @@ export const PipelinePage = () => {
   const [selected, setSelected] = useState<Application | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [manualModalOpen, setManualModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   const openDetails = (application: Application) => {
     setSelected(application);
@@ -57,9 +59,15 @@ export const PipelinePage = () => {
           <h1 className="text-2xl font-bold text-foreground">Pipeline de carreira</h1>
           <p className="text-sm text-muted-foreground">Acompanhe toda a sua jornada de candidaturas</p>
         </div>
-        <Button type="button" onClick={() => setManualModalOpen(true)}>
-          Adicionar Processo
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button type="button" variant="outline" onClick={() => setImportModalOpen(true)}>
+            <Link2 className="size-4" aria-hidden />
+            Importar por URL
+          </Button>
+          <Button type="button" onClick={() => setManualModalOpen(true)}>
+            Adicionar Processo
+          </Button>
+        </div>
       </div>
 
       {data ? <PipelineKpisWidget kpis={data.kpis} /> : null}
@@ -92,6 +100,12 @@ export const PipelinePage = () => {
             { onSuccess: () => setManualModalOpen(false) },
           );
         }}
+      />
+
+      <ImportJobByUrlModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        defaultAddToPipeline
       />
     </div>
   );

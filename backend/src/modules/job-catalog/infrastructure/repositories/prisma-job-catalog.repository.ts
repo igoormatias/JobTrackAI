@@ -35,6 +35,15 @@ import {
 
 const CATALOG_MATCH_CAP = 500;
 
+const priorityWeight: Record<string, number> = {
+  HIGH: 3,
+  MEDIUM: 2,
+  LOW: 1,
+};
+
+const getPriorityWeight = (priority?: string | null): number =>
+  priority ? (priorityWeight[priority] ?? 0) : 0;
+
 const priorityMap: Record<NonNullable<CatalogListFilters["priority"]>, JobPriority> = {
   high: "HIGH",
   medium: "MEDIUM",
@@ -50,7 +59,7 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
   async list(filters: CatalogListFilters): Promise<CatalogListResult<Job>> {
     const normalized = normalizeCatalogFilters(filters);
     const limit = normalized.limit ?? 20;
-    const sortBy = normalized.sortBy ?? "date";
+    const sortBy = normalized.sortBy ?? "recent";
     const sortDirection = normalized.sortDirection ?? "desc";
 
     const trackingContext = await this.resolveTrackingFilters(normalized);
@@ -63,6 +72,10 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
 
     if (sortBy === "match" || normalized.matchMin !== undefined) {
       return this.listWithMatchSort(normalized, baseWhere, total, limit);
+    }
+
+    if (sortBy === "recent" || sortBy === "priority") {
+      return this.listWithCompositeSort(normalized, baseWhere, total, limit, sortBy);
     }
 
     const cursorWhere = normalized.cursor ? buildCursorWhere(normalized.cursor, sortDirection) : undefined;
@@ -194,6 +207,48 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
     return { imported, updated };
   }
 
+  async touchLastCheckedAt(source: string, externalIds: string[]): Promise<void> {
+    if (externalIds.length === 0) return;
+
+    await prisma.job.updateMany({
+      where: {
+        source,
+        externalId: { in: externalIds },
+        isCatalog: true,
+      },
+      data: { lastCheckedAt: new Date() },
+    });
+  }
+
+  async markStaleByProvider(
+    source: string,
+    activeExternalIds: string[],
+  ): Promise<{ count: number; closedJobIds: string[] }> {
+    const stale = await prisma.job.findMany({
+      where: {
+        source,
+        isCatalog: true,
+        status: "active",
+        externalId: { not: null, notIn: activeExternalIds },
+      },
+      select: { id: true },
+    });
+
+    if (stale.length === 0) return { count: 0, closedJobIds: [] };
+
+    const closedJobIds = stale.map((job) => job.id);
+
+    await prisma.job.updateMany({
+      where: { id: { in: closedJobIds } },
+      data: {
+        status: "closed",
+        removedAt: new Date(),
+      },
+    });
+
+    return { count: closedJobIds.length, closedJobIds };
+  }
+
   private toCreateInput(data: CatalogJobUpsertInput): Prisma.JobCreateManyInput {
     return {
       id: data.id,
@@ -217,6 +272,8 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
       status: data.status ?? "active",
       isCatalog: data.isCatalog ?? true,
       publishedAt: data.publishedAt ?? new Date(),
+      expiresAt: data.expiresAt ?? null,
+      lastCheckedAt: data.lastCheckedAt ?? new Date(),
       metadata: data.metadata as Prisma.InputJsonValue,
     };
   }
@@ -238,6 +295,9 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
       salaryMax: data.salaryMax,
       status: data.status ?? "active",
       publishedAt: data.publishedAt,
+      expiresAt: data.expiresAt,
+      lastCheckedAt: data.lastCheckedAt ?? new Date(),
+      removedAt: data.removedAt,
       metadata: data.metadata as Prisma.InputJsonValue,
     };
   }
@@ -300,6 +360,73 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
         hasMore,
         nextCursor,
       },
+    };
+  }
+
+  private async listWithCompositeSort(
+    filters: CatalogListFilters,
+    baseWhere: Prisma.JobWhereInput,
+    total: number,
+    limit: number,
+    sortBy: "recent" | "priority",
+  ): Promise<CatalogListResult<Job>> {
+    const records = await prisma.job.findMany({
+      where: baseWhere,
+      orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
+      take: CATALOG_MATCH_CAP,
+    });
+
+    const ctx = await this.loadUserContext(filters.userId);
+    let jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
+
+    if (filters.profile?.area) {
+      jobs = jobs.filter((job) =>
+        isAreaCompatible(filters.profile!, {
+          title: job.title,
+          area: job.area,
+          seniority: job.seniority,
+          modality: job.modality,
+          location: job.location,
+          salaryMin: job.salaryMin,
+          salaryMax: job.salaryMax,
+          technologies: job.technologies,
+          requirements: job.requirements,
+        }),
+      );
+    }
+
+    const direction = filters.sortDirection === "asc" ? 1 : -1;
+
+    jobs.sort((a, b) => {
+      if (sortBy === "priority") {
+        const priorityDiff =
+          (getPriorityWeight(a.priority) - getPriorityWeight(b.priority)) * direction;
+        if (priorityDiff !== 0) return priorityDiff;
+      }
+
+      const dateDiff =
+        (new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()) * direction;
+      if (dateDiff !== 0) return -dateDiff;
+
+      const matchDiff = (a.matchScore.score - b.matchScore.score) * direction;
+      if (matchDiff !== 0) return -matchDiff;
+
+      return getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
+    });
+
+    let startIndex = 0;
+    if (filters.cursor) {
+      const foundIndex = jobs.findIndex((job) => job.id === filters.cursor);
+      startIndex = foundIndex >= 0 ? foundIndex + 1 : 0;
+    }
+
+    const data = jobs.slice(startIndex, startIndex + limit);
+    const hasMore = startIndex + limit < jobs.length;
+    const nextCursor = hasMore ? (data[data.length - 1]?.id ?? null) : null;
+
+    return {
+      data,
+      meta: { limit, total, hasMore, nextCursor },
     };
   }
 

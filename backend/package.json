@@ -17,7 +17,8 @@
     "prepare": "husky",
     "prisma:generate": "prisma generate",
     "prisma:seed": "tsx prisma/seed.ts",
-    "prisma:migrate": "prisma migrate deploy"
+    "prisma:migrate": "prisma migrate deploy",
+    "fix:seed-urls": "tsx scripts/fix-seeded-source-urls.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

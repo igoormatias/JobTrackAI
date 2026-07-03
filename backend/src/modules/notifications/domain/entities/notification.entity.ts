@@ -3,7 +3,8 @@ export type NotificationType =
   | "recommendation"
   | "pipeline_change"
   | "interview_reminder"
-  | "dashboard_update";
+  | "dashboard_update"
+  | "job_closed";
 
 export type NotificationEntity = {
   id: string;

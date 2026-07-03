@@ -23,6 +23,11 @@ export type CatalogWhereContext = {
   excludeJobIds?: string[];
 };
 
+export const buildActiveJobFreshnessFilter = (): Prisma.JobWhereInput => ({
+  status: "active",
+  OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+});
+
 export const buildCatalogWhere = (
   filters: CatalogListFilters,
   context: CatalogWhereContext = {},
@@ -30,8 +35,10 @@ export const buildCatalogWhere = (
   const normalized = normalizeCatalogFilters(filters);
   const and: Prisma.JobWhereInput[] = [
     {
-      OR: [{ isCatalog: true }, { userId: filters.userId }],
-      status: "active",
+      AND: [
+        { OR: [{ isCatalog: true }, { userId: filters.userId }] },
+        buildActiveJobFreshnessFilter(),
+      ],
     },
   ];
 
@@ -43,14 +50,17 @@ export const buildCatalogWhere = (
     and.push({ id: { notIn: context.excludeJobIds } });
   }
 
-  const query = normalized.q?.trim().toLowerCase();
+  const query = normalized.q?.trim();
   if (query) {
+    const lowerQuery = query.toLowerCase();
     and.push({
       OR: [
         { title: { contains: query, mode: "insensitive" } },
         { companyName: { contains: query, mode: "insensitive" } },
+        { companySlug: { contains: lowerQuery, mode: "insensitive" } },
         { description: { contains: query, mode: "insensitive" } },
         { location: { contains: query, mode: "insensitive" } },
+        { source: { contains: lowerQuery, mode: "insensitive" } },
       ],
     });
   }

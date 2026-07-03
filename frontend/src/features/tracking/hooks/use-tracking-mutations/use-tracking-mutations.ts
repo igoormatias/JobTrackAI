@@ -17,6 +17,10 @@ import {
   type CreateTrackingFromJobPayload,
 } from "../../services/tracking-service";
 
+const invalidateNotifications = (queryClient: ReturnType<typeof useQueryClient>): void => {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+};
+
 export const useCreateTrackingMutation = () => {
   const queryClient = useQueryClient();
 
@@ -26,6 +30,7 @@ export const useCreateTrackingMutation = () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      invalidateNotifications(queryClient);
       toast.success("Processo adicionado ao acompanhamento");
     },
     onError: () => toast.error("Não foi possível adicionar o processo"),
@@ -41,6 +46,7 @@ export const useMoveTrackingStageMutation = () => {
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
+      invalidateNotifications(queryClient);
     },
   });
 };
@@ -53,6 +59,7 @@ export const useTrackingFavoriteMutation = () => {
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      invalidateNotifications(queryClient);
     },
   });
 };
@@ -65,6 +72,7 @@ export const useTrackingPriorityMutation = () => {
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      invalidateNotifications(queryClient);
     },
   });
 };
@@ -78,6 +86,7 @@ export const useTrackingVisibilityMutation = () => {
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      invalidateNotifications(queryClient);
     },
   });
 };
@@ -90,6 +99,7 @@ export const useUpdateTrackingNotesMutation = () => {
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
+      invalidateNotifications(queryClient);
     },
   });
 };

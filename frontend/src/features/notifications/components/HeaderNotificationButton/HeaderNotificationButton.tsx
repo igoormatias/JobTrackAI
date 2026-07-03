@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Bell } from "lucide-react";
 
 import { NotificationBadge } from "@/components/badges/NotificationBadge";
@@ -65,20 +66,34 @@ export const HeaderNotificationButton = () => {
             <p className="px-4 py-6 text-sm text-muted-foreground">Nenhuma notificação por enquanto.</p>
           ) : (
             <ul className="divide-y divide-border">
-              {notifications.map((notification: Notification) => (
-                <li
-                  key={notification.id}
-                  className={`px-4 py-3 text-sm ${notification.read ? "text-muted-foreground" : "bg-primary/5 text-foreground"}`}
-                >
-                  <p className="font-medium">{notification.title}</p>
-                  {notification.message ? (
-                    <p className="mt-1 text-muted-foreground">{notification.message}</p>
-                  ) : null}
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {formatNotificationTime(notification.createdAt)}
-                  </p>
-                </li>
-              ))}
+              {notifications.map((notification: Notification) => {
+                const content = (
+                  <>
+                    <p className="font-medium">{notification.title}</p>
+                    {notification.message ? (
+                      <p className="mt-1 text-muted-foreground">{notification.message}</p>
+                    ) : null}
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {formatNotificationTime(notification.createdAt)}
+                    </p>
+                  </>
+                );
+
+                return (
+                  <li
+                    key={notification.id}
+                    className={`px-4 py-3 text-sm ${notification.read ? "text-muted-foreground" : "bg-primary/5 text-foreground"}`}
+                  >
+                    {notification.actionUrl ? (
+                      <Link href={notification.actionUrl} className="block hover:opacity-90">
+                        {content}
+                      </Link>
+                    ) : (
+                      content
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

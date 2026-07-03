@@ -6,7 +6,7 @@ import { JOB_VISIBILITIES } from "../../../shared/domain/job-visibility.js";
 export const jobListQuerySchema = z.object({
   cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
-  sortBy: z.enum(["match", "date", "salary", "title", "company", "priority"]).optional(),
+  sortBy: z.enum(["recent", "match", "date", "salary", "title", "company", "priority"]).optional(),
   sortDirection: z.enum(["asc", "desc"]).optional(),
   q: z.string().optional(),
   search: z.string().optional(),

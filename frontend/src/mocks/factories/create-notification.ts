@@ -43,6 +43,11 @@ const notificationDefaults: Record<
     message: "Novos KPIs e atividades disponíveis.",
     actionUrl: "/dashboard",
   },
+  job_closed: {
+    title: "Vaga encerrada",
+    message: "Uma vaga que você acompanha não está mais disponível na origem.",
+    actionUrl: "/jobs",
+  },
 };
 
 export const createNotification = ({

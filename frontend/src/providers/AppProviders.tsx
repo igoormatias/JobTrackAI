@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/Tooltip";
 import { GoogleAuthProvider } from "@/providers/google-auth-provider";
 import { NuqsProvider } from "@/providers/nuqs-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { RealtimeInvalidation, RealtimeProvider } from "@/providers/realtime-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { ToastProvider } from "@/providers/toast-provider";
 
@@ -22,7 +23,10 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
           <QueryProvider>
             <SessionProvider>
               <NuqsProvider>
-                {children}
+                <RealtimeProvider>
+                  <RealtimeInvalidation />
+                  {children}
+                </RealtimeProvider>
                 <ToastProvider />
               </NuqsProvider>
             </SessionProvider>

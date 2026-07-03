@@ -13,6 +13,7 @@ import { Chip } from "@/components/ui/Chip";
 import { FAVORITE_JOB_BADGE_CLASS, FAVORITE_JOB_SURFACE_CLASS } from "@/features/jobs/constants/jobs-constants";
 import { formatModality, getCompanyInitials } from "@/features/jobs/utils/job-formatters";
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
+import { openJobUrl } from "@/lib/jobs/open-job-url";
 import { cn } from "@/lib/utils";
 import type { Application } from "@/types";
 
@@ -91,7 +92,7 @@ const PipelineApplicationCardComponent = ({
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => window.open(job.sourceUrl, "_blank", "noopener,noreferrer")}
+            onClick={() => openJobUrl({ sourceUrl: job.sourceUrl, status: job.status })}
             aria-label="Ver vaga"
           >
             <ExternalLink className="h-4 w-4" />

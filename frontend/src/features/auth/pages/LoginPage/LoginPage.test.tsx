@@ -25,7 +25,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     expect(screen.getByRole("main")).toBeInTheDocument();
-    expect(screen.getByText("JobTrack AI")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "JobTrack AI" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Entrar com Google/i })).toHaveClass("w-full");
     expect(screen.getByText(/Sua busca por emprego/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Termos de Serviço/i })).toBeInTheDocument();

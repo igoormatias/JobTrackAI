@@ -38,6 +38,10 @@ const envSchema = z
       .enum(["true", "false"])
       .default("false")
       .transform((v) => v === "true"),
+    ENABLE_REALTIME: z
+      .enum(["true", "false"])
+      .optional()
+      .transform((v) => (v === undefined ? undefined : v === "true")),
     ENABLE_SCHEDULER: z
       .enum(["true", "false"])
       .default("false")
@@ -115,7 +119,9 @@ const envSchema = z
     }
   });
 
-export type Env = z.infer<typeof envSchema>;
+export type Env = z.infer<typeof envSchema> & {
+  ENABLE_REALTIME: boolean;
+};
 
 export const loadEnv = (): Env => {
   const parsed = envSchema.safeParse(normalizeProcessEnv());
@@ -124,7 +130,12 @@ export const loadEnv = (): Env => {
     throw new Error(`Invalid environment variables:\n${formatZodErrors(parsed.error)}`);
   }
 
-  return parsed.data;
+  const data = parsed.data;
+
+  return {
+    ...data,
+    ENABLE_REALTIME: data.ENABLE_REALTIME ?? data.ENABLE_V2_FEATURES,
+  };
 };
 
 export const env = loadEnv();

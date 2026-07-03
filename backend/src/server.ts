@@ -9,6 +9,8 @@ import { syncProviderRegistryFromEnv } from "./modules/job-aggregation/infrastru
 import { createJobAggregationService } from "./modules/job-aggregation/infrastructure/http/routes/provider.routes.js";
 import { ProviderSyncScheduler } from "./modules/job-aggregation/infrastructure/scheduler/provider-sync.scheduler.js";
 import { SchedulerService } from "./modules/scheduler/services/scheduler.service.js";
+import { eventBus } from "./shared/events/event-bus.js";
+import { setupRealtimeBridge } from "./shared/events/realtime-bridge.js";
 
 export { createApp } from "./app.js";
 
@@ -18,8 +20,9 @@ export const startServer = async (): Promise<void> => {
 
   await syncProviderRegistryFromEnv();
 
-  if (env.ENABLE_V2_FEATURES) {
-    createSocketServer(httpServer);
+  if (env.ENABLE_REALTIME) {
+    const io = createSocketServer(httpServer);
+    setupRealtimeBridge(eventBus, io);
     const scheduler = new SchedulerService();
     scheduler.start();
   }

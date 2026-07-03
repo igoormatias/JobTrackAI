@@ -13,6 +13,7 @@ import { createSettingsRoutes } from "../modules/settings/infrastructure/http/ro
 import { createSystemRoutes } from "../modules/system/infrastructure/http/routes/system.routes.js";
 import { createProviderRoutes } from "../modules/job-aggregation/infrastructure/http/routes/provider.routes.js";
 import { createAiRoutes } from "../modules/ai/infrastructure/http/routes/ai.routes.js";
+import { createJobImportRoutes } from "../modules/job-import/infrastructure/http/routes/job-import.routes.js";
 
 export const createRoutes = (): Router => {
   const router = Router();
@@ -21,6 +22,7 @@ export const createRoutes = (): Router => {
   router.use("/auth", createAuthRoutes());
   router.use("/profile", createProfileRoutes());
   router.use("/settings", createSettingsRoutes());
+  router.use("/jobs/import", createJobImportRoutes());
   router.use("/jobs", createJobRoutes());
   router.use("/companies", createCompanyRoutes());
   router.use("/tracking", createTrackingRoutes());

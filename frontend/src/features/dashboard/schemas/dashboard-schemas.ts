@@ -54,6 +54,10 @@ export const dashboardDataSchema = z.object({
       }),
     ),
     providerErrors24h: z.number(),
+    expiredJobsCount: z.number(),
+    closedJobsCount: z.number(),
+    newJobsSinceLastSync: z.number(),
+    newCompaniesCount: z.number(),
     recentExecutions: z.array(
       z.object({
         id: z.string(),

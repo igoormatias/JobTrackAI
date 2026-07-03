@@ -124,6 +124,7 @@ export const createApplication = ({ index, userId, job, stage }: CreateApplicati
       matchScore: job.matchScore,
       technologies: job.technologies,
       sourceUrl: job.sourceUrl,
+      status: job.status,
       area: job.area,
       isFavorite: job.isFavorite,
       updatedAt: job.updatedAt,

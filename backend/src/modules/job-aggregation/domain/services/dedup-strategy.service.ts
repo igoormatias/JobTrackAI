@@ -9,6 +9,14 @@ export class DedupStrategy {
   async evaluate(job: NormalizedJob): Promise<DedupResult> {
     const byExternal = await this.lookup.findBySourceAndExternalId(job.provider, job.externalId);
     if (byExternal) {
+      if (byExternal.contentHash && byExternal.contentHash === job.contentHash) {
+        return {
+          action: "skip",
+          reason: "unchanged",
+          existingJobId: byExternal.id,
+        };
+      }
+
       return {
         action: "update",
         reason: "source_external_id",

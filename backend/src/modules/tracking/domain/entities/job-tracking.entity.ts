@@ -17,6 +17,7 @@ export type TrackingJobSnapshot = {
   technologies: Array<{ id: string; name: string; slug: string }>;
   sourceUrl: string | null;
   source: JobSource;
+  status: string;
   isFavorite: boolean;
   priority: JobPriority;
   visibility: JobVisibility;

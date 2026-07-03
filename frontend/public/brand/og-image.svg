@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="og-bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="45%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#312E81"/>
+    </linearGradient>
+    <linearGradient id="og-accent" x1="200" y1="120" x2="520" y2="440" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <radialGradient id="og-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(900 180) rotate(90) scale(320)">
+      <stop stop-color="#6366F1" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#6366F1" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#og-bg)"/>
+  <rect width="1200" height="630" fill="url(#og-glow)"/>
+  <circle cx="1040" cy="520" r="180" fill="#6366F1" fill-opacity="0.08"/>
+  <circle cx="180" cy="560" r="120" fill="#3B82F6" fill-opacity="0.1"/>
+  <rect x="120" y="165" width="120" height="120" rx="28" fill="url(#og-accent)"/>
+  <path d="M150 255V195h19.5c12 0 19.5 7.2 19.5 17.7 0 7.2-3.6 12.6-9.3 15.3L198 255h-16.5l-11.1-18.9h-3.9V255H150zm14.7-30.3h3c3.6 0 5.7-2.4 5.7-6.3 0-3.9-2.1-6.3-5.7-6.3h-3v12.6z" fill="#FFFFFF"/>
+  <path d="M183 255V195h16.5l17.1 33.3V195H234v60h-16.5l-17.1-33.3V255H183z" fill="#FFFFFF" fill-opacity="0.92"/>
+  <text x="270" y="238" fill="#FFFFFF" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="72" font-weight="700" letter-spacing="-0.03em">JobTrack AI</text>
+  <text x="270" y="320" fill="#C7D2FE" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="36" font-weight="500">Sua busca por emprego, inteligente e organizada</text>
+  <rect x="270" y="370" width="280" height="4" rx="2" fill="url(#og-accent)"/>
+  <text x="270" y="430" fill="#94A3B8" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="24" font-weight="500">Career Tracker · Vagas · Pipeline · Match</text>
+</svg>

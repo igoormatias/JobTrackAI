@@ -14,7 +14,7 @@ export const JobsSearchBar = ({ value, onChange, className }: JobsSearchBarProps
     value={value}
     onChange={(event) => onChange(event.target.value)}
     onClear={() => onChange("")}
-    placeholder="Pesquisar por cargo, empresa, tecnologia..."
+    placeholder="Pesquisar por empresa, cargo, tecnologia, cidade, provider..."
     aria-label="Pesquisar vagas"
   />
 );

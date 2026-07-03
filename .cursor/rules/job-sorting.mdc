@@ -1,0 +1,13 @@
+---
+description: Default job sort — recent first, then match, then priority
+globs:
+  - backend/src/modules/job-catalog/**
+  - frontend/src/features/jobs/**
+alwaysApply: false
+---
+
+# Job sorting
+
+- Default sort: **`recent`** (publishedAt DESC → matchScore DESC → user priority).
+- Never surface old jobs ahead of newer active jobs without explicit user sort choice.
+- `sortBy=priority` uses tracking priority when user is authenticated.

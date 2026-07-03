@@ -90,6 +90,13 @@ export const slugify = (value: string): string =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
+export const buildSeedExternalId = (source: (typeof SOURCES)[number], index: number): string => {
+  if (source === "gupy") {
+    return String(10_000 + index);
+  }
+  return `${source}_job_${String(index).padStart(4, "0")}`;
+};
+
 export const buildSourceUrl = (source: (typeof SOURCES)[number], externalId: string): string => {
   switch (source) {
     case "gupy":

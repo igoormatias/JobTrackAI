@@ -1,6 +1,7 @@
 import { logger } from "../../../../config/logger.js";
 import type { JobCatalogRepository } from "../../../job-catalog/domain/repositories/job-catalog.repository.js";
 import type { CatalogJobUpsertInput } from "../../../job-catalog/domain/value-objects/catalog-list-filters.js";
+import type { JobSyncNotificationService } from "../../../notifications/application/job-sync-notification.service.js";
 import type { ProviderExecution } from "../../domain/entities/provider-execution.entity.js";
 import type { JobProviderPort } from "../../domain/ports/job-provider.port.js";
 import type { DedupLookupRepository } from "../../domain/repositories/dedup-lookup.repository.js";
@@ -33,6 +34,7 @@ export class JobAggregationService {
     private readonly registryRepo: ProviderRegistryRepository,
     private readonly catalogRepo: JobCatalogRepository,
     private readonly dedupLookup: DedupLookupRepository,
+    private readonly jobSyncNotifications?: JobSyncNotificationService,
   ) {}
 
   async runProvider(providerName: string): Promise<ProviderExecution> {
@@ -75,6 +77,8 @@ export class JobAggregationService {
     };
     const importRecords: Array<Parameters<JobImportRepository["create"]>[0]> = [];
     const upsertBatch: Array<{ input: CatalogJobUpsertInput; action: "import" | "update" }> = [];
+    const seenExternalIds = new Set<string>();
+    const unchangedExternalIds: string[] = [];
 
     try {
       const health = await provider.health();
@@ -119,6 +123,10 @@ export class JobAggregationService {
               continue;
             }
 
+            if (validation.job.externalId) {
+              seenExternalIds.add(validation.job.externalId);
+            }
+
             const dedupResult = await dedup.evaluate(validation.job);
 
             if (dedupResult.action === "skip") {
@@ -132,6 +140,11 @@ export class JobAggregationService {
                 status: "duplicate",
                 jobId: dedupResult.existingJobId,
               });
+
+              if (dedupResult.reason === "unchanged" && validation.job.externalId) {
+                unchangedExternalIds.push(validation.job.externalId);
+              }
+
               continue;
             }
 
@@ -159,6 +172,19 @@ export class JobAggregationService {
         await this.flushBatch(upsertBatch, importRecords, execution.id, providerName, counts);
       }
 
+      if (unchangedExternalIds.length > 0) {
+        await this.catalogRepo.touchLastCheckedAt(providerName, unchangedExternalIds);
+      }
+
+      const { count: closedCount, closedJobIds } = await this.catalogRepo.markStaleByProvider(
+        providerName,
+        Array.from(seenExternalIds),
+      );
+
+      if (closedCount > 0 && this.jobSyncNotifications) {
+        await this.jobSyncNotifications.notifyClosedJobs(closedJobIds);
+      }
+
       if (importRecords.length > 0) {
         await this.importRepo.createMany(importRecords);
       }
@@ -174,6 +200,8 @@ export class JobAggregationService {
         {
           provider: providerName,
           durationMs: Date.now() - startedAt,
+          closedCount,
+          seenCount: seenExternalIds.size,
           ...counts,
         },
         "Provider sync completed",

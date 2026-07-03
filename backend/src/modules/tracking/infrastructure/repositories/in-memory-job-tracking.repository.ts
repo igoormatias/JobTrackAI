@@ -56,6 +56,7 @@ const toJobSnapshot = (job: Job, tracking: Pick<JobTrackingEntity, "isFavorite" 
   technologies: job.technologies,
   sourceUrl: job.sourceUrl,
   source: job.source as JobSource,
+  status: job.status,
   isFavorite: tracking.isFavorite,
   priority: tracking.priority,
   visibility: tracking.visibility,

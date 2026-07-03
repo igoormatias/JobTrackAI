@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import {
   AREAS,
   buildSourceUrl,
+  buildSeedExternalId,
   CATALOG_JOB_COUNT,
   COMPANIES,
   MODALITIES,
@@ -33,7 +34,7 @@ export const buildCatalogJobs = (): Prisma.JobCreateManyInput[] => {
       const name = TECH_POOL[(index + t) % TECH_POOL.length]!;
       return { id: `tech_${i}_${t}`, name, slug: slugify(name) };
     });
-    const externalId = `${source}_job_${String(i).padStart(4, "0")}`;
+    const externalId = buildSeedExternalId(source, i);
     const publishedDaysAgo = index % 60;
 
     return {

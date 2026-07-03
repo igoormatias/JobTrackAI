@@ -171,6 +171,23 @@ Catálogo oficial persistido em Prisma — sem vagas fake em runtime:
 
 ---
 
+## Pós-MVP v1.x
+
+### ✅ Product Polish & UX (Etapa 21)
+
+- Identidade visual (logo SVG, favicon, OG)
+- SEO completo (metadata, JSON-LD, robots, sitemap)
+- PWA manifest preparado
+- Job freshness (`expiresAt`, `lastCheckedAt`, `markStaleByProvider`)
+- Ordenação default `recent` (data → match → prioridade)
+- Fix `sourceUrl` / Abrir vaga + importação por URL (Gupy)
+- Provider sync incremental + dashboard sync stats
+- Notificações `job_closed` + Realtime híbrido (Socket local / polling Vercel)
+- `docs/PROVIDERS.md`, `docs/WEBSOCKET.md`, `docs/PWA.md`, `docs/SEO.md`
+- ADR-030 + Cursor Rules (URL, freshness, sorting, import)
+
+---
+
 #### ~~Release Candidate MVP (Etapa 13)~~ — renumerado para Etapas 13–15
 
 ~~- Notificações (feed de eventos internos)~~
@@ -212,8 +229,8 @@ Funcionalidades **fora do MVP**. Não implementar antes de concluir o escopo MVP
 
 ### Integrações e infraestrutura
 
-- ⬜ **Importação por URL** — cadastrar vaga a partir de link externo
-- ⬜ **WebSocket** — atualizações em tempo real (Socket.IO preparado)
+- ✅ **Importação por URL** — Etapa 21 (Gupy real; LinkedIn/Programathor stub)
+- ✅ **WebSocket** — Etapa 21 (local); polling fallback Vercel
 - ⬜ **Integrações avançadas** — novas fontes e normalização em produção
 
 ### Inteligência e dados

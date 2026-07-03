@@ -6,6 +6,7 @@ const notificationTypeSchema = z.enum([
   "pipeline_change",
   "interview_reminder",
   "dashboard_update",
+  "job_closed",
 ]);
 
 export const notificationListQuerySchema = z.object({

@@ -6,7 +6,7 @@ export type CatalogListFilters = {
   profile?: MatchProfileInput | null;
   cursor?: string;
   limit?: number;
-  sortBy?: "match" | "date" | "salary" | "title" | "company" | "priority";
+  sortBy?: "recent" | "match" | "date" | "salary" | "title" | "company" | "priority";
   sortDirection?: "asc" | "desc";
   q?: string;
   search?: string;
@@ -61,6 +61,9 @@ export type CatalogJobUpsertInput = {
   status?: string;
   isCatalog?: boolean;
   publishedAt?: Date;
+  expiresAt?: Date | null;
+  lastCheckedAt?: Date | null;
+  removedAt?: Date | null;
   metadata?: Record<string, unknown>;
 };
 

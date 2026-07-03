@@ -33,6 +33,7 @@ export type PipelineApplicationJob = {
   };
   technologies: { id: string; name: string; slug: string }[];
   sourceUrl: string;
+  status: string;
   isFavorite: boolean;
   updatedAt: string;
 };

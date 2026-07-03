@@ -25,6 +25,7 @@ export type PipelineApplicationJob = Pick<
   | "matchScore"
   | "technologies"
   | "sourceUrl"
+  | "status"
   | "area"
   | "isFavorite"
 > & {

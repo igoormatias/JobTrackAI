@@ -40,6 +40,7 @@ const toApplication = (tracking: JobTrackingEntity): Application => ({
     },
     technologies: tracking.job.technologies,
     sourceUrl: tracking.job.sourceUrl ?? "",
+    status: tracking.job.status ?? "active",
     isFavorite: tracking.isFavorite,
     updatedAt: tracking.job.updatedAt,
   },

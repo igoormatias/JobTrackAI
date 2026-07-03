@@ -74,7 +74,7 @@ export type Job = {
 export type JobListParams = {
   cursor?: string;
   limit?: number;
-  sortBy?: "match" | "date" | "salary" | "title" | "company" | "priority";
+  sortBy?: "recent" | "match" | "date" | "salary" | "title" | "company" | "priority";
   sortDirection?: "asc" | "desc";
   q?: string;
   search?: string;

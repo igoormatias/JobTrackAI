@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronLeft, LogOut } from "lucide-react";
@@ -39,13 +40,43 @@ export const Sidebar = ({ className }: SidebarProps) => {
         className,
       )}
     >
-      <div className="flex h-16 items-center justify-between border-b border-border px-4">
-        {!isSidebarCollapsed ? (
-          <span className="text-lg font-bold text-foreground">JobTrack AI</span>
-        ) : null}
+      <div
+        className={cn(
+          "flex border-b border-border",
+          isSidebarCollapsed
+            ? "h-16 flex-col items-center justify-center gap-0.5 px-1"
+            : "h-16 items-center justify-between px-4",
+        )}
+      >
+        <Link
+          href="/dashboard"
+          className={cn("flex min-w-0 items-center", isSidebarCollapsed && "justify-center")}
+          aria-label="JobTrack AI"
+        >
+          {isSidebarCollapsed ? (
+            <Image
+              src="/brand/logo-mark.svg"
+              alt=""
+              width={28}
+              height={28}
+              className="h-7 w-7"
+              aria-hidden
+            />
+          ) : (
+            <Image
+              src="/brand/logo.svg"
+              alt="JobTrack AI"
+              width={148}
+              height={32}
+              className="h-8 w-auto"
+              priority
+            />
+          )}
+        </Link>
         <Button
           variant="ghost"
           size="icon"
+          className={cn(isSidebarCollapsed && "h-7 w-7")}
           onClick={toggleSidebarCollapsed}
           aria-label={isSidebarCollapsed ? "Expandir sidebar" : "Recolher sidebar"}
         >

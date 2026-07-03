@@ -25,9 +25,26 @@ const createLookup = (overrides: Partial<DedupLookupRepository> = {}): DedupLook
 });
 
 describe("DedupStrategy", () => {
-  it("should update when source and externalId already exist", async () => {
+  it("should skip when content hash matches on same external id", async () => {
     const lookup = createLookup({
-      findBySourceAndExternalId: vi.fn().mockResolvedValue({ id: "job-1", source: "gupy", externalId: "123" }),
+      findBySourceAndExternalId: vi.fn().mockResolvedValue({
+        id: "job-1",
+        source: "gupy",
+        externalId: "123",
+        contentHash: "hash-123",
+      }),
+    });
+    const strategy = new DedupStrategy(lookup);
+
+    const result = await strategy.evaluate(baseJob);
+
+    expect(result.action).toBe("skip");
+    expect(result.reason).toBe("unchanged");
+  });
+
+  it("should update when source and externalId already exist with different hash", async () => {
+    const lookup = createLookup({
+      findBySourceAndExternalId: vi.fn().mockResolvedValue({ id: "job-1", source: "gupy", externalId: "123", contentHash: "other-hash" }),
     });
     const strategy = new DedupStrategy(lookup);
 

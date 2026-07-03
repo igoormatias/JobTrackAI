@@ -22,4 +22,9 @@ export interface JobCatalogRepository {
   findRelated(query: RelatedJobsQuery): Promise<Job[]>;
   upsertCatalogJob(data: CatalogJobUpsertInput): Promise<Job>;
   upsertManyCatalogJobs(data: CatalogJobUpsertInput[]): Promise<{ imported: number; updated: number }>;
+  touchLastCheckedAt(source: string, externalIds: string[]): Promise<void>;
+  markStaleByProvider(
+    source: string,
+    activeExternalIds: string[],
+  ): Promise<{ count: number; closedJobIds: string[] }>;
 }

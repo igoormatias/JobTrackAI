@@ -49,6 +49,10 @@ export type DashboardJobSyncDto = {
   totalCatalogJobs: number;
   jobsByProvider: Array<{ provider: string; count: number }>;
   providerErrors24h: number;
+  expiredJobsCount: number;
+  closedJobsCount: number;
+  newJobsSinceLastSync: number;
+  newCompaniesCount: number;
   recentExecutions: Array<{
     id: string;
     providerName: string;

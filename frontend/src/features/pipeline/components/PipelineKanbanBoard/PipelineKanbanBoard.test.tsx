@@ -43,6 +43,7 @@ describe("PipelineKanbanBoard", () => {
                     area: "frontend",
                     technologies: [],
                     sourceUrl: "https://example.com",
+                    status: "active",
                     isFavorite: false,
                     updatedAt: new Date().toISOString(),
                     matchScore: { score: 80, label: "good", reasons: [], missingSkills: [] },

@@ -1,0 +1,12 @@
+---
+description: URL import must use shared normalizer
+globs:
+  - backend/src/modules/job-import/**
+alwaysApply: false
+---
+
+# URL job import
+
+- All URL imports pass through `job-normalizer` / provider `normalize()` before persist.
+- Preview endpoint must not write to DB; confirm creates Job + optional Tracking.
+- Unsupported providers return 422 with clear message — no silent fallback.

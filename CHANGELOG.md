@@ -4,6 +4,17 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [Unreleased]
 
+### Added (Etapa 21 — Product Polish & UX)
+
+- Identidade visual: logo SVG, favicon, OG image
+- SEO: metadata por página, JSON-LD, robots, sitemap, manifest PWA
+- Job freshness: `expiresAt`, `lastCheckedAt`, `markStaleByProvider`
+- Ordenação default `recent`; fix `sourceUrl` / `openJobUrl()`
+- Importação por URL (`POST /jobs/import/preview|confirm`) — Gupy
+- Provider sync incremental; dashboard sync stats ampliados
+- Notificações `job_closed`; Realtime híbrido (Socket.IO + polling)
+- `docs/PROVIDERS.md`, `docs/WEBSOCKET.md`, `docs/PWA.md`, `docs/SEO.md`
+
 ### Added (Etapa 20 — Production Stabilization Vercel)
 
 - Logger JSON em produção/Vercel; `pino-pretty` apenas em dev

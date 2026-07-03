@@ -26,6 +26,7 @@ export const toCatalogUpsertInput = (job: NormalizedJob): CatalogJobUpsertInput 
   salaryMax: job.salaryMax ?? null,
   isCatalog: true,
   publishedAt: job.publishedAt,
+  lastCheckedAt: new Date(),
   metadata: {
     technologies: job.technologies.map((name, index) => ({
       id: `tech_${slugify(name)}_${index}`,

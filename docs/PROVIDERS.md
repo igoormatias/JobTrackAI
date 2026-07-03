@@ -1,75 +1,41 @@
-# Job Providers — Job Aggregation Engine
+# JobTrack AI — Providers
 
-Documentação do pipeline de importação de vagas (Etapa 17).
+Guia de integração com fontes de vagas (Job Aggregation + URL Import).
 
-## Visão geral
+## Princípios
 
-O **Job Aggregation Engine** orquestra providers externos, normaliza vagas para um contrato canônico, deduplica e persiste no catálogo Prisma (`Job` com `isCatalog=true`).
-
-```
-POST /providers/run  ─┐
-ENABLE_SCHEDULER     ─┼─► JobAggregationService ─► Provider ─► normalize ─► validate ─► dedup ─► JobCatalogRepository
-POST /providers/run/:provider ─┘
-```
+1. **Nunca reconstruir URLs** — persistir `sourceUrl` exatamente como recebida do provider.
+2. **Dedup** — chave única `(source, externalId)` + `contentHash` para updates incrementais.
+3. **Freshness** — `lastCheckedAt` em todo check; jobs ausentes no sync → `status: closed`.
 
 ## Providers
 
-| Provider | Status | `search()` | `health()` |
-|----------|--------|------------|------------|
-| `gupy` | **Real** | API pública Gupy com paginação | Probe da API |
-| `linkedin` | Stub | `NotImplementedError` | `degraded` |
-| `programathor` | Stub | `NotImplementedError` | `degraded` |
+| Provider | Sync | URL Import | Status |
+|----------|------|------------|--------|
+| Gupy | Real (`gupy.provider.ts`) | Real (`gupy-url.extractor.ts`) | Produção |
+| LinkedIn | Stub | Stub (422) | Arquitetura pronta |
+| Programathor | Stub | Stub (422) | Arquitetura pronta |
 
-## Normalização
+## Sync manual / scheduler
 
-Saída canônica `NormalizedJob`:
+```bash
+POST /providers/run          # todos habilitados
+POST /providers/:name/run    # um provider
+```
 
-`title, company, description, technologies[], seniority, modality, location, salaryMin/Max, sourceUrl, provider, publishedAt, contentHash, externalId`
+Após sync:
+- `markStaleByProvider` fecha vagas removidas pelo provider
+- `JobSyncNotificationService` notifica usuários com tracking na vaga
 
-- **Gupy:** `name→title`, `careerPageName→company`, `workplaceType→modality`, `city/state→location`, `jobUrl→sourceUrl`
-- **contentHash:** SHA-256 de `normalize(title)|company|sourceUrl|publishedAt`
+## URLs Gupy
 
-## Deduplicação
+- API retorna `jobUrl` — usar diretamente como `sourceUrl`
+- Seed dev: IDs numéricos (`10001+`), nunca `gupy_job_XXXX`
+- Portal: `https://portal.gupy.io/job/{numericId}`
 
-Ordem (configurável via env no futuro):
+## Env
 
-1. `source + externalId` (unique DB) → **update**
-2. `contentHash` → **skip**
-3. `normalized sourceUrl` → **skip**
+- `ENABLE_PROVIDER_GUPY=true`
+- `ENABLE_SCHEDULER=true` (local only — Vercel usa sync manual)
 
-## Variáveis de ambiente
-
-| Variável | Default | Descrição |
-|----------|---------|-----------|
-| `ENABLE_SCHEDULER` | `false` | Liga sync automático |
-| `SYNC_INTERVAL` | `3600000` | Intervalo em ms |
-| `ENABLE_PROVIDER_GUPY` | `true` | Habilita Gupy no registry |
-| `ENABLE_PROVIDER_LINKEDIN` | `false` | LinkedIn stub |
-| `ENABLE_PROVIDER_PROGRAMATHOR` | `false` | Programathor stub |
-| `SEED_CATALOG` | `false` | Seed ~400 vagas (apenas dev) |
-
-## API
-
-Rotas em `/providers` (auth obrigatório):
-
-- `GET /providers` — lista providers
-- `GET /providers/statistics` — totais e execuções recentes
-- `GET /providers/history` — histórico paginado
-- `GET /providers/health` — health check
-- `POST /providers/run` — executa todos habilitados (rate limit)
-- `POST /providers/run/:provider` — executa um provider
-
-## Como adicionar um provider
-
-1. Implementar `JobProvider` em `backend/src/providers/<name>/`
-2. Registrar em `provider-registry.ts`
-3. Inserir em `JobProviderRegistry` (migration/seed)
-4. Adicionar flag `ENABLE_PROVIDER_<NAME>` em `env.ts`
-5. Testes unitários de `normalize()` e `search()` (mock fetch)
-
-## Regras
-
-- Use cases **nunca** importam `fetch` ou Prisma diretamente
-- Sempre normalizar antes de persistir
-- Nunca persistir payload raw do provider
-- Catálogo em runtime vem de imports; seed é fallback dev (`SEED_CATALOG=true`)
+Ver [ARCHITECTURE.md](./ARCHITECTURE.md) · [API_CONTRACT.md](./API_CONTRACT.md)

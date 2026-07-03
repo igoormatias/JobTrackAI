@@ -1,0 +1,17 @@
+---
+description: Persist provider URLs in sourceUrl — never reconstruct
+globs:
+  - backend/src/providers/**
+  - backend/src/modules/job-aggregation/**
+  - backend/src/modules/job-import/**
+  - backend/prisma/seeders/**
+  - frontend/src/lib/jobs/**
+alwaysApply: false
+---
+
+# Job URL persistence
+
+- Always persist the **original URL** from the provider in `Job.sourceUrl`.
+- Never reconstruct provider URLs from `externalId` at runtime.
+- Seed data must use realistic URL patterns (Gupy: numeric IDs only).
+- Frontend opens jobs via `openJobUrl()` — never inline `window.open` with rebuilt URLs.

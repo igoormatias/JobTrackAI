@@ -57,6 +57,7 @@ export const mapTrackingToEntity = (
       technologies: meta.technologies ?? [],
       sourceUrl: tracking.job.sourceUrl,
       source: tracking.job.source as JobTrackingEntity["job"]["source"],
+      status: tracking.job.status,
       isFavorite: tracking.isFavorite,
       priority: tracking.priority as JobPriority,
       visibility: tracking.visibility as JobVisibility,

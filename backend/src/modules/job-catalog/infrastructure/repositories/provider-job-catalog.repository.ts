@@ -39,4 +39,15 @@ export class ProviderJobCatalogRepository implements JobCatalogRepository {
   async upsertManyCatalogJobs(_data: CatalogJobUpsertInput[]): Promise<{ imported: number; updated: number }> {
     throw new NotImplementedError("Provider catalog ingestion is planned for V2");
   }
+
+  async touchLastCheckedAt(_source: string, _externalIds: string[]): Promise<void> {
+    throw new NotImplementedError("Provider catalog ingestion is planned for V2");
+  }
+
+  async markStaleByProvider(
+    _source: string,
+    _activeExternalIds: string[],
+  ): Promise<{ count: number; closedJobIds: string[] }> {
+    throw new NotImplementedError("Provider catalog ingestion is planned for V2");
+  }
 }
