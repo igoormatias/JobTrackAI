@@ -20,12 +20,26 @@ import { MatchExplanation } from "../MatchExplanation";
 export type CareerAnalysisCardProps = {
   trackingId?: string;
   matchScore?: number;
+  aiAnalysisStatus?: string;
+  aiAnalyzedAt?: string | null;
   onAddToPipeline?: () => void;
 };
 
-export const CareerAnalysisCard = ({ trackingId, matchScore, onAddToPipeline }: CareerAnalysisCardProps) => {
+const isAnalyzing = (status?: string): boolean =>
+  status === "PENDING" || status === "PROCESSING";
+
+export const CareerAnalysisCard = ({
+  trackingId,
+  matchScore,
+  aiAnalysisStatus,
+  aiAnalyzedAt,
+  onAddToPipeline,
+}: CareerAnalysisCardProps) => {
   const [expanded, setExpanded] = useState(false);
-  const { data: analysis, isLoading, isError } = useCareerAnalysisQuery(trackingId);
+  const shouldPoll = aiAnalysisStatus === "PROCESSING";
+  const { data: analysis, isLoading, isError } = useCareerAnalysisQuery(trackingId, {
+    refetchInterval: shouldPoll ? 3000 : false,
+  });
   const generateMutation = useGenerateCareerAnalysisMutation(trackingId ?? "");
 
   const handleGenerate = useCallback(
@@ -67,6 +81,10 @@ export const CareerAnalysisCard = ({ trackingId, matchScore, onAddToPipeline }: 
 
   const showResult = expanded || Boolean(analysis);
   const isGenerating = generateMutation.isPending;
+  const analyzing = isAnalyzing(aiAnalysisStatus);
+  const isLegacy = !aiAnalyzedAt && !analyzing;
+  const showGenerateButton = isLegacy && !analyzing;
+  const showUpdateButton = Boolean(aiAnalyzedAt || analysis);
 
   return (
     <Card>
@@ -88,13 +106,17 @@ export const CareerAnalysisCard = ({ trackingId, matchScore, onAddToPipeline }: 
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {!showResult ? (
+        {analyzing ? (
+          <p className="text-sm text-muted-foreground">Analisando compatibilidade...</p>
+        ) : null}
+
+        {!showResult && !analyzing ? (
           <p className="text-sm text-muted-foreground">
             Gere insights sobre match, lacunas e preparação para entrevista com base no seu perfil e nesta vaga.
           </p>
         ) : null}
 
-        {isLoading && !analysis ? <Skeleton className="h-24 w-full" aria-hidden /> : null}
+        {isLoading && !analysis && !analyzing ? <Skeleton className="h-24 w-full" aria-hidden /> : null}
 
         {isError && !analysis ? (
           <p className="text-sm text-destructive">Não foi possível carregar a análise salva.</p>
@@ -131,20 +153,32 @@ export const CareerAnalysisCard = ({ trackingId, matchScore, onAddToPipeline }: 
         ) : null}
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            onClick={() => handleGenerate(false)}
-            disabled={isGenerating}
-            aria-busy={isGenerating}
-          >
-            {isGenerating ? "Gerando…" : analysis ? "Atualizar análise" : "Gerar análise IA"}
-          </Button>
+          {showGenerateButton ? (
+            <Button
+              size="sm"
+              onClick={() => handleGenerate(false)}
+              disabled={isGenerating}
+              aria-busy={isGenerating}
+            >
+              {isGenerating ? "Gerando…" : "Gerar análise IA"}
+            </Button>
+          ) : null}
+          {showUpdateButton ? (
+            <Button
+              size="sm"
+              onClick={() => handleGenerate(false)}
+              disabled={isGenerating || analyzing}
+              aria-busy={isGenerating}
+            >
+              {isGenerating ? "Gerando…" : "Atualizar análise"}
+            </Button>
+          ) : null}
           {analysis && showResult ? (
             <Button
               size="sm"
               variant="outline"
               onClick={() => handleGenerate(true)}
-              disabled={isGenerating}
+              disabled={isGenerating || analyzing}
             >
               Regenerar
             </Button>

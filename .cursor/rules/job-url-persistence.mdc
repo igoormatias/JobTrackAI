@@ -12,6 +12,14 @@ alwaysApply: false
 # Job URL persistence
 
 - Always persist the **original URL** from the provider in `Job.sourceUrl`.
-- Never reconstruct provider URLs from `externalId` at runtime.
+- **Never reconstruct** provider URLs from `externalId`, `companySlug`, or path templates at runtime.
+- **Never** build Gupy/LinkedIn/Programathor URLs in frontend, sync, import, or seed — only store what the provider or user supplied.
+- On sync: use `resolveSourceUrlOnSync()` to **preserve** career-page URLs over generic portal URLs — not reconstruction.
+- On import confirm: `shouldUpdateSourceUrlOnImport()` when user pasted a valid different URL.
 - Seed data must use realistic URL patterns (Gupy: numeric IDs only).
 - Frontend opens jobs via `openJobUrl()` — never inline `window.open` with rebuilt URLs.
+
+## Referências
+
+- ADR-030 · ADR-032
+- `backend/src/shared/utils/source-url-merge.utils.ts`

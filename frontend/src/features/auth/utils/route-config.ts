@@ -4,8 +4,10 @@ export const PROTECTED_ROUTES = [
   "/dashboard",
   "/jobs",
   "/pipeline",
+  "/calendar",
   "/profile",
   "/settings",
+  "/resume",
   "/onboarding",
 ] as const;
 

@@ -1,0 +1,33 @@
+---
+description: Calendar module — CalendarProviderPort, Google OAuth, interview sync (v1.5)
+globs:
+  - backend/src/modules/calendar/**
+  - frontend/src/features/calendar/**
+alwaysApply: false
+---
+
+# Calendar Provider (v1.5)
+
+## Regras obrigatórias
+
+1. **Port pattern** — toda integração externa via `CalendarProviderPort`; nunca chamar googleapis direto em use cases
+2. **OAuth separado** — escopo `calendar.events` apenas no fluxo `/calendar/google/*`; login usa idToken sem calendário
+3. **Tokens** — criptografar com `encryptToken` / `decryptToken` antes de persistir em `CalendarIntegration`
+4. **Refresh** — `onTokenRefresh` callback atualiza tokens no repository
+5. **Sync entrevistas** — `SyncInterviewCalendarEventUseCase`; falha grava `syncStatus: failed`, não bloqueia CRUD local
+6. **Sem integração** — sync é no-op; entrevistas e Career Calendar locais continuam funcionando
+7. **Outlook** — usar stub `OutlookCalendarProvider` até implementação V2+; não expor rotas públicas
+
+## Clean Architecture
+
+```
+domain/ports/calendar-provider.port.ts
+application/use-cases/
+infrastructure/providers/google-calendar.provider.ts
+infrastructure/repositories/prisma-calendar-integration.repository.ts
+```
+
+## Referências
+
+- `docs/CALENDAR.md`
+- ADR-032

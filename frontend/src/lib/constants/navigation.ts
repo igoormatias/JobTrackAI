@@ -1,5 +1,6 @@
 import {
   Briefcase,
+  Calendar,
   FileText,
   Kanban,
   LayoutDashboard,
@@ -24,6 +25,7 @@ export const MAIN_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/jobs", label: "Vagas", icon: Briefcase },
   { href: "/pipeline", label: "Pipeline", icon: Kanban },
+  { href: "/calendar", label: "Calendário", icon: Calendar },
 ];
 
 export const ACCOUNT_NAV: NavGroup = {

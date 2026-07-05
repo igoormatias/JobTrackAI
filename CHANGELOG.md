@@ -4,6 +4,27 @@ All notable changes to JobTrack AI are documented in this file.
 
 ## [Unreleased]
 
+## [v1.5.0] — 2026-07 (Etapa 23 — Career Calendar & Product Polish)
+
+### Added
+
+- Módulo `calendar` — `CalendarProviderPort`, Google Calendar OAuth, sync de entrevistas
+- Career Calendar (`/calendar`) — views agenda/semanal/mensal; entrevistas + eventos Google
+- Process Detail (`/pipeline/[trackingId]`) — timeline, análise IA, `EditProcessModal`
+- `PATCH /tracking/:id/process` — feedback, recrutador, salário, process links
+- Match persistido (`rulesMatchScore`) na criação do tracking
+- Análise IA em background após criar processo (`aiAnalysisStatus`, cache-first)
+- `source-url-merge.utils` — preservar URLs career-page Gupy no sync/import
+- Prisma: `CalendarIntegration`, campos processo/IA em `JobTracking`, calendar em `Interview`
+- ADR-032 · `docs/CALENDAR.md` · Cursor Rules v1.5
+
+### Notes
+
+- Outlook calendar provider permanece stub (V2+)
+- OAuth calendário separado do login Google
+
+## [v1.4.0] — 2026-07 (Etapa 22 — Currículo Inteligente)
+
 ### Added (Etapa 22 — Currículo Inteligente / Resume Intelligence v1.4)
 
 - Módulo `resume`: currículo estruturado, versionamento, upload PDF/DOCX/TXT, colar texto

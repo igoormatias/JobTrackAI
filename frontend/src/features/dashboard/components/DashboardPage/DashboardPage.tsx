@@ -9,6 +9,7 @@ import { useTopJobs } from "../../hooks/use-top-jobs";
 import { DashboardActivityTimeline } from "../DashboardActivityTimeline";
 import { DashboardApplicationsChart } from "../DashboardApplicationsChart";
 import { DashboardCompaniesCard } from "../DashboardCompaniesCard";
+import { DashboardHealthCard } from "../DashboardHealthCard";
 import { DashboardInsightCard } from "../DashboardInsightCard";
 import { DashboardInterviewsCard } from "../DashboardInterviewsCard";
 import { DashboardJobSyncCard } from "../DashboardJobSyncCard";
@@ -42,6 +43,10 @@ export const DashboardPage = () => {
   return (
     <div className={DASHBOARD_LAYOUT.page}>
       <DashboardWelcome />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <DashboardJobSyncCard jobSync={data.jobSync} />
+        <DashboardHealthCard providerHealth={data.jobSync.providerHealth} />
+      </div>
       <DashboardKpiGrid kpis={data.kpis} />
 
       <div className={DASHBOARD_LAYOUT.grid}>
@@ -55,7 +60,10 @@ export const DashboardPage = () => {
           <DashboardTopJobsSection jobs={topJobs} isLoading={isTopJobsLoading} />
         </div>
         <div className={DASHBOARD_LAYOUT.interviews}>
-          <DashboardInterviewsCard interviews={data.upcomingInterviews} />
+          <DashboardInterviewsCard
+            interviews={data.upcomingInterviews}
+            hasCalendarIntegration={data.hasCalendarIntegration}
+          />
         </div>
         <div className={DASHBOARD_LAYOUT.timeline}>
           <DashboardActivityTimeline activities={data.recentActivities} />
@@ -65,9 +73,6 @@ export const DashboardPage = () => {
         </div>
         <div className={DASHBOARD_LAYOUT.technologies}>
           <DashboardTechnologiesCard technologies={data.topTechnologies} />
-        </div>
-        <div className={DASHBOARD_LAYOUT.companies}>
-          <DashboardJobSyncCard jobSync={data.jobSync} />
         </div>
       </div>
     </div>

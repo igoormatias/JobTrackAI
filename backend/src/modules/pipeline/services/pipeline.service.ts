@@ -24,7 +24,7 @@ const toApplication = (tracking: JobTrackingEntity): Application => ({
   status: tracking.status,
   notes: tracking.notes,
   nextStep: null,
-  nextInterviewAt: null,
+  nextInterviewAt: tracking.nextInterviewAt ?? null,
   job: {
     id: tracking.job.id,
     title: tracking.job.title,
@@ -34,9 +34,13 @@ const toApplication = (tracking: JobTrackingEntity): Application => ({
     area: tracking.job.area,
     matchScore: {
       score: tracking.job.matchScore.score,
-      label: "low",
-      reasons: [],
-      missingSkills: [],
+      label: tracking.job.matchScore.label,
+      reasons: tracking.job.matchScore.reasons.map((reason) =>
+        typeof reason === "string"
+          ? { id: reason, label: reason, matched: true }
+          : reason,
+      ),
+      missingSkills: tracking.job.matchScore.missingSkills,
     },
     technologies: tracking.job.technologies,
     sourceUrl: tracking.job.sourceUrl ?? "",
@@ -64,13 +68,22 @@ const buildKpis = (applications: Application[]): PipelineKpis => {
   const hired = applications.filter((app) => app.stage === "hired").length;
   const applied = applications.filter((app) => app.stage !== "discovery").length;
 
+  const stageDurations = applications
+    .filter((app) => app.lastStageUpdatedAt)
+    .map((app) => (Date.now() - new Date(app.lastStageUpdatedAt!).getTime()) / 86_400_000);
+  const avgDaysPerStage =
+    stageDurations.length > 0
+      ? Math.round((stageDurations.reduce((sum, days) => sum + days, 0) / stageDurations.length) * 10) /
+        10
+      : 0;
+
   return {
     totalApplications: applications.length,
     interviews,
     offers,
     rejections,
     conversionRate: applied > 0 ? Math.round((hired / applied) * 100) : 0,
-    avgDaysPerStage: 4.2,
+    avgDaysPerStage,
   };
 };
 

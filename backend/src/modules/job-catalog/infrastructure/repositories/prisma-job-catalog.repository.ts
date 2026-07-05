@@ -2,6 +2,7 @@ import type { Job as PrismaJob } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "../../../../database/prisma.js";
+import { resolveSourceUrlOnSync } from "../../../../shared/utils/source-url-merge.utils.js";
 import type { JobPriority } from "../../../../shared/domain/job-priority.js";
 import {
   isAreaCompatible,
@@ -162,16 +163,28 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
       throw new Error("Catalog upsert requires id or externalId");
     }
 
-    const record = data.externalId
+    let updateData = data;
+    if (data.externalId) {
+      const existing = await prisma.job.findUnique({
+        where: { source_externalId: { source: data.source, externalId: data.externalId } },
+        select: { sourceUrl: true },
+      });
+      if (existing) {
+        const mergedUrl = resolveSourceUrlOnSync(existing.sourceUrl, data.sourceUrl);
+        updateData = { ...data, sourceUrl: mergedUrl ?? data.sourceUrl };
+      }
+    }
+
+    const record = updateData.externalId
       ? await prisma.job.upsert({
-          where: { source_externalId: { source: data.source, externalId: data.externalId } },
-          create: this.toCreateInput(data) as Prisma.JobCreateInput,
-          update: this.toUpdateInput(data),
+          where: { source_externalId: { source: updateData.source, externalId: updateData.externalId } },
+          create: this.toCreateInput(updateData) as Prisma.JobCreateInput,
+          update: this.toUpdateInput(updateData),
         })
       : await prisma.job.upsert({
-          where: { id: data.id! },
-          create: this.toCreateInput(data) as Prisma.JobCreateInput,
-          update: this.toUpdateInput(data),
+          where: { id: updateData.id! },
+          create: this.toCreateInput(updateData) as Prisma.JobCreateInput,
+          update: this.toUpdateInput(updateData),
         });
 
     const ctx = await this.loadUserContextForJob(data.userId ?? "", record.id);
@@ -190,13 +203,25 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
 
         const existing = await tx.job.findUnique({
           where: { source_externalId: { source: item.source, externalId: item.externalId } },
-          select: { id: true },
+          select: { id: true, sourceUrl: true },
         });
 
+        const mergedUrl =
+          existing != null
+            ? resolveSourceUrlOnSync(existing.sourceUrl, item.sourceUrl) ?? item.sourceUrl ?? null
+            : item.sourceUrl ?? null;
+
+        const mergedItem = {
+          ...item,
+          sourceUrl: mergedUrl,
+        };
+
+        if (!mergedItem.externalId) continue;
+
         await tx.job.upsert({
-          where: { source_externalId: { source: item.source, externalId: item.externalId } },
-          create: this.toCreateInput(item) as Prisma.JobCreateInput,
-          update: this.toUpdateInput(item),
+          where: { source_externalId: { source: mergedItem.source, externalId: mergedItem.externalId } },
+          create: this.toCreateInput(mergedItem) as Prisma.JobCreateInput,
+          update: this.toUpdateInput(mergedItem),
         });
 
         if (existing) updated += 1;

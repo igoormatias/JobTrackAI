@@ -1,7 +1,14 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import type { ReactNode } from "react";
+import { describe, expect, it, vi } from "vitest";
 
 import { DashboardInterviewsCard } from "./DashboardInterviewsCard";
+
+vi.mock("next/link", () => ({
+  default: ({ children, href }: { children: ReactNode; href: string }) => (
+    <a href={href}>{children}</a>
+  ),
+}));
 
 describe("DashboardInterviewsCard", () => {
   it("renders interview details", () => {
@@ -16,6 +23,7 @@ describe("DashboardInterviewsCard", () => {
             scheduledAt: "2026-06-28T14:00:00.000Z",
             stage: "Entrevista técnica",
             status: "Entrevista técnica",
+            link: null,
           },
         ]}
       />,

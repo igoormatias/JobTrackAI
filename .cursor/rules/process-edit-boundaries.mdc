@@ -1,0 +1,50 @@
+---
+description: Process Detail edit boundaries — o que PATCH /process pode e não pode mutar (v1.5)
+globs:
+  - backend/src/modules/tracking/**
+  - frontend/src/features/process-detail/**
+  - frontend/src/features/pipeline/**
+alwaysApply: false
+---
+
+# Process Edit Boundaries (v1.5)
+
+## Rota dedicada
+
+`PATCH /tracking/:id/process` — metadados do processo; **não** substitui outras mutações de tracking.
+
+## Campos editáveis via `/process`
+
+- `notes`, `feedback`
+- `priority`, `isFavorite`
+- `recruiterName`, `recruiterEmail`, `recruiterPhone`
+- `negotiatedSalary`, `processLinks`
+
+Timeline automática para `notes`, `priority`, `isFavorite`.
+
+## Fora do escopo de `/process` (rotas próprias)
+
+| Campo / ação | Rota correta |
+|--------------|--------------|
+| `stage` | `PATCH /tracking/:id/stage` |
+| `visibility` | `PATCH /tracking/:id/visibility` |
+| `notes` isolado (legado) | `PATCH /tracking/:id/notes` |
+| Entrevistas | `POST/PATCH /tracking/:id/interviews` |
+| Timeline event | `PATCH /tracking/:id/timeline/:eventId` |
+| Arquivar / excluir | endpoints dedicados |
+
+## Somente leitura no Process Detail
+
+- Dados da **vaga** (`job.title`, `company`, `sourceUrl`, `matchScore`) — catálogo; abrir vaga via `openJobUrl()`
+- `stage` — exibido; mover pelo pipeline ou `PATCH /stage`
+- Análise IA — `CareerAnalysisCard` on-demand; background não bloqueia UI
+
+## UI
+
+- Página: `/pipeline/[trackingId]` (`ProcessDetailPage`)
+- Modal: `EditProcessModal` → `updateTrackingProcess`
+
+## Referências
+
+- `docs/API_CONTRACT.md`
+- ADR-032

@@ -12,9 +12,11 @@ import {
   toggleTrackingFavorite,
   updateTrackingNotes,
   updateTrackingPriority,
+  updateTrackingProcess,
   updateTrackingVisibility,
   type CreateManualTrackingPayload,
   type CreateTrackingFromJobPayload,
+  type UpdateProcessPayload,
 } from "../../services/tracking-service";
 
 const invalidateNotifications = (queryClient: ReturnType<typeof useQueryClient>): void => {
@@ -96,10 +98,28 @@ export const useUpdateTrackingNotesMutation = () => {
 
   return useMutation({
     mutationFn: ({ id, notes }: { id: string; notes: string | null }) => updateTrackingNotes(id, notes),
-    onSettled: async () => {
+    onSettled: async (_data, _error, variables) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.detail(variables.id) });
       invalidateNotifications(queryClient);
     },
+  });
+};
+
+export const useUpdateTrackingProcessMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateProcessPayload }) =>
+      updateTrackingProcess(id, payload),
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.detail(variables.id) });
+      invalidateNotifications(queryClient);
+      toast.success("Processo atualizado");
+    },
+    onError: () => toast.error("Não foi possível atualizar o processo"),
   });
 };

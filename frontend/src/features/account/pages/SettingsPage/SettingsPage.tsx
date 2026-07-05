@@ -1,17 +1,34 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { Button } from "@/components/ui/Button";
+import { GoogleCalendarIntegrationCard } from "@/features/calendar/components/GoogleCalendarIntegrationCard";
 
 import { AccountSectionLayout } from "../../components/AccountSectionLayout";
 import { SettingsForm } from "../../components/settings/SettingsForm";
 import { SettingsFormSkeleton } from "../../components/settings/SettingsFormSkeleton";
 import { useAccountSettings } from "../../hooks/use-account-settings";
 
-export const SettingsPage = () => {
+const SettingsPageContent = () => {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
+  const isIntegrations = tab === "integrations";
   const { settings, isLoading, isError, isSaving, saveSettings, refetch } = useAccountSettings();
+
+  if (isIntegrations) {
+    return (
+      <AccountSectionLayout
+        title="Integrações"
+        description="Conecte serviços externos para enriquecer sua experiência."
+      >
+        <GoogleCalendarIntegrationCard />
+      </AccountSectionLayout>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -53,3 +70,9 @@ export const SettingsPage = () => {
     </AccountSectionLayout>
   );
 };
+
+export const SettingsPage = () => (
+  <Suspense fallback={null}>
+    <SettingsPageContent />
+  </Suspense>
+);

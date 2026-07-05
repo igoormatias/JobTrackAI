@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -27,7 +26,6 @@ import { useJobTimelineQuery } from "../../hooks/use-job-timeline-query";
 import { useLearningGapsQuery } from "../../hooks/use-learning-gaps-query";
 import { useMarkJobViewedOnMount } from "../../hooks/use-mark-job-viewed-on-mount";
 import { useRelatedJobsQuery } from "../../hooks/use-related-jobs-query";
-import { shareJobUrl } from "../../utils/share-job";
 import { openJobUrl } from "@/lib/jobs/open-job-url";
 import { JobDetailsMainWidget } from "../../widgets/JobDetailsMainWidget";
 import {
@@ -82,16 +80,6 @@ export const JobDetailsPage = () => {
         }
       : null;
 
-  const handleShare = useCallback(async () => {
-    if (!job) return;
-    try {
-      const result = await shareJobUrl(window.location.href, `${job.title} · ${job.company.name}`);
-      toast.success(result === "shared" ? "Vaga compartilhada" : "Link copiado");
-    } catch {
-      toast.error("Não foi possível compartilhar a vaga");
-    }
-  }, [job]);
-
   const handleFavorite = useCallback(() => {
     if (!job) return;
     favoriteMutation.mutate({ id: job.id, isFavorite: !job.isFavorite });
@@ -125,7 +113,7 @@ export const JobDetailsPage = () => {
 
   return (
     <div className={JOB_DETAILS_LAYOUT.page}>
-      <JobDetailsHeader onShare={handleShare} />
+      <JobDetailsHeader onOpenJob={handleOpenJob} canOpenJob={Boolean(job.sourceUrl)} />
       <JobDetailsBreadcrumb jobTitle={job.title} />
 
       <div className={JOB_DETAILS_LAYOUT.grid}>
@@ -151,7 +139,6 @@ export const JobDetailsPage = () => {
       <JobDetailsBottomActions
         job={job}
         onFavorite={handleFavorite}
-        onOpenJob={handleOpenJob}
         onAddToPipeline={handleAddToPipeline}
         isFavoritePending={favoriteMutation.isPending}
         isAddToPipelinePending={createTrackingMutation.isPending}

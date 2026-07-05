@@ -62,6 +62,11 @@ export const queryKeys = {
     all: ["settings"] as const,
     detail: () => [...queryKeys.settings.all, "detail"] as const,
   },
+  calendar: {
+    all: ["calendar"] as const,
+    status: () => [...queryKeys.calendar.all, "status"] as const,
+    events: (from: string, to: string) => [...queryKeys.calendar.all, "events", from, to] as const,
+  },
   ai: {
     all: ["ai"] as const,
     careerAnalysis: (trackingId: string) => [...queryKeys.ai.all, "career-analysis", trackingId] as const,

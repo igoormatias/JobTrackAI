@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, ExternalLink } from "lucide-react";
+import { Bookmark } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import type { Job } from "@/types";
@@ -10,7 +10,6 @@ import { JOB_DETAILS_LAYOUT } from "../../constants/job-details-constants";
 export type JobDetailsBottomActionsProps = {
   job: Job;
   onFavorite: () => void;
-  onOpenJob: () => void;
   onAddToPipeline: () => void;
   isFavoritePending?: boolean;
   isAddToPipelinePending?: boolean;
@@ -19,7 +18,6 @@ export type JobDetailsBottomActionsProps = {
 export const JobDetailsBottomActions = ({
   job,
   onFavorite,
-  onOpenJob,
   onAddToPipeline,
   isFavoritePending,
   isAddToPipelinePending,
@@ -35,16 +33,6 @@ export const JobDetailsBottomActions = ({
           aria-label={job.isFavorite ? "Desfavoritar vaga" : "Salvar vaga"}
         >
           <Bookmark className={job.isFavorite ? "fill-current" : ""} />
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="flex-1"
-          onClick={onOpenJob}
-          disabled={!job.sourceUrl}
-        >
-          <ExternalLink className="mr-2 h-4 w-4" />
-          Abrir vaga
         </Button>
         <Button
           type="button"

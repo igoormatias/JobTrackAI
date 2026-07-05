@@ -7,6 +7,7 @@ import type {
   JobTrackingEntity,
   MoveTrackingStageInput,
   TrackingTimelineEvent,
+  UpdateProcessInput,
   UpdateTimelineEventInput,
 } from "../domain/entities/job-tracking.entity.js";
 import {
@@ -45,6 +46,7 @@ type TrackingRepository = Pick<
   | "changePriority"
   | "setVisibility"
   | "updateNotes"
+  | "updateProcess"
   | "updateTimelineEvent"
   | "archive"
   | "delete"
@@ -150,6 +152,10 @@ export class TrackingService {
 
   async updateNotes(userId: string, id: string, notes: string | null): Promise<JobTrackingEntity> {
     return this.repository.updateNotes(userId, id, notes);
+  }
+
+  async updateProcess(userId: string, id: string, input: UpdateProcessInput): Promise<JobTrackingEntity> {
+    return this.repository.updateProcess(userId, id, input);
   }
 
   async updateTimelineEvent(

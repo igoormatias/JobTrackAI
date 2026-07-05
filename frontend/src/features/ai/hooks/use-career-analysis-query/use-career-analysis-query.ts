@@ -6,9 +6,13 @@ import { queryKeys } from "@/lib/query-client/query-keys";
 
 import { getCareerAnalysis } from "../../services/career-analysis-service";
 
-export const useCareerAnalysisQuery = (trackingId?: string) =>
+export const useCareerAnalysisQuery = (
+  trackingId?: string,
+  options?: { refetchInterval?: number | false },
+) =>
   useQuery({
     queryKey: queryKeys.ai.careerAnalysis(trackingId ?? ""),
     queryFn: () => getCareerAnalysis(trackingId!),
     enabled: Boolean(trackingId),
+    refetchInterval: options?.refetchInterval,
   });

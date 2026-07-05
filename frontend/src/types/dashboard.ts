@@ -35,6 +35,16 @@ export type DashboardInterview = {
   scheduledAt: string;
   stage: string;
   status: string;
+  link: string | null;
+};
+
+export type DashboardProviderHealth = {
+  provider: string;
+  displayName: string;
+  enabled: boolean;
+  status: string;
+  lastRunAt: string | null;
+  lastHealthAt: string | null;
 };
 
 export type DashboardInsight = {
@@ -53,6 +63,7 @@ export type DashboardJobSync = {
   closedJobsCount: number;
   newJobsSinceLastSync: number;
   newCompaniesCount: number;
+  providerHealth: DashboardProviderHealth[];
   recentExecutions: Array<{
     id: string;
     providerName: string;
@@ -77,5 +88,6 @@ export type DashboardData = {
   insight: DashboardInsight;
   applicationsTimeline: DashboardChartPoint[];
   jobSync: DashboardJobSync;
+  hasCalendarIntegration: boolean;
   generatedAt: string;
 };

@@ -26,8 +26,10 @@ export const config = {
     "/dashboard/:path*",
     "/jobs/:path*",
     "/pipeline/:path*",
+    "/calendar/:path*",
     "/profile/:path*",
     "/settings/:path*",
+    "/resume/:path*",
     "/onboarding/:path*",
   ],
 };

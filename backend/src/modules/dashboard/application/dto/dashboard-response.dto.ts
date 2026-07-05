@@ -35,6 +35,7 @@ export type DashboardInterviewDto = {
   scheduledAt: string;
   stage: string;
   status: string;
+  link: string | null;
 };
 
 export type DashboardInsightDto = {
@@ -42,6 +43,15 @@ export type DashboardInsightDto = {
   message: string;
   highlight?: string;
   trendPercent?: number;
+};
+
+export type DashboardProviderHealthDto = {
+  provider: string;
+  displayName: string;
+  enabled: boolean;
+  status: string;
+  lastRunAt: string | null;
+  lastHealthAt: string | null;
 };
 
 export type DashboardJobSyncDto = {
@@ -53,6 +63,7 @@ export type DashboardJobSyncDto = {
   closedJobsCount: number;
   newJobsSinceLastSync: number;
   newCompaniesCount: number;
+  providerHealth: DashboardProviderHealthDto[];
   recentExecutions: Array<{
     id: string;
     providerName: string;
@@ -77,6 +88,7 @@ export type DashboardDataDto = {
   insight: DashboardInsightDto;
   applicationsTimeline: DashboardChartPointDto[];
   jobSync: DashboardJobSyncDto;
+  hasCalendarIntegration: boolean;
   generatedAt: string;
 };
 

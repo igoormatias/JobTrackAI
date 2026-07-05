@@ -12,6 +12,7 @@ import type { JobTrackingEntity } from "../../../tracking/domain/entities/job-tr
 import type { JobSource } from "../../../../shared/domain/job-source.js";
 import { NotFoundError } from "../../../../shared/errors/not-found-error.js";
 import { ValidationError } from "../../../../shared/errors/validation-error.js";
+import { shouldUpdateSourceUrlOnImport } from "../../../../shared/utils/source-url-merge.utils.js";
 import type { UrlExtractorRegistry } from "../../infrastructure/extractors/url-extractor.registry.js";
 import { urlExtractorRegistry } from "../../infrastructure/extractors/url-extractor.registry.js";
 
@@ -65,6 +66,8 @@ export class ConfirmJobImportUseCase {
         location: jobData.location ?? undefined,
       });
       jobId = created.id;
+    } else if (shouldUpdateSourceUrlOnImport(existing?.sourceUrl, jobData.sourceUrl)) {
+      await this.jobRepository.updateSourceUrl(jobId, jobData.sourceUrl);
     }
 
     const job = await this.jobRepository.findByIdForUser(jobId, { userId: input.userId });

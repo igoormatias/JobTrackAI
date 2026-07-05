@@ -16,11 +16,13 @@ Detalhes: [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md)
 - Permite favoritar, priorizar e ocultar vagas
 - Abre vagas na plataforma original (nunca candidatura interna)
 - Cadastro manual de vagas com mesmo fluxo das importadas
-- Calcula Match Score personalizado (Match Engine V1 no backend)
+- Calcula Match Score personalizado (Match Engine `rules-v2` no backend)
 - Dashboard com visão da busca
 - Pipeline manual para acompanhar a jornada seletiva
+- **Process Detail (v1.5)** — página dedicada por processo no pipeline
 - Timeline automática de eventos
 - Gestão de entrevistas no contexto do pipeline
+- **Career Calendar (v1.5)** — agenda unificada + sync Google Calendar
 - Notificações sobre eventos internos
 - Perfil simplificado (Google + dados profissionais)
 
@@ -60,10 +62,12 @@ Encontrou vaga → Favoritou → Definiu prioridade → Abriu vaga (origem)
 | 11 | Minha Conta | Concluída |
 | 12 | Pipeline & Job Tracking | Concluída |
 | 13 | MVP Stabilization | Concluída |
-| 14 | Release Candidate (RC1) | Próxima |
-| 15 | AI Match Engine | Pendente |
+| 15 | AI Match Engine | Concluída |
+| 21 | Product Polish & UX | Concluída |
+| 22 | Currículo Inteligente (v1.4) | Concluída |
+| 23 | Career Calendar & Polish (v1.5) | Concluída |
 
-- **V2** — Providers, Scheduler, Match Engine real, WebSocket, IA, Analytics, ML, i18n
+- **V2** — Outlook calendar, providers avançados, Analytics, ML, i18n
 
 Ver [docs/ROADMAP.md](docs/ROADMAP.md)
 

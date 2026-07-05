@@ -36,8 +36,46 @@ export type MoveTrackingStagePayload = {
   occurredAt: string;
 };
 
+export type TrackingDetail = JobTracking & {
+  feedback: string | null;
+  recruiterName: string | null;
+  recruiterEmail: string | null;
+  recruiterPhone: string | null;
+  negotiatedSalary: number | null;
+  processLinks: Record<string, string> | null;
+  aiAnalysisStatus: string;
+  aiAnalyzedAt: string | null;
+  stage: PipelineStage;
+  timeline: TimelineEvent[];
+};
+
+export type UpdateProcessPayload = {
+  notes?: string | null;
+  feedback?: string | null;
+  priority?: JobPriority;
+  isFavorite?: boolean;
+  recruiterName?: string | null;
+  recruiterEmail?: string | null;
+  recruiterPhone?: string | null;
+  negotiatedSalary?: number | null;
+  processLinks?: Record<string, string> | null;
+};
+
+export const getTrackingById = async (id: string): Promise<TrackingDetail> => {
+  const response = await apiClient.get<{ data: TrackingDetail }>(`/tracking/${id}`);
+  return response.data.data;
+};
+
 export const listTracking = async (): Promise<JobTracking[]> => {
   const response = await apiClient.get<{ data: JobTracking[] }>("/tracking");
+  return response.data.data;
+};
+
+export const updateTrackingProcess = async (
+  id: string,
+  payload: UpdateProcessPayload,
+): Promise<TrackingDetail> => {
+  const response = await apiClient.patch<{ data: TrackingDetail }>(`/tracking/${id}/process`, payload);
   return response.data.data;
 };
 

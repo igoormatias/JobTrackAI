@@ -44,6 +44,18 @@ export const updateNotesSchema = z.object({
   notes: z.string().nullable(),
 });
 
+export const updateProcessSchema = z.object({
+  notes: z.string().nullable().optional(),
+  feedback: z.string().nullable().optional(),
+  priority: z.enum(JOB_PRIORITIES).optional(),
+  isFavorite: z.boolean().optional(),
+  recruiterName: z.string().nullable().optional(),
+  recruiterEmail: z.union([z.string().email(), z.literal(""), z.null()]).optional(),
+  recruiterPhone: z.string().nullable().optional(),
+  negotiatedSalary: z.number().int().nullable().optional(),
+  processLinks: z.record(z.string()).nullable().optional(),
+});
+
 export const updateTimelineEventSchema = z.object({
   occurredAt: z.string().datetime().optional(),
   notes: z.string().nullable().optional(),
@@ -64,12 +76,18 @@ export const trackingListQuerySchema = z.object({
 
 export const createInterviewSchema = z.object({
   scheduledAt: z.string().datetime(),
-  link: z.string().url().optional().nullable(),
+  timezone: z.string().optional().nullable(),
+  location: z.string().optional().nullable(),
+  meetingType: z.enum(["meet", "teams", "zoom", "other"]).optional().nullable(),
+  link: z.string().url().optional().nullable().or(z.literal("")),
   notes: z.string().optional().nullable(),
 });
 
 export const updateInterviewSchema = z.object({
   scheduledAt: z.string().datetime().optional(),
-  link: z.string().url().optional().nullable(),
+  timezone: z.string().optional().nullable(),
+  location: z.string().optional().nullable(),
+  meetingType: z.enum(["meet", "teams", "zoom", "other"]).optional().nullable(),
+  link: z.string().url().optional().nullable().or(z.literal("")),
   notes: z.string().optional().nullable(),
 });

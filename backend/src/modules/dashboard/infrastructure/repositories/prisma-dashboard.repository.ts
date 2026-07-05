@@ -111,24 +111,35 @@ const buildApplicationsTimeline = (
 const buildInsight = (
   profile: Profile | null,
   matchedJobs: Array<{ score: number; area: string | null }>,
+  trendPercent: number,
 ): DashboardInsightDto => {
   const areaLabel = profile?.area ? (AREA_LABELS[profile.area] ?? profile.area) : "compatíveis";
   const primarySkill = profile?.skillNames[0] ?? "suas competências";
-  const highMatchCount = matchedJobs.filter((job) => job.score >= 75).length;
-  const trendPercent = Math.min(38, Math.max(8, highMatchCount * 4));
 
   return {
     title: "Insight da semana",
-    message: `Você tem ${matchedJobs.length} vagas com bom match em ${areaLabel}. Foque em ${primarySkill} para ampliar oportunidades — tendência de ${trendPercent}% nas compatíveis.`,
+    message: `Você tem ${matchedJobs.length} vagas com bom match em ${areaLabel}. Foque em ${primarySkill} para ampliar oportunidades${trendPercent !== 0 ? ` — tendência de ${trendPercent > 0 ? "+" : ""}${trendPercent}% nos processos ativos` : ""}.`,
     highlight: primarySkill,
     trendPercent,
   };
+};
+
+const deriveProviderStatus = (
+  enabled: boolean,
+  latestExecutionStatus: string | undefined,
+): string => {
+  if (!enabled) return "disabled";
+  if (!latestExecutionStatus) return "unknown";
+  if (latestExecutionStatus === "failed") return "unhealthy";
+  if (latestExecutionStatus === "running") return "degraded";
+  return "healthy";
 };
 
 export class PrismaDashboardRepository implements DashboardRepository {
   async getDashboardData(userId: string): Promise<DashboardDataDto> {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 86_400_000);
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 86_400_000);
 
     const lastSyncExecution = await prisma.providerExecution.findFirst({
       where: { finishedAt: { not: null } },
@@ -161,6 +172,10 @@ export class PrismaDashboardRepository implements DashboardRepository {
       closedJobsCount,
       newJobsSinceLastSync,
       newCompaniesCount,
+      providerRegistry,
+      trackingsThisWeek,
+      trackingsLastWeek,
+      calendarIntegration,
     ] = await Promise.all([
       prisma.jobTracking.count({ where: { userId, isFavorite: true } }),
       prisma.jobTracking.count({ where: { userId, priority: "HIGH" } }),
@@ -270,6 +285,17 @@ export class PrismaDashboardRepository implements DashboardRepository {
             })
             .then((rows) => rows.length)
         : Promise.resolve(0),
+      prisma.jobProviderRegistry.findMany({ orderBy: { name: "asc" } }),
+      prisma.jobTracking.count({
+        where: { userId, updatedAt: { gte: weekAgo } },
+      }),
+      prisma.jobTracking.count({
+        where: { userId, updatedAt: { gte: twoWeeksAgo, lt: weekAgo } },
+      }),
+      prisma.calendarIntegration.findUnique({
+        where: { userId },
+        select: { id: true, revokedAt: true },
+      }),
     ]);
 
     const matchProfile = toMatchProfileInput(profile);
@@ -290,6 +316,26 @@ export class PrismaDashboardRepository implements DashboardRepository {
     );
     const companyCounts = countBy(topMatchedJobs, ({ job }) => job.companyName);
     const areaCounts = countBy(catalogJobs, (job) => job.area ?? "other");
+
+    const trendPercent =
+      trackingsLastWeek > 0
+        ? Math.round(((trackingsThisWeek - trackingsLastWeek) / trackingsLastWeek) * 100)
+        : 0;
+
+    const latestExecutionByProvider = new Map(
+      recentExecutions.map((execution) => [execution.providerName, execution.status]),
+    );
+
+    const providerHealth = providerRegistry.map((provider) => ({
+      provider: provider.name,
+      displayName: provider.displayName,
+      enabled: provider.enabled,
+      status: deriveProviderStatus(provider.enabled, latestExecutionByProvider.get(provider.name)),
+      lastRunAt: provider.lastRunAt?.toISOString() ?? null,
+      lastHealthAt: provider.lastHealthAt?.toISOString() ?? null,
+    }));
+
+    const hasCalendarIntegration = Boolean(calendarIntegration && !calendarIntegration.revokedAt);
 
     const kpis: DashboardKpiDto[] = [
       {
@@ -339,17 +385,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
       occurredAt: event.occurredAt.toISOString(),
     }));
 
-    const matchActivities: DashboardActivityDto[] = topMatchedJobs.slice(0, 3).map(
-      ({ job, match }, index) => ({
-        id: `activity_match_${index}`,
-        type: "match" as const,
-        title: "Alto match encontrado",
-        description: `${job.title} · ${job.companyName} · ${match.score}% match`,
-        occurredAt: job.publishedAt.toISOString(),
-      }),
-    );
-
-    const recentActivities = [...matchActivities, ...timelineActivities]
+    const recentActivities = timelineActivities
       .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())
       .slice(0, 8);
 
@@ -366,6 +402,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
         scheduledAt: interview.scheduledAt.toISOString(),
         stage: stageLabel,
         status: stageLabel,
+        link: interview.link,
       };
     });
 
@@ -389,6 +426,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
       insight: buildInsight(
         profile,
         jobsWithMatch.map(({ job, match }) => ({ score: match.score, area: job.area })),
+        trendPercent,
       ),
       applicationsTimeline: buildApplicationsTimeline(trackings),
       jobSync: {
@@ -403,6 +441,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
         closedJobsCount,
         newJobsSinceLastSync,
         newCompaniesCount,
+        providerHealth,
         recentExecutions: recentExecutions.map((execution) => ({
           id: execution.id,
           providerName: execution.providerName,
@@ -415,6 +454,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
           errorMessage: execution.errorMessage,
         })),
       },
+      hasCalendarIntegration,
       generatedAt: now.toISOString(),
     };
   }

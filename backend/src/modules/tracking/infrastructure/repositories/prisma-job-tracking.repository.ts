@@ -1,6 +1,8 @@
 import type { Prisma } from "@prisma/client";
 
+import { logger } from "../../../../config/logger.js";
 import { prisma } from "../../../../database/prisma.js";
+import { syncInterviewCalendarEventUseCase } from "../../../calendar/index.js";
 import type { JobPriority } from "../../../../shared/domain/job-priority.js";
 import type { JobVisibility } from "../../../../shared/domain/job-visibility.js";
 import { eventBus } from "../../../../shared/events/event-bus.js";
@@ -13,12 +15,16 @@ import {
   ProcessCreatedEvent,
   StatusChangedEvent,
 } from "../../../notifications/domain/events/notification-events.js";
+import { loadMatchProfileForUser } from "../../../job-catalog/application/mappers/match-profile.mapper.js";
+import { matchEngineService } from "../../../match/domain/services/match-engine.service.js";
+import { toMatchJobInput } from "../../../jobs/infrastructure/mappers/job.mapper.js";
 import { prismaJobRepository } from "../../../jobs/infrastructure/repositories/prisma-job.repository.js";
 import type {
   CreateTrackingInput,
   JobTrackingEntity,
   MoveTrackingStageInput,
   TrackingTimelineEvent,
+  UpdateProcessInput,
   UpdateTimelineEventInput,
 } from "../../domain/entities/job-tracking.entity.js";
 import { mapTrackingToEntity, stageTitle } from "../mappers/tracking.mapper.js";
@@ -31,24 +37,46 @@ const trackingInclude = {
 
 export type CreateInterviewInput = {
   scheduledAt: string;
+  timezone?: string | null;
+  location?: string | null;
+  meetingType?: string | null;
   link?: string | null;
   notes?: string | null;
 };
 
 export type UpdateInterviewInput = {
   scheduledAt?: string;
+  timezone?: string | null;
+  location?: string | null;
+  meetingType?: string | null;
   link?: string | null;
   notes?: string | null;
 };
 
 export class PrismaJobTrackingRepository {
+  private async mapRow(
+    userId: string,
+    row: Parameters<typeof mapTrackingToEntity>[0],
+  ): Promise<JobTrackingEntity> {
+    const profile = await loadMatchProfileForUser(userId);
+    return mapTrackingToEntity(row, profile);
+  }
+
+  private async mapRows(
+    userId: string,
+    rows: Parameters<typeof mapTrackingToEntity>[0][],
+  ): Promise<JobTrackingEntity[]> {
+    const profile = await loadMatchProfileForUser(userId);
+    return rows.map((row) => mapTrackingToEntity(row, profile));
+  }
+
   async findAllByUserId(userId: string): Promise<JobTrackingEntity[]> {
     const rows = await prisma.jobTracking.findMany({
       where: { userId, status: "active" },
       include: trackingInclude,
       orderBy: { updatedAt: "desc" },
     });
-    return rows.map(mapTrackingToEntity);
+    return this.mapRows(userId, rows);
   }
 
   async findById(userId: string, id: string): Promise<JobTrackingEntity | null> {
@@ -56,7 +84,7 @@ export class PrismaJobTrackingRepository {
       where: { id, userId },
       include: trackingInclude,
     });
-    return row ? mapTrackingToEntity(row) : null;
+    return row ? this.mapRow(userId, row) : null;
   }
 
   async findByUserAndJobId(userId: string, jobId: string): Promise<JobTrackingEntity | null> {
@@ -64,7 +92,7 @@ export class PrismaJobTrackingRepository {
       where: { userId_jobId: { userId, jobId } },
       include: trackingInclude,
     });
-    return row ? mapTrackingToEntity(row) : null;
+    return row ? this.mapRow(userId, row) : null;
   }
 
   async create(input: CreateTrackingInput): Promise<JobTrackingEntity> {
@@ -83,6 +111,9 @@ export class PrismaJobTrackingRepository {
     const job = await prisma.job.findUnique({ where: { id: jobId } });
     if (!job) throw new NotFoundError("Job not found");
 
+    const profile = await loadMatchProfileForUser(input.userId);
+    const rulesMatch = profile ? matchEngineService.compute(profile, toMatchJobInput(job)) : null;
+
     const occurredAt = new Date(input.stageOccurredAt);
     const row = await prisma.jobTracking.create({
       data: {
@@ -91,6 +122,11 @@ export class PrismaJobTrackingRepository {
         stage: input.stage,
         notes: input.notes ?? null,
         lastStageUpdatedAt: occurredAt,
+        rulesMatchScore: rulesMatch?.score ?? null,
+        rulesMatchLabel: rulesMatch?.label ?? null,
+        rulesMatchReasons: rulesMatch?.reasons ?? undefined,
+        aiAnalysisStatus: "PENDING",
+        jobContentHash: job.contentHash,
         timelineEvents: {
           create: {
             type: "created",
@@ -105,7 +141,7 @@ export class PrismaJobTrackingRepository {
       include: trackingInclude,
     });
 
-    const entity = mapTrackingToEntity(row);
+    const entity = await this.mapRow(input.userId, row);
     await eventBus.publish(
       new ProcessCreatedEvent({
         userId: input.userId,
@@ -156,7 +192,7 @@ export class PrismaJobTrackingRepository {
       }),
     );
 
-    return mapTrackingToEntity(row);
+    return this.mapRow(userId, row);
   }
 
   async toggleFavorite(userId: string, id: string): Promise<JobTrackingEntity> {
@@ -193,7 +229,7 @@ export class PrismaJobTrackingRepository {
       }),
     );
 
-    return mapTrackingToEntity(row);
+    return this.mapRow(userId, row);
   }
 
   async changePriority(userId: string, id: string, priority: JobPriority): Promise<JobTrackingEntity> {
@@ -230,7 +266,7 @@ export class PrismaJobTrackingRepository {
       }),
     );
 
-    return mapTrackingToEntity(row);
+    return this.mapRow(userId, row);
   }
 
   async setVisibility(userId: string, id: string, visibility: JobVisibility): Promise<JobTrackingEntity> {
@@ -254,7 +290,7 @@ export class PrismaJobTrackingRepository {
       include: trackingInclude,
     });
 
-    return mapTrackingToEntity(row);
+    return this.mapRow(userId, row);
   }
 
   async updateNotes(userId: string, id: string, notes: string | null): Promise<JobTrackingEntity> {
@@ -279,7 +315,66 @@ export class PrismaJobTrackingRepository {
       include: trackingInclude,
     });
 
-    return mapTrackingToEntity(row);
+    return this.mapRow(userId, row);
+  }
+
+  async updateProcess(userId: string, id: string, input: UpdateProcessInput): Promise<JobTrackingEntity> {
+    const current = await prisma.jobTracking.findFirst({ where: { id, userId } });
+    if (!current) throw new NotFoundError("Tracking not found");
+
+    const data: Prisma.JobTrackingUpdateInput = {};
+    const timelineCreates: Prisma.TimelineEventCreateWithoutTrackingInput[] = [];
+
+    if (input.notes !== undefined && input.notes !== current.notes) {
+      data.notes = input.notes;
+      timelineCreates.push({
+        type: current.notes ? "note_updated" : "note_added",
+        title: current.notes ? "Observações atualizadas" : "Observação adicionada",
+        occurredAt: new Date(),
+        notes: input.notes,
+        createdById: userId,
+      });
+    }
+
+    if (input.feedback !== undefined) data.feedback = input.feedback;
+    if (input.recruiterName !== undefined) data.recruiterName = input.recruiterName;
+    if (input.recruiterEmail !== undefined) data.recruiterEmail = input.recruiterEmail || null;
+    if (input.recruiterPhone !== undefined) data.recruiterPhone = input.recruiterPhone;
+    if (input.negotiatedSalary !== undefined) data.negotiatedSalary = input.negotiatedSalary;
+    if (input.processLinks !== undefined) data.processLinks = input.processLinks ?? undefined;
+
+    if (input.priority !== undefined && input.priority !== current.priority) {
+      data.priority = input.priority;
+      timelineCreates.push({
+        type: "priority_changed",
+        title: `Prioridade alterada para ${input.priority}`,
+        occurredAt: new Date(),
+        metadata: { from: current.priority, to: input.priority },
+        createdById: userId,
+      });
+    }
+
+    if (input.isFavorite !== undefined && input.isFavorite !== current.isFavorite) {
+      data.isFavorite = input.isFavorite;
+      timelineCreates.push({
+        type: input.isFavorite ? "favorited" : "unfavorited",
+        title: input.isFavorite ? "Marcada como favorita" : "Removida dos favoritos",
+        occurredAt: new Date(),
+        createdById: userId,
+      });
+    }
+
+    if (timelineCreates.length > 0) {
+      data.timelineEvents = { create: timelineCreates };
+    }
+
+    const row = await prisma.jobTracking.update({
+      where: { id },
+      data,
+      include: trackingInclude,
+    });
+
+    return this.mapRow(userId, row);
   }
 
   async updateTimelineEvent(
@@ -323,7 +418,7 @@ export class PrismaJobTrackingRepository {
       data: { status: "archived" },
       include: trackingInclude,
     });
-    return mapTrackingToEntity(row);
+    return this.mapRow(userId, row);
   }
 
   async delete(userId: string, id: string): Promise<void> {
@@ -345,9 +440,17 @@ export class PrismaJobTrackingRepository {
       data: {
         trackingId,
         scheduledAt,
+        timezone: input.timezone ?? null,
+        location: input.location ?? null,
+        meetingType: input.meetingType ?? null,
         link: input.link ?? null,
         notes: input.notes ?? null,
       },
+    });
+
+    await prisma.jobTracking.update({
+      where: { id: trackingId },
+      data: { nextInterviewAt: scheduledAt, updatedAt: new Date() },
     });
 
     await prisma.timelineEvent.create({
@@ -376,6 +479,20 @@ export class PrismaJobTrackingRepository {
       );
     }
 
+    void syncInterviewCalendarEventUseCase
+      .execute({
+        userId,
+        interviewId: interview.id,
+        trackingId,
+        scheduledAt: scheduledAt.toISOString(),
+        link: input.link,
+        notes: input.notes,
+        jobTitle: tracking.job.title,
+        companyName: tracking.job.companyName,
+        calendarEventId: interview.calendarEventId,
+      })
+      .catch((err) => logger.error({ err, interviewId: interview.id }, "Calendar sync failed"));
+
     return interview;
   }
 
@@ -394,10 +511,13 @@ export class PrismaJobTrackingRepository {
     const tracking = await prisma.jobTracking.findFirst({ where: { id: trackingId, userId } });
     if (!tracking) throw new NotFoundError("Tracking not found");
 
-    const interview = await prisma.interview.findFirst({ where: { id: interviewId, trackingId } });
+    const interview = await prisma.interview.findFirst({
+      where: { id: interviewId, trackingId },
+      include: { tracking: { include: { job: true } } },
+    });
     if (!interview) throw new NotFoundError("Interview not found");
 
-    return prisma.interview.update({
+    const updated = await prisma.interview.update({
       where: { id: interviewId },
       data: {
         scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : undefined,
@@ -405,6 +525,23 @@ export class PrismaJobTrackingRepository {
         notes: input.notes,
       },
     });
+
+    const scheduledAt = input.scheduledAt ?? interview.scheduledAt.toISOString();
+    void syncInterviewCalendarEventUseCase
+      .execute({
+        userId,
+        interviewId: updated.id,
+        trackingId,
+        scheduledAt,
+        link: input.link !== undefined ? input.link : interview.link,
+        notes: input.notes !== undefined ? input.notes : interview.notes,
+        jobTitle: interview.tracking.job.title,
+        companyName: interview.tracking.job.companyName,
+        calendarEventId: interview.calendarEventId,
+      })
+      .catch((err) => logger.error({ err, interviewId: updated.id }, "Calendar sync failed"));
+
+    return updated;
   }
 }
 

@@ -612,6 +612,33 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 ---
 
+## ADR-032 — Career Calendar & Match background (Etapa 23 / v1.5)
+
+**Status:** Aceito  
+**Data:** 2026-07 (Etapa 23 — v1.5 Product Polish)
+
+**Contexto:** Usuários precisam ver entrevistas em agenda e sincronizar com calendário externo. Processos no pipeline careciam de página de detalhe e match persistido. Análise IA on-demand (Etapa 18) exigia espera na criação do processo.
+
+**Decisão:**
+
+- **Módulo `calendar`** — `CalendarProviderPort`; `GoogleCalendarProvider` ativo; `OutlookCalendarProvider` stub V2+
+- **OAuth calendário separado** — escopo `calendar.events`; tokens criptografados em `CalendarIntegration`; login Google não concede calendário
+- **Sync entrevistas** — create/update em Google Calendar; `Interview.syncStatus` + `calendarEventId`
+- **Career Calendar** — `/calendar`; eventos locais (entrevistas) + remotos (Google)
+- **Process Detail** — `/pipeline/[trackingId]`; `PATCH /tracking/:id/process` para metadados (recrutador, feedback, links); estágio e vaga fora deste PATCH
+- **Match imediato** — `rulesMatchScore` persistido na criação do tracking (`rules-v2`)
+- **IA background** — `ProcessCreatedEvent` → `TrackingAnalysisBackgroundHandler`; cache-first (`refresh: false`); `aiAnalysisStatus` + realtime
+- **URL merge** — `source-url-merge.utils` preserva URLs career-page Gupy; nunca reconstruir URLs
+
+**Consequências:**
+
+- `docs/CALENDAR.md`
+- Cursor Rules: `calendar-provider`, `tracking-match-background`, `process-edit-boundaries`
+- `job-url-persistence.mdc` reforçado
+- Prisma: `CalendarIntegration`, campos processo/IA em `JobTracking`, calendar em `Interview`
+
+---
+
 ## Template para novas decisões
 
 ```markdown

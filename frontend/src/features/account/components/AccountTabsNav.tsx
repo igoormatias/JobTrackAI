@@ -1,23 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
 const ACCOUNT_TABS = [
   { href: "/profile", label: "Perfil", value: "profile" },
   { href: "/settings", label: "Preferências", value: "settings" },
+  { href: "/settings?tab=integrations", label: "Integrações", value: "integrations" },
+  { href: "/resume", label: "Currículo", value: "resume" },
 ] as const;
 
-const getActiveTab = (pathname: string): string => {
+const getActiveTab = (pathname: string, tab: string | null): string => {
+  if (pathname.startsWith("/settings") && tab === "integrations") return "integrations";
   if (pathname.startsWith("/settings")) return "settings";
+  if (pathname.startsWith("/resume")) return "resume";
   return "profile";
 };
 
 export const AccountTabsNav = () => {
   const pathname = usePathname();
-  const activeTab = getActiveTab(pathname);
+  const searchParams = useSearchParams();
+  const activeTab = getActiveTab(pathname, searchParams.get("tab"));
 
   return (
     <nav aria-label="Minha Conta" className="w-full overflow-x-auto">

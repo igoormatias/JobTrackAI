@@ -13,7 +13,12 @@ export type TrackingJobSnapshot = {
   modality: string;
   location: string;
   area: string;
-  matchScore: { score: number };
+  matchScore: {
+    score: number;
+    label: string;
+    reasons: Array<{ id: string; label: string; matched: boolean } | string>;
+    missingSkills: Array<{ id: string; name: string }>;
+  };
   technologies: Array<{ id: string; name: string; slug: string }>;
   sourceUrl: string | null;
   source: JobSource;
@@ -48,6 +53,15 @@ export type JobTrackingEntity = {
   visibility: JobVisibility;
   hiddenAt: string | null;
   notes: string | null;
+  feedback: string | null;
+  recruiterName: string | null;
+  recruiterEmail: string | null;
+  recruiterPhone: string | null;
+  negotiatedSalary: number | null;
+  processLinks: Record<string, string> | null;
+  aiAnalysisStatus: string;
+  aiAnalyzedAt: string | null;
+  nextInterviewAt: string | null;
   lastStageUpdatedAt: string | null;
   job: TrackingJobSnapshot;
   timeline: TrackingTimelineEvent[];
@@ -86,6 +100,18 @@ export type UpdateTrackingVisibilityInput = {
 
 export type UpdateTrackingNotesInput = {
   notes: string | null;
+};
+
+export type UpdateProcessInput = {
+  notes?: string | null;
+  feedback?: string | null;
+  priority?: JobPriority;
+  isFavorite?: boolean;
+  recruiterName?: string | null;
+  recruiterEmail?: string | null;
+  recruiterPhone?: string | null;
+  negotiatedSalary?: number | null;
+  processLinks?: Record<string, string> | null;
 };
 
 export type UpdateTimelineEventInput = {

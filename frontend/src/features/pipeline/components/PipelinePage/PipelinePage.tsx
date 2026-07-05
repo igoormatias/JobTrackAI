@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AlertCircle, Link2 } from "lucide-react";
 
@@ -12,8 +13,6 @@ import { AddToTrackingModal } from "@/features/tracking/components/AddToTracking
 import { useCreateTrackingMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 
 import { PipelineBoardSkeleton } from "../../components/PipelineBoardSkeleton";
-import { PipelineDetailDrawer } from "../../components/PipelineDetailDrawer";
-import { PipelineDetailPanel } from "../../components/PipelineDetailPanel";
 import { PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
 import { usePipelineFilters } from "../../hooks/use-pipeline-filters";
 import { usePipelineQuery } from "../../hooks/use-pipeline-query";
@@ -22,17 +21,15 @@ import { PipelineKpisWidget } from "../../widgets/PipelineKpisWidget";
 import { PipelineToolbarWidget } from "../../widgets/PipelineToolbarWidget";
 
 export const PipelinePage = () => {
+  const router = useRouter();
   const { listParams } = usePipelineFilters();
   const { data, isLoading, isError, refetch } = usePipelineQuery(listParams);
   const createTrackingMutation = useCreateTrackingMutation();
-  const [selected, setSelected] = useState<Application | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
 
   const openDetails = (application: Application) => {
-    setSelected(application);
-    setDetailOpen(true);
+    router.push(`/pipeline/${application.id}`);
   };
 
   if (isLoading) return <PipelineBoardSkeleton />;
@@ -76,17 +73,6 @@ export const PipelinePage = () => {
         data={data as PipelineData}
         onOpenDetails={openDetails}
         suppressEmptyState={manualModalOpen}
-      />
-
-      <PipelineDetailDrawer
-        application={selected}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
-      <PipelineDetailPanel
-        application={selected}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
       />
 
       <AddToTrackingModal

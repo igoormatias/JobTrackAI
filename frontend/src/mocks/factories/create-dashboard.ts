@@ -49,6 +49,7 @@ export const createDashboard = ({ jobs, applications, profile }: CreateDashboard
       scheduledAt: app.nextInterviewAt!,
       stage: PIPELINE_STAGE_LABELS[app.stage],
       status: PIPELINE_STAGE_LABELS[app.stage],
+      link: null,
     }));
 
   const newJobsCount = jobs.filter((job) => new Date(job.publishedAt) > new Date(Date.now() - 7 * 86400000)).length;
@@ -139,8 +140,12 @@ export const createDashboard = ({ jobs, applications, profile }: CreateDashboard
       closedJobsCount: 0,
       newJobsSinceLastSync: 0,
       newCompaniesCount: 0,
+      providerHealth: [
+        { provider: "gupy", displayName: "Gupy", enabled: true, status: "healthy", lastRunAt: null, lastHealthAt: null },
+      ],
       recentExecutions: [],
     },
+    hasCalendarIntegration: false,
     generatedAt: new Date().toISOString(),
   };
 };

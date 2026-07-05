@@ -40,6 +40,7 @@ export const dashboardDataSchema = z.object({
       scheduledAt: z.string(),
       stage: z.string(),
       status: z.string(),
+      link: z.string().nullable(),
     }),
   ),
   topTechnologies: z.array(chartPointSchema),
@@ -58,6 +59,16 @@ export const dashboardDataSchema = z.object({
     closedJobsCount: z.number(),
     newJobsSinceLastSync: z.number(),
     newCompaniesCount: z.number(),
+    providerHealth: z.array(
+      z.object({
+        provider: z.string(),
+        displayName: z.string(),
+        enabled: z.boolean(),
+        status: z.string(),
+        lastRunAt: z.string().nullable(),
+        lastHealthAt: z.string().nullable(),
+      }),
+    ),
     recentExecutions: z.array(
       z.object({
         id: z.string(),
@@ -72,6 +83,7 @@ export const dashboardDataSchema = z.object({
       }),
     ),
   }),
+  hasCalendarIntegration: z.boolean(),
   generatedAt: z.string(),
 });
 

@@ -4,11 +4,22 @@ import { PIPELINE_STAGE_LABELS, type PipelineStage } from "../../../../shared/do
 import type { JobPriority } from "../../../../shared/domain/job-priority.js";
 import type { JobVisibility } from "../../../../shared/domain/job-visibility.js";
 import type { TimelineEventType } from "../../../../shared/domain/timeline-event-type.js";
-import { parseJobMetadata } from "../../../jobs/infrastructure/mappers/job.mapper.js";
+import {
+  matchEngineService,
+  type MatchProfileInput,
+} from "../../../match/domain/services/match-engine.service.js";
+import { parseJobMetadata, toMatchJobInput, toMatchScore } from "../../../jobs/infrastructure/mappers/job.mapper.js";
 import type {
   JobTrackingEntity,
   TrackingTimelineEvent,
 } from "../../domain/entities/job-tracking.entity.js";
+
+const defaultMatchScore = () => ({
+  score: 0,
+  label: "low" as const,
+  reasons: [] as string[],
+  missingSkills: [] as Array<{ id: string; name: string }>,
+});
 
 export const mapTimelineEvent = (event: TimelineEvent): TrackingTimelineEvent => ({
   id: event.id,
@@ -24,6 +35,7 @@ export const mapTimelineEvent = (event: TimelineEvent): TrackingTimelineEvent =>
 
 export const mapTrackingToEntity = (
   tracking: JobTracking & { job: Job; timelineEvents: TimelineEvent[]; interviews?: Interview[] },
+  profile?: MatchProfileInput | null,
 ): JobTrackingEntity => {
   const meta = parseJobMetadata(tracking.job.metadata);
   const company = meta.company ?? {
@@ -32,6 +44,26 @@ export const mapTrackingToEntity = (
     slug: tracking.job.companySlug ?? tracking.job.companyName.toLowerCase().replace(/\s+/g, "-"),
     logoUrl: null,
   };
+
+  const persistedMatch =
+    tracking.rulesMatchScore != null
+      ? {
+          score: tracking.rulesMatchScore,
+          label: (tracking.rulesMatchLabel ?? "low") as "low" | "medium" | "high",
+          reasons: (tracking.rulesMatchReasons as Array<{ id: string; label: string; matched: boolean } | string> | null) ?? [],
+          missingSkills: [] as Array<{ id: string; name: string }>,
+        }
+      : null;
+
+  const matchScore =
+    persistedMatch ??
+    (profile
+      ? toMatchScore(matchEngineService.compute(profile, toMatchJobInput(tracking.job)))
+      : defaultMatchScore());
+
+  const upcomingInterview = tracking.interviews
+    ?.filter((item) => item.scheduledAt >= new Date())
+    .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime())[0];
 
   return {
     id: tracking.id,
@@ -45,6 +77,15 @@ export const mapTrackingToEntity = (
     visibility: tracking.visibility as JobVisibility,
     hiddenAt: tracking.hiddenAt?.toISOString() ?? null,
     notes: tracking.notes,
+    feedback: tracking.feedback,
+    recruiterName: tracking.recruiterName,
+    recruiterEmail: tracking.recruiterEmail,
+    recruiterPhone: tracking.recruiterPhone,
+    negotiatedSalary: tracking.negotiatedSalary,
+    processLinks: (tracking.processLinks as Record<string, string> | null) ?? null,
+    aiAnalysisStatus: tracking.aiAnalysisStatus,
+    aiAnalyzedAt: tracking.aiAnalyzedAt?.toISOString() ?? null,
+    nextInterviewAt: upcomingInterview?.scheduledAt.toISOString() ?? tracking.nextInterviewAt?.toISOString() ?? null,
     lastStageUpdatedAt: tracking.lastStageUpdatedAt?.toISOString() ?? null,
     job: {
       id: tracking.job.id,
@@ -53,7 +94,12 @@ export const mapTrackingToEntity = (
       modality: tracking.job.modality ?? "remote",
       location: tracking.job.location ?? "",
       area: tracking.job.area ?? "frontend",
-      matchScore: { score: 0 },
+      matchScore: {
+        score: matchScore.score,
+        label: matchScore.label,
+        reasons: matchScore.reasons,
+        missingSkills: matchScore.missingSkills,
+      },
       technologies: meta.technologies ?? [],
       sourceUrl: tracking.job.sourceUrl,
       source: tracking.job.source as JobTrackingEntity["job"]["source"],

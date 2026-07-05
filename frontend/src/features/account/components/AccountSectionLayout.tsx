@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,9 @@ export const AccountSectionLayout = ({
 }: AccountSectionLayoutProps) => (
   <div className={cn("space-y-6 pb-24", className)}>
     <PageHeader title={title} description={description} />
-    <AccountTabsNav />
+    <Suspense fallback={null}>
+      <AccountTabsNav />
+    </Suspense>
     {children}
   </div>
 );

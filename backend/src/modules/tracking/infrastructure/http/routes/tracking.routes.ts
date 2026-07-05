@@ -1,9 +1,21 @@
 import { Router } from "express";
 
 import { requireAuth } from "../../../../../middlewares/auth-middleware.js";
+import { eventBus } from "../../../../../shared/events/event-bus.js";
+import { trackingAnalysisBackgroundHandler } from "../../../application/handlers/tracking-analysis-background.handler.js";
 import { TrackingController } from "../controllers/tracking.controller.js";
 
+let handlersRegistered = false;
+
+const registerTrackingHandlers = (): void => {
+  if (handlersRegistered) return;
+  trackingAnalysisBackgroundHandler.register(eventBus);
+  handlersRegistered = true;
+};
+
 export const createTrackingRoutes = (): Router => {
+  registerTrackingHandlers();
+
   const router = Router();
   const controller = new TrackingController();
 
@@ -16,6 +28,7 @@ export const createTrackingRoutes = (): Router => {
   router.patch("/:id/priority", controller.changePriority);
   router.patch("/:id/visibility", controller.changeVisibility);
   router.patch("/:id/notes", controller.updateNotes);
+  router.patch("/:id/process", controller.updateProcess);
   router.get("/:id/timeline", controller.getTimeline);
   router.patch("/:id/timeline/:eventId", controller.updateTimelineEvent);
   router.get("/:id/interviews", controller.listInterviews);

@@ -27,6 +27,7 @@ model User {
   resumeImports ResumeImport[]
   resumeAnalyses ResumeAnalysis[]
   resumeAnalysisUsageLogs ResumeAnalysisUsageLog[]
+  calendarIntegration     CalendarIntegration?
 }
 
 model Job {
@@ -149,6 +150,22 @@ model JobTracking {
   visibility         String          @default("VISIBLE")
   hiddenAt           DateTime?
   notes              String?
+  feedback           String?
+  recruiterName      String?
+  recruiterEmail     String?
+  recruiterPhone     String?
+  negotiatedSalary   Int?
+  processLinks       Json?
+  nextInterviewAt    DateTime?
+  rulesMatchScore    Int?
+  rulesMatchLabel    String?
+  rulesMatchReasons  Json?
+  aiAnalysisStatus   String          @default("PENDING")
+  aiMatchScore       Int?
+  aiAnalyzedAt       DateTime?
+  resumeHash         String?
+  profileHash        String?
+  jobContentHash     String?
   lastStageUpdatedAt DateTime?
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
@@ -161,6 +178,7 @@ model JobTracking {
   @@index([userId, isFavorite])
   @@index([userId, priority])
   @@index([userId, visibility])
+  @@index([userId, aiAnalysisStatus])
 }
 
 model TimelineEvent {
@@ -179,14 +197,20 @@ model TimelineEvent {
 }
 
 model Interview {
-  id          String      @id @default(cuid())
-  trackingId  String
-  tracking    JobTracking @relation(fields: [trackingId], references: [id], onDelete: Cascade)
-  scheduledAt DateTime
-  link        String?
-  notes       String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                String      @id @default(cuid())
+  trackingId        String
+  tracking          JobTracking @relation(fields: [trackingId], references: [id], onDelete: Cascade)
+  scheduledAt       DateTime
+  timezone          String?
+  location          String?
+  meetingType       String?
+  link              String?
+  notes             String?
+  calendarEventId   String?
+  calendarProvider  String?
+  syncStatus        String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
   @@index([trackingId, scheduledAt])
 }
@@ -230,6 +254,7 @@ model UserSettings {
   theme                         String   @default("dark")
   jobRefreshFrequency           String   @default("1h")
   dashboardNotificationInterval String   @default("1h")
+  calendarPromptDismissedAt     DateTime?
   updatedAt                     DateTime @updatedAt
 }
 
@@ -404,4 +429,18 @@ model ResumeAnalysisUsageLog {
   createdAt        DateTime @default(now())
 
   @@index([userId, createdAt])
+}
+
+model CalendarIntegration {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider     String    @default("google")
+  accessToken  String
+  refreshToken String
+  tokenExpiry  DateTime?
+  calendarId   String?
+  connectedAt  DateTime  @default(now())
+  revokedAt    DateTime?
+  updatedAt    DateTime  @updatedAt
 }

@@ -17,6 +17,7 @@ import type {
   JobTrackingEntity,
   MoveTrackingStageInput,
   TrackingTimelineEvent,
+  UpdateProcessInput,
   UpdateTimelineEventInput,
 } from "../../domain/entities/job-tracking.entity.js";
 
@@ -52,7 +53,12 @@ const toJobSnapshot = (job: Job, tracking: Pick<JobTrackingEntity, "isFavorite" 
   modality: job.modality,
   location: job.location,
   area: job.area,
-  matchScore: { score: job.matchScore.score },
+  matchScore: {
+    score: job.matchScore.score,
+    label: job.matchScore.label ?? "low",
+    reasons: job.matchScore.reasons ?? [],
+    missingSkills: job.matchScore.missingSkills ?? [],
+  },
   technologies: job.technologies,
   sourceUrl: job.sourceUrl,
   source: job.source as JobSource,
@@ -127,6 +133,15 @@ const createSeedTracking = (index: number, stage: PipelineStage): JobTrackingEnt
     visibility: "VISIBLE",
     hiddenAt: null,
     notes: null,
+    feedback: null,
+    recruiterName: null,
+    recruiterEmail: null,
+    recruiterPhone: null,
+    negotiatedSalary: null,
+    processLinks: null,
+    aiAnalysisStatus: "PENDING",
+    aiAnalyzedAt: null,
+    nextInterviewAt: null,
     lastStageUpdatedAt: occurredAt,
     job: toJobSnapshot(job, { isFavorite, priority, visibility: "VISIBLE" }),
     timeline: buildSeedTimeline(id, "user_0001", stage, occurredAt),
@@ -193,6 +208,15 @@ export class InMemoryJobTrackingRepository {
       visibility: "VISIBLE",
       hiddenAt: null,
       notes: input.notes ?? null,
+      feedback: null,
+      recruiterName: null,
+      recruiterEmail: null,
+      recruiterPhone: null,
+      negotiatedSalary: null,
+      processLinks: null,
+      aiAnalysisStatus: "PENDING",
+      aiAnalyzedAt: null,
+      nextInterviewAt: null,
       lastStageUpdatedAt: input.stageOccurredAt,
       job: toJobSnapshot(job, { isFavorite: false, priority: "MEDIUM", visibility: "VISIBLE" }),
       timeline: [
@@ -309,6 +333,65 @@ export class InMemoryJobTrackingRepository {
       ),
     );
 
+    return this.enrich(tracking);
+  }
+
+  updateProcess(userId: string, id: string, input: UpdateProcessInput): JobTrackingEntity {
+    const tracking = this.requireTracking(userId, id);
+
+    if (input.notes !== undefined && input.notes !== tracking.notes) {
+      const hadNotes = Boolean(tracking.notes);
+      tracking.notes = input.notes;
+      tracking.timeline.push(
+        createTimelineEvent(
+          tracking.id,
+          tracking.userId,
+          hadNotes ? "note_updated" : "note_added",
+          hadNotes ? "Observações atualizadas" : "Observação adicionada",
+          new Date().toISOString(),
+          input.notes,
+        ),
+      );
+    }
+
+    if (input.feedback !== undefined) tracking.feedback = input.feedback;
+    if (input.recruiterName !== undefined) tracking.recruiterName = input.recruiterName;
+    if (input.recruiterEmail !== undefined) tracking.recruiterEmail = input.recruiterEmail;
+    if (input.recruiterPhone !== undefined) tracking.recruiterPhone = input.recruiterPhone;
+    if (input.negotiatedSalary !== undefined) tracking.negotiatedSalary = input.negotiatedSalary;
+    if (input.processLinks !== undefined) tracking.processLinks = input.processLinks;
+
+    if (input.priority !== undefined && input.priority !== tracking.priority) {
+      tracking.priority = input.priority;
+      tracking.job.priority = input.priority;
+      tracking.timeline.push(
+        createTimelineEvent(
+          tracking.id,
+          tracking.userId,
+          "priority_changed",
+          `Prioridade alterada para ${input.priority}`,
+          new Date().toISOString(),
+          null,
+          { from: tracking.priority, to: input.priority },
+        ),
+      );
+    }
+
+    if (input.isFavorite !== undefined && input.isFavorite !== tracking.isFavorite) {
+      tracking.isFavorite = input.isFavorite;
+      tracking.job.isFavorite = input.isFavorite;
+      tracking.timeline.push(
+        createTimelineEvent(
+          tracking.id,
+          tracking.userId,
+          input.isFavorite ? "favorited" : "unfavorited",
+          input.isFavorite ? "Marcada como favorita" : "Removida dos favoritos",
+          new Date().toISOString(),
+        ),
+      );
+    }
+
+    tracking.updatedAt = new Date().toISOString();
     return this.enrich(tracking);
   }
 

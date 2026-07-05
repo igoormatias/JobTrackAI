@@ -1,0 +1,33 @@
+---
+description: Match rules imediato + análise IA em background no tracking (v1.5)
+globs:
+  - backend/src/modules/tracking/**
+  - backend/src/modules/match/**
+  - backend/src/modules/ai/**
+  - frontend/src/features/ai/**
+  - frontend/src/features/process-detail/**
+alwaysApply: false
+---
+
+# Tracking Match & Background Analysis (v1.5)
+
+## Regras obrigatórias
+
+1. **`rulesMatchScore`** — calculado **sincronamente** em `JobTracking.create` via `MatchEngineService` (`rules-v2`); persistir `rulesMatchLabel` e `rulesMatchReasons`
+2. **IA em background** — após `ProcessCreatedEvent`, `TrackingAnalysisBackgroundHandler` dispara `CareerAnalysisService.generate(userId, trackingId, false)` via `setImmediate`
+3. **Cache-first** — background nunca força refresh (`refresh: false`); respeitar `AIAnalysis` existente
+4. **Nunca** recalcular match score com IA — `aiMatchScore` espelha `rulesMatchScore` ao concluir análise
+5. **Status** — `aiAnalysisStatus`: `PENDING` → `PROCESSING` → `COMPLETED` | `CACHED` | `FAILED`
+6. **Realtime** — emitir `tracking:analysis-update`, `pipeline:update`, `dashboard:update` ao concluir
+7. **Leitura** — `mapTrackingToEntity` usa `rulesMatchScore` persistido; fallback runtime só se null (legado)
+
+## Fronteira on-demand (Etapa 18)
+
+- `POST /ai/career-analysis/:trackingId` permanece para refresh manual
+- Background complementa UX; não substitui botão on-demand em Job Details / Process Detail
+
+## Referências
+
+- `docs/DECISIONS.md` — ADR-032
+- `.cursor/rules/match-engine.mdc`
+- `backend/src/modules/tracking/application/handlers/tracking-analysis-background.handler.ts`

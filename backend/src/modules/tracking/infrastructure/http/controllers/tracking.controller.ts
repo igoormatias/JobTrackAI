@@ -13,6 +13,7 @@ import {
   trackingListQuerySchema,
   updateInterviewSchema,
   updateNotesSchema,
+  updateProcessSchema,
   updateTimelineEventSchema,
 } from "../schemas/tracking.schema.js";
 
@@ -119,6 +120,20 @@ export class TrackingController {
       const id = getRouteParam(req, "id");
       const data = await this.service.updateNotes(userId, id, parsed.data.notes);
       res.status(200).json({ data, message: "Notes updated" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateProcess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const parsed = updateProcessSchema.safeParse(req.body);
+      if (!parsed.success) throw new ValidationError(parsed.error.message);
+
+      const userId = getAuthUserId(req);
+      const id = getRouteParam(req, "id");
+      const data = await this.service.updateProcess(userId, id, parsed.data);
+      res.status(200).json({ data, message: "Process updated" });
     } catch (error) {
       next(error);
     }

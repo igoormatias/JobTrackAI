@@ -151,6 +151,13 @@ export class PrismaJobRepository {
     return prisma.job.count({ where: { isCatalog: true } });
   }
 
+  async updateSourceUrl(jobId: string, sourceUrl: string): Promise<void> {
+    await prisma.job.update({
+      where: { id: jobId },
+      data: { sourceUrl },
+    });
+  }
+
   private mapWithContext(
     record: PrismaJob,
     ctx: ReturnType<typeof buildUserJobContext>,

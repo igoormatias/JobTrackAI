@@ -178,6 +178,7 @@ export const buildPersonalizedDashboard = ({
       scheduledAt: app.nextInterviewAt!,
       stage: PIPELINE_STAGE_LABELS[app.stage],
       status: PIPELINE_STAGE_LABELS[app.stage],
+      link: null,
     }));
 
   const newJobsInArea = compatibleJobs.filter((job) => isWithinDays(job.publishedAt, 7)).length;
@@ -248,8 +249,10 @@ export const buildPersonalizedDashboard = ({
       closedJobsCount: 0,
       newJobsSinceLastSync: 0,
       newCompaniesCount: 0,
+      providerHealth: [],
       recentExecutions: [],
     },
+    hasCalendarIntegration: false,
     generatedAt: new Date().toISOString(),
   };
 };

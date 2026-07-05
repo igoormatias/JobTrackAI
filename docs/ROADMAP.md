@@ -198,6 +198,17 @@ Catálogo oficial persistido em Prisma — sem vagas fake em runtime:
 
 ---
 
+### ✅ Career Calendar & Product Polish v1.5 (Etapa 23)
+
+- Módulo `calendar` — `CalendarProviderPort`, Google Calendar OAuth, sync de entrevistas
+- Career Calendar (`/calendar`) — agenda unificada entrevistas + Google
+- Process Detail (`/pipeline/[trackingId]`) — editar metadados via `PATCH /tracking/:id/process`
+- Match persistido (`rulesMatchScore`) na criação; análise IA em background (cache-first)
+- `source-url-merge.utils` — preservar URLs career-page Gupy no sync
+- Outlook stub; ADR-032 + `docs/CALENDAR.md` + Cursor Rules v1.5
+
+---
+
 #### ~~Release Candidate MVP (Etapa 13)~~ — renumerado para Etapas 13–15
 
 ~~- Notificações (feed de eventos internos)~~

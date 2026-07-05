@@ -38,7 +38,7 @@ describe("DashboardPage", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Novas vagas")).toBeInTheDocument();
+      expect(screen.getByText("Favoritas")).toBeInTheDocument();
     });
 
     expect(screen.getByText(/Bom dia, Igor 👋|Boa tarde, Igor 👋|Boa noite, Igor 👋/)).toBeInTheDocument();

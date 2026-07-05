@@ -1,7 +1,10 @@
 "use client";
 
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { RefreshCw } from "lucide-react";
 
+import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Muted } from "@/components/typography";
 import type { DashboardJobSync } from "@/types";
@@ -10,9 +13,23 @@ type DashboardJobSyncCardProps = {
   jobSync: DashboardJobSync;
 };
 
-const formatDate = (value: string | null): string => {
+const formatRelativeSync = (value: string | null): string => {
   if (!value) return "Nunca";
-  return new Date(value).toLocaleString("pt-BR");
+  return formatDistanceToNow(new Date(value), { addSuffix: true, locale: ptBR });
+};
+
+const EXECUTION_STATUS_LABELS: Record<string, string> = {
+  completed: "OK",
+  failed: "Falha",
+  running: "Executando",
+};
+
+const getProviderStatus = (
+  provider: string,
+  executions: DashboardJobSync["recentExecutions"],
+): string | null => {
+  const latest = executions.find((execution) => execution.providerName === provider);
+  return latest?.status ?? null;
 };
 
 export const DashboardJobSyncCard = ({ jobSync }: DashboardJobSyncCardProps) => (
@@ -22,27 +39,43 @@ export const DashboardJobSyncCard = ({ jobSync }: DashboardJobSyncCardProps) => 
       <CardTitle className="text-base">Sincronização de vagas</CardTitle>
     </CardHeader>
     <CardContent className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <div>
           <Muted>Última sync</Muted>
-          <p className="text-sm font-medium">{formatDate(jobSync.lastSyncAt)}</p>
+          <p className="text-sm font-medium">{formatRelativeSync(jobSync.lastSyncAt)}</p>
         </div>
         <div>
           <Muted>Total no catálogo</Muted>
           <p className="text-sm font-medium">{jobSync.totalCatalogJobs}</p>
         </div>
+        {jobSync.newJobsSinceLastSync > 0 ? (
+          <div>
+            <Muted>Novas desde a sync</Muted>
+            <p className="text-sm font-medium text-primary">+{jobSync.newJobsSinceLastSync}</p>
+          </div>
+        ) : null}
       </div>
 
       {jobSync.jobsByProvider.length > 0 ? (
         <div className="space-y-2">
           <Muted>Por provider</Muted>
           <ul className="space-y-1 text-sm">
-            {jobSync.jobsByProvider.map((item) => (
-              <li key={item.provider} className="flex justify-between gap-2">
-                <span className="capitalize">{item.provider}</span>
-                <span className="font-medium">{item.count}</span>
-              </li>
-            ))}
+            {jobSync.jobsByProvider.map((item) => {
+              const status = getProviderStatus(item.provider, jobSync.recentExecutions);
+              return (
+                <li key={item.provider} className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 capitalize">
+                    {item.provider}
+                    {status ? (
+                      <Badge variant={status === "failed" ? "warning" : "secondary"} className="text-xs">
+                        {EXECUTION_STATUS_LABELS[status] ?? status}
+                      </Badge>
+                    ) : null}
+                  </span>
+                  <span className="font-medium">{item.count}</span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : (
@@ -62,8 +95,8 @@ export const DashboardJobSyncCard = ({ jobSync }: DashboardJobSyncCardProps) => 
             {jobSync.recentExecutions.slice(0, 3).map((execution) => (
               <li key={execution.id} className="rounded-md border border-border/60 p-2">
                 <div className="flex justify-between gap-2">
-                  <span className="capitalize font-medium">{execution.providerName}</span>
-                  <span>{execution.status}</span>
+                  <span className="font-medium capitalize">{execution.providerName}</span>
+                  <span>{EXECUTION_STATUS_LABELS[execution.status] ?? execution.status}</span>
                 </div>
                 <Muted>
                   +{execution.importedCount} importadas · {execution.duplicateCount} duplicadas

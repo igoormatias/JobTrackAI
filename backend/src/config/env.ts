@@ -34,6 +34,8 @@ const envSchema = z
     FRONTEND_URL: z.string().default("http://localhost:3000"),
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
+    GOOGLE_CALENDAR_REDIRECT_URI: z.string().optional(),
+    CALENDAR_TOKEN_SECRET: z.string().optional(),
     ENABLE_V2_FEATURES: z
       .enum(["true", "false"])
       .default("false")
