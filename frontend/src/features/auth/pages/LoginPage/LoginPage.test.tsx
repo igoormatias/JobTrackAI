@@ -30,7 +30,7 @@ describe("LoginPage", () => {
     expect(screen.getByRole("heading", { name: /Organize sua carreira/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Pipeline", level: 3 })).toBeInTheDocument();
     expect(screen.getByText(/IA de Carreira/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Entrar com Google/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Entrar com Google/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Termos de Serviço/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Política de Privacidade/i })).toBeInTheDocument();
     expect(screen.getByText(/v1\.5\.0/)).toBeInTheDocument();

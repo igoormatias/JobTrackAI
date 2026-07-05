@@ -5,7 +5,6 @@ import { CheckCircle2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 import { useLoginMutation } from "../../hooks/use-auth-mutations";
@@ -15,9 +14,24 @@ type LoginButtonStatus = "idle" | "loading" | "success" | "error";
 
 export const GoogleLoginButton = () => {
   const loginMutation = useLoginMutation();
-  const googleContainerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [buttonWidth, setButtonWidth] = useState(360);
   const [status, setStatus] = useState<LoginButtonStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const updateWidth = () => {
+      setButtonWidth(Math.max(Math.floor(element.getBoundingClientRect().width), 240));
+    };
+
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (loginMutation.isPending) {
@@ -59,45 +73,60 @@ export const GoogleLoginButton = () => {
     toast.error("Falha ao entrar com Google");
   };
 
-  const handleCustomClick = () => {
-    if (status === "loading" || status === "success") return;
-
-    setErrorMessage(null);
-    const googleButton = googleContainerRef.current?.querySelector('[role="button"]') as HTMLElement | null;
-    googleButton?.click();
-  };
+  const isInteractive = status !== "loading" && status !== "success";
 
   return (
     <div className="space-y-3">
-      <div ref={googleContainerRef} className="sr-only" aria-hidden>
-        <GoogleLogin onSuccess={handleSuccess} onError={handleError} text="signin_with" shape="rectangular" size="large" width="360" />
-      </div>
-
-      <Button
-        type="button"
-        size="lg"
-        className={cn(
-          "h-12 w-full rounded-xl text-base font-medium shadow-sm transition-transform hover:scale-[1.01] active:scale-[0.99]",
-          status === "success" && "bg-emerald-600 text-white hover:bg-emerald-600",
-        )}
-        onClick={handleCustomClick}
-        isLoading={status === "loading"}
-        disabled={status === "loading" || status === "success"}
+      <div
+        ref={containerRef}
+        className="relative h-12 w-full"
+        role="group"
+        aria-label="Entrar com Google"
         aria-live="polite"
         aria-busy={status === "loading"}
       >
-        {status === "success" ? (
-          <>
-            <CheckCircle2 className="h-5 w-5" aria-hidden />
-            Login realizado
-          </>
-        ) : (
-          <>
-            <GoogleIcon className="h-5 w-5" aria-hidden />
-            Entrar com Google
-          </>
-        )}
-      </Button>
+        <div
+          className={cn(
+            "pointer-events-none flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-base font-medium text-primary-foreground shadow-sm transition-transform",
+            status === "success" && "bg-emerald-600 text-white",
+            status === "loading" && "opacity-80",
+          )}
+          aria-hidden
+        >
+          {status === "loading" ? (
+            <>
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Entrando…
+            </>
+          ) : status === "success" ? (
+            <>
+              <CheckCircle2 className="h-5 w-5" />
+              Login realizado
+            </>
+          ) : (
+            <>
+              <GoogleIcon className="h-5 w-5" />
+              Entrar com Google
+            </>
+          )}
+        </div>
+
+        <div
+          className={cn(
+            "absolute inset-0 overflow-hidden opacity-0",
+            !isInteractive && "pointer-events-none",
+          )}
+        >
+          <GoogleLogin
+            onSuccess={handleSuccess}
+            onError={handleError}
+            text="signin_with"
+            shape="rectangular"
+            size="large"
+            width={buttonWidth}
+          />
+        </div>
+      </div>
 
       {errorMessage ? (
         <p role="alert" className="text-center text-sm text-destructive">
