@@ -26,15 +26,13 @@ export const useCalendarEventsQuery = (from: string, to: string, enabled = true)
     enabled,
   });
 
-export const useGoogleCalendarConnectMutation = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
+export const useGoogleCalendarConnectMutation = () =>
+  useMutation({
     mutationFn: async () => {
       const url = await getGoogleCalendarAuthUrl();
       window.location.href = url;
     },
   });
-};
 
 export const useGoogleCalendarCallbackMutation = () => {
   const queryClient = useQueryClient();
