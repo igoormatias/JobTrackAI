@@ -1,4 +1,5 @@
 export * from "./pages/LoginPage";
+export * from "./pages/AuthLoadingPage";
 export * from "./pages/LoadingSessionPage";
 export * from "./pages/UnauthorizedPage";
 export * from "./pages/SessionExpiredPage";

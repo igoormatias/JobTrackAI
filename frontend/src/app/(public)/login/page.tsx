@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 
 import { LoginPage } from "@/features/auth/pages/LoginPage";
-import { PublicLayout } from "@/components/layout/PublicLayout";
 import { createPageMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Entrar",
-  description: `${siteConfig.tagline} Faça login com Google para acessar o JobTrack AI.`,
+  description: `${siteConfig.tagline} Faça login com Google para acessar pipeline, match inteligente, currículo e agenda de entrevistas.`,
   path: "/login",
 });
 
 export default function LoginRoutePage() {
-  return (
-    <PublicLayout>
-      <LoginPage />
-    </PublicLayout>
-  );
+  return <LoginPage />;
 }

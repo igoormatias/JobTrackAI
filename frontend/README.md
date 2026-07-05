@@ -54,9 +54,15 @@ O projeto foi pensado para atender profissionais de tecnologia como:
 
 ## 🔐 Autenticação
 
-- Login com Google
+- Landing login responsiva (hero + 4 product cards + card de auth)
+- Identidade visual oficial (`components/brand`, `public/brand/`) — PNGs via `pnpm brand:generate`
+- Login com Google (botão customizado com estados loading/erro/sucesso)
+- Páginas legais públicas: `/terms` e `/privacy` (LGPD + OAuth Google Calendar)
+- Tela de loading na autenticação (`AuthLoadingPage`)
 - Perfil personalizado
 - Rotas protegidas
+
+Ver [docs/DESIGN_GUIDELINES.md](../docs/DESIGN_GUIDELINES.md).
 
 ---
 
@@ -70,8 +76,7 @@ Configuração inicial do perfil profissional.
 - Modalidade
 - Localização
 - Pretensão salarial
-- Tecnologias desejadas
-- Tecnologias que deseja evitar
+- Google Calendar (opcional)
 
 ---
 
@@ -552,6 +557,9 @@ pnpm lint
 
 # testes
 pnpm test
+
+# gerar PNGs de marca (PWA, OG, favicon) a partir dos SVGs em public/brand/
+pnpm brand:generate
 ```
 
 ---

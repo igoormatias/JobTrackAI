@@ -20,6 +20,7 @@ export type CalendarAuthTokens = {
   accessToken: string;
   refreshToken: string;
   tokenExpiry: Date | null;
+  scope: string | null;
 };
 
 export type CalendarProviderTokens = {
@@ -36,7 +37,14 @@ export type TokenRefreshCallback = (
 export interface CalendarProviderPort {
   getAuthUrl(state: string): string;
   exchangeCode(code: string): Promise<CalendarAuthTokens>;
-  getPrimaryCalendarId(tokens: CalendarProviderTokens, onTokenRefresh?: TokenRefreshCallback): Promise<string>;
+  resolvePrimaryCalendarId(): string;
+  validateConnection(
+    calendarId: string,
+    tokens: CalendarProviderTokens,
+    onTokenRefresh?: TokenRefreshCallback,
+  ): Promise<void>;
+  getAccountEmail(tokens: CalendarProviderTokens): Promise<string | null>;
+  revokeToken(tokens: CalendarProviderTokens): Promise<void>;
   createEvent(
     calendarId: string,
     event: CalendarEventInput,
@@ -63,4 +71,5 @@ export interface CalendarProviderPort {
     tokens: CalendarProviderTokens,
     onTokenRefresh?: TokenRefreshCallback,
   ): Promise<CalendarEvent[]>;
+  refreshAccessToken(tokens: CalendarProviderTokens): Promise<CalendarProviderTokens>;
 }

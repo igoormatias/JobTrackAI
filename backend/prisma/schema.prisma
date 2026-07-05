@@ -440,6 +440,10 @@ model CalendarIntegration {
   refreshToken String
   tokenExpiry  DateTime?
   calendarId   String?
+  scope        String?
+  accountEmail String?
+  lastSyncAt   DateTime?
+  lastError    String?
   connectedAt  DateTime  @default(now())
   revokedAt    DateTime?
   updatedAt    DateTime  @updatedAt

@@ -1,4 +1,5 @@
 import type {
+  CalendarAuthTokens,
   CalendarEvent,
   CalendarEventInput,
   CalendarProviderPort,
@@ -15,11 +16,27 @@ export class OutlookCalendarProvider implements CalendarProviderPort {
     return notImplemented();
   }
 
-  async exchangeCode(): Promise<never> {
+  async exchangeCode(): Promise<CalendarAuthTokens> {
     return notImplemented();
   }
 
-  async getPrimaryCalendarId(): Promise<never> {
+  resolvePrimaryCalendarId(): string {
+    return notImplemented();
+  }
+
+  async validateConnection(): Promise<void> {
+    return notImplemented();
+  }
+
+  async getAccountEmail(): Promise<string | null> {
+    return notImplemented();
+  }
+
+  async revokeToken(): Promise<void> {
+    return notImplemented();
+  }
+
+  async refreshAccessToken(): Promise<CalendarProviderTokens> {
     return notImplemented();
   }
 

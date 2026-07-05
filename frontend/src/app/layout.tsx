@@ -57,9 +57,12 @@ export const metadata: Metadata = {
     creator: siteConfig.twitterHandle,
   },
   icons: {
-    icon: [{ url: siteConfig.icon, type: "image/svg+xml" }],
-    shortcut: [{ url: siteConfig.icon, type: "image/svg+xml" }],
-    apple: [{ url: siteConfig.icon, type: "image/svg+xml" }],
+    icon: [
+      { url: siteConfig.icon192, sizes: "192x192", type: "image/png" },
+      { url: siteConfig.icon512, sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: [{ url: siteConfig.icon192, type: "image/png" }],
+    apple: [{ url: siteConfig.appleTouchIcon, sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: {
     capable: true,

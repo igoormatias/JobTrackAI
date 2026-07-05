@@ -1,12 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-label="JobTrack AI">
   <defs>
-    <linearGradient id="icon-gradient" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+    <linearGradient id="jt-icon-gradient" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#3B82F6"/>
-      <stop offset="50%" stop-color="#6366F1"/>
+      <stop offset="55%" stop-color="#6366F1"/>
       <stop offset="100%" stop-color="#8B5CF6"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="8" fill="url(#icon-gradient)"/>
-  <path d="M9 22V10h4.8c3 0 4.9 1.8 4.9 4.4 0 1.8-.9 3.2-2.4 3.9L20 22h-4.1l-2.8-4.7h-.3V22H9zm4.6-7.8h.8c1.1 0 1.8-.6 1.8-1.6 0-1-.7-1.6-1.8-1.6h-.8v3.2z" fill="#FFFFFF"/>
-  <path d="M20.5 22V10h4.1l4.2 8.2V10H32v12h-4.1l-4.2-8.1V22h-4.2z" fill="#FFFFFF" fill-opacity="0.92"/>
+  <rect width="512" height="512" rx="112" fill="#0B0B0C"/>
+  <rect x="64" y="64" width="384" height="384" rx="96" fill="url(#jt-icon-gradient)"/>
+  <path d="M148 356L220 284L300 216L380 148" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="148" cy="356" r="30" fill="#FFFFFF"/>
+  <circle cx="220" cy="284" r="28" fill="#FFFFFF" fill-opacity="0.92"/>
+  <circle cx="300" cy="216" r="26" fill="#FFFFFF" fill-opacity="0.85"/>
+  <circle cx="380" cy="148" r="34" fill="#E0E7FF"/>
+  <path d="M380 112V184M346 148H414" stroke="#4F46E5" stroke-width="16" stroke-linecap="round"/>
 </svg>

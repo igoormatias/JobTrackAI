@@ -68,6 +68,8 @@ export const salaryStepSchema = z.object({
   salaryBand: salaryBandSchema,
 });
 
+export const calendarStepSchema = z.object({});
+
 export const onboardingFormSchema = z.object({
   area: professionalAreaSchema,
   skills: z.array(z.string()).min(1).max(15),
@@ -84,6 +86,7 @@ export const stepSchemas: Record<OnboardingStep, z.ZodTypeAny> = {
   modality: modalityStepSchema,
   location: locationStepSchema,
   salary: salaryStepSchema,
+  calendar: calendarStepSchema,
   summary: onboardingFormSchema,
 };
 

@@ -10,8 +10,17 @@ describe("calendar-provider.port", () => {
         accessToken: "access",
         refreshToken: "refresh",
         tokenExpiry: null,
+        scope: "calendar.events",
       })),
-      getPrimaryCalendarId: vi.fn(async () => "primary"),
+      resolvePrimaryCalendarId: vi.fn(() => "primary"),
+      validateConnection: vi.fn(async () => undefined),
+      getAccountEmail: vi.fn(async () => "user@example.com"),
+      revokeToken: vi.fn(async () => undefined),
+      refreshAccessToken: vi.fn(async () => ({
+        accessToken: "access",
+        refreshToken: "refresh",
+        tokenExpiry: null,
+      })),
       createEvent: vi.fn(async () => ({
         id: "evt-1",
         summary: "Interview",

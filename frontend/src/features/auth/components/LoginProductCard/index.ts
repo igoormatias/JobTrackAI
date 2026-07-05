@@ -1,0 +1,1 @@
+export { LoginProductCard } from "./LoginProductCard";

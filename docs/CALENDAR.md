@@ -27,7 +27,8 @@ Contrato em `backend/src/modules/calendar/domain/ports/calendar-provider.port.ts
 |--------|-----|
 | `getAuthUrl(state)` | Iniciar OAuth |
 | `exchangeCode(code)` | Trocar code por tokens |
-| `getPrimaryCalendarId(tokens)` | Calendário primário com role `writer` |
+| `resolvePrimaryCalendarId()` | Retorna `"primary"` (sem `calendarList.list`) |
+| `validateConnection(calendarId, tokens)` | Valida via `events.list` |
 | `createEvent` / `updateEvent` / `deleteEvent` | Sync de entrevistas |
 | `listEvents(from, to)` | Career Calendar |
 
@@ -35,15 +36,29 @@ Implementações em `infrastructure/providers/`. Rotas injetam `googleCalendarPr
 
 ## Google OAuth (calendário)
 
-Fluxo distinto do login (`POST /auth/login` com `idToken` — escopos `openid` + profile/email apenas).
+Fluxo distinto do login (`POST /auth/login` com `idToken`).
 
 1. Usuário autenticado → `GET /calendar/google/auth-url`
-2. Redirect Google com escopo `https://www.googleapis.com/auth/calendar.events`
-3. `access_type: offline`, `prompt: consent` (garante `refresh_token`)
+2. Redirect Google com escopos:
+   - `openid`, `email`, `profile`
+   - `https://www.googleapis.com/auth/calendar.events`
+3. `access_type: offline`, `prompt: consent`, `include_granted_scopes: true`
 4. Callback frontend: `/settings/calendar/callback?code=…`
 5. `POST /calendar/google/callback` → `ConnectGoogleCalendarUseCase`
-6. Tokens criptografados (`CALENDAR_TOKEN_SECRET` ou `JWT_SECRET`) em `CalendarIntegration`
-7. `calendarId` = calendário primário do usuário
+6. Valida `calendar.events` no scope recebido
+7. `calendarId = "primary"` — **não** chama `calendarList.list` (exige escopo extra)
+8. Valida conexão com `events.list` no calendário primário
+9. Tokens criptografados em `CalendarIntegration` (`scope`, `accountEmail`, `lastSyncAt`, `lastError`)
+
+### Troubleshooting 403 `ACCESS_TOKEN_SCOPE_INSUFFICIENT`
+
+Causa histórica: chamar `calendar.calendarList.list` com apenas `calendar.events`. Corrigido usando `primary` + `events.list`.
+
+### Google Cloud Console (produção)
+
+- **Authorized redirect URI:** `https://<seu-dominio>/settings/calendar/callback`
+- **Privacy Policy:** `https://<seu-dominio>/privacy`
+- **Terms of Service:** `https://<seu-dominio>/terms`
 
 Redirect URI: `GOOGLE_CALENDAR_REDIRECT_URI` ou default `{FRONTEND_URL}/settings/calendar/callback`.
 
@@ -79,12 +94,14 @@ Sem integração ativa: entrevista persiste localmente; sync é no-op.
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| GET | `/calendar/status` | Conexão ativa |
+| GET | `/calendar/status` | Conexão ativa (+ email, scope, lastSync) |
 | GET | `/calendar/google/auth-url` | URL OAuth |
 | POST | `/calendar/google/callback` | `{ code }` → conectar |
 | DELETE | `/calendar/google/disconnect` | Revogar integração |
+| POST | `/calendar/sync` | Validar + atualizar lastSyncAt |
 | GET | `/calendar/events?from&to` | Agenda (interviews + Google) |
 | POST | `/calendar/dismiss-prompt` | Dispensar prompt |
+| GET | `/calendar/debug` | Diagnóstico (apenas `NODE_ENV !== production`) |
 
 ## Frontend
 

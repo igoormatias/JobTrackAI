@@ -54,6 +54,7 @@ export type OnboardingStepId =
   | "modality"
   | "location"
   | "salary"
+  | "calendar"
   | "summary";
 
 export type OnboardingProgress = {

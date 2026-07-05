@@ -1,11 +1,14 @@
+import { env } from "../../../../../config/env.js";
 import { Router } from "express";
 
 import { requireAuth } from "../../../../../middlewares/auth-middleware.js";
 import { ConnectGoogleCalendarUseCase } from "../../../application/use-cases/connect-google-calendar.use-case.js";
 import { DisconnectCalendarUseCase } from "../../../application/use-cases/disconnect-calendar.use-case.js";
+import { GetCalendarDebugUseCase } from "../../../application/use-cases/get-calendar-debug.use-case.js";
 import { GetCalendarStatusUseCase } from "../../../application/use-cases/get-calendar-status.use-case.js";
 import { GetGoogleCalendarAuthUrlUseCase } from "../../../application/use-cases/get-google-calendar-auth-url.use-case.js";
 import { ListCalendarEventsUseCase } from "../../../application/use-cases/list-calendar-events.use-case.js";
+import { SyncCalendarUseCase } from "../../../application/use-cases/sync-calendar.use-case.js";
 import { DismissCalendarPromptUseCase } from "../../../application/use-cases/dismiss-calendar-prompt.use-case.js";
 import { googleCalendarProvider } from "../../providers/google-calendar.provider.js";
 import { prismaCalendarIntegrationRepository } from "../../repositories/prisma-calendar-integration.repository.js";
@@ -20,9 +23,11 @@ export const createCalendarRoutes = (): Router => {
     new GetCalendarStatusUseCase(repository),
     new GetGoogleCalendarAuthUrlUseCase(provider),
     new ConnectGoogleCalendarUseCase(repository, provider),
-    new DisconnectCalendarUseCase(repository),
+    new DisconnectCalendarUseCase(repository, provider),
     new ListCalendarEventsUseCase(repository, provider),
     new DismissCalendarPromptUseCase(),
+    new SyncCalendarUseCase(repository, provider),
+    new GetCalendarDebugUseCase(repository),
   );
 
   router.use(requireAuth);
@@ -30,8 +35,13 @@ export const createCalendarRoutes = (): Router => {
   router.get("/google/auth-url", controller.getGoogleAuthUrl);
   router.post("/google/callback", controller.connectGoogle);
   router.delete("/google/disconnect", controller.disconnectGoogle);
+  router.post("/sync", controller.syncCalendar);
   router.get("/events", controller.listEvents);
   router.post("/dismiss-prompt", controller.dismissPrompt);
+
+  if (env.NODE_ENV !== "production") {
+    router.get("/debug", controller.getDebug);
+  }
 
   return router;
 };

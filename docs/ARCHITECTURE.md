@@ -6,7 +6,7 @@ Visão geral da arquitetura do monorepo JobTrack AI.
 
 JobTrack AI é um **Career Tracker inteligente** — centraliza vagas de múltiplas plataformas e ajuda o usuário a organizar sua jornada de busca por emprego. O usuário **candidata-se sempre na plataforma de origem**; o JobTrack AI não substitui Gupy, LinkedIn ou Programathor.
 
-Detalhes: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Escopo: [MVP_SCOPE.md](./MVP_SCOPE.md) · API: [API_CONTRACT.md](./API_CONTRACT.md)
+Detalhes: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Escopo: [MVP_SCOPE.md](./MVP_SCOPE.md) · API: [API_CONTRACT.md](./API_CONTRACT.md) · UI: [DESIGN_GUIDELINES.md](./DESIGN_GUIDELINES.md)
 
 ### Fluxo do usuário
 

@@ -1,6 +1,12 @@
 import { google } from "googleapis";
 
 import { env } from "../../../../config/env.js";
+import {
+  EXPECTED_CALENDAR_SCOPES,
+  PRIMARY_CALENDAR_ID,
+} from "../../domain/constants/calendar-scopes.js";
+import { CalendarConnectionError } from "../../domain/errors/calendar-connection.error.js";
+import { CalendarOAuthError } from "../../domain/errors/calendar-oauth.error.js";
 import type {
   CalendarAuthTokens,
   CalendarEvent,
@@ -9,8 +15,6 @@ import type {
   CalendarProviderTokens,
   TokenRefreshCallback,
 } from "../../domain/ports/calendar-provider.port.js";
-
-const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 
 const mapGoogleEvent = (item: {
   id?: string | null;
@@ -37,6 +41,34 @@ const mapGoogleEvent = (item: {
     start: new Date(startRaw),
     end: new Date(endRaw),
   };
+};
+
+const mapGoogleError = (error: unknown): CalendarOAuthError | CalendarConnectionError => {
+  const reason =
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error &&
+    typeof (error as { response?: { data?: { error?: { message?: string; errors?: Array<{ reason?: string }> } } } })
+      .response?.data?.error?.errors?.[0]?.reason === "string"
+      ? (error as { response: { data: { error: { errors: Array<{ reason: string }> } } } }).response.data.error
+          .errors[0].reason
+      : undefined;
+
+  const message =
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: string }).message === "string"
+      ? (error as { message: string }).message
+      : "Google Calendar API error";
+
+  if (reason === "ACCESS_TOKEN_SCOPE_INSUFFICIENT" || reason === "insufficientPermissions") {
+    return new CalendarConnectionError(
+      "Permissões insuficientes para acessar o Google Calendar. Reconecte a integração.",
+    );
+  }
+
+  return new CalendarOAuthError(message);
 };
 
 export class GoogleCalendarProvider implements CalendarProviderPort {
@@ -88,34 +120,92 @@ export class GoogleCalendarProvider implements CalendarProviderPort {
     return client.generateAuthUrl({
       access_type: "offline",
       prompt: "consent",
-      scope: [CALENDAR_SCOPE],
+      include_granted_scopes: true,
+      scope: [...EXPECTED_CALENDAR_SCOPES],
       state,
     });
   }
 
   async exchangeCode(code: string): Promise<CalendarAuthTokens> {
-    const client = this.createOAuthClient();
-    const { tokens } = await client.getToken(code);
+    try {
+      const client = this.createOAuthClient();
+      const { tokens } = await client.getToken(code);
 
-    if (!tokens.access_token || !tokens.refresh_token) {
-      throw new Error("Google OAuth did not return required tokens");
+      if (!tokens.access_token || !tokens.refresh_token) {
+        throw new CalendarOAuthError(
+          "O Google não retornou os tokens necessários. Tente conectar novamente.",
+          422,
+        );
+      }
+
+      return {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        tokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+        scope: tokens.scope ?? null,
+      };
+    } catch (error) {
+      if (error instanceof CalendarOAuthError) throw error;
+      throw mapGoogleError(error);
+    }
+  }
+
+  resolvePrimaryCalendarId(): string {
+    return PRIMARY_CALENDAR_ID;
+  }
+
+  async validateConnection(
+    calendarId: string,
+    tokens: CalendarProviderTokens,
+    onTokenRefresh?: TokenRefreshCallback,
+  ): Promise<void> {
+    try {
+      const calendar = this.getCalendarApi(tokens, onTokenRefresh);
+      const now = new Date();
+      await calendar.events.list({
+        calendarId,
+        timeMin: now.toISOString(),
+        maxResults: 1,
+        singleEvents: true,
+      });
+    } catch (error) {
+      throw mapGoogleError(error);
+    }
+  }
+
+  async getAccountEmail(tokens: CalendarProviderTokens): Promise<string | null> {
+    try {
+      const client = this.createOAuthClient(tokens);
+      const oauth2 = google.oauth2({ version: "v2", auth: client });
+      const response = await oauth2.userinfo.get();
+      return response.data.email ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async revokeToken(tokens: CalendarProviderTokens): Promise<void> {
+    try {
+      const client = this.createOAuthClient(tokens);
+      await client.revokeToken(tokens.accessToken);
+    } catch {
+      // Best-effort revoke — local disconnect still proceeds
+    }
+  }
+
+  async refreshAccessToken(tokens: CalendarProviderTokens): Promise<CalendarProviderTokens> {
+    const client = this.createOAuthClient(tokens);
+    const { credentials } = await client.refreshAccessToken();
+
+    if (!credentials.access_token) {
+      throw new CalendarOAuthError("Não foi possível renovar o token do Google Calendar.", 422);
     }
 
     return {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      tokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+      accessToken: credentials.access_token,
+      refreshToken: credentials.refresh_token ?? tokens.refreshToken,
+      tokenExpiry: credentials.expiry_date ? new Date(credentials.expiry_date) : null,
     };
-  }
-
-  async getPrimaryCalendarId(
-    tokens: CalendarProviderTokens,
-    onTokenRefresh?: TokenRefreshCallback,
-  ): Promise<string> {
-    const calendar = this.getCalendarApi(tokens, onTokenRefresh);
-    const response = await calendar.calendarList.list({ minAccessRole: "writer" });
-    const primary = response.data.items?.find((item) => item.primary)?.id;
-    return primary ?? "primary";
   }
 
   async createEvent(

@@ -14,6 +14,10 @@ const mapRow = (row: {
   refreshToken: string;
   tokenExpiry: Date | null;
   calendarId: string | null;
+  scope: string | null;
+  accountEmail: string | null;
+  lastSyncAt: Date | null;
+  lastError: string | null;
   connectedAt: Date;
   revokedAt: Date | null;
 }): CalendarIntegrationRecord => ({
@@ -24,6 +28,10 @@ const mapRow = (row: {
   refreshToken: row.refreshToken,
   tokenExpiry: row.tokenExpiry,
   calendarId: row.calendarId,
+  scope: row.scope,
+  accountEmail: row.accountEmail,
+  lastSyncAt: row.lastSyncAt,
+  lastError: row.lastError,
   connectedAt: row.connectedAt,
   revokedAt: row.revokedAt,
 });
@@ -46,6 +54,10 @@ export class PrismaCalendarIntegrationRepository implements CalendarIntegrationR
         refreshToken: input.refreshToken,
         tokenExpiry: input.tokenExpiry,
         calendarId: input.calendarId,
+        scope: input.scope ?? null,
+        accountEmail: input.accountEmail ?? null,
+        lastSyncAt: input.lastSyncAt ?? null,
+        lastError: input.lastError ?? null,
         revokedAt: null,
       },
       update: {
@@ -54,6 +66,10 @@ export class PrismaCalendarIntegrationRepository implements CalendarIntegrationR
         refreshToken: input.refreshToken,
         tokenExpiry: input.tokenExpiry,
         calendarId: input.calendarId,
+        scope: input.scope ?? null,
+        accountEmail: input.accountEmail ?? null,
+        lastSyncAt: input.lastSyncAt ?? null,
+        lastError: input.lastError ?? null,
         revokedAt: null,
         connectedAt: new Date(),
       },
@@ -76,6 +92,13 @@ export class PrismaCalendarIntegrationRepository implements CalendarIntegrationR
         accessToken: encryptToken(accessToken),
         tokenExpiry,
       },
+    });
+  }
+
+  async updateSyncStatus(userId: string, lastSyncAt: Date | null, lastError: string | null): Promise<void> {
+    await prisma.calendarIntegration.updateMany({
+      where: { userId, revokedAt: null },
+      data: { lastSyncAt, lastError },
     });
   }
 }

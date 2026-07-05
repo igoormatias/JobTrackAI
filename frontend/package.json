@@ -13,6 +13,7 @@
     "test:coverage": "vitest run --coverage",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "brand:generate": "node scripts/generate-brand-pngs.mjs",
     "prepare": "husky"
   },
   "dependencies": {
@@ -83,6 +84,7 @@
     "msw": "^2.14.6",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.12",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.1.8",
     "typescript": "^5.8.3",
     "vitest": "^3.2.1"

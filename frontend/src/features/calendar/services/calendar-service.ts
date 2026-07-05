@@ -5,6 +5,13 @@ export type CalendarStatus = {
   provider: string | null;
   connectedAt?: string | null;
   calendarId?: string | null;
+  accountEmail?: string | null;
+  scope?: string | null;
+  expectedScope?: string | null;
+  lastSyncAt?: string | null;
+  lastError?: string | null;
+  tokenExpiresAt?: string | null;
+  refreshToken?: boolean;
 };
 
 export type CalendarEventItem = {
@@ -15,6 +22,13 @@ export type CalendarEventItem = {
   htmlLink?: string | null;
   start: string;
   end: string;
+  source?: "interview" | "google";
+};
+
+export type CalendarSyncResult = {
+  connected: boolean;
+  lastSyncAt: string | null;
+  lastError: string | null;
 };
 
 export const getCalendarStatus = async (): Promise<CalendarStatus> => {
@@ -34,6 +48,11 @@ export const connectGoogleCalendar = async (code: string): Promise<CalendarStatu
 
 export const disconnectGoogleCalendar = async (): Promise<void> => {
   await apiClient.delete("/calendar/google/disconnect");
+};
+
+export const syncGoogleCalendar = async (): Promise<CalendarSyncResult> => {
+  const { data } = await apiClient.post<CalendarSyncResult>("/calendar/sync");
+  return data;
 };
 
 export const listCalendarEvents = async (from: string, to: string): Promise<CalendarEventItem[]> => {

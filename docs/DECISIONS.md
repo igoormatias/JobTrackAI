@@ -639,6 +639,29 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 ---
 
+## ADR-033 — Google Calendar `primary` + validação `events.list` (fix OAuth 500)
+
+**Status:** Aceito  
+**Data:** 2026-07
+
+**Contexto:** Callback OAuth retornava HTTP 500 com `ACCESS_TOKEN_SCOPE_INSUFFICIENT` ao chamar `calendarList.list` com escopo apenas `calendar.events`.
+
+**Decisão:**
+
+- Usar `calendarId = "primary"` (API de events aceita com `calendar.events`)
+- Validar conexão com `events.list` em vez de `calendarList.list`
+- Escopos OAuth: `openid`, `email`, `profile`, `calendar.events` + `include_granted_scopes`
+- Persistir `scope`, `lastSyncAt`, `lastError`, `accountEmail` em `CalendarIntegration`
+- `CalendarTokenService` renova access token proativamente antes da expiração
+- Erros de domínio (`CalendarScopeInsufficientError`, etc.) → 422 amigável, nunca 500 opaco
+
+**Consequências:**
+
+- `GET /calendar/debug` (dev), `POST /calendar/sync`
+- Páginas `/terms` e `/privacy` para OAuth app verification
+
+---
+
 ## Template para novas decisões
 
 ```markdown

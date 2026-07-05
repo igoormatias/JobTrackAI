@@ -15,6 +15,8 @@ const getStepPayload = (step: OnboardingStep, form: OnboardingFormState) => {
       return { locationPreference: form.locationPreference };
     case "salary":
       return { salaryBand: form.salaryBand };
+    case "calendar":
+      return {};
     case "summary":
       return {
         area: form.area,

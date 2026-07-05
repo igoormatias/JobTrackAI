@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { OnboardingStepper } from "../../components/OnboardingStepper";
 import {
   AreaStep,
+  CalendarStep,
   LocationStep,
   ModalityStep,
   SalaryStep,
@@ -101,6 +102,8 @@ export const OnboardingPage = () => {
             onChange={(salaryBand) => updateForm({ salaryBand })}
           />
         ) : null}
+
+        {step === "calendar" ? <CalendarStep onSkip={() => void goNext()} /> : null}
 
         {step === "summary" ? <SummaryStep form={form} onEdit={goToStep} /> : null}
 

@@ -66,6 +66,7 @@ Encontrou vaga → Favoritou → Definiu prioridade → Abriu vaga (origem)
 | 21 | Product Polish & UX | Concluída |
 | 22 | Currículo Inteligente (v1.4) | Concluída |
 | 23 | Career Calendar & Polish (v1.5) | Concluída |
+| XX | Google Calendar OAuth fix + Login v2 + Legal/SEO | Concluída |
 
 - **V2** — Outlook calendar, providers avançados, Analytics, ML, i18n
 
@@ -212,6 +213,8 @@ Guia: [docs/DEPLOY.md](docs/DEPLOY.md)
 | [docs/API_CONTRACT.md](docs/API_CONTRACT.md) | Contrato REST oficial |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | MVP e V2 |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitetura técnica |
+| [docs/DESIGN_GUIDELINES.md](docs/DESIGN_GUIDELINES.md) | Identidade visual e login |
+| [docs/CALENDAR.md](docs/CALENDAR.md) | Google Calendar OAuth, sync e troubleshooting |
 | [docs/FRONTEND_GUIDE.md](docs/FRONTEND_GUIDE.md) | Guia frontend |
 | [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md) | Guia backend |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | ADRs (ADR-020 = escopo · ADR-022 = domínio) |

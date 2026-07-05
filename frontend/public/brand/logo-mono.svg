@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" fill="none" role="img" aria-label="JobTrack AI">
+  <rect x="4" y="4" width="40" height="40" rx="11" fill="currentColor"/>
+  <path d="M14 33.5L21 26.5L27.5 21L35 13.5" stroke="#FFFFFF" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="14" cy="33.5" r="3" fill="#FFFFFF"/>
+  <circle cx="21" cy="26.5" r="2.75" fill="#FFFFFF" fill-opacity="0.92"/>
+  <circle cx="27.5" cy="21" r="2.5" fill="#FFFFFF" fill-opacity="0.85"/>
+  <circle cx="35" cy="13.5" r="3.25" fill="#FFFFFF" fill-opacity="0.75"/>
+  <text x="56" y="32" fill="currentColor" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em">JobTrack AI</text>
+</svg>

@@ -4,4 +4,5 @@ export * from "./SeniorityStep";
 export * from "./ModalityStep";
 export * from "./LocationStep";
 export * from "./SalaryStep";
+export * from "./CalendarStep";
 export * from "./SummaryStep";

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" fill="none" role="img" aria-label="JobTrack AI">
+  <defs>
+    <linearGradient id="jt-light-mark" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="55%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="jt-light-ai" x1="196" y1="10" x2="256" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="40" height="40" rx="11" fill="url(#jt-light-mark)"/>
+  <path d="M14 33.5L21 26.5L27.5 21L35 13.5" stroke="#FFFFFF" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="14" cy="33.5" r="3" fill="#FFFFFF"/>
+  <circle cx="21" cy="26.5" r="2.75" fill="#FFFFFF" fill-opacity="0.92"/>
+  <circle cx="27.5" cy="21" r="2.5" fill="#FFFFFF" fill-opacity="0.85"/>
+  <circle cx="35" cy="13.5" r="3.25" fill="#E0E7FF"/>
+  <path d="M35 10.25V16.75M31.75 13.5H38.25" stroke="#4F46E5" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="56" y="32" fill="#0F172A" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em">JobTrack</text>
+  <text x="168" y="32" fill="url(#jt-light-ai)" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em"> AI</text>
+</svg>

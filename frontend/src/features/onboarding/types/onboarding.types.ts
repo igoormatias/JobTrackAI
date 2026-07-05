@@ -16,6 +16,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   "modality",
   "location",
   "salary",
+  "calendar",
   "summary",
 ];
 
@@ -47,6 +48,7 @@ export const STEP_TITLES: Record<OnboardingStep, string> = {
   modality: "Qual modelo de trabalho prefere?",
   location: "Onde você deseja trabalhar?",
   salary: "Qual sua pretensão salarial?",
+  calendar: "Conecte seu Google Calendar",
   summary: "Revise seu perfil profissional",
 };
 
@@ -57,5 +59,6 @@ export const STEP_HELP: Record<OnboardingStep, string> = {
   modality: "Escolha a modalidade de trabalho que você prefere ou aceita.",
   location: "Defina onde você busca oportunidades e se aceita mudança.",
   salary: "Selecione a faixa salarial que representa sua pretensão.",
+  calendar: "Opcional — conecte para sincronizar entrevistas e receber lembretes na agenda.",
   summary: "Confira todas as informações antes de finalizar seu perfil.",
 };
