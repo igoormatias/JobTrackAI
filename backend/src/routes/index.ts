@@ -12,6 +12,7 @@ import { createRecommendationRoutes } from "../modules/recommendations/routes/re
 import { createSettingsRoutes } from "../modules/settings/infrastructure/http/routes/settings.routes.js";
 import { createSystemRoutes } from "../modules/system/infrastructure/http/routes/system.routes.js";
 import { createProviderRoutes } from "../modules/job-aggregation/infrastructure/http/routes/provider.routes.js";
+import { createInternalRoutes } from "../modules/job-aggregation/infrastructure/http/routes/internal.routes.js";
 import { createAiRoutes } from "../modules/ai/infrastructure/http/routes/ai.routes.js";
 import { createJobImportRoutes } from "../modules/job-import/infrastructure/http/routes/job-import.routes.js";
 import { createResumeRoutes } from "../modules/resume/infrastructure/http/routes/resume.routes.js";
@@ -33,6 +34,7 @@ export const createRoutes = (): Router => {
   router.use("/notifications", createNotificationRoutes());
   router.use("/recommendations", createRecommendationRoutes());
   router.use("/providers", createProviderRoutes());
+  router.use("/internal", createInternalRoutes());
   router.use("/ai", createAiRoutes());
   router.use("/resume", createResumeRoutes());
   router.use("/calendar", createCalendarRoutes());

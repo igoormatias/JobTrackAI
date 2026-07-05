@@ -19,7 +19,7 @@ type FilterState = ReturnType<typeof useJobFilters>["urlState"];
 export type JobsFilterFieldsProps = {
   urlState: FilterState;
   setUrlState: ReturnType<typeof useJobFilters>["setUrlState"];
-  companies: { id: string; name: string }[];
+  companies: { id: string; slug: string; name: string }[];
 };
 
 const toggleArrayValue = <T extends string>(values: T[], value: T): T[] =>
@@ -50,12 +50,12 @@ export const JobsFilterFields = ({ urlState, setUrlState, companies }: JobsFilte
       <h4 className="text-sm font-medium">Empresa</h4>
       <div className="max-h-40 space-y-2 overflow-y-auto scrollbar-app pr-1">
         {companies.slice(0, 12).map((company) => (
-          <label key={company.id} className="flex items-center gap-2 text-sm">
+          <label key={company.slug} className="flex items-center gap-2 text-sm">
             <Checkbox
-              checked={urlState.companyIds.includes(company.id)}
+              checked={urlState.companyIds.includes(company.slug)}
               onCheckedChange={() =>
                 void setUrlState({
-                  companyIds: toggleArrayValue(urlState.companyIds, company.id),
+                  companyIds: toggleArrayValue(urlState.companyIds, company.slug),
                 })
               }
             />

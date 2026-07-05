@@ -30,11 +30,15 @@ export type DashboardActivityDto = {
 export type DashboardInterviewDto = {
   id: string;
   applicationId: string;
+  trackingId: string | null;
   jobTitle: string;
   companyName: string;
   scheduledAt: string;
   stage: string;
   status: string;
+  meetingType: string | null;
+  location: string | null;
+  source: "interview" | "google";
   link: string | null;
 };
 

@@ -10,7 +10,7 @@ import type { useJobFilters } from "../../hooks/use-job-filters";
 
 export type JobsFilterBarProps = {
   filters: ReturnType<typeof useJobFilters>;
-  companies: { id: string; name: string }[];
+  companies: { id: string; slug: string; name: string }[];
   onOpenAllFilters?: () => void;
 };
 

@@ -158,6 +158,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
       highPriorityRecent,
       hiddenRecent,
       interviewsNextWeek,
+      interviewsFutureTotal,
       stageGroups,
       timelineEvents,
       upcomingInterviews,
@@ -196,6 +197,12 @@ export class PrismaDashboardRepository implements DashboardRepository {
         where: {
           tracking: { userId },
           scheduledAt: { gte: now, lte: new Date(now.getTime() + 7 * 86_400_000) },
+        },
+      }),
+      prisma.interview.count({
+        where: {
+          tracking: { userId },
+          scheduledAt: { gte: now },
         },
       }),
       prisma.jobTracking.groupBy({
@@ -371,7 +378,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
       {
         id: "kpi_interviews",
         label: "Entrevistas",
-        value: upcomingInterviews.length,
+        value: interviewsFutureTotal,
         change: interviewsNextWeek,
         changeLabel: "próximos 7 dias",
       },
@@ -397,11 +404,15 @@ export class PrismaDashboardRepository implements DashboardRepository {
       return {
         id: interview.id,
         applicationId: interview.trackingId,
+        trackingId: interview.trackingId,
         jobTitle: interview.tracking.job.title,
         companyName: interview.tracking.job.companyName,
         scheduledAt: interview.scheduledAt.toISOString(),
         stage: stageLabel,
         status: stageLabel,
+        meetingType: interview.meetingType,
+        location: interview.location,
+        source: "interview" as const,
         link: interview.link,
       };
     });

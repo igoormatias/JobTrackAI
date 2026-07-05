@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import { queryKeys } from "@/lib/query-client/query-keys";
 
 import { DEFAULT_CALENDAR_RETURN_TO, setCalendarReturnTo } from "../constants/calendar-oauth";
@@ -16,8 +17,7 @@ import {
 } from "../services/calendar-service";
 
 const invalidateCalendarQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
-  void queryClient.invalidateQueries({ queryKey: queryKeys.calendar.all });
-  void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+  invalidateCareerSurfaces(queryClient);
 };
 
 export const useCalendarStatusQuery = () =>

@@ -11,6 +11,7 @@ import type { ProviderRegistryRepository } from "../../domain/repositories/provi
 import { DedupStrategy } from "../../domain/services/dedup-strategy.service.js";
 import { jobNormalizer } from "../../domain/services/job-normalizer.service.js";
 import { jobValidator } from "../../domain/services/job-validator.service.js";
+import { syncProviderRegistryFromEnv } from "../../infrastructure/bootstrap/sync-provider-registry.js";
 import { toCatalogUpsertInput } from "../../infrastructure/mappers/normalized-job-to-catalog.mapper.js";
 
 const BATCH_SIZE = 50;
@@ -50,6 +51,8 @@ export class JobAggregationService {
   }
 
   async runAllEnabled(): Promise<ProviderExecution[]> {
+    await syncProviderRegistryFromEnv();
+
     const registry = await this.registryRepo.findAll();
     const enabled = registry.filter((entry) => entry.enabled);
     const results = await Promise.allSettled(

@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { queryKeys } from "@/lib/query-client/query-keys";
+import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 
 import type { Application, PipelineData, PipelineStage } from "@/types";
 
@@ -63,9 +63,7 @@ export const PipelineBoardWidget = ({
       notes?: string | null;
     }) => createInterview(trackingId, { scheduledAt, link, notes }),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      invalidateCareerSurfaces(queryClient);
       toast.success("Entrevista agendada");
       setInterviewApplication(null);
     },

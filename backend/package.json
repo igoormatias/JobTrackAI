@@ -26,6 +26,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.9.0",
+    "cheerio": "^1.2.0",
     "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -46,6 +47,7 @@
     "zod": "^3.25.51"
   },
   "devDependencies": {
+    "@types/cheerio": "^1.0.0",
     "@types/compression": "^1.8.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",

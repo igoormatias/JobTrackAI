@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import { queryKeys } from "@/lib/query-client/query-keys";
 import type { JobPriority, JobVisibility, PipelineStage } from "@/types";
 
@@ -23,6 +24,11 @@ const invalidateNotifications = (queryClient: ReturnType<typeof useQueryClient>)
   void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
 };
 
+const invalidateTrackingSurfaces = (queryClient: ReturnType<typeof useQueryClient>): void => {
+  invalidateCareerSurfaces(queryClient);
+  invalidateNotifications(queryClient);
+};
+
 export const useCreateTrackingMutation = () => {
   const queryClient = useQueryClient();
 
@@ -32,7 +38,7 @@ export const useCreateTrackingMutation = () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
-      invalidateNotifications(queryClient);
+      invalidateTrackingSurfaces(queryClient);
       toast.success("Processo adicionado ao acompanhamento");
     },
     onError: () => toast.error("Não foi possível adicionar o processo"),
@@ -48,7 +54,7 @@ export const useMoveTrackingStageMutation = () => {
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
-      invalidateNotifications(queryClient);
+      invalidateTrackingSurfaces(queryClient);
     },
   });
 };
@@ -61,7 +67,7 @@ export const useTrackingFavoriteMutation = () => {
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
-      invalidateNotifications(queryClient);
+      invalidateTrackingSurfaces(queryClient);
     },
   });
 };
@@ -74,7 +80,7 @@ export const useTrackingPriorityMutation = () => {
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
-      invalidateNotifications(queryClient);
+      invalidateTrackingSurfaces(queryClient);
     },
   });
 };
@@ -88,7 +94,7 @@ export const useTrackingVisibilityMutation = () => {
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
-      invalidateNotifications(queryClient);
+      invalidateTrackingSurfaces(queryClient);
     },
   });
 };
@@ -102,7 +108,7 @@ export const useUpdateTrackingNotesMutation = () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.detail(variables.id) });
-      invalidateNotifications(queryClient);
+      invalidateTrackingSurfaces(queryClient);
     },
   });
 };
@@ -117,7 +123,7 @@ export const useUpdateTrackingProcessMutation = () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.detail(variables.id) });
-      invalidateNotifications(queryClient);
+      invalidateTrackingSurfaces(queryClient);
       toast.success("Processo atualizado");
     },
     onError: () => toast.error("Não foi possível atualizar o processo"),

@@ -55,7 +55,7 @@ const envSchema = z
       .transform((v) => v === "true"),
     ENABLE_PROVIDER_LINKEDIN: z
       .enum(["true", "false"])
-      .default("false")
+      .default("true")
       .transform((v) => v === "true"),
     ENABLE_PROVIDER_PROGRAMATHOR: z
       .enum(["true", "false"])
@@ -72,6 +72,7 @@ const envSchema = z
     AI_CAREER_DAILY_LIMIT: z.coerce.number().default(5),
     AI_CAREER_DEBOUNCE_MS: z.coerce.number().default(15_000),
     LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).optional(),
+    CRON_SECRET: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === "production") {
@@ -108,6 +109,13 @@ const envSchema = z
           code: z.ZodIssueCode.custom,
           message: "FRONTEND_URL must match the Vercel frontend URL for CORS and cookies",
           path: ["FRONTEND_URL"],
+        });
+      }
+      if (!data.CRON_SECRET) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "CRON_SECRET is required in production for Vercel Cron provider sync",
+          path: ["CRON_SECRET"],
         });
       }
     }

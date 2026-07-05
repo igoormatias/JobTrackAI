@@ -13,15 +13,24 @@ Guia de integração com fontes de vagas (Job Aggregation + URL Import).
 | Provider | Sync | URL Import | Status |
 |----------|------|------------|--------|
 | Gupy | Real (`gupy.provider.ts`) | Real (`gupy-url.extractor.ts`) | Produção |
-| LinkedIn | Stub | Stub (422) | Arquitetura pronta |
+| LinkedIn | Real (`linkedin.provider.ts` — guest API + HTML parser) | Stub (422) | Produção (sync) |
 | Programathor | Stub | Stub (422) | Arquitetura pronta |
 
-## Sync manual / scheduler
+## Sync manual / scheduler / site
 
 ```bash
-POST /providers/run          # todos habilitados
-POST /providers/:name/run    # um provider
+POST /providers/run          # todos habilitados (auth + rate limit)
+POST /providers/run/:provider # um provider
+GET  /internal/cron/provider-sync  # Vercel Cron (Bearer CRON_SECRET)
 ```
+
+**Pelo site (MVP):**
+- Dashboard → card **Sincronização de vagas** → botão **Sincronizar agora**
+- Auto-sync enquanto logado: frequência em **Configurações → Atualização automática de vagas** (`jobRefreshFrequency`: `15m` | `30m` | `1h` | `2h` | `manual`)
+- **Vercel Cron** (global, 1h): `GET /api/backend/internal/cron/provider-sync` — requer `CRON_SECRET` no backend
+
+**Local (processo longo):**
+- `ENABLE_SCHEDULER=true` + `SYNC_INTERVAL` (ms) — ver [`server.ts`](../backend/src/server.ts)
 
 Após sync:
 - `markStaleByProvider` fecha vagas removidas pelo provider
@@ -33,11 +42,17 @@ Após sync:
 - **Página da empresa:** `https://{company}.gupy.io/jobs/{id}` (ex.: [afya.gupy.io/jobs/11299164](https://afya.gupy.io/jobs/11299164))
 - Importação por URL persiste a **URL original** colada pelo usuário em `sourceUrl`
 - API de detalhe: `employability-portal.gupy.io/api/v1/jobs/{id}`
+- A API retorna `jobUrl` com URL da career page quando disponível (ex.: `{empresa}.gupy.io/job/...`) — persistir exatamente esse valor
 - **Fallback:** se a API retorna 404 (vaga encerrada/arquivada), o extractor busca a página pública e extrai dados do JSON-LD `JobPosting` (`gupy-page.parser.ts`). O preview inclui aviso quando candidaturas estão encerradas.
+- **Backfill:** `backend/scripts/backfill-gupy-source-urls.ts` atualiza vagas antigas com `portal.gupy.io` via re-fetch da API
 
 ## Env
 
-- `ENABLE_PROVIDER_GUPY=true`
-- `ENABLE_SCHEDULER=true` (local only — Vercel usa sync manual)
+- `ENABLE_PROVIDER_GUPY=true` (default)
+- `ENABLE_PROVIDER_LINKEDIN=true` (default — guest API + HTML parser)
+- `ENABLE_PROVIDER_PROGRAMATHOR=false` (default)
+- `ENABLE_SCHEDULER=true` (local only — Vercel usa cron + botão no site)
+- `CRON_SECRET` (obrigatório em produção — Vercel envia como Bearer token no cron)
+- `SYNC_INTERVAL=3600000` (ms — scheduler local; cron Vercel usa schedule fixo 1h)
 
 Ver [ARCHITECTURE.md](./ARCHITECTURE.md) · [API_CONTRACT.md](./API_CONTRACT.md)

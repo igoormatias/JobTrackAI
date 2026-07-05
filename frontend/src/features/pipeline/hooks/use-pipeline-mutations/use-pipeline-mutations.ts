@@ -2,14 +2,14 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import { queryKeys } from "@/lib/query-client/query-keys";
 
 import { archiveApplication, deleteApplication, favoriteApplication } from "../../services/pipeline-service";
 import { removeApplicationFromCache } from "../../utils/update-pipeline-cache";
 
 const invalidateRelated = (queryClient: ReturnType<typeof useQueryClient>) => {
-  void queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
-  void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+  invalidateCareerSurfaces(queryClient);
   void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
   void queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
 };

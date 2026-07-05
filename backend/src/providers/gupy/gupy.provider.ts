@@ -23,28 +23,35 @@ const mapModality = (workplaceType?: string): string | null => {
   }
 };
 
-const extractExternalId = (jobUrl: string): string => {
-  const normalized = normalizeSourceUrl(jobUrl);
+const extractExternalId = (raw: GupyRawJob): string => {
+  if (raw.id !== undefined) return String(raw.id);
+  const normalized = normalizeSourceUrl(raw.jobUrl);
   const parts = normalized.split("/").filter(Boolean);
-  return parts[parts.length - 1] ?? normalized;
+  return parts[parts.length - 1]?.split("?")[0] ?? normalized;
+};
+
+const resolveGupySourceUrl = (raw: GupyRawJob): string => {
+  if (raw.jobUrl?.trim()) return normalizeSourceUrl(raw.jobUrl);
+  if (raw.careerPageUrl?.trim()) return normalizeSourceUrl(raw.careerPageUrl);
+  return "";
 };
 
 const mapGupyJob = (raw: GupyRawJob): NormalizedJob => {
   const publishedAt = raw.publishedDate ? new Date(raw.publishedDate) : new Date();
-  const sourceUrl = normalizeSourceUrl(raw.jobUrl);
+  const sourceUrl = resolveGupySourceUrl(raw);
   const location = [raw.city, raw.state].filter(Boolean).join(", ") || null;
 
   const job: NormalizedJob = {
     title: raw.name.trim(),
     company: raw.careerPageName.trim(),
-    description: `${raw.name} na ${raw.careerPageName}`,
-    technologies: [],
+    description: raw.description?.trim() || `${raw.name} na ${raw.careerPageName}`,
+    technologies: raw.skills ?? [],
     modality: mapModality(raw.workplaceType),
     location,
     sourceUrl,
     provider: "gupy",
     publishedAt,
-    externalId: extractExternalId(raw.jobUrl),
+    externalId: extractExternalId(raw),
     contentHash: "",
   };
 

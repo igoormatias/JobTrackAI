@@ -13,7 +13,7 @@ const serializeCsv = (values: string[] | undefined): string | undefined =>
 
 export const urlFiltersToJobListParams = (filters: JobUrlFilters): JobListParams => ({
   q: filters.search || undefined,
-  sortBy: filters.sort ?? "match",
+  sortBy: filters.sort ?? "recent",
   sortDirection: filters.dir ?? "desc",
   areas: filters.areas,
   companyIds: filters.companyIds,

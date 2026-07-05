@@ -17,7 +17,7 @@ export const LoginProductCard = ({ icon: Icon, title, description, accent, index
     className={LOGIN_LAYOUT.productCard}
   >
     <div
-      className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${accent}`}
+      className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br ${accent}`}
     >
       <Icon className="h-5 w-5 text-primary" aria-hidden />
     </div>

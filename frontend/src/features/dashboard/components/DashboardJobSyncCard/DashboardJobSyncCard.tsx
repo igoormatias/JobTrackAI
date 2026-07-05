@@ -4,10 +4,15 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { RefreshCw } from "lucide-react";
 
+import { REFRESH_FREQUENCY_OPTIONS } from "@/features/account/constants/settings-options";
+import { useSettingsQuery } from "@/features/account/queries";
+import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Muted } from "@/components/typography";
 import type { DashboardJobSync } from "@/types";
+
+import { useProviderSyncMutation } from "../../hooks/use-provider-sync";
 
 type DashboardJobSyncCardProps = {
   jobSync: DashboardJobSync;
@@ -32,7 +37,14 @@ const getProviderStatus = (
   return latest?.status ?? null;
 };
 
-export const DashboardJobSyncCard = ({ jobSync }: DashboardJobSyncCardProps) => (
+export const DashboardJobSyncCard = ({ jobSync }: DashboardJobSyncCardProps) => {
+  const { data: settings } = useSettingsQuery();
+  const syncMutation = useProviderSyncMutation();
+  const autoSyncLabel = REFRESH_FREQUENCY_OPTIONS.find(
+    (option) => option.value === settings?.jobRefreshFrequency,
+  )?.label;
+
+  return (
   <Card>
     <CardHeader className="flex flex-row items-center gap-2 space-y-0">
       <RefreshCw className="h-4 w-4 text-muted-foreground" />
@@ -106,6 +118,24 @@ export const DashboardJobSyncCard = ({ jobSync }: DashboardJobSyncCardProps) => 
           </ul>
         </div>
       ) : null}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => syncMutation.mutate()}
+          disabled={syncMutation.isPending}
+          isLoading={syncMutation.isPending}
+        >
+          <RefreshCw className="h-4 w-4" aria-hidden />
+          Sincronizar agora
+        </Button>
+        {settings?.jobRefreshFrequency && settings.jobRefreshFrequency !== "manual" && autoSyncLabel ? (
+          <Muted>Auto-sync: {autoSyncLabel.toLowerCase()}</Muted>
+        ) : null}
+      </div>
     </CardContent>
   </Card>
-);
+  );
+};

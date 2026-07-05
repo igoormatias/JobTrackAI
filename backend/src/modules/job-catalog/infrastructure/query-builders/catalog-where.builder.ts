@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
+import { normalizeCompanyFilterValues } from "../../../../shared/utils/company-filter.utils.js";
 import type { CatalogListFilters } from "../../domain/value-objects/catalog-list-filters.js";
 
 const toArray = (value?: string | string[]): string[] | undefined => {
@@ -69,8 +70,11 @@ export const buildCatalogWhere = (
     and.push({ area: { in: normalized.areas } });
   }
 
-  if (normalized.companyIds?.length) {
-    and.push({ companySlug: { in: normalized.companyIds } });
+  const companySlugs = normalizeCompanyFilterValues(
+    normalized.companyIds ?? toArray(normalized.companyIds as unknown as string),
+  );
+  if (companySlugs?.length) {
+    and.push({ companySlug: { in: companySlugs } });
   }
 
   if (normalized.seniorities?.length) {

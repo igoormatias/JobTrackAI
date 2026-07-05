@@ -23,6 +23,11 @@ export type CalendarEventItem = {
   start: string;
   end: string;
   source?: "interview" | "google";
+  trackingId?: string | null;
+  jobTitle?: string | null;
+  companyName?: string | null;
+  stage?: string | null;
+  meetingType?: string | null;
 };
 
 export type CalendarSyncResult = {

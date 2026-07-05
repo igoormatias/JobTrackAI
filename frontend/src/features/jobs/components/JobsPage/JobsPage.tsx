@@ -45,7 +45,12 @@ export const JobsPage = () => {
   });
 
   const companies = useMemo(
-    () => companiesData?.data.map((company) => ({ id: company.id, name: company.name })) ?? [],
+    () =>
+      companiesData?.data.map((company) => ({
+        id: company.id,
+        slug: company.slug,
+        name: company.name,
+      })) ?? [],
     [companiesData],
   );
 

@@ -11,7 +11,7 @@ import type { useJobFilters } from "../../hooks/use-job-filters";
 
 export type JobsFilterSheetProps = {
   filters: ReturnType<typeof useJobFilters>;
-  companies: { id: string; name: string }[];
+  companies: { id: string; slug: string; name: string }[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 };

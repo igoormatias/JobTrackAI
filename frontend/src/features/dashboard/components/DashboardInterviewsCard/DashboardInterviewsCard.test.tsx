@@ -18,11 +18,15 @@ describe("DashboardInterviewsCard", () => {
           {
             id: "i1",
             applicationId: "a1",
+            trackingId: "a1",
             jobTitle: "Frontend Engineer",
             companyName: "Nubank",
             scheduledAt: "2026-06-28T14:00:00.000Z",
             stage: "Entrevista técnica",
             status: "Entrevista técnica",
+            meetingType: "video",
+            location: null,
+            source: "interview",
             link: null,
           },
         ]}

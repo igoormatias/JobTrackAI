@@ -1,6 +1,7 @@
 import {
   Briefcase,
   Calendar,
+  EyeOff,
   Heart,
   Sparkles,
   Target,
@@ -24,6 +25,18 @@ export const KPI_CONFIG: Record<string, KpiConfig> = {
   kpi_favorites: {
     icon: Heart,
     description: "Vagas que você salvou para acompanhar",
+  },
+  kpi_high_priority: {
+    icon: Target,
+    description: "Processos marcados como alta prioridade",
+  },
+  kpi_hidden: {
+    icon: EyeOff,
+    description: "Vagas ocultadas da listagem principal",
+  },
+  kpi_in_process: {
+    icon: Briefcase,
+    description: "Processos ativos fora de descoberta",
   },
   kpi_applications: {
     icon: Sparkles,

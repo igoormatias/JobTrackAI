@@ -7,6 +7,7 @@ import { Activity } from "lucide-react";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { DashboardActivity } from "@/types";
+import { cn } from "@/lib/utils";
 
 import { getActivityMeta } from "../../utils/get-activity-meta";
 
@@ -27,23 +28,25 @@ export const DashboardActivityTimeline = ({ activities }: DashboardActivityTimel
           description="Suas ações e novidades aparecerão aqui em tempo real."
         />
       ) : (
-        <ol className="relative space-y-0 border-l border-border pl-4">
+        <ol className="space-y-4">
           {activities.map((activity) => {
             const meta = getActivityMeta(activity.type);
             const Icon = meta.icon;
 
             return (
-              <li key={activity.id} className="relative pb-6 last:pb-0">
-                <span className="absolute left-[1.35rem] flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background">
-                  <Icon className="h-3 w-3 text-primary" aria-hidden="true" />
-                </span>
-                <div className="min-w-0 space-y-1">
-                  <p className="truncate text-sm font-medium text-foreground">{activity.title}</p>
+              <li key={activity.id} className="flex gap-3">
+                <div
+                  className={cn(
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border",
+                    meta.iconClassName,
+                  )}
+                >
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="line-clamp-1 text-sm font-medium text-foreground">{activity.title}</p>
                   <p className="line-clamp-2 text-sm text-muted-foreground">{activity.description}</p>
-                  <time
-                    className="text-xs text-muted-foreground"
-                    dateTime={activity.occurredAt}
-                  >
+                  <time className="text-xs text-muted-foreground" dateTime={activity.occurredAt}>
                     {formatDistanceToNow(new Date(activity.occurredAt), {
                       addSuffix: true,
                       locale: ptBR,

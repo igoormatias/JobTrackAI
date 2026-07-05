@@ -173,11 +173,15 @@ export const buildPersonalizedDashboard = ({
     .map((app) => ({
       id: `interview_${app.id}`,
       applicationId: app.id,
+      trackingId: app.id,
       jobTitle: app.job.title,
       companyName: app.job.company.name,
       scheduledAt: app.nextInterviewAt!,
       stage: PIPELINE_STAGE_LABELS[app.stage],
       status: PIPELINE_STAGE_LABELS[app.stage],
+      meetingType: null,
+      location: null,
+      source: "interview" as const,
       link: null,
     }));
 

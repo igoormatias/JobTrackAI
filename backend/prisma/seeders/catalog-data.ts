@@ -100,6 +100,7 @@ export const buildSeedExternalId = (source: (typeof SOURCES)[number], index: num
 export const buildSourceUrl = (source: (typeof SOURCES)[number], externalId: string): string => {
   switch (source) {
     case "gupy":
+      // Dev seed only — real sync persists provider jobUrl (career page when available).
       return `https://portal.gupy.io/job/${externalId}`;
     case "linkedin":
       return `https://www.linkedin.com/jobs/view/${externalId}`;

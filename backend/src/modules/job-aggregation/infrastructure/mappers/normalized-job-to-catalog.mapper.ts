@@ -1,3 +1,4 @@
+import { jobTitleNormalizer } from "../../../match/domain/services/job-title-normalizer.service.js";
 import type { NormalizedJob } from "../../domain/entities/normalized-job.entity.js";
 import type { CatalogJobUpsertInput } from "../../../job-catalog/domain/value-objects/catalog-list-filters.js";
 
@@ -12,6 +13,7 @@ const slugify = (value: string): string =>
 export const toCatalogUpsertInput = (job: NormalizedJob): CatalogJobUpsertInput => ({
   companyName: job.company,
   companySlug: slugify(job.company),
+  area: jobTitleNormalizer.inferArea(job.title) ?? null,
   title: job.title,
   slug: slugify(`${job.title}-${job.company}-${job.externalId}`),
   description: job.description || `${job.title} na ${job.company}`,

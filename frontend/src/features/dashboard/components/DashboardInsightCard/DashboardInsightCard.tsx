@@ -17,7 +17,12 @@ export const DashboardInsightCard = ({ insight }: DashboardInsightCardProps) => 
     <CardContent>
       <p className="text-sm leading-relaxed text-muted-foreground">{insight.message}</p>
       {insight.trendPercent !== undefined ? (
-        <p className="mt-3 text-xs font-medium text-primary">+{insight.trendPercent}% esta semana</p>
+        <p
+          className={`mt-3 text-xs font-medium ${insight.trendPercent >= 0 ? "text-primary" : "text-destructive"}`}
+        >
+          {insight.trendPercent >= 0 ? "+" : ""}
+          {insight.trendPercent}% esta semana
+        </p>
       ) : null}
     </CardContent>
   </Card>
