@@ -6,10 +6,7 @@ import type { DisconnectCalendarUseCase } from "../../../application/use-cases/d
 import type { GetCalendarStatusUseCase } from "../../../application/use-cases/get-calendar-status.use-case.js";
 import type { GetGoogleCalendarAuthUrlUseCase } from "../../../application/use-cases/get-google-calendar-auth-url.use-case.js";
 import type { ListCalendarEventsUseCase } from "../../../application/use-cases/list-calendar-events.use-case.js";
-import {
-  dismissCalendarPromptUseCase,
-  DismissCalendarPromptUseCase,
-} from "../../../application/use-cases/dismiss-calendar-prompt.use-case.js";
+import type { DismissCalendarPromptUseCase } from "../../../application/use-cases/dismiss-calendar-prompt.use-case.js";
 import {
   googleCallbackSchema,
   listCalendarEventsQuerySchema,
@@ -22,7 +19,7 @@ export class CalendarController {
     private readonly connectGoogleCalendarUseCase: ConnectGoogleCalendarUseCase,
     private readonly disconnectCalendarUseCase: DisconnectCalendarUseCase,
     private readonly listCalendarEventsUseCase: ListCalendarEventsUseCase,
-    private readonly dismissCalendarPromptUseCase: DismissCalendarPromptUseCase = dismissCalendarPromptUseCase,
+    private readonly dismissCalendarPromptUseCase: DismissCalendarPromptUseCase,
   ) {}
 
   getStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

@@ -6,6 +6,7 @@ import { DisconnectCalendarUseCase } from "../../../application/use-cases/discon
 import { GetCalendarStatusUseCase } from "../../../application/use-cases/get-calendar-status.use-case.js";
 import { GetGoogleCalendarAuthUrlUseCase } from "../../../application/use-cases/get-google-calendar-auth-url.use-case.js";
 import { ListCalendarEventsUseCase } from "../../../application/use-cases/list-calendar-events.use-case.js";
+import { DismissCalendarPromptUseCase } from "../../../application/use-cases/dismiss-calendar-prompt.use-case.js";
 import { googleCalendarProvider } from "../../providers/google-calendar.provider.js";
 import { prismaCalendarIntegrationRepository } from "../../repositories/prisma-calendar-integration.repository.js";
 import { CalendarController } from "../controllers/calendar.controller.js";
@@ -21,6 +22,7 @@ export const createCalendarRoutes = (): Router => {
     new ConnectGoogleCalendarUseCase(repository, provider),
     new DisconnectCalendarUseCase(repository),
     new ListCalendarEventsUseCase(repository, provider),
+    new DismissCalendarPromptUseCase(),
   );
 
   router.use(requireAuth);

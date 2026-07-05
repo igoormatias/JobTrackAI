@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 
 import { logger } from "../../../../config/logger.js";
 import { prisma } from "../../../../database/prisma.js";
-import { syncInterviewCalendarEventUseCase } from "../../../calendar/index.js";
+import { syncInterviewCalendarEventUseCase } from "../../../calendar/application/use-cases/sync-interview-calendar-event.instance.js";
 import type { JobPriority } from "../../../../shared/domain/job-priority.js";
 import type { JobVisibility } from "../../../../shared/domain/job-visibility.js";
 import { eventBus } from "../../../../shared/events/event-bus.js";

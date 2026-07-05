@@ -4,14 +4,6 @@ export { ConnectGoogleCalendarUseCase } from "./application/use-cases/connect-go
 export { DisconnectCalendarUseCase } from "./application/use-cases/disconnect-calendar.use-case.js";
 export { GetCalendarStatusUseCase } from "./application/use-cases/get-calendar-status.use-case.js";
 export { SyncInterviewCalendarEventUseCase } from "./application/use-cases/sync-interview-calendar-event.use-case.js";
+export { syncInterviewCalendarEventUseCase } from "./application/use-cases/sync-interview-calendar-event.instance.js";
 export { GoogleCalendarProvider } from "./infrastructure/providers/google-calendar.provider.js";
 export { prismaCalendarIntegrationRepository } from "./infrastructure/repositories/prisma-calendar-integration.repository.js";
-
-import { SyncInterviewCalendarEventUseCase } from "./application/use-cases/sync-interview-calendar-event.use-case.js";
-import { googleCalendarProvider } from "./infrastructure/providers/google-calendar.provider.js";
-import { prismaCalendarIntegrationRepository } from "./infrastructure/repositories/prisma-calendar-integration.repository.js";
-
-export const syncInterviewCalendarEventUseCase = new SyncInterviewCalendarEventUseCase(
-  prismaCalendarIntegrationRepository,
-  googleCalendarProvider,
-);

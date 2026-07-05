@@ -14,5 +14,3 @@ export class DismissCalendarPromptUseCase {
     });
   }
 }
-
-export const dismissCalendarPromptUseCase = new DismissCalendarPromptUseCase();
