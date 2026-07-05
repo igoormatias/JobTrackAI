@@ -16,18 +16,16 @@ Guia de integração com fontes de vagas (Job Aggregation + URL Import).
 | LinkedIn | Real (`linkedin.provider.ts` — guest API + HTML parser) | Stub (422) | Produção (sync) |
 | Programathor | Stub | Stub (422) | Arquitetura pronta |
 
-## Sync manual / scheduler / site
+## Sync manual / site
 
 ```bash
 POST /providers/run          # todos habilitados (auth + rate limit)
-POST /providers/run/:provider # um provider
-GET  /internal/cron/provider-sync  # Vercel Cron (Bearer CRON_SECRET)
+POST /providers/run/:provider  # um provider
 ```
 
-**Pelo site (MVP):**
+**Pelo site (MVP — Vercel Hobby):**
 - Dashboard → card **Sincronização de vagas** → botão **Sincronizar agora**
-- Auto-sync enquanto logado: frequência em **Configurações → Atualização automática de vagas** (`jobRefreshFrequency`: `15m` | `30m` | `1h` | `2h` | `manual`)
-- **Vercel Cron** (global, 1h): `GET /api/backend/internal/cron/provider-sync` — requer `CRON_SECRET` no backend
+- Auto-sync enquanto logado: **Configurações → Atualização automática de vagas** (`jobRefreshFrequency`: `15m` | `30m` | `1h` | `2h` | `manual`)
 
 **Local (processo longo):**
 - `ENABLE_SCHEDULER=true` + `SYNC_INTERVAL` (ms) — ver [`server.ts`](../backend/src/server.ts)
@@ -51,8 +49,7 @@ Após sync:
 - `ENABLE_PROVIDER_GUPY=true` (default)
 - `ENABLE_PROVIDER_LINKEDIN=true` (default — guest API + HTML parser)
 - `ENABLE_PROVIDER_PROGRAMATHOR=false` (default)
-- `ENABLE_SCHEDULER=true` (local only — Vercel usa cron + botão no site)
-- `CRON_SECRET` (obrigatório em produção — Vercel envia como Bearer token no cron)
-- `SYNC_INTERVAL=3600000` (ms — scheduler local; cron Vercel usa schedule fixo 1h)
+- `ENABLE_SCHEDULER=true` (local only — Vercel usa botão + auto-sync no site)
+- `SYNC_INTERVAL=3600000` (ms — scheduler local)
 
 Ver [ARCHITECTURE.md](./ARCHITECTURE.md) · [API_CONTRACT.md](./API_CONTRACT.md)

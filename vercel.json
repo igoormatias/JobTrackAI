@@ -1,10 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/backend/internal/cron/provider-sync",
-      "schedule": "0 * * * *"
-    }
-  ],
   "services": {
     "frontend": {
       "root": "frontend",

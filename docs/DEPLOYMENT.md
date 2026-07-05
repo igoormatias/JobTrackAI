@@ -43,23 +43,11 @@ Requisições usam `withCredentials: true` — **mesmo domínio** obrigatório p
 | `ENABLE_PROVIDER_GUPY` | Não | Default `true` |
 | `ENABLE_PROVIDER_LINKEDIN` | Não | Default `true` |
 | `ENABLE_PROVIDER_PROGRAMATHOR` | Não | Default `false` |
-| `CRON_SECRET` | Sim (prod) | Secret para Vercel Cron (`GET /internal/cron/provider-sync`) |
 | `SYNC_INTERVAL` | Não | Scheduler local (ms); default `3600000` |
 
 **Nunca** definir `LOG_PRETTY=true` na Vercel.
 
-### Vercel Cron (sync de providers)
-
-[`vercel.json`](../vercel.json) agenda sync a cada hora:
-
-```json
-"path": "/api/backend/internal/cron/provider-sync",
-"schedule": "0 * * * *"
-```
-
-Configure `CRON_SECRET` no serviço **backend** na Vercel. A plataforma envia `Authorization: Bearer <CRON_SECRET>` automaticamente.
-
-Sync adicional pelo usuário: Dashboard → **Sincronizar agora**; auto-sync conforme `jobRefreshFrequency` nas Configurações.
+**Sync de providers em produção:** Dashboard → **Sincronizar agora**; auto-sync conforme `jobRefreshFrequency` nas Configurações (sem Vercel Cron no plano Hobby).
 
 ### Frontend (Vercel — serviço frontend)
 
