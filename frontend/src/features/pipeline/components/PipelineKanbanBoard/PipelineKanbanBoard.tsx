@@ -25,6 +25,7 @@ export type PipelineKanbanBoardProps = {
   onOpenDetails: (application: Application) => void;
   onEdit?: (application: Application) => void;
   onFavorite: (application: Application) => void;
+  onDelete?: (application: Application) => void;
   isMovePending?: boolean;
   visibleStage?: PipelineStage | null;
   mobile?: boolean;
@@ -36,6 +37,7 @@ export const PipelineKanbanBoard = ({
   onOpenDetails,
   onEdit,
   onFavorite,
+  onDelete,
   isMovePending,
   visibleStage,
   mobile,
@@ -85,6 +87,7 @@ export const PipelineKanbanBoard = ({
       onOpenDetails={onOpenDetails}
       onEdit={onEdit}
       onFavorite={onFavorite}
+      onDelete={onDelete}
       onChangeStage={mobile ? onMove : undefined}
       activeCardId={activeApplication?.id}
       className={mobile ? "w-full" : undefined}
@@ -118,6 +121,7 @@ export const PipelineKanbanBoard = ({
             onOpenDetails={onOpenDetails}
             onEdit={onEdit}
             onFavorite={onFavorite}
+            onDelete={onDelete}
             isDragging
             isPending={isMovePending}
           />

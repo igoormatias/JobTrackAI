@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import { PIPELINE_STAGE_LABELS } from "@/features/pipeline/constants/pipeline-co
 import { PipelineApplicationTimeline } from "@/features/pipeline/components/PipelineApplicationTimeline";
 import { EditProcessModal } from "@/features/process-detail/components/EditProcessModal";
 import { ChangeStageSheet } from "@/features/tracking/components/ChangeStageSheet";
+import { DeleteProcessDialog } from "@/features/tracking/components/DeleteProcessDialog";
 import { ScheduleInterviewDialog } from "@/features/tracking/components/ScheduleInterviewDialog";
 import { StageDateConfirmDialog } from "@/features/tracking/components/StageDateConfirmDialog/StageDateConfirmDialog";
 import { useTrackingByIdQuery } from "@/features/tracking/hooks/use-tracking-by-id-query";
@@ -31,6 +32,8 @@ import { createInterview } from "@/features/tracking/services/tracking-service";
 import { openJobUrl } from "@/lib/jobs/open-job-url";
 import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import type { Application, JobPriority, PipelineStage, TimelineEvent, TimelineEventType } from "@/types";
+
+import { useDeleteApplicationMutation } from "@/features/pipeline/hooks/use-pipeline-mutations";
 
 import { PROCESS_DETAIL_LAYOUT } from "../../constants/process-detail-layout";
 
@@ -75,6 +78,7 @@ export type ProcessDetailPageProps = {
 };
 
 export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { data: tracking, isLoading, isError } = useTrackingByIdQuery(trackingId);
@@ -85,6 +89,8 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
   const [stageSheetOpen, setStageSheetOpen] = useState(false);
   const [pendingStage, setPendingStage] = useState<PipelineStage | null>(null);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const deleteMutation = useDeleteApplicationMutation();
 
   const scheduleInterviewMutation = useMutation({
     mutationFn: (values: { scheduledAt: string; link?: string | null; notes?: string | null }) =>
@@ -193,6 +199,9 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
               Abrir vaga
             </Button>
           ) : null}
+          <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+            Excluir processo
+          </Button>
         </div>
       </div>
 
@@ -449,6 +458,22 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
         application={interviewApplication}
         isPending={scheduleInterviewMutation.isPending}
         onSubmit={(values) => scheduleInterviewMutation.mutate(values)}
+      />
+
+      <DeleteProcessDialog
+        application={{ id: tracking.id, job: tracking.job } as Application}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        isPending={deleteMutation.isPending}
+        onConfirm={() => {
+          deleteMutation.mutate(tracking.id, {
+            onSuccess: () => {
+              toast.success("Processo excluído");
+              router.push("/pipeline");
+            },
+            onError: () => toast.error("Não foi possível excluir o processo"),
+          });
+        }}
       />
     </div>
   );

@@ -9,6 +9,7 @@ import {
   MoreVertical,
   Pencil,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 import { memo } from "react";
 
@@ -37,6 +38,7 @@ export type PipelineApplicationCardProps = {
   onOpenDetails: (application: Application) => void;
   onEdit?: (application: Application) => void;
   onFavorite: (application: Application) => void;
+  onDelete?: (application: Application) => void;
   onChangeStage?: (application: Application) => void;
   isDragging?: boolean;
   isPending?: boolean;
@@ -48,6 +50,7 @@ const PipelineApplicationCardComponent = ({
   onOpenDetails,
   onEdit,
   onFavorite,
+  onDelete,
   onChangeStage,
   isDragging,
   isPending,
@@ -76,6 +79,11 @@ const PipelineApplicationCardComponent = ({
       <DropdownItem onClick={() => onFavorite(application)}>
         {job.isFavorite ? "Desfavoritar" : "Favoritar"}
       </DropdownItem>
+      {onDelete ? (
+        <DropdownItem className="text-destructive focus:text-destructive" onClick={() => onDelete(application)}>
+          Excluir processo
+        </DropdownItem>
+      ) : null}
     </>
   );
 
@@ -181,6 +189,18 @@ const PipelineApplicationCardComponent = ({
           >
             <Bookmark className={cn("h-4 w-4", job.isFavorite && "fill-current")} />
           </Button>
+          {onDelete ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => onDelete(application)}
+              aria-label="Excluir processo"
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          ) : null}
         </div>
       </CardContent>
     </Card>

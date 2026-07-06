@@ -35,9 +35,19 @@ export class LinkedinUrlExtractor implements UrlJobExtractor {
     }
 
     const html = await response.text();
-    const parsed = parseLinkedinJobViewHtml(html, trimmed);
+    const finalUrl = response.url.trim();
+
+    if (!LINKEDIN_VIEW_PATTERN.test(finalUrl)) {
+      throw new ValidationError(
+        "LinkedIn redirecionou para outra página. A vaga pode exigir login — tente cadastro manual ou copie o link direto da publicação.",
+      );
+    }
+
+    const parsed = parseLinkedinJobViewHtml(html, finalUrl);
     if (!parsed) {
-      throw new ValidationError("Could not extract job data from LinkedIn page");
+      throw new ValidationError(
+        "Não foi possível extrair a vaga do LinkedIn. A página pode exigir login ou o link pode estar expirado — use cadastro manual.",
+      );
     }
 
     return { job: linkedinProvider.normalize(parsed) };

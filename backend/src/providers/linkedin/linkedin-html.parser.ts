@@ -50,6 +50,43 @@ const extractJobIdFromUrl = (url: string): string | null => {
   return match?.[1] ?? null;
 };
 
+/** LinkedIn often returns a login wall or job-search HTML for /jobs/view/{id} without auth. */
+export const isLinkedinJobSearchResultsPage = (html: string, title: string): boolean => {
+  const normalizedTitle = title.trim();
+  if (!normalizedTitle) return true;
+
+  const searchTitlePatterns = [
+    /\d[\d.,]*\s*\+?\s*vagas?\s+(de\s+)?/i,
+    /vagas?\s+em\s*:/i,
+    /jobs?\s+in\s+/i,
+    /^\+?\s*de\s+\d/i,
+  ];
+  if (searchTitlePatterns.some((pattern) => pattern.test(normalizedTitle))) return true;
+
+  const loginWallMarkers = [
+    /Entre para ver mais vagas/i,
+    /Sign in to view more jobs/i,
+    /authwall/i,
+    /join-linkedin/i,
+  ];
+  if (loginWallMarkers.some((pattern) => pattern.test(html))) return true;
+
+  const $ = load(html);
+  if ($("div.base-card").length > 1) return true;
+  if ($('[data-tracking-control-name="public_jobs_jserp-result"]').length > 0) return true;
+
+  const hasJobPostingLd = /"@type"\s*:\s*"JobPosting"/i.test(html);
+  const hasJobViewLayout =
+    $(".top-card-layout__title, .jobs-unified-top-card__job-title, .job-details-jobs-unified-top-card__job-title")
+      .length > 0;
+
+  if (!hasJobPostingLd && !hasJobViewLayout && normalizedTitle.split(/\s+/).length > 12) {
+    return true;
+  }
+
+  return false;
+};
+
 const extractSalaryFromJsonLd = (html: string): { salaryMin?: number; salaryMax?: number } => {
   const match = html.match(
     /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i,
@@ -85,7 +122,7 @@ export const parseLinkedinJobViewHtml = (html: string, sourceUrl: string): Linke
   const description =
     $(".description__text, .show-more-less-html").first().text().trim().slice(0, 2000) || undefined;
 
-  if (!title) return null;
+  if (!title || isLinkedinJobSearchResultsPage(html, title)) return null;
 
   const salaryFromLd = extractSalaryFromJsonLd(html);
 

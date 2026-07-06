@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import type { Application, PipelineData, PipelineStage } from "@/types";
 
 import { StageDateConfirmDialog } from "@/features/tracking/components/StageDateConfirmDialog/StageDateConfirmDialog";
+import { DeleteProcessDialog } from "@/features/tracking/components/DeleteProcessDialog";
 import { useMoveTrackingStageMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 
 import { PipelineBoardSkeleton } from "../../components/PipelineBoardSkeleton";
@@ -14,6 +15,7 @@ import { PipelineEmptyState } from "../../components/PipelineEmptyState";
 import { PipelineKanbanBoard } from "../../components/PipelineKanbanBoard";
 import { PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
 import {
+  useDeleteApplicationMutation,
   useFavoriteApplicationMutation,
 } from "../../hooks/use-pipeline-mutations";
 import { usePipelineFilters } from "../../hooks/use-pipeline-filters";
@@ -40,8 +42,10 @@ export const PipelineBoardWidget = ({
   const isLoading = dataProp === undefined && isQueryLoading;
   const moveMutation = useMoveTrackingStageMutation();
   const favoriteMutation = useFavoriteApplicationMutation();
+  const deleteMutation = useDeleteApplicationMutation();
   const [mobileStage, setMobileStage] = useState<PipelineStage>("applied");
   const [pendingMove, setPendingMove] = useState<{ id: string; stage: PipelineStage } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Application | null>(null);
 
   const columnCounts = useMemo(() => {
     if (!data) return {};
@@ -77,6 +81,24 @@ export const PipelineBoardWidget = ({
     [favoriteMutation],
   );
 
+  const handleDeleteRequest = useCallback((application: Application) => {
+    setDeleteTarget(application);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        toast.success("Processo excluído");
+        setDeleteTarget(null);
+      },
+      onError: () => toast.error("Não foi possível excluir o processo"),
+    });
+  }, [deleteMutation, deleteTarget]);
+
+  const visibleMobileCount = columnCounts[mobileStage] ?? 0;
+  const showMobileStageHint = data != null && data.totalApplications > visibleMobileCount;
+
   if (isLoading || !data) return <PipelineBoardSkeleton />;
 
   if (data.totalApplications === 0) {
@@ -92,6 +114,17 @@ export const PipelineBoardWidget = ({
         onChange={setMobileStage}
       />
 
+      {showMobileStageHint ? (
+        <p className="text-sm text-muted-foreground lg:hidden">
+          Exibindo {visibleMobileCount} de {data.totalApplications} processos nesta etapa. Use as abas acima
+          para ver os demais.
+        </p>
+      ) : null}
+
+      <p className="hidden text-xs text-muted-foreground lg:block">
+        Role horizontalmente para ver todas as etapas do pipeline.
+      </p>
+
       <div className="lg:hidden">
         <PipelineKanbanBoard
           columns={data.columns}
@@ -99,6 +132,7 @@ export const PipelineBoardWidget = ({
           onOpenDetails={onOpenDetails}
           onEdit={onEdit}
           onFavorite={handleFavorite}
+          onDelete={handleDeleteRequest}
           isMovePending={moveMutation.isPending}
           visibleStage={mobileStage}
           mobile
@@ -112,9 +146,20 @@ export const PipelineBoardWidget = ({
           onOpenDetails={onOpenDetails}
           onEdit={onEdit}
           onFavorite={handleFavorite}
+          onDelete={handleDeleteRequest}
           isMovePending={moveMutation.isPending}
         />
       </div>
+
+      <DeleteProcessDialog
+        application={deleteTarget}
+        open={deleteTarget != null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        onConfirm={confirmDelete}
+        isPending={deleteMutation.isPending}
+      />
 
       <StageDateConfirmDialog
         open={Boolean(pendingMove)}

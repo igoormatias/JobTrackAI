@@ -15,6 +15,7 @@ export type PipelineKanbanColumnProps = {
   onOpenDetails: (application: Application) => void;
   onEdit?: (application: Application) => void;
   onFavorite: (application: Application) => void;
+  onDelete?: (application: Application) => void;
   onChangeStage?: (applicationId: string, stage: PipelineStage) => void;
   activeCardId?: string | null;
   className?: string;
@@ -26,6 +27,7 @@ const PipelineKanbanColumnComponent = ({
   onOpenDetails,
   onEdit,
   onFavorite,
+  onDelete,
   onChangeStage,
   activeCardId,
   className,
@@ -65,6 +67,7 @@ const PipelineKanbanColumnComponent = ({
                 onOpenDetails={onOpenDetails}
                 onEdit={onEdit}
                 onFavorite={onFavorite}
+                onDelete={onDelete}
                 onChangeStage={onChangeStage}
                 isPending={activeCardId === application.id}
                 enableDrag={enableDrag}
