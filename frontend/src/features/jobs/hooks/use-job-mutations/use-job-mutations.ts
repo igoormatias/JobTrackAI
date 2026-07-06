@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import { queryKeys } from "@/lib/query-client/query-keys";
 import type { Job } from "@/types";
 
@@ -52,7 +53,7 @@ export const useJobMutations = () => {
     mutationFn: ({ id, isFavorite }: { id: string; isFavorite: boolean }) => favoriteJob(id, isFavorite),
     onSuccess: (job) => {
       updateJobInCache(job);
-      void invalidateJobs();
+      invalidateCareerSurfaces(queryClient);
     },
   });
 

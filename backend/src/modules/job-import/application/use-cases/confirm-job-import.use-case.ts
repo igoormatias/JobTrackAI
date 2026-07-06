@@ -79,7 +79,7 @@ export class ConfirmJobImportUseCase {
         location: jobData.location ?? undefined,
         externalId: jobData.externalId,
         contentHash: jobData.contentHash,
-        technologies: jobData.technologies,
+        technologies: jobData.technologies?.map((name) => ({ name })),
       });
       jobId = created.id;
     } else {

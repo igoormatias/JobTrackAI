@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 
-import { getTitleSearchHintsForArea } from "../../../match/domain/services/job-title-normalizer.service.js";
-import type { ProfessionalArea } from "../../domain/entities/profile.entity.js";
-import { prismaProfileRepository } from "../../infrastructure/repositories/prisma-profile.repository.js";
+import { getTitleSearchHintsForArea } from "../../../../match/domain/services/job-title-normalizer.service.js";
+import type { ProfessionalArea } from "../../../domain/entities/profile.entity.js";
+import { prismaProfileRepository } from "../../repositories/prisma-profile.repository.js";
 
 export const getJobSearchHints = async (req: Request, res: Response): Promise<void> => {
   const userId = req.auth!.userId;

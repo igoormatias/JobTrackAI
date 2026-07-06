@@ -16,7 +16,7 @@ export class ProgramathorUrlExtractor implements UrlJobExtractor {
 
   async extract(_url: string): Promise<UrlJobExtractResult> {
     throw new ValidationError(
-      "Programathor URL import is not supported yet. Add the job manually or use a Gupy link.",
+      "Importação por URL do Programathor em breve. Use um link Gupy ou LinkedIn, ou cadastre a vaga manualmente.",
     );
   }
 }

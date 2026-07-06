@@ -20,7 +20,7 @@ export class GetDashboardUseCase implements UseCase<string, DashboardResponseDto
     const data = await this.dashboardRepository.getDashboardData(userId);
     const now = Date.now();
     const horizonEnd = new Date(now + 90 * 86_400_000).toISOString();
-    const allUpcoming = await this.careerEvents.listEvents(userId, new Date().toISOString(), horizonEnd);
+    const allUpcoming = await this.careerEvents.listEvents(userId, new Date(), new Date(horizonEnd));
     const futureEvents = allUpcoming
       .filter((event) => new Date(event.start).getTime() >= now)
       .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());

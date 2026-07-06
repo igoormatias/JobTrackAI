@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { completeOnboarding } from "@/features/auth/services/auth-service";
 import type { OnboardingCompletePayload } from "@/features/auth/types";
+import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import { queryKeys } from "@/lib/query-client/query-keys";
 import type { CreateProfilePayload, UpdateProfilePayload } from "@/types";
 
@@ -23,8 +24,7 @@ export const useSaveProfile = () => {
     }) => saveOnboardingProfile(payload, exists),
      onSuccess: (profile) => {
       queryClient.setQueryData(onboardingQueryKeys.profile(), profile);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      invalidateCareerSurfaces(queryClient);
       void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
       void queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
     },
@@ -35,11 +35,9 @@ export const useSaveProfile = () => {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.auth.me() });
       void queryClient.invalidateQueries({ queryKey: onboardingQueryKeys.profile() });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      invalidateCareerSurfaces(queryClient);
       void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
       void queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
     },
   });
 

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import { REALTIME_EVENT_NAMES, type RealtimeEventName } from "@/events/types/event-names";
 import { queryKeys } from "@/lib/query-client/query-keys";
 import { createPollingRealtimeClient } from "@/lib/realtime/polling-realtime-client";
@@ -32,11 +33,10 @@ const invalidateForEvent = (
       void queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
       break;
     case REALTIME_EVENT_NAMES.PIPELINE_UPDATE:
-      void queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
+      invalidateCareerSurfaces(queryClient);
       break;
     case REALTIME_EVENT_NAMES.DASHBOARD_UPDATE:
-      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      invalidateCareerSurfaces(queryClient);
       break;
     case REALTIME_EVENT_NAMES.NOTIFICATIONS_NEW:
       void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
