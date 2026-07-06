@@ -55,7 +55,14 @@ describe("JobService", () => {
   it("lists jobs via catalog use case", async () => {
     vi.mocked(listCatalogJobsUseCase.execute).mockResolvedValue({
       data: [sampleJob("job_0001")],
-      meta: { limit: 10, total: 1, hasMore: false, nextCursor: null },
+      meta: {
+        limit: 10,
+        total: 1,
+        hasMore: false,
+        nextCursor: null,
+        jobsWithSalary: 1,
+        salaryCoverageRatio: 1,
+      },
     });
 
     const service = new JobService();

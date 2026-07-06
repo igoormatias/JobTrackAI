@@ -29,7 +29,9 @@ import type {
 import {
   buildCatalogOrderBy,
   buildCatalogWhere,
+  buildCatalogWhereWithoutSalaryFilters,
   buildCursorWhere,
+  buildJobWithSalaryFilter,
   encodeCursor,
   normalizeCatalogFilters,
 } from "../query-builders/catalog-where.builder.js";
@@ -56,7 +58,28 @@ type TrackingFilterContext = {
   excludeJobIds?: string[];
 };
 
+const emptySalaryMeta = {
+  jobsWithSalary: 0,
+  salaryCoverageRatio: 0,
+};
+
 export class PrismaJobCatalogRepository implements JobCatalogRepository {
+  private async resolveSalaryCoverageMeta(
+    filters: CatalogListFilters,
+    trackingContext: TrackingFilterContext,
+  ): Promise<{ jobsWithSalary: number; salaryCoverageRatio: number }> {
+    const coverageWhere = buildCatalogWhereWithoutSalaryFilters(filters, trackingContext);
+    const coverageTotal = await prisma.job.count({ where: coverageWhere });
+    const jobsWithSalary = await prisma.job.count({
+      where: { AND: [coverageWhere, buildJobWithSalaryFilter()] },
+    });
+
+    return {
+      jobsWithSalary,
+      salaryCoverageRatio: coverageTotal > 0 ? jobsWithSalary / coverageTotal : 0,
+    };
+  }
+
   async list(filters: CatalogListFilters): Promise<CatalogListResult<Job>> {
     const normalized = normalizeCatalogFilters(filters);
     const limit = normalized.limit ?? 20;
@@ -65,18 +88,22 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
 
     const trackingContext = await this.resolveTrackingFilters(normalized);
     if (trackingContext.includeJobIds && trackingContext.includeJobIds.length === 0) {
-      return { data: [], meta: { limit, total: 0, hasMore: false, nextCursor: null } };
+      return {
+        data: [],
+        meta: { limit, total: 0, hasMore: false, nextCursor: null, ...emptySalaryMeta },
+      };
     }
 
     const baseWhere = buildCatalogWhere(normalized, trackingContext);
     const total = await prisma.job.count({ where: baseWhere });
+    const salaryMeta = await this.resolveSalaryCoverageMeta(normalized, trackingContext);
 
     if (sortBy === "match" || normalized.matchMin !== undefined) {
-      return this.listWithMatchSort(normalized, baseWhere, total, limit);
+      return this.listWithMatchSort(normalized, baseWhere, total, limit, salaryMeta);
     }
 
     if (sortBy === "recent" || sortBy === "priority") {
-      return this.listWithCompositeSort(normalized, baseWhere, total, limit, sortBy);
+      return this.listWithCompositeSort(normalized, baseWhere, total, limit, sortBy, salaryMeta);
     }
 
     const cursorWhere = normalized.cursor ? buildCursorWhere(normalized.cursor, sortDirection) : undefined;
@@ -100,7 +127,7 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
 
     return {
       data,
-      meta: { limit, total, hasMore, nextCursor },
+      meta: { limit, total, hasMore, nextCursor, ...salaryMeta },
     };
   }
 
@@ -332,6 +359,7 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
     baseWhere: Prisma.JobWhereInput,
     total: number,
     limit: number,
+    salaryMeta: { jobsWithSalary: number; salaryCoverageRatio: number },
   ): Promise<CatalogListResult<Job>> {
     const records = await prisma.job.findMany({
       where: baseWhere,
@@ -384,6 +412,7 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
         total: filters.matchMin !== undefined ? jobs.length : total,
         hasMore,
         nextCursor,
+        ...salaryMeta,
       },
     };
   }
@@ -394,6 +423,7 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
     total: number,
     limit: number,
     sortBy: "recent" | "priority",
+    salaryMeta: { jobsWithSalary: number; salaryCoverageRatio: number },
   ): Promise<CatalogListResult<Job>> {
     const records = await prisma.job.findMany({
       where: baseWhere,
@@ -451,7 +481,7 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
 
     return {
       data,
-      meta: { limit, total, hasMore, nextCursor },
+      meta: { limit, total, hasMore, nextCursor, ...salaryMeta },
     };
   }
 

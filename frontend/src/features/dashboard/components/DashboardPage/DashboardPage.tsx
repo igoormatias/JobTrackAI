@@ -29,7 +29,7 @@ export const DashboardPage = () => {
 
   if (isError || !data) {
     return (
-      <div className="flex flex-col items-center gap-4 py-12 text-center">
+      <div className="flex w-full min-w-0 flex-col items-center gap-4 py-12 text-center">
         <Muted>Não foi possível carregar o dashboard.</Muted>
         <Button variant="outline" onClick={() => refetch()} disabled={isRefetching}>
           Tentar novamente
@@ -41,7 +41,7 @@ export const DashboardPage = () => {
   const topJobs = topJobsData?.data ?? [];
 
   return (
-    <div className={DASHBOARD_LAYOUT.page}>
+    <div className={`${DASHBOARD_LAYOUT.page} min-w-0`}>
       <DashboardWelcome />
       <div className="grid gap-4 lg:grid-cols-2">
         <DashboardJobSyncCard jobSync={data.jobSync} />

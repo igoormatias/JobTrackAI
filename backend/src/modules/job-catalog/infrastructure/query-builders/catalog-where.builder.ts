@@ -29,6 +29,31 @@ export const buildActiveJobFreshnessFilter = (): Prisma.JobWhereInput => ({
   OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
 });
 
+/** Jobs with at least one salary field populated. */
+export const buildJobWithSalaryFilter = (): Prisma.JobWhereInput => ({
+  OR: [{ salaryMin: { not: null } }, { salaryMax: { not: null } }],
+});
+
+/** Jobs with no salary data persisted — always included when salary filters are active. */
+export const buildJobWithoutSalaryFilter = (): Prisma.JobWhereInput => ({
+  AND: [{ salaryMin: null }, { salaryMax: null }],
+});
+
+export const buildCatalogWhereWithoutSalaryFilters = (
+  filters: CatalogListFilters,
+  context: CatalogWhereContext = {},
+): Prisma.JobWhereInput =>
+  buildCatalogWhere(
+    { ...normalizeCatalogFilters(filters), salaryMin: undefined, salaryMax: undefined },
+    context,
+  );
+
+const resolveSalaryMin = (value?: number): number | undefined =>
+  value !== undefined && value > 0 ? value : undefined;
+
+const resolveSalaryMax = (value?: number): number | undefined =>
+  value !== undefined && value > 0 ? value : undefined;
+
 export const buildCatalogWhere = (
   filters: CatalogListFilters,
   context: CatalogWhereContext = {},
@@ -93,12 +118,19 @@ export const buildCatalogWhere = (
     and.push({ location: { contains: normalized.location, mode: "insensitive" } });
   }
 
-  if (normalized.salaryMin !== undefined) {
-    and.push({ salaryMax: { gte: normalized.salaryMin } });
+  const salaryMin = resolveSalaryMin(normalized.salaryMin);
+  const salaryMax = resolveSalaryMax(normalized.salaryMax);
+
+  if (salaryMin !== undefined) {
+    and.push({
+      OR: [buildJobWithoutSalaryFilter(), { salaryMax: { gte: salaryMin } }],
+    });
   }
 
-  if (normalized.salaryMax !== undefined) {
-    and.push({ salaryMin: { lte: normalized.salaryMax } });
+  if (salaryMax !== undefined) {
+    and.push({
+      OR: [buildJobWithoutSalaryFilter(), { salaryMin: { lte: salaryMax } }],
+    });
   }
 
   if (normalized.dateFrom) {

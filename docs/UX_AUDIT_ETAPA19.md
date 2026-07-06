@@ -85,3 +85,45 @@ Auditoria do frontend e match engine antes da estabilização. Cada item documen
 - [x] Profile / Onboarding / Login
 
 Viewport alvo: Desktop (≥1280px), Notebook (1024px), Tablet (768px), Mobile (375px).
+
+---
+
+## Etapa XX — Refinamentos Gerais de UX
+
+| Área | Causa raiz | Impacto | Solução |
+|------|------------|---------|---------|
+| Login | Colunas centralizadas verticalmente em `lg` | Hero mais alto “flutuava” o card | `lg:items-start`, grid produto `sm:grid-cols-2`, auth `min-h` |
+| Pipeline mobile | DnD para coluna invisível | Impossível mudar estágio | Select no `EditProcessModal` + sheet "Alterar status" no card |
+| Dedup / Import | `skip` mesmo com dados alterados | Vagas duplicadas | `DedupStrategy` → `update`; confirm retorna `isExisting` |
+| Jobs | Filtros vazios na entrada | Descoberta não personalizada | `buildProfileDefaultJobFilters` + banner "Filtros do seu perfil" |
+| Dashboard entrevistas | KPI e card com fontes distintas | Números divergentes | `CareerEventsService` única fonte; DTO enriquecido |
+| Dashboard empresas | Top 10 catálogo por match | Label "recorrentes" enganosa | Agregação por tracking do usuário |
+| Dashboard tecnologias | Só `metadata` do catálogo | Card vazio p/ manual/LinkedIn | Skills do tracking + `SkillMatcher` |
+| Notificações | Scroll mantido entre aberturas | Lista começa no meio | `scrollTop = 0` ao abrir popover |
+| Cache React Query | Invalidação parcial | Dashboard desatualizado | `invalidateCareerSurfaces` em profile, import, favoritos, realtime |
+
+### Páginas validadas (Etapa XX)
+
+- [x] Login — 375px / 768px / 1024px / 1280px
+- [x] Jobs — filtros do perfil, skills no form, import URL
+- [x] Dashboard — loading skeleton top jobs, empty states, KPI grid responsivo
+- [x] Pipeline — status mobile, DnD desktop inalterado
+- [x] Notificações — scroll reset + skeleton
+
+---
+
+## Etapa 13 — Layout e Filtro Salarial
+
+| Área | Causa raiz | Impacto | Solução |
+|------|------------|---------|---------|
+| `EmptyState` | `text-balance` em container estreito | Descrição com uma palavra por linha | `break-words` + `max-w-md`; remover `text-balance` |
+| Jobs empty state | Sem `min-w-0` no wrapper | Texto comprimido no flex pai | `w-full min-w-0` em `JobsResultsWidget` |
+| Filtro salarial | Prisma `salaryMax gte X` exclui null | Zero resultados com defaults do perfil | OR com vagas sem salário; remover `salaryMin` dos defaults |
+| Cobertura salarial | Gupy/LinkedIn sem salário na maioria | Filtro inútil | `salaryCoverageRatio` no meta; ocultar UI &lt; 10% |
+| Importação | JSON-LD sem parser de `baseSalary` | Salário não persistido | `parseJobPostingSalary` em Gupy/LinkedIn |
+
+### Páginas validadas (Etapa 13)
+
+- [x] Jobs — empty state legível; filtro salarial condicional
+- [x] Dashboard — erro state com `min-w-0`
+- [x] Login / Pipeline — sem regressão (auditoria pontual)

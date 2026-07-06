@@ -1,4 +1,5 @@
 import type { GupyRawJob, GupyWorkplaceType } from "./gupy.types.js";
+import { parseJobPostingSalary } from "../../shared/utils/parse-job-posting-salary.js";
 
 type JobPostingJsonLd = {
   "@type"?: string;
@@ -11,6 +12,7 @@ type JobPostingJsonLd = {
     address?: { streetAddress?: string; addressCountry?: string };
     additionalProperty?: { value?: string };
   };
+  baseSalary?: unknown;
 };
 
 const decodeHtmlEntities = (value: string): string =>
@@ -74,6 +76,7 @@ export const mapJobPostingToGupyRaw = (
   const street = posting.jobLocation?.address?.streetAddress?.trim();
   const country = posting.jobLocation?.address?.addressCountry?.trim();
   const location = [street, country].filter(Boolean).join(", ") || undefined;
+  const salary = parseJobPostingSalary(posting.baseSalary);
 
   return {
     jobUrl: sourceUrl,
@@ -83,6 +86,8 @@ export const mapJobPostingToGupyRaw = (
     state: country ?? undefined,
     workplaceType: mapWorkplaceType(posting.jobLocation?.additionalProperty?.value),
     publishedDate: posting.datePosted,
+    salaryMin: salary?.salaryMin,
+    salaryMax: salary?.salaryMax,
   };
 };
 

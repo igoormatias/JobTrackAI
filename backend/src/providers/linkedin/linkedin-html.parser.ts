@@ -1,5 +1,6 @@
 import { load } from "cheerio";
 
+import { parseJobPostingSalary } from "../../shared/utils/parse-job-posting-salary.js";
 import type { LinkedinRawJob } from "./linkedin.types.js";
 
 const stripQuery = (url: string): string => url.split("?")[0] ?? url;
@@ -49,6 +50,23 @@ const extractJobIdFromUrl = (url: string): string | null => {
   return match?.[1] ?? null;
 };
 
+const extractSalaryFromJsonLd = (html: string): { salaryMin?: number; salaryMax?: number } => {
+  const match = html.match(
+    /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i,
+  );
+  if (!match?.[1]) return {};
+
+  try {
+    const parsed = JSON.parse(match[1].trim()) as { "@type"?: string; baseSalary?: unknown };
+    if (parsed["@type"] !== "JobPosting") return {};
+    const salary = parseJobPostingSalary(parsed.baseSalary);
+    if (!salary) return {};
+    return { salaryMin: salary.salaryMin, salaryMax: salary.salaryMax };
+  } catch {
+    return {};
+  }
+};
+
 export const parseLinkedinJobViewHtml = (html: string, sourceUrl: string): LinkedinRawJob | null => {
   const $ = load(html);
   const externalId = extractJobIdFromUrl(sourceUrl);
@@ -69,6 +87,8 @@ export const parseLinkedinJobViewHtml = (html: string, sourceUrl: string): Linke
 
   if (!title) return null;
 
+  const salaryFromLd = extractSalaryFromJsonLd(html);
+
   return {
     title,
     company: company || "Empresa não informada",
@@ -76,5 +96,7 @@ export const parseLinkedinJobViewHtml = (html: string, sourceUrl: string): Linke
     sourceUrl: stripQuery(sourceUrl),
     externalId,
     description,
+    salaryMin: salaryFromLd.salaryMin,
+    salaryMax: salaryFromLd.salaryMax,
   };
 };

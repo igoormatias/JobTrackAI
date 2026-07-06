@@ -20,8 +20,8 @@ export const urlFiltersToJobListParams = (filters: JobUrlFilters): JobListParams
   seniorities: filters.seniorities,
   modalities: filters.modalities,
   location: filters.location || undefined,
-  salaryMin: filters.salaryMin,
-  salaryMax: filters.salaryMax,
+  salaryMin: filters.salaryMin && filters.salaryMin > 0 ? filters.salaryMin : undefined,
+  salaryMax: filters.salaryMax && filters.salaryMax > 0 ? filters.salaryMax : undefined,
   skills: filters.skills,
   matchMin: filters.matchMin,
   dateFrom: filters.dateFrom || undefined,
@@ -84,8 +84,8 @@ export const serializeJobUrlSearchParams = (filters: JobUrlFilters): Record<stri
   if (filters.seniorities?.length) entries.seniorities = serializeCsv(filters.seniorities)!;
   if (filters.modalities?.length) entries.modalities = serializeCsv(filters.modalities)!;
   if (filters.location) entries.location = filters.location;
-  if (filters.salaryMin !== undefined) entries.salaryMin = String(filters.salaryMin);
-  if (filters.salaryMax !== undefined) entries.salaryMax = String(filters.salaryMax);
+  if (filters.salaryMin !== undefined && filters.salaryMin > 0) entries.salaryMin = String(filters.salaryMin);
+  if (filters.salaryMax !== undefined && filters.salaryMax > 0) entries.salaryMax = String(filters.salaryMax);
   if (filters.skills?.length) entries.skills = serializeCsv(filters.skills)!;
   if (filters.matchMin !== undefined) entries.matchMin = String(filters.matchMin);
   if (filters.dateFrom) entries.dateFrom = filters.dateFrom;
@@ -104,8 +104,8 @@ export const hasActiveJobFilters = (filters: JobUrlFilters): boolean =>
       filters.seniorities?.length ||
       filters.modalities?.length ||
       filters.location ||
-      filters.salaryMin !== undefined ||
-      filters.salaryMax !== undefined ||
+      (filters.salaryMin !== undefined && filters.salaryMin > 0) ||
+      (filters.salaryMax !== undefined && filters.salaryMax > 0) ||
       filters.skills?.length ||
       filters.matchMin !== undefined ||
       filters.dateFrom ||

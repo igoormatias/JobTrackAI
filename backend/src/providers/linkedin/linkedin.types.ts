@@ -7,4 +7,6 @@ export type LinkedinRawJob = {
   publishedDate?: string;
   modality?: string | null;
   description?: string;
+  salaryMin?: number;
+  salaryMax?: number;
 };

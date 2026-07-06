@@ -37,10 +37,6 @@ export const mapJobSearchHintsToFilters = (hints: JobSearchHints): Partial<Filte
     filters.search = hints.titleHints[0];
   }
 
-  if (hints.salaryExpectation?.min) {
-    filters.salaryMin = hints.salaryExpectation.min;
-  }
-
   return filters;
 };
 
@@ -51,8 +47,7 @@ export const hasProfileDefaultFilters = (defaults: Partial<FilterState>): boolea
       defaults.modalities?.length ||
       defaults.skills?.length ||
       defaults.location ||
-      defaults.search ||
-      defaults.salaryMin != null,
+      defaults.search,
   );
 
 export const loadProfileDefaultFilters = async (): Promise<Partial<FilterState>> => {

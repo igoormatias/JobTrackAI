@@ -64,6 +64,9 @@ export const DEFAULT_JOB_LIST_LIMIT = 20;
 export const DEFAULT_JOB_SORT: JobSortField = "recent";
 export const DEFAULT_JOB_SORT_DIRECTION: SortDirection = "desc";
 
+/** Hide salary filter when fewer than 10% of filtered jobs report salary. */
+export const SALARY_FILTER_MIN_COVERAGE = 0.1;
+
 export const FAVORITE_JOB_SURFACE_CLASS = "border-amber-500/50 bg-amber-500/5";
 export const FAVORITE_JOB_BADGE_CLASS = "bg-amber-500/15 text-amber-700 dark:text-amber-300";
 

@@ -30,10 +30,10 @@ export const EmptyState = ({
           <Icon className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
         </div>
       ) : null}
-      <div className="mx-auto w-full min-w-0 max-w-sm space-y-2">
+      <div className="mx-auto w-full min-w-0 max-w-md space-y-2">
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         {description ? (
-          <p className="text-balance text-sm text-muted-foreground">{description}</p>
+          <p className="break-words text-sm leading-relaxed text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {action ? <div className="mx-auto">{action}</div> : null}

@@ -57,12 +57,20 @@ export const filterJobs = (jobs: Job[], params: JobListParams): Job[] => {
     result = result.filter((job) => job.location.toLowerCase().includes(location));
   }
 
-  if (params.salaryMin !== undefined) {
-    result = result.filter((job) => (job.salaryMax ?? 0) >= params.salaryMin!);
+  if (params.salaryMin !== undefined && params.salaryMin > 0) {
+    result = result.filter(
+      (job) =>
+        (job.salaryMin === null && job.salaryMax === null) ||
+        (job.salaryMax ?? 0) >= params.salaryMin!,
+    );
   }
 
-  if (params.salaryMax !== undefined) {
-    result = result.filter((job) => (job.salaryMin ?? Number.MAX_SAFE_INTEGER) <= params.salaryMax!);
+  if (params.salaryMax !== undefined && params.salaryMax > 0) {
+    result = result.filter(
+      (job) =>
+        (job.salaryMin === null && job.salaryMax === null) ||
+        (job.salaryMin ?? Number.MAX_SAFE_INTEGER) <= params.salaryMax!,
+    );
   }
 
   if (params.skills?.length) {

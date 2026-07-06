@@ -69,6 +69,19 @@ Favorito, prioridade e visibilidade são **ortogonais** ao estágio do pipeline.
 | `GET` | `/profile` | Sim | Retorna perfil do usuário |
 | `POST` | `/profile` | Sim | Cria perfil (onboarding) |
 | `PATCH` | `/profile` | Sim | Atualiza perfil |
+| `GET` | `/profile/job-search-hints` | Sim | Dicas de busca derivadas do perfil (Etapa XX) |
+
+**`GET /profile/job-search-hints` — resposta `data`:**
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `area` | string \| null | Área profissional |
+| `titleHints` | string[] | Aliases de cargo sugeridos para `search`/`q` |
+| `skillNames` | string[] | Skills do perfil |
+| `seniority` | string \| null | Senioridade |
+| `modality` | string \| null | Modalidade preferida |
+| `location` | object \| null | Localização do perfil |
+| `salaryExpectation` | string \| null | Faixa salarial |
 
 **Campos MVP:** área, senioridade, competências (`skillNames`), modalidade, localização, pretensão salarial.
 
@@ -140,6 +153,12 @@ Campos `priority`, `visibility` e `hiddenAt` são opcionais até implementação
 | `priority` | `high` \| `medium` \| `low` | — |
 | `isFavorite` | `true` \| `false` | — |
 | `sortBy` | `match` \| `date` \| `salary` \| `title` \| `company` \| `priority` | — |
+| `salaryMin` | inteiro > 0 (BRL mensal) | — |
+| `salaryMax` | inteiro > 0 (BRL mensal) | — |
+
+**Filtro salarial (Etapa 13):** `salaryMin`/`salaryMax` aplicam-se apenas a vagas com salário informado. Vagas sem `salaryMin`/`salaryMax` **nunca** são excluídas pelo filtro.
+
+**Meta da listagem (`meta`):** além de `limit`, `total`, `hasMore`, `nextCursor`, inclui `jobsWithSalary` e `salaryCoverageRatio` (0–1) calculados sobre o conjunto filtrado **sem** considerar `salaryMin`/`salaryMax`. O frontend oculta o controle salarial quando `salaryCoverageRatio < 0.1`.
 
 ### Cadastro manual `POST /jobs`
 
@@ -228,7 +247,26 @@ Atualizado automaticamente em cada movimentação de card. Editável indiretamen
 
 **MSW (dev):** `GET /dashboard`, `GET /notifications` — handlers no frontend; backend real em evolução.
 
-**KPIs preparados (implementação futura):** favoritas, alta prioridade, ocultadas, em processo, entrevistas.
+**Dashboard (`GET /dashboard`) — campos principais (Etapa XX):**
+
+| Campo | Descrição |
+|-------|-----------|
+| `kpis` | KPIs incl. `kpi_interviews` alinhado a `CareerEventsService` |
+| `upcomingInterviews` | Próximas 5 entrevistas (Google + pipeline): `scheduledAt`, `companyName`, `jobTitle`, `stage`, `meetingType`, `source`, `link` |
+| `topCompanies` | `DashboardCompanyInsight[]` — agregação do **tracking do usuário** (`totalJobs`, `inProgress`, `favorites`, `lastInteractionAt`, `bestMatchScore`) |
+| `topTechnologies` | Skills normalizadas a partir dos jobs do tracking do usuário |
+| `jobSync` | `lastSyncAt`, `totalCatalogJobs`, `jobsByProvider`, `recentExecutions`, `providerErrors24h` |
+
+### Job Import por URL (Etapa XX)
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| `POST` | `/jobs/import/preview` | Sim | Extrai metadados da URL (Gupy, LinkedIn) |
+| `POST` | `/jobs/import/confirm` | Sim | Persiste vaga; dedup idempotente |
+
+**Confirm — resposta `data`:** `job`, `tracking?`, `isExisting?` (quando URL/hash já existe → reutiliza job sem duplicar).
+
+**Providers suportados:** Gupy, LinkedIn. Programathor retorna `422` com mensagem "em breve".
 
 ---
 
@@ -256,7 +294,7 @@ Contrato alvo (MSW implementado; backend em evolução):
 | `POST` | `/providers/run` | Sim + rate limit | Executa todos os providers habilitados |
 | `POST` | `/providers/run/:provider` | Sim + rate limit | Executa um provider |
 
-**Dashboard (`GET /dashboard`):** inclui `jobSync` com `lastSyncAt`, `totalCatalogJobs`, `jobsByProvider`, `recentExecutions`, `providerErrors24h`.
+**Dashboard (`GET /dashboard`):** inclui `jobSync` com `lastSyncAt`, `totalCatalogJobs`, `jobsByProvider`, `recentExecutions`, `providerErrors24h`. Ver seção Recommendations/Dashboard acima para DTOs Etapa XX.
 
 ---
 

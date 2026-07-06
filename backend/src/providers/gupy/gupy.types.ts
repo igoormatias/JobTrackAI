@@ -16,6 +16,8 @@ export type GupyRawJob = {
   publishedDate?: string;
   description?: string;
   skills?: string[];
+  salaryMin?: number;
+  salaryMax?: number;
 };
 
 export type GupyApiResponse = {

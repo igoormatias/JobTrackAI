@@ -12,13 +12,19 @@ export type JobsFilterBarProps = {
   filters: ReturnType<typeof useJobFilters>;
   companies: { id: string; slug: string; name: string }[];
   onOpenAllFilters?: () => void;
+  showSalaryFilter?: boolean;
 };
 
-export const JobsFilterBar = ({ filters, companies, onOpenAllFilters }: JobsFilterBarProps) => {
+export const JobsFilterBar = ({
+  filters,
+  companies,
+  onOpenAllFilters,
+  showSalaryFilter = true,
+}: JobsFilterBarProps) => {
   const { urlState, setUrlState, hasActiveFilters, clearFilters } = filters;
 
   return (
-    <div className="hidden space-y-3 lg:block">
+    <div className="hidden min-w-0 space-y-3 lg:block">
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" size="sm" onClick={onOpenAllFilters}>
           <SlidersHorizontal className="mr-1 h-4 w-4" />
@@ -31,7 +37,12 @@ export const JobsFilterBar = ({ filters, companies, onOpenAllFilters }: JobsFilt
         ) : null}
       </div>
       <div className="rounded-lg border border-border/60 bg-card/40 p-4">
-        <JobsFilterFields urlState={urlState} setUrlState={setUrlState} companies={companies} />
+        <JobsFilterFields
+          urlState={urlState}
+          setUrlState={setUrlState}
+          companies={companies}
+          showSalaryFilter={showSalaryFilter}
+        />
       </div>
       {urlState.areas.length > 0 || urlState.modalities.length > 0 ? (
         <div className="flex flex-wrap gap-2">

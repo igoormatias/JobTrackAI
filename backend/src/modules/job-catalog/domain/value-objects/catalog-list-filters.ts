@@ -32,6 +32,8 @@ export type CatalogListResultMeta = {
   total: number;
   nextCursor: string | null;
   hasMore: boolean;
+  jobsWithSalary: number;
+  salaryCoverageRatio: number;
 };
 
 export type CatalogListResult<TJob> = {

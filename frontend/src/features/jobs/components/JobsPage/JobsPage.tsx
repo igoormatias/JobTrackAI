@@ -15,7 +15,7 @@ import { queryKeys } from "@/lib/query-client/query-keys";
 import type { Job, JobSortField, SortDirection } from "@/types";
 
 import { JobsPageSkeleton } from "../../components/JobsPageSkeleton";
-import { JOBS_LAYOUT } from "../../constants/jobs-constants";
+import { JOBS_LAYOUT, SALARY_FILTER_MIN_COVERAGE } from "../../constants/jobs-constants";
 import { useInfiniteJobs } from "../../hooks/use-infinite-jobs";
 import { useJobFilters } from "../../hooks/use-job-filters";
 import { useJobMutations } from "../../hooks/use-job-mutations";
@@ -91,6 +91,15 @@ export const JobsPage = () => {
   );
 
   const total = data?.pages[0]?.meta.total ?? 0;
+  const salaryCoverageRatio = data?.pages[0]?.meta.salaryCoverageRatio ?? 1;
+  const showSalaryFilter = salaryCoverageRatio >= SALARY_FILTER_MIN_COVERAGE;
+
+  useEffect(() => {
+    if (showSalaryFilter) return;
+    if (filters.urlState.salaryMin != null || filters.urlState.salaryMax != null) {
+      void filters.setUrlState({ salaryMin: null, salaryMax: null });
+    }
+  }, [showSalaryFilter, filters.urlState.salaryMin, filters.urlState.salaryMax, filters.setUrlState]);
 
   const handleSortChange = (sort: JobSortField) => {
     void filters.setUrlState({ sort });
@@ -124,7 +133,7 @@ export const JobsPage = () => {
   }
 
   return (
-    <div className={JOBS_LAYOUT.page}>
+    <div className={`${JOBS_LAYOUT.page} min-w-0`}>
       <PageHeader
         title="Explorar Vagas"
         description="Oportunidades personalizadas com base no seu perfil profissional."
@@ -135,7 +144,11 @@ export const JobsPage = () => {
           </Button>
         }
       />
-      <JobsToolbarWidget filters={filters} companies={companies} />
+      <JobsToolbarWidget
+        filters={filters}
+        companies={companies}
+        showSalaryFilter={showSalaryFilter}
+      />
       <JobsResultsWidget
         jobs={jobs}
         total={total}

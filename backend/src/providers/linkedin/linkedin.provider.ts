@@ -34,6 +34,8 @@ const mapLinkedinJob = (raw: LinkedinRawJob): NormalizedJob => {
     seniority: null,
     modality: raw.modality ?? mapModality(raw.location),
     location: raw.location ?? null,
+    salaryMin: raw.salaryMin ?? null,
+    salaryMax: raw.salaryMax ?? null,
     sourceUrl,
     provider: "linkedin",
     publishedAt,

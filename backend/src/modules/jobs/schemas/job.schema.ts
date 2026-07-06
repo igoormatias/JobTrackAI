@@ -19,8 +19,14 @@ export const jobListQuerySchema = z.object({
   modality: z.string().optional(),
   modalities: z.union([z.string(), z.array(z.string())]).optional(),
   location: z.string().optional(),
-  salaryMin: z.coerce.number().optional(),
-  salaryMax: z.coerce.number().optional(),
+  salaryMin: z.coerce
+    .number()
+    .optional()
+    .transform((value) => (value !== undefined && value > 0 ? value : undefined)),
+  salaryMax: z.coerce
+    .number()
+    .optional()
+    .transform((value) => (value !== undefined && value > 0 ? value : undefined)),
   skills: z.union([z.string(), z.array(z.string())]).optional(),
   matchMin: z.coerce.number().optional(),
   dateFrom: z.string().optional(),

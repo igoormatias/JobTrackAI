@@ -100,6 +100,8 @@ export type CursorPaginationMeta = {
   total: number;
   nextCursor: string | null;
   hasMore: boolean;
+  jobsWithSalary: number;
+  salaryCoverageRatio: number;
 };
 
 export type JobListResult = {

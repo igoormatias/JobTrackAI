@@ -53,6 +53,8 @@ const mapGupyJob = (raw: GupyRawJob): NormalizedJob => {
     publishedAt,
     externalId: extractExternalId(raw),
     contentHash: "",
+    salaryMin: raw.salaryMin ?? null,
+    salaryMax: raw.salaryMax ?? null,
   };
 
   return { ...job, contentHash: computeContentHash(job) };

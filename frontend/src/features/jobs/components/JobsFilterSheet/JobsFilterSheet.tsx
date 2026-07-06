@@ -14,6 +14,7 @@ export type JobsFilterSheetProps = {
   companies: { id: string; slug: string; name: string }[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  showSalaryFilter?: boolean;
 };
 
 export const JobsFilterSheet = ({
@@ -21,6 +22,7 @@ export const JobsFilterSheet = ({
   companies,
   open: controlledOpen,
   onOpenChange,
+  showSalaryFilter = true,
 }: JobsFilterSheetProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
@@ -46,6 +48,7 @@ export const JobsFilterSheet = ({
             urlState={filters.urlState}
             setUrlState={filters.setUrlState}
             companies={companies}
+            showSalaryFilter={showSalaryFilter}
           />
           <div className="flex gap-2">
             <Button type="button" className="flex-1" onClick={() => setOpen(false)}>

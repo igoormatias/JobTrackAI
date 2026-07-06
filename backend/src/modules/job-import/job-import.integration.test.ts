@@ -126,7 +126,7 @@ describe("Job import module integration", () => {
 
     vi.stubGlobal(
       "fetch",
-      vi.fn(async (input: RequestInfo | URL) => {
+      vi.fn(async (input: string | URL | Request) => {
         const url = String(input);
         if (url.includes("employability-portal.gupy.io")) {
           return { ok: false, status: 404, json: async () => ({}) };

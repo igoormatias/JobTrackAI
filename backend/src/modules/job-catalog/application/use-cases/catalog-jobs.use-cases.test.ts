@@ -7,7 +7,14 @@ describe("ListCatalogJobsUseCase", () => {
   it("delegates listing to JobCatalogRepository", async () => {
     const list = vi.fn().mockResolvedValue({
       data: [],
-      meta: { limit: 20, total: 0, hasMore: false, nextCursor: null },
+      meta: {
+        limit: 20,
+        total: 0,
+        hasMore: false,
+        nextCursor: null,
+        jobsWithSalary: 0,
+        salaryCoverageRatio: 0,
+      },
     });
 
     const repository = { list } as unknown as JobCatalogRepository;

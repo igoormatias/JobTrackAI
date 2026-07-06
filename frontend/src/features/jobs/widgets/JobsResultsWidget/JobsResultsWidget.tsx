@@ -50,11 +50,19 @@ export const JobsResultsWidget = ({
   favoritePendingId,
 }: JobsResultsWidgetProps) => {
   if (isError) {
-    return <JobsEmptyState variant="error" onRetry={onRetry} />;
+    return (
+      <div className="w-full min-w-0">
+        <JobsEmptyState variant="error" onRetry={onRetry} />
+      </div>
+    );
   }
 
   if (!isLoading && jobs.length === 0) {
-    return <JobsEmptyState variant={emptyVariant} onClearFilters={onClearFilters} />;
+    return (
+      <div className="w-full min-w-0">
+        <JobsEmptyState variant={emptyVariant} onClearFilters={onClearFilters} />
+      </div>
+    );
   }
 
   return (

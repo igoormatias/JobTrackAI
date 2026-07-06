@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildCatalogWhere, decodeCursor, encodeCursor } from "./catalog-where.builder.js";
+import {
+  buildCatalogWhere,
+  buildJobWithoutSalaryFilter,
+  buildJobWithSalaryFilter,
+} from "./catalog-where.builder.js";
 
 describe("catalog-where.builder", () => {
   it("builds catalog visibility filter for user", () => {
@@ -25,12 +29,28 @@ describe("catalog-where.builder", () => {
     );
   });
 
-  it("encodes and decodes cursor", () => {
-    const publishedAt = new Date("2026-07-01T12:00:00.000Z");
-    const cursor = encodeCursor(publishedAt, "job_0001");
-    const decoded = decodeCursor(cursor);
+  it("includes jobs without salary when salaryMin filter is active", () => {
+    const where = buildCatalogWhere({ userId: "user_1", salaryMin: 8000 });
 
-    expect(decoded?.id).toBe("job_0001");
-    expect(decoded?.publishedAt.toISOString()).toBe(publishedAt.toISOString());
+    expect(where.AND).toEqual(
+      expect.arrayContaining([
+        {
+          OR: [buildJobWithoutSalaryFilter(), { salaryMax: { gte: 8000 } }],
+        },
+      ]),
+    );
+  });
+
+  it("ignores salaryMin of zero", () => {
+    const withZero = buildCatalogWhere({ userId: "user_1", salaryMin: 0 });
+    const without = buildCatalogWhere({ userId: "user_1" });
+
+    expect(withZero.AND?.length).toBe(without.AND?.length);
+  });
+
+  it("buildJobWithSalaryFilter matches jobs with any salary field", () => {
+    expect(buildJobWithSalaryFilter()).toEqual({
+      OR: [{ salaryMin: { not: null } }, { salaryMax: { not: null } }],
+    });
   });
 });

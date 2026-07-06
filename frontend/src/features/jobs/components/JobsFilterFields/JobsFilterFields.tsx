@@ -24,12 +24,18 @@ export type JobsFilterFieldsProps = {
   urlState: FilterState;
   setUrlState: ReturnType<typeof useJobFilters>["setUrlState"];
   companies: { id: string; slug: string; name: string }[];
+  showSalaryFilter?: boolean;
 };
 
 const toggleArrayValue = <T extends string>(values: T[], value: T): T[] =>
   values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
 
-export const JobsFilterFields = ({ urlState, setUrlState, companies }: JobsFilterFieldsProps) => {
+export const JobsFilterFields = ({
+  urlState,
+  setUrlState,
+  companies,
+  showSalaryFilter = true,
+}: JobsFilterFieldsProps) => {
   const skillOptions = useMemo(() => {
     const areas = urlState.areas.length
       ? urlState.areas
@@ -143,17 +149,28 @@ export const JobsFilterFields = ({ urlState, setUrlState, companies }: JobsFilte
 
     <section className="space-y-3">
       <h4 className="text-sm font-medium">Faixa salarial mínima</h4>
-      <Slider
-        min={0}
-        max={30000}
-        step={500}
-        value={[urlState.salaryMin ?? 0]}
-        onValueChange={([value]) => void setUrlState({ salaryMin: value })}
-        aria-label="Salário mínimo"
-      />
-      <p className="text-xs text-muted-foreground">
-        A partir de R$ {(urlState.salaryMin ?? 0).toLocaleString("pt-BR")}
-      </p>
+      {showSalaryFilter ? (
+        <>
+          <Slider
+            min={0}
+            max={30000}
+            step={500}
+            value={[urlState.salaryMin ?? 0]}
+            onValueChange={([value]) =>
+              void setUrlState({ salaryMin: value > 0 ? value : null })
+            }
+            aria-label="Salário mínimo"
+          />
+          <p className="text-xs text-muted-foreground">
+            A partir de R$ {(urlState.salaryMin ?? 0).toLocaleString("pt-BR")}
+          </p>
+        </>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Poucas vagas informam salário nos filtros atuais. Este filtro ficará disponível quando
+          houver dados suficientes.
+        </p>
+      )}
     </section>
 
     <section className="space-y-3">
