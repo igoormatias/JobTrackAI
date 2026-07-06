@@ -137,7 +137,10 @@ const createSeedTracking = (index: number, stage: PipelineStage): JobTrackingEnt
     recruiterName: null,
     recruiterEmail: null,
     recruiterPhone: null,
+    recruiterLinkedin: null,
+    tags: [],
     negotiatedSalary: null,
+    salaryExpectation: null,
     processLinks: null,
     aiAnalysisStatus: "PENDING",
     aiAnalyzedAt: null,
@@ -212,7 +215,10 @@ export class InMemoryJobTrackingRepository {
       recruiterName: null,
       recruiterEmail: null,
       recruiterPhone: null,
+      recruiterLinkedin: null,
+      tags: [],
       negotiatedSalary: null,
+      salaryExpectation: null,
       processLinks: null,
       aiAnalysisStatus: "PENDING",
       aiAnalyzedAt: null,
@@ -358,7 +364,12 @@ export class InMemoryJobTrackingRepository {
     if (input.recruiterName !== undefined) tracking.recruiterName = input.recruiterName;
     if (input.recruiterEmail !== undefined) tracking.recruiterEmail = input.recruiterEmail;
     if (input.recruiterPhone !== undefined) tracking.recruiterPhone = input.recruiterPhone;
-    if (input.negotiatedSalary !== undefined) tracking.negotiatedSalary = input.negotiatedSalary;
+    if (input.recruiterLinkedin !== undefined) tracking.recruiterLinkedin = input.recruiterLinkedin;
+    if (input.tags !== undefined) tracking.tags = input.tags;
+    if (input.salaryExpectation !== undefined) tracking.salaryExpectation = input.salaryExpectation;
+    const negotiatedSalary =
+      input.offerValue !== undefined ? input.offerValue : input.negotiatedSalary;
+    if (negotiatedSalary !== undefined) tracking.negotiatedSalary = negotiatedSalary;
     if (input.processLinks !== undefined) tracking.processLinks = input.processLinks;
 
     if (input.priority !== undefined && input.priority !== tracking.priority) {

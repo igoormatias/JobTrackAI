@@ -19,6 +19,9 @@ export const jobListQuerySchema = z.object({
   modality: z.string().optional(),
   modalities: z.union([z.string(), z.array(z.string())]).optional(),
   location: z.string().optional(),
+  locationScope: z.enum(["country", "state", "city"]).optional(),
+  locationState: z.string().optional(),
+  locationCity: z.string().optional(),
   salaryMin: z.coerce
     .number()
     .optional()

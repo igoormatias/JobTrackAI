@@ -143,7 +143,7 @@ export const JobCard = memo(
               Abrir vaga
             </Button>
             <Button type="button" size="sm" onClick={() => onAddToPipeline?.(job)} className="w-full sm:w-auto">
-              Adicionar ao Pipeline
+              Iniciar processo
             </Button>
           </div>
         </CardContent>

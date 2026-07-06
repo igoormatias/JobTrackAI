@@ -28,7 +28,7 @@ Contrato REST oficial alinhado ao escopo do MVP. Ver [MVP_SCOPE.md](./MVP_SCOPE.
 | `JobVisibility` | `VISIBLE` · `HIDDEN` |
 | `JobSource` | `gupy` · `linkedin` · `programathor` · `manual` |
 | `ApplicationStatus` | `active` · `archived` · `withdrawn` |
-| `TimelineEventType` | `created` · `stage_changed` · `priority_changed` · `favorited` · `unfavorited` · `hidden` · `restored` · `note_added` · `note_updated` · `applied` · `interview_scheduled` · `offer_received` · `rejected` |
+| `TimelineEventType` | `process_created` · `created` · `stage_changed` · `priority_changed` · `favorited` · `unfavorited` · `hidden` · `restored` · `note_added` · `note_updated` · `applied` · `interview_scheduled` · `offer` · `offer_received` · `rejected` · `match_recalculated` |
 
 ### Atributos independentes
 
@@ -36,7 +36,9 @@ Favorito, prioridade e visibilidade são **ortogonais** ao estágio do pipeline.
 
 **JobEngagement** (em `Job` response): `isFavorite`, `priority`, `visibility`, `hiddenAt`
 
-**Application** (pipeline): `stage`, `lastStageUpdatedAt`, `notes`, `timeline`, `status`
+**Application** / **ApplicationProcess** (pipeline): `stage`, `lastStageUpdatedAt`, `notes`, `timeline`, `status`, `recruiterLinkedin`, `tags`, `salaryExpectation`, `negotiatedSalary` (`offerValue` no PATCH)
+
+**Job** (catálogo global): read-only no contexto de processo — mutação de título/empresa/descrição/URL/salário publicado **proibida** via API de processo.
 
 ---
 
@@ -80,8 +82,8 @@ Favorito, prioridade e visibilidade são **ortogonais** ao estágio do pipeline.
 | `skillNames` | string[] | Skills do perfil |
 | `seniority` | string \| null | Senioridade |
 | `modality` | string \| null | Modalidade preferida |
-| `location` | object \| null | Localização do perfil |
-| `salaryExpectation` | string \| null | Faixa salarial |
+| `locationPreference` | `{ scope: "country" \| "state" \| "city", state?: string, city?: string }` \| null | Preferência estruturada (não usar string livre) |
+| `salaryExpectation` | object \| null | Faixa salarial `{ min, max, currency }` |
 
 **Campos MVP:** área, senioridade, competências (`skillNames`), modalidade, localização, pretensão salarial.
 
@@ -153,6 +155,10 @@ Campos `priority`, `visibility` e `hiddenAt` são opcionais até implementação
 | `priority` | `high` \| `medium` \| `low` | — |
 | `isFavorite` | `true` \| `false` | — |
 | `sortBy` | `match` \| `date` \| `salary` \| `title` \| `company` \| `priority` | — |
+| `location` | string | Filtro textual (cidade/UF); não usar "Brasil inteiro" |
+| `locationScope` | `country` \| `state` \| `city` | Filtro estruturado (ex.: `country` = remoto + Brasil) |
+| `locationState` | string | UF quando `locationScope=state` ou `city` |
+| `locationCity` | string | Cidade quando `locationScope=city` |
 | `salaryMin` | inteiro > 0 (BRL mensal) | — |
 | `salaryMax` | inteiro > 0 (BRL mensal) | — |
 
@@ -191,6 +197,33 @@ window.open(job.sourceUrl, '_blank', 'noopener,noreferrer')
 |--------|------|--------|-------|
 | `POST` | `/jobs/:id/apply` | **Deprecated** | Não usar em novas implementações. Candidatura é na plataforma original. |
 | `DELETE` | `/jobs/:id/apply` | **Deprecated** | Remover aplicação interna — alinhar com pipeline manual. |
+
+---
+
+## Application Process (`/tracking`) — ADR-034
+
+Nome de produto para `JobTracking`. Rotas e persistência usam `/tracking`; respostas expõem `data` e alias `process`.
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| `GET` | `/tracking` | Sim | Lista processos do usuário |
+| `GET` | `/tracking/:id` | Sim | Detalhe do processo |
+| `POST` | `/tracking` | Sim | Inicia processo (`jobId` ou `job` manual → upsert catálogo global) |
+| `PATCH` | `/tracking/:id/stage` | Sim | Move estágio |
+| `PATCH` | `/tracking/:id/favorite` | Sim | Toggle favorito |
+| `PATCH` | `/tracking/:id/priority` | Sim | Altera prioridade |
+| `PATCH` | `/tracking/:id/visibility` | Sim | Ocultar/restaurar |
+| `PATCH` | `/tracking/:id/notes` | Sim | Observações |
+| `PATCH` | `/tracking/:id/process` | Sim | Metadados do processo (recrutador, tags, `offerValue`, links) — **não** edita campos da vaga |
+| `GET` | `/tracking/:id/timeline` | Sim | Timeline |
+| `PATCH` | `/tracking/:id/timeline/:eventId` | Sim | Editar evento |
+| `GET/POST/PATCH` | `/tracking/:id/interviews` | Sim | Entrevistas do processo |
+
+**Resposta (exemplo):** `{ "data": { ... }, "process": { ... } }` — mesmo payload.
+
+**`PATCH /tracking/:id/process` — campos permitidos:** `notes`, `feedback`, `priority`, `isFavorite`, `recruiterName`, `recruiterEmail`, `recruiterPhone`, `recruiterLinkedin`, `tags`, `negotiatedSalary`, `offerValue` (alias), `salaryExpectation`, `processLinks`.
+
+**Proibido:** mutar `Job.title`, `Job.companyName`, `Job.description`, `Job.sourceUrl`, salário publicado da vaga.
 
 ---
 
@@ -235,7 +268,12 @@ Atualizado automaticamente em cada movimentação de card. Editável indiretamen
 | `favorited` / `unfavorited` | Toggle favorito |
 | `hidden` / `restored` | Ocultar / restaurar |
 | `note_added` / `note_updated` | Observações |
-| `created` | Entrada criada |
+| `process_created` | Processo iniciado (`POST /tracking`) |
+| `interview_scheduled` | Entrevista criada |
+| `offer` | Estágio movido para oferta |
+| `rejected` | Processo encerrado (`closed`) |
+| `match_recalculated` | Análise IA concluída em background |
+| `created` | Legado — preferir `process_created` |
 
 ---
 

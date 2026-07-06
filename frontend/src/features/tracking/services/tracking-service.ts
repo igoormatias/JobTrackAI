@@ -41,7 +41,10 @@ export type TrackingDetail = JobTracking & {
   recruiterName: string | null;
   recruiterEmail: string | null;
   recruiterPhone: string | null;
+  recruiterLinkedin: string | null;
+  tags: string[];
   negotiatedSalary: number | null;
+  salaryExpectation: { min: number; max: number; currency: "BRL" } | null;
   processLinks: Record<string, string> | null;
   aiAnalysisStatus: string;
   aiAnalyzedAt: string | null;
@@ -57,7 +60,11 @@ export type UpdateProcessPayload = {
   recruiterName?: string | null;
   recruiterEmail?: string | null;
   recruiterPhone?: string | null;
+  recruiterLinkedin?: string | null;
+  tags?: string[];
   negotiatedSalary?: number | null;
+  offerValue?: number | null;
+  salaryExpectation?: { min: number; max: number; currency: "BRL" } | null;
   processLinks?: Record<string, string> | null;
 };
 

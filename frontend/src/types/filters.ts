@@ -24,6 +24,9 @@ export type JobListParams = {
   modality?: WorkModality;
   modalities?: WorkModality[];
   location?: string;
+  locationScope?: "country" | "state" | "city";
+  locationState?: string;
+  locationCity?: string;
   salaryMin?: number;
   salaryMax?: number;
   skills?: string[];

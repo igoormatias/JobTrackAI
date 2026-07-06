@@ -31,7 +31,7 @@ export const JobsFilterBar = ({
           Todos os Filtros
         </Button>
         {hasActiveFilters ? (
-          <Button type="button" variant="ghost" size="sm" onClick={clearFilters}>
+          <Button type="button" variant="ghost" size="sm" onClick={() => clearFilters({ skipProfileDefaults: true })}>
             Limpar filtros
           </Button>
         ) : null}

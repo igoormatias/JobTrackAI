@@ -16,7 +16,11 @@ export type JobSearchHints = {
   skillNames: string[];
   seniority: Seniority | null;
   modality: WorkModality | null;
-  location: string | null;
+  locationPreference: {
+    scope: "country" | "state" | "city";
+    state?: string;
+    city?: string;
+  } | null;
   salaryExpectation: SalaryRange | null;
 };
 

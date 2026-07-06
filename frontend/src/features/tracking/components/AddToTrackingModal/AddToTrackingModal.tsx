@@ -117,7 +117,7 @@ export const AddToTrackingModal = ({
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent className="w-[min(42rem,calc(100vw-2rem))]" data-dialog-content="wide">
         <ModalHeader>
-          <ModalTitle>{isManual ? "Adicionar processo" : "Adicionar ao Pipeline"}</ModalTitle>
+          <ModalTitle>Iniciar processo</ModalTitle>
         </ModalHeader>
         <form className="flex w-full min-w-0 flex-col gap-4" onSubmit={submit}>
           <div className="grid min-w-0 grid-cols-1 gap-4">

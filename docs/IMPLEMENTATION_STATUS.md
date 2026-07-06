@@ -1,6 +1,6 @@
 # JobTrack AI — Implementation Status
 
-Last updated: Etapa 13 (Layout e Filtro Salarial).  
+Last updated: Etapa 14 (Pipeline CRM + Explorar Vagas).  
 Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 
 | Module | Frontend | Backend API | Prisma | Tests | Notes |
@@ -8,12 +8,12 @@ Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 | Auth | ✅ | ✅ | ✅ User | ✅ | Google OAuth real; rate limit login |
 | Onboarding | ✅ | ✅ | ✅ Profile | ✅ | `blockedSkills` removido (Etapa 17) |
 | Profile / Settings | ✅ | ✅ | ✅ | ✅ | Clean Architecture; `features/account/` |
-| Jobs (catalog) | ✅ | ✅ | ✅ Job | ✅ | Filtro salarial inclusivo; meta `salaryCoverageRatio` (Etapa 13) |
+| Jobs (catalog) | ✅ | ✅ | ✅ Job | ✅ | Catálogo global; `locationScope`; filtros sugeridos (Etapa 14) |
 | Job Aggregation | — | ✅ | ✅ Registry/Execution/Import | ✅ | Gupy + LinkedIn import; dedup idempotente (Etapa XX) |
 | Job Details | ✅ | ✅ | ✅ | ✅ | Match rules-v2; related via catalog |
 | Match Engine | ✅ types | ✅ | — | ✅ | `rules-v2`; JobTitleNormalizer + SkillMatcher |
 | AI Career | ✅ | ✅ | ✅ Skill/AIAnalysis | ✅ | Gemini on-demand; cache-first; Etapa 18 |
-| Job Tracking | ✅ | ✅ | ✅ | ✅ | Ownership enforced; rulesMatch persistido (v1.5) |
+| Job Tracking | ✅ | ✅ | ✅ | ✅ | ApplicationProcess alias; campos processo expandidos (Etapa 14) |
 | Process Detail | ✅ | ✅ | ✅ | ✅ | `/pipeline/[trackingId]`; PATCH `/process` (v1.5) |
 | Match Background | — | ✅ | ✅ aiAnalysisStatus | ✅ | IA após ProcessCreated; cache-first (v1.5) |
 | Timeline | ✅ | ✅ | ✅ TimelineEvent | ✅ | |
@@ -80,6 +80,16 @@ Validated flows (no regressions expected):
 | Layout | `EmptyState` sem `text-balance`; wrappers `min-w-0` em Jobs/Dashboard |
 | Filtro salarial | Query OR preserva vagas sem salário; extração `baseSalary` JSON-LD |
 | UX salário | Ocultar filtro quando cobertura &lt; 10%; sem default de `salaryMin` no perfil |
+
+## Etapa 14 — entregas
+
+| Parte | Entrega |
+|-------|---------|
+| ADR-034 | ApplicationProcess = JobTracking; jobs globais; sem editar Job via processo |
+| Catálogo | Manual/import → `upsertCatalogJob`; backfill script |
+| Processo | `recruiterLinkedin`, `tags`, `salaryExpectation`; timeline padronizada |
+| Explorar | `locationPreference`; banner filtros sugeridos; limpar com skip defaults |
+| UI | "Iniciar processo"; "Ver vaga" no detalhe do processo |
 
 ## Out of scope (V2+)
 

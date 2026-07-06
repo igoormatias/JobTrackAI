@@ -19,7 +19,7 @@ import { JOBS_LAYOUT, SALARY_FILTER_MIN_COVERAGE } from "../../constants/jobs-co
 import { useInfiniteJobs } from "../../hooks/use-infinite-jobs";
 import { useJobFilters } from "../../hooks/use-job-filters";
 import { useJobMutations } from "../../hooks/use-job-mutations";
-import { hasProfileDefaultFilters, loadProfileDefaultFilters } from "../../utils/profile-default-filters";
+import { hasProfileDefaultFilters, loadProfileDefaultFilters, shouldSkipProfileDefaults } from "../../utils/profile-default-filters";
 import { JobsResultsWidget } from "../../widgets/JobsResultsWidget";
 import { JobsToolbarWidget } from "../../widgets/JobsToolbarWidget";
 
@@ -43,7 +43,7 @@ export const JobsPage = () => {
   const profileDefaultsApplied = useRef(false);
 
   useEffect(() => {
-    if (profileDefaultsApplied.current || hasActiveFilters) return;
+    if (profileDefaultsApplied.current || hasActiveFilters || shouldSkipProfileDefaults()) return;
 
     profileDefaultsApplied.current = true;
 
@@ -59,6 +59,13 @@ export const JobsPage = () => {
         profileDefaultsApplied.current = false;
       });
   }, [hasActiveFilters, setFilters, setSearchInputValue]);
+
+  const profileFiltersActive = filters.urlState.suggested === true;
+
+  const handleClearSuggestedFilters = () => {
+    profileDefaultsApplied.current = false;
+    filters.clearFilters({ skipProfileDefaults: true });
+  };
 
   const { data: companiesData } = useQuery({
     queryKey: queryKeys.companies.list({ limit: 30 }),
@@ -144,6 +151,14 @@ export const JobsPage = () => {
           </Button>
         }
       />
+      {profileFiltersActive ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2 text-sm">
+          <span>✨ Filtros sugeridos pelo seu perfil</span>
+          <Button type="button" variant="ghost" size="sm" onClick={handleClearSuggestedFilters}>
+            Limpar sugestões
+          </Button>
+        </div>
+      ) : null}
       <JobsToolbarWidget
         filters={filters}
         companies={companies}
@@ -166,7 +181,7 @@ export const JobsPage = () => {
         onOpenJob={handleOpenJob}
         onAddToPipeline={handleAddToPipeline}
         onViewDetails={handleViewDetails}
-        onClearFilters={filters.clearFilters}
+        onClearFilters={() => filters.clearFilters({ skipProfileDefaults: true })}
         onRetry={() => void refetch()}
         favoritePendingId={
           favoriteMutation.isPending ? favoriteMutation.variables?.id : undefined

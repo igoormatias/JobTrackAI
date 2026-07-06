@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 
 import { normalizeCompanyFilterValues } from "../../../../shared/utils/company-filter.utils.js";
 import type { CatalogListFilters } from "../../domain/value-objects/catalog-list-filters.js";
+import { buildLocationPreferenceFilter } from "./location-preference.filter.js";
 
 const toArray = (value?: string | string[]): string[] | undefined => {
   if (!value) return undefined;
@@ -116,6 +117,13 @@ export const buildCatalogWhere = (
 
   if (normalized.location) {
     and.push({ location: { contains: normalized.location, mode: "insensitive" } });
+  } else if (normalized.locationScope) {
+    const locationFilter = buildLocationPreferenceFilter({
+      scope: normalized.locationScope,
+      state: normalized.locationState,
+      city: normalized.locationCity,
+    });
+    if (locationFilter) and.push(locationFilter);
   }
 
   const salaryMin = resolveSalaryMin(normalized.salaryMin);

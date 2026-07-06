@@ -37,7 +37,7 @@ describe("JobDetailsPage", () => {
 
     expect(await screen.findByText("Por que essa vaga?")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Abrir vaga" }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("button", { name: "Adicionar ao Pipeline" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Iniciar processo" }).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Insights").length).toBeGreaterThan(0);
   });
 });

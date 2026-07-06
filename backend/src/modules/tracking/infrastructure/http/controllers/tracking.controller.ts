@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 
 import { getAuthUserId } from "../../../../../shared/http/get-auth-user-id.js";
 import { getRouteParam } from "../../../../../shared/http/get-route-param.js";
+import { withApplicationProcessResponse } from "../../../../../shared/http/tracking-response.js";
 import { ValidationError } from "../../../../../shared/errors/validation-error.js";
 import { trackingService, type TrackingService } from "../../../application/tracking.service.js";
 import {
@@ -26,7 +27,7 @@ export class TrackingController {
       if (!parsed.success) throw new ValidationError(parsed.error.message);
 
       const data = await this.service.listAsync(getAuthUserId(req), parsed.data);
-      res.status(200).json({ data });
+      res.status(200).json(withApplicationProcessResponse(data));
     } catch (error) {
       next(error);
     }
@@ -37,7 +38,7 @@ export class TrackingController {
       const userId = getAuthUserId(req);
       const id = getRouteParam(req, "id");
       const data = await this.service.getById(userId, id);
-      res.status(200).json({ data });
+      res.status(200).json(withApplicationProcessResponse(data));
     } catch (error) {
       next(error);
     }
@@ -52,7 +53,7 @@ export class TrackingController {
         userId: getAuthUserId(req),
         ...parsed.data,
       });
-      res.status(201).json({ data, message: "Tracking created" });
+      res.status(201).json({ ...withApplicationProcessResponse(data), message: "Process created" });
     } catch (error) {
       next(error);
     }
@@ -66,7 +67,7 @@ export class TrackingController {
       const userId = getAuthUserId(req);
       const id = getRouteParam(req, "id");
       const data = await this.service.moveStage(userId, id, parsed.data);
-      res.status(200).json({ data, message: "Stage updated" });
+      res.status(200).json({ ...withApplicationProcessResponse(data), message: "Stage updated" });
     } catch (error) {
       next(error);
     }
@@ -77,7 +78,7 @@ export class TrackingController {
       const userId = getAuthUserId(req);
       const id = getRouteParam(req, "id");
       const data = await this.service.toggleFavorite(userId, id);
-      res.status(200).json({ data, message: "Favorite updated" });
+      res.status(200).json({ ...withApplicationProcessResponse(data), message: "Favorite updated" });
     } catch (error) {
       next(error);
     }
@@ -91,7 +92,7 @@ export class TrackingController {
       const userId = getAuthUserId(req);
       const id = getRouteParam(req, "id");
       const data = await this.service.changePriority(userId, id, parsed.data.priority);
-      res.status(200).json({ data, message: "Priority updated" });
+      res.status(200).json({ ...withApplicationProcessResponse(data), message: "Priority updated" });
     } catch (error) {
       next(error);
     }
@@ -105,7 +106,7 @@ export class TrackingController {
       const userId = getAuthUserId(req);
       const id = getRouteParam(req, "id");
       const data = await this.service.setVisibility(userId, id, parsed.data.visibility);
-      res.status(200).json({ data, message: "Visibility updated" });
+      res.status(200).json({ ...withApplicationProcessResponse(data), message: "Visibility updated" });
     } catch (error) {
       next(error);
     }
@@ -119,7 +120,7 @@ export class TrackingController {
       const userId = getAuthUserId(req);
       const id = getRouteParam(req, "id");
       const data = await this.service.updateNotes(userId, id, parsed.data.notes);
-      res.status(200).json({ data, message: "Notes updated" });
+      res.status(200).json({ ...withApplicationProcessResponse(data), message: "Notes updated" });
     } catch (error) {
       next(error);
     }
@@ -133,7 +134,7 @@ export class TrackingController {
       const userId = getAuthUserId(req);
       const id = getRouteParam(req, "id");
       const data = await this.service.updateProcess(userId, id, parsed.data);
-      res.status(200).json({ data, message: "Process updated" });
+      res.status(200).json({ ...withApplicationProcessResponse(data), message: "Process updated" });
     } catch (error) {
       next(error);
     }

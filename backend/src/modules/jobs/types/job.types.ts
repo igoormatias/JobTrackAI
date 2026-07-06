@@ -83,6 +83,9 @@ export type JobListParams = {
   seniorities?: string[];
   modalities?: string[];
   location?: string;
+  locationScope?: "country" | "state" | "city";
+  locationState?: string;
+  locationCity?: string;
   salaryMin?: number;
   salaryMax?: number;
   skills?: string[];

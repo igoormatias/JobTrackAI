@@ -662,6 +662,31 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 ---
 
+## ADR-034 — ApplicationProcess (nome de produto) + catálogo global de vagas
+
+**Status:** Aceito
+**Data:** 2026-07 (Etapa 14 — Pipeline CRM + Explorar Vagas)
+
+**Contexto:** O modelo de domínio já separava descoberta (`Job`) de acompanhamento (`JobTracking`), mas a nomenclatura misturava "vaga" e "processo", jobs manuais criavam `Job.userId` e filtros de localização quebravam com "Brasil inteiro".
+
+**Decisão:**
+
+- **`ApplicationProcess`** é o nome de produto/API para `JobTracking` (tabela Prisma permanece `JobTracking`)
+- Rotas `/tracking/*` documentadas como Application Process; respostas incluem alias `process` (backward-compatible com `data`)
+- **Jobs 100% globais:** novos registros `Job` sempre `userId: null`, `isCatalog: true`; criação manual/import via `upsertCatalogJob` + dedup
+- **Edição de processo, não de vaga:** `PATCH /tracking/:id/process` muta apenas metadados do processo; título, empresa, descrição, URL e salário publicado da vaga são read-only
+- **`PATCH /jobs/:id/favorite`** permanece atalho de conveniência (upsert em `JobTracking`)
+- **Localização estruturada:** `locationPreference` no perfil; filtro `locationScope` no catálogo (sem string "Brasil inteiro")
+
+**Consequências:**
+
+- `docs/API_CONTRACT.md` — seção Application Process
+- Script `backend/scripts/backfill-catalog-jobs.ts`
+- Campos processo: `recruiterLinkedin`, `tags`, `salaryExpectation`; `offerValue` alias de `negotiatedSalary` no DTO
+- Timeline padronizada: `process_created`, `match_recalculated`, `offer`, `rejected` (+ tipos legados)
+
+---
+
 ## Template para novas decisões
 
 ```markdown

@@ -56,7 +56,7 @@ describe("JobCard", () => {
     expect(screen.getByRole("button", { name: "Salvar vaga" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Ver detalhes/i })).toHaveAttribute("href", "/jobs/job_1");
     expect(screen.getByRole("button", { name: "Abrir vaga" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Adicionar ao Pipeline" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Iniciar processo" })).toBeInTheDocument();
   });
 
   it("calls favorite and pipeline callbacks", async () => {
@@ -67,7 +67,7 @@ describe("JobCard", () => {
     render(<JobCard job={job} onFavorite={onFavorite} onAddToPipeline={onAddToPipeline} />);
 
     await user.click(screen.getByRole("button", { name: "Salvar vaga" }));
-    await user.click(screen.getByRole("button", { name: "Adicionar ao Pipeline" }));
+    await user.click(screen.getByRole("button", { name: "Iniciar processo" }));
 
     expect(onFavorite).toHaveBeenCalledWith(job);
     expect(onAddToPipeline).toHaveBeenCalledWith(job);

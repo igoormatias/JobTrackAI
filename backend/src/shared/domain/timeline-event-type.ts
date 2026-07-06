@@ -1,5 +1,6 @@
 export const TIMELINE_EVENT_TYPES = [
   "created",
+  "process_created",
   "stage_changed",
   "priority_changed",
   "favorited",
@@ -11,7 +12,9 @@ export const TIMELINE_EVENT_TYPES = [
   "applied",
   "interview_scheduled",
   "offer_received",
+  "offer",
   "rejected",
+  "match_recalculated",
 ] as const;
 
 export type TimelineEventType = (typeof TIMELINE_EVENT_TYPES)[number];

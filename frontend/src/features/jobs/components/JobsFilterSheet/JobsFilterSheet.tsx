@@ -54,7 +54,7 @@ export const JobsFilterSheet = ({
             <Button type="button" className="flex-1" onClick={() => setOpen(false)}>
               Aplicar
             </Button>
-            <Button type="button" variant="outline" onClick={clearFilters}>
+            <Button type="button" variant="outline" onClick={() => clearFilters({ skipProfileDefaults: true })}>
               Limpar
             </Button>
           </div>

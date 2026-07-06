@@ -82,6 +82,11 @@ export const ProcessDetailPage = () => {
           <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
             Editar processo
           </Button>
+          <Link href={`/jobs/${tracking.job.id}`}>
+            <Button variant="outline" size="sm">
+              Ver vaga
+            </Button>
+          </Link>
           {tracking.job.sourceUrl ? (
             <Button
               variant="outline"
@@ -132,7 +137,7 @@ export const ProcessDetailPage = () => {
             aiAnalyzedAt={tracking.aiAnalyzedAt}
           />
 
-          {tracking.recruiterName || tracking.recruiterEmail || tracking.recruiterPhone ? (
+          {tracking.recruiterName || tracking.recruiterEmail || tracking.recruiterPhone || tracking.recruiterLinkedin ? (
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Recrutador(a)</CardTitle>
@@ -141,6 +146,26 @@ export const ProcessDetailPage = () => {
                 {tracking.recruiterName ? <p>{tracking.recruiterName}</p> : null}
                 {tracking.recruiterEmail ? <p>{tracking.recruiterEmail}</p> : null}
                 {tracking.recruiterPhone ? <p>{tracking.recruiterPhone}</p> : null}
+                {tracking.recruiterLinkedin ? (
+                  <a href={tracking.recruiterLinkedin} className="text-primary hover:underline" target="_blank" rel="noreferrer">
+                    LinkedIn
+                  </a>
+                ) : null}
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {tracking.tags?.length ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Tags</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-1">
+                {tracking.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary">
+                    {tag}
+                  </Badge>
+                ))}
               </CardContent>
             </Card>
           ) : null}

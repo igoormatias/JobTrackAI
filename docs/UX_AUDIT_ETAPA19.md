@@ -127,3 +127,24 @@ Viewport alvo: Desktop (≥1280px), Notebook (1024px), Tablet (768px), Mobile (3
 - [x] Jobs — empty state legível; filtro salarial condicional
 - [x] Dashboard — erro state com `min-w-0`
 - [x] Login / Pipeline — sem regressão (auditoria pontual)
+
+---
+
+## Etapa 14 — Pipeline CRM + Explorar Vagas
+
+| Área | Causa raiz | Impacto | Solução |
+|------|------------|---------|---------|
+| Nomenclatura | "Vaga" e "processo" misturados | Confusão CRM vs catálogo | ADR-034: ApplicationProcess; UI "Iniciar processo", "Detalhes do processo" |
+| Jobs manuais | `Job.userId` em cadastro manual | Duplicação / vaga não global | Upsert catálogo (`userId: null`); script `backfill-catalog-jobs.ts` |
+| Brasil inteiro | `location` textual do perfil | Zero resultados em `/jobs` | `locationPreference` + `locationScope=country` (OR remoto/Brasil) |
+| Limpar filtros | Defaults reaplicados na visita | Usuário não consegue ver tudo | `sessionStorage jobs:skipProfileDefaults` + reset completo nuqs |
+| Filtros perfil | Skills/location agressivos | Esconde vagas relevantes | Top 3 skills; sem `location` para scope country; banner "Filtros sugeridos" |
+| Process detail | Sem link para vaga read-only | Edição implícita da vaga | Botão "Ver vaga" → `/jobs/[id]`; PATCH processo só metadados |
+
+### Páginas validadas (Etapa 14)
+
+- [x] Explorar Vagas — empty state (Etapa 13), banner sugestões, limpar filtros, locationScope
+- [x] Pipeline — cards, sheet mobile, DnD desktop
+- [x] Detalhes do processo vs detalhes da vaga
+- [x] Dashboard — KPIs via tracking; catálogo só em recomendações
+- [x] Calendário — eventos via `Interview.trackingId`

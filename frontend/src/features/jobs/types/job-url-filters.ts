@@ -9,6 +9,10 @@ export type JobUrlFilters = {
   seniorities?: Seniority[];
   modalities?: WorkModality[];
   location?: string;
+  locationScope?: "country" | "state" | "city";
+  locationState?: string;
+  locationCity?: string;
+  suggested?: boolean;
   salaryMin?: number;
   salaryMax?: number;
   skills?: string[];

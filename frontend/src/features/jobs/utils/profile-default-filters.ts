@@ -5,13 +5,29 @@ import type { useJobFilters } from "../hooks/use-job-filters";
 
 type FilterState = ReturnType<typeof useJobFilters>["urlState"];
 
+const PROFILE_SKILLS_LIMIT = 3;
+
+export const JOBS_SKIP_PROFILE_DEFAULTS_KEY = "jobs:skipProfileDefaults";
+
+export const shouldSkipProfileDefaults = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return sessionStorage.getItem(JOBS_SKIP_PROFILE_DEFAULTS_KEY) === "1";
+};
+
 export const fetchProfileJobSearchHints = (): Promise<JobSearchHints> => getJobSearchHints();
 
 export const mapJobSearchHintsToFilters = (hints: JobSearchHints): Partial<FilterState> => {
   const filters: Partial<FilterState> = {
-    sort: "match",
-    dir: "desc",
+    suggested: true,
   };
+
+  if (hints.area && hints.seniority) {
+    filters.sort = "match";
+    filters.dir = "desc";
+  } else {
+    filters.sort = "recent";
+    filters.dir = "desc";
+  }
 
   if (hints.area) {
     filters.areas = [hints.area as ProfessionalArea];
@@ -26,11 +42,24 @@ export const mapJobSearchHintsToFilters = (hints: JobSearchHints): Partial<Filte
   }
 
   if (hints.skillNames.length > 0) {
-    filters.skills = hints.skillNames;
+    filters.skills = hints.skillNames.slice(0, PROFILE_SKILLS_LIMIT);
   }
 
-  if (hints.location) {
-    filters.location = hints.location;
+  if (hints.locationPreference) {
+    const { scope, state, city } = hints.locationPreference;
+    if (scope === "country") {
+      filters.locationScope = "country";
+      filters.location = "";
+    } else if (scope === "state" && state) {
+      filters.locationScope = "state";
+      filters.locationState = state;
+      filters.location = "";
+    } else if (scope === "city" && city) {
+      filters.locationScope = "city";
+      filters.locationCity = city;
+      filters.locationState = state ?? "";
+      filters.location = city;
+    }
   }
 
   if (hints.titleHints[0]) {
@@ -42,10 +71,12 @@ export const mapJobSearchHintsToFilters = (hints: JobSearchHints): Partial<Filte
 
 export const hasProfileDefaultFilters = (defaults: Partial<FilterState>): boolean =>
   Boolean(
-    defaults.areas?.length ||
+    defaults.suggested ||
+      defaults.areas?.length ||
       defaults.seniorities?.length ||
       defaults.modalities?.length ||
       defaults.skills?.length ||
+      defaults.locationScope ||
       defaults.location ||
       defaults.search,
   );

@@ -302,6 +302,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
         select: { createdAt: true, stage: true },
       }),
       prisma.job.findMany({
+        // Discovery recommendations only — pipeline KPIs use jobTracking above
         where: { isCatalog: true, status: "active" },
         orderBy: { publishedAt: "desc" },
         take: 80,

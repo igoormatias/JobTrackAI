@@ -18,7 +18,8 @@ import {
 import { loadMatchProfileForUser } from "../../../job-catalog/application/mappers/match-profile.mapper.js";
 import { matchEngineService } from "../../../match/domain/services/match-engine.service.js";
 import { toMatchJobInput } from "../../../jobs/infrastructure/mappers/job.mapper.js";
-import { prismaJobRepository } from "../../../jobs/infrastructure/repositories/prisma-job.repository.js";
+import { manualJobToCatalogInput } from "../../../job-catalog/infrastructure/mappers/manual-job-to-catalog.mapper.js";
+import { prismaJobCatalogRepository } from "../../../job-catalog/infrastructure/repositories/prisma-job-catalog.repository.js";
 import type {
   CreateTrackingInput,
   JobTrackingEntity,
@@ -103,8 +104,9 @@ export class PrismaJobTrackingRepository {
 
     let jobId = input.jobId;
     if (!jobId && input.job) {
-      const job = await prismaJobRepository.createManualJob(input.userId, input.job);
-      jobId = job.id;
+      const catalogInput = manualJobToCatalogInput(input.job);
+      const catalogJob = await prismaJobCatalogRepository.upsertCatalogJob(catalogInput);
+      jobId = catalogJob.id;
     }
     if (!jobId) throw new NotFoundError("Job data required");
 
@@ -129,7 +131,7 @@ export class PrismaJobTrackingRepository {
         jobContentHash: job.contentHash,
         timelineEvents: {
           create: {
-            type: "created",
+            type: "process_created",
             title: "Processo iniciado",
             occurredAt,
             notes: input.notes ?? null,
@@ -163,20 +165,40 @@ export class PrismaJobTrackingRepository {
     const fromStage = current.stage;
     const occurredAt = new Date(input.occurredAt);
 
+    const stageTimelineCreates: Prisma.TimelineEventCreateWithoutTrackingInput[] = [
+      {
+        type: "stage_changed",
+        title: stageTitle(input.stage),
+        occurredAt,
+        metadata: { from: fromStage, to: input.stage },
+        createdById: current.userId,
+      },
+    ];
+
+    if (input.stage === "offer") {
+      stageTimelineCreates.push({
+        type: "offer",
+        title: "Oferta recebida",
+        occurredAt,
+        createdById: current.userId,
+      });
+    }
+
+    if (input.stage === "closed") {
+      stageTimelineCreates.push({
+        type: "rejected",
+        title: "Processo encerrado",
+        occurredAt,
+        createdById: current.userId,
+      });
+    }
+
     const row = await prisma.jobTracking.update({
       where: { id },
       data: {
         stage: input.stage,
         lastStageUpdatedAt: occurredAt,
-        timelineEvents: {
-          create: {
-            type: "stage_changed",
-            title: stageTitle(input.stage),
-            occurredAt,
-            metadata: { from: fromStage, to: input.stage },
-            createdById: current.userId,
-          },
-        },
+        timelineEvents: { create: stageTimelineCreates },
       },
       include: trackingInclude,
     });
@@ -340,7 +362,15 @@ export class PrismaJobTrackingRepository {
     if (input.recruiterName !== undefined) data.recruiterName = input.recruiterName;
     if (input.recruiterEmail !== undefined) data.recruiterEmail = input.recruiterEmail || null;
     if (input.recruiterPhone !== undefined) data.recruiterPhone = input.recruiterPhone;
-    if (input.negotiatedSalary !== undefined) data.negotiatedSalary = input.negotiatedSalary;
+    if (input.recruiterLinkedin !== undefined) data.recruiterLinkedin = input.recruiterLinkedin || null;
+    if (input.tags !== undefined) data.tags = input.tags;
+    if (input.salaryExpectation !== undefined) {
+      data.salaryExpectation = input.salaryExpectation ?? undefined;
+    }
+
+    const negotiatedSalary =
+      input.offerValue !== undefined ? input.offerValue : input.negotiatedSalary;
+    if (negotiatedSalary !== undefined) data.negotiatedSalary = negotiatedSalary;
     if (input.processLinks !== undefined) data.processLinks = input.processLinks ?? undefined;
 
     if (input.priority !== undefined && input.priority !== current.priority) {

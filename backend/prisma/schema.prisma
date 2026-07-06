@@ -154,7 +154,10 @@ model JobTracking {
   recruiterName      String?
   recruiterEmail     String?
   recruiterPhone     String?
+  recruiterLinkedin  String?
+  tags               String[]        @default([])
   negotiatedSalary   Int?
+  salaryExpectation  Json?
   processLinks       Json?
   nextInterviewAt    DateTime?
   rulesMatchScore    Int?

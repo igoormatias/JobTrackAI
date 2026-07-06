@@ -44,6 +44,15 @@ export const updateNotesSchema = z.object({
   notes: z.string().nullable(),
 });
 
+const salaryExpectationSchema = z
+  .object({
+    min: z.number().int().nonnegative(),
+    max: z.number().int().nonnegative(),
+    currency: z.literal("BRL"),
+  })
+  .nullable()
+  .optional();
+
 export const updateProcessSchema = z.object({
   notes: z.string().nullable().optional(),
   feedback: z.string().nullable().optional(),
@@ -52,7 +61,11 @@ export const updateProcessSchema = z.object({
   recruiterName: z.string().nullable().optional(),
   recruiterEmail: z.union([z.string().email(), z.literal(""), z.null()]).optional(),
   recruiterPhone: z.string().nullable().optional(),
+  recruiterLinkedin: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
+  tags: z.array(z.string()).optional(),
   negotiatedSalary: z.number().int().nullable().optional(),
+  offerValue: z.number().int().nullable().optional(),
+  salaryExpectation: salaryExpectationSchema,
   processLinks: z.record(z.string()).nullable().optional(),
 });
 

@@ -69,19 +69,9 @@ export class ConfirmJobImportUseCase {
     }
 
     if (!jobId) {
-      const created = await this.jobRepository.createManualJob(input.userId, {
-        companyName: jobData.company,
-        title: jobData.title,
-        sourceUrl: jobData.sourceUrl,
-        description: jobData.description,
-        source,
-        modality: jobData.modality ?? undefined,
-        location: jobData.location ?? undefined,
-        externalId: jobData.externalId,
-        contentHash: jobData.contentHash,
-        technologies: jobData.technologies?.map((name) => ({ name })),
-      });
-      jobId = created.id;
+      const catalogInput = toCatalogUpsertInput(jobData);
+      const catalogJob = await prismaJobCatalogRepository.upsertCatalogJob(catalogInput);
+      jobId = catalogJob.id;
     } else {
       const existingMatch =
         (await this.dedupLookup.findBySourceAndExternalId(jobData.provider, jobData.externalId)) ??

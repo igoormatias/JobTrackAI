@@ -1,5 +1,6 @@
 export type TimelineEventType =
   | "created"
+  | "process_created"
   | "stage_changed"
   | "priority_changed"
   | "favorited"
@@ -11,7 +12,9 @@ export type TimelineEventType =
   | "applied"
   | "interview_scheduled"
   | "offer_received"
-  | "rejected";
+  | "offer"
+  | "rejected"
+  | "match_recalculated";
 
 export type TimelineEvent = {
   id: string;

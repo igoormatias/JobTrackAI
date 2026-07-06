@@ -20,6 +20,9 @@ export const urlFiltersToJobListParams = (filters: JobUrlFilters): JobListParams
   seniorities: filters.seniorities,
   modalities: filters.modalities,
   location: filters.location || undefined,
+  locationScope: filters.locationScope,
+  locationState: filters.locationState || undefined,
+  locationCity: filters.locationCity || undefined,
   salaryMin: filters.salaryMin && filters.salaryMin > 0 ? filters.salaryMin : undefined,
   salaryMax: filters.salaryMax && filters.salaryMax > 0 ? filters.salaryMax : undefined,
   skills: filters.skills,
@@ -39,6 +42,9 @@ export const jobListParamsToUrlFilters = (params: JobListParams): JobUrlFilters 
   seniorities: params.seniorities ?? (params.seniority ? [params.seniority] : undefined),
   modalities: params.modalities ?? (params.modality ? [params.modality] : undefined),
   location: params.location,
+  locationScope: params.locationScope,
+  locationState: params.locationState,
+  locationCity: params.locationCity,
   salaryMin: params.salaryMin,
   salaryMax: params.salaryMax,
   skills: params.skills,
@@ -103,6 +109,7 @@ export const hasActiveJobFilters = (filters: JobUrlFilters): boolean =>
       filters.companyIds?.length ||
       filters.seniorities?.length ||
       filters.modalities?.length ||
+      filters.locationScope ||
       filters.location ||
       (filters.salaryMin !== undefined && filters.salaryMin > 0) ||
       (filters.salaryMax !== undefined && filters.salaryMax > 0) ||

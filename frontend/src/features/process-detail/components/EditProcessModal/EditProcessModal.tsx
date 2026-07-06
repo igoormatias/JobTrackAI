@@ -36,6 +36,8 @@ const processFormSchema = z.object({
   recruiterName: z.string().optional(),
   recruiterEmail: z.string().optional(),
   recruiterPhone: z.string().optional(),
+  recruiterLinkedin: z.string().optional(),
+  tags: z.string().optional(),
   negotiatedSalary: z.string().optional(),
   processLinkLabel: z.string().optional(),
   processLinkUrl: z.string().optional(),
@@ -66,6 +68,8 @@ const toFormValues = (tracking: TrackingDetail): ProcessFormValues => {
     recruiterName: tracking.recruiterName ?? "",
     recruiterEmail: tracking.recruiterEmail ?? "",
     recruiterPhone: tracking.recruiterPhone ?? "",
+    recruiterLinkedin: tracking.recruiterLinkedin ?? "",
+    tags: tracking.tags?.join(", ") ?? "",
     negotiatedSalary: tracking.negotiatedSalary?.toString() ?? "",
     processLinkLabel: firstLink?.[0] ?? "",
     processLinkUrl: typeof firstLink?.[1] === "string" ? firstLink[1] : "",
@@ -107,6 +111,10 @@ export const EditProcessModal = ({
       recruiterName: values.recruiterName || null,
       recruiterEmail: values.recruiterEmail || null,
       recruiterPhone: values.recruiterPhone || null,
+      recruiterLinkedin: values.recruiterLinkedin || null,
+      tags: values.tags
+        ? values.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+        : undefined,
       negotiatedSalary: values.negotiatedSalary ? Number(values.negotiatedSalary) : null,
       processLinks,
     });
@@ -196,7 +204,17 @@ export const EditProcessModal = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="negotiatedSalary">Salário negociado (R$)</Label>
+            <Label htmlFor="recruiterLinkedin">LinkedIn do recrutador(a)</Label>
+            <Input id="recruiterLinkedin" type="url" {...form.register("recruiterLinkedin")} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
+            <Input id="tags" placeholder="Ex: remoto, sênior" {...form.register("tags")} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="negotiatedSalary">Valor da oferta / salário negociado (R$)</Label>
             <Input id="negotiatedSalary" type="number" {...form.register("negotiatedSalary")} />
           </div>
 

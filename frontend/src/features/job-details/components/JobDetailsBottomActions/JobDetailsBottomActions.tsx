@@ -40,7 +40,7 @@ export const JobDetailsBottomActions = ({
           onClick={onAddToPipeline}
           disabled={isAddToPipelinePending}
         >
-          Adicionar ao Pipeline
+          Iniciar processo
         </Button>
       </div>
     </div>

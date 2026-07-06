@@ -45,6 +45,15 @@ export class TrackingAnalysisBackgroundHandler {
           aiAnalysisStatus: result.cached ? "CACHED" : "COMPLETED",
           aiMatchScore: tracking?.rulesMatchScore ?? null,
           aiAnalyzedAt: new Date(),
+          timelineEvents: {
+            create: {
+              type: "match_recalculated",
+              title: "Match com IA atualizado",
+              occurredAt: new Date(),
+              metadata: { cached: result.cached },
+              createdById: userId,
+            },
+          },
         },
       });
 

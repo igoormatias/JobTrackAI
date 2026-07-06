@@ -32,6 +32,10 @@ const jobFiltersParsers = {
   seniorities: parseAsArrayOf(parseAsString).withDefault([]),
   modalities: parseAsArrayOf(parseAsString).withDefault([]),
   location: parseAsString.withDefault(""),
+  locationScope: parseAsStringLiteral(["country", "state", "city"] as const),
+  locationState: parseAsString.withDefault(""),
+  locationCity: parseAsString.withDefault(""),
+  suggested: parseAsBoolean,
   salaryMin: parseAsInteger,
   salaryMax: parseAsInteger,
   skills: parseAsArrayOf(parseAsString).withDefault([]),
@@ -75,6 +79,10 @@ export const useJobFilters = () => {
       seniorities: urlState.seniorities.length ? (urlState.seniorities as Seniority[]) : undefined,
       modalities: urlState.modalities.length ? (urlState.modalities as WorkModality[]) : undefined,
       location: urlState.location || undefined,
+      locationScope: urlState.locationScope ?? undefined,
+      locationState: urlState.locationState || undefined,
+      locationCity: urlState.locationCity || undefined,
+      suggested: urlState.suggested ?? undefined,
       salaryMin: urlState.salaryMin ?? undefined,
       salaryMax: urlState.salaryMax ?? undefined,
       skills: urlState.skills.length ? urlState.skills : undefined,
@@ -89,7 +97,10 @@ export const useJobFilters = () => {
 
   const listParams = useMemo(() => urlFiltersToJobListParams(urlFilters), [urlFilters]);
 
-  const clearFilters = () => {
+  const clearFilters = (options?: { skipProfileDefaults?: boolean }) => {
+    if (options?.skipProfileDefaults && typeof window !== "undefined") {
+      sessionStorage.setItem("jobs:skipProfileDefaults", "1");
+    }
     setSearchDraft("");
     void setUrlState({
       search: "",
@@ -100,6 +111,10 @@ export const useJobFilters = () => {
       seniorities: [],
       modalities: [],
       location: "",
+      locationScope: null,
+      locationState: "",
+      locationCity: "",
+      suggested: null,
       salaryMin: null,
       salaryMax: null,
       skills: [],
