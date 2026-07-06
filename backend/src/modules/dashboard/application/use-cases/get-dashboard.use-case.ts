@@ -18,7 +18,19 @@ export class GetDashboardUseCase implements UseCase<string, DashboardResponseDto
 
   async execute(userId: string): Promise<DashboardResponseDto> {
     const data = await this.dashboardRepository.getDashboardData(userId);
-    const upcoming = await this.careerEvents.getUpcomingEvents(userId, 5);
+    const now = Date.now();
+    const horizonEnd = new Date(now + 90 * 86_400_000).toISOString();
+    const allUpcoming = await this.careerEvents.listEvents(userId, new Date().toISOString(), horizonEnd);
+    const futureEvents = allUpcoming
+      .filter((event) => new Date(event.start).getTime() >= now)
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+    const upcoming = futureEvents.slice(0, 5);
+    const weekAhead = now + 7 * 86_400_000;
+    const interviewsFutureTotal = futureEvents.length;
+    const interviewsNextWeek = futureEvents.filter(
+      (event) => new Date(event.start).getTime() <= weekAhead,
+    ).length;
 
     const upcomingInterviews: DashboardInterviewDto[] = upcoming.map((event) => ({
       id: event.id,
@@ -35,9 +47,21 @@ export class GetDashboardUseCase implements UseCase<string, DashboardResponseDto
       link: event.htmlLink,
     }));
 
+    const kpis = data.kpis.map((kpi) =>
+      kpi.id === "kpi_interviews"
+        ? {
+            ...kpi,
+            value: interviewsFutureTotal,
+            change: interviewsNextWeek,
+            changeLabel: "próximos 7 dias",
+          }
+        : kpi,
+    );
+
     return {
       data: {
         ...data,
+        kpis,
         upcomingInterviews,
       },
     };

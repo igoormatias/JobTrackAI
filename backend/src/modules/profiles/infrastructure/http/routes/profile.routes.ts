@@ -9,6 +9,7 @@ import { UpdateProfileUseCase } from "../../../application/use-cases/update-prof
 import { prismaProfileRepository } from "../../repositories/prisma-profile.repository.js";
 import { ProfileUpdatedEvent } from "../../../domain/events/profile-updated.event.js";
 import { ProfileController } from "../controllers/profile.controller.js";
+import { getJobSearchHints } from "../controllers/job-search-hints.controller.js";
 
 const registerProfileEventHandlers = (): void => {
   eventBus.subscribe("ProfileUpdated", async (event) => {
@@ -33,6 +34,7 @@ export const createProfileRoutes = (): Router => {
 
   router.use(requireAuth);
   router.get("/", controller.getProfile);
+  router.get("/job-search-hints", getJobSearchHints);
   router.post("/", controller.createProfile);
   router.patch("/", controller.updateProfile);
 

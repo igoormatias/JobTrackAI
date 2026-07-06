@@ -14,7 +14,7 @@ import { PipelineApplicationTimeline } from "@/features/pipeline/components/Pipe
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
 import { EditProcessModal } from "@/features/process-detail/components/EditProcessModal";
 import { useTrackingByIdQuery } from "@/features/tracking/hooks/use-tracking-by-id-query";
-import { useUpdateTrackingProcessMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
+import { useUpdateTrackingProcessMutation, useMoveTrackingStageMutation } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 import { openJobUrl } from "@/lib/jobs/open-job-url";
 import type { TimelineEvent, TimelineEventType } from "@/types";
 
@@ -45,6 +45,7 @@ export const ProcessDetailPage = () => {
   const trackingId = params.trackingId;
   const { data: tracking, isLoading, isError } = useTrackingByIdQuery(trackingId);
   const updateProcessMutation = useUpdateTrackingProcessMutation();
+  const moveStageMutation = useMoveTrackingStageMutation();
   const [editOpen, setEditOpen] = useState(false);
 
   if (isLoading) {
@@ -150,7 +151,14 @@ export const ProcessDetailPage = () => {
         open={editOpen}
         onOpenChange={setEditOpen}
         tracking={tracking}
-        isSubmitting={updateProcessMutation.isPending}
+        isSubmitting={updateProcessMutation.isPending || moveStageMutation.isPending}
+        onStageChange={(stage) => {
+          moveStageMutation.mutate({
+            id: tracking.id,
+            stage,
+            occurredAt: new Date().toISOString(),
+          });
+        }}
         onSubmit={(payload) => {
           updateProcessMutation.mutate(
             { id: tracking.id, payload },

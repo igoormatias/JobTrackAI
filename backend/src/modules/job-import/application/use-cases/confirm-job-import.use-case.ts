@@ -1,7 +1,10 @@
 import { jobNormalizer } from "../../../job-aggregation/domain/services/job-normalizer.service.js";
 import { jobValidator } from "../../../job-aggregation/domain/services/job-validator.service.js";
+import { DedupStrategy } from "../../../job-aggregation/domain/services/dedup-strategy.service.js";
 import type { DedupLookupRepository } from "../../../job-aggregation/domain/repositories/dedup-lookup.repository.js";
 import { prismaDedupLookupRepository } from "../../../job-aggregation/infrastructure/repositories/prisma-dedup-lookup.repository.js";
+import { toCatalogUpsertInput } from "../../../job-aggregation/infrastructure/mappers/normalized-job-to-catalog.mapper.js";
+import { prismaJobCatalogRepository } from "../../../job-catalog/infrastructure/repositories/prisma-job-catalog.repository.js";
 import {
   prismaJobRepository,
   type PrismaJobRepository,
@@ -26,6 +29,7 @@ export type ConfirmJobImportResponse = {
   data: {
     job: Job;
     tracking?: JobTrackingEntity;
+    isExisting?: boolean;
   };
   message: string;
 };
@@ -48,12 +52,21 @@ export class ConfirmJobImportUseCase {
 
     const jobData = validation.job;
     const source = jobData.provider as JobSource;
+    const dedup = new DedupStrategy(this.dedupLookup);
+    const dedupResult = await dedup.evaluate(jobData);
 
-    const existing =
-      (await this.dedupLookup.findBySourceAndExternalId(jobData.provider, jobData.externalId)) ??
-      (await this.dedupLookup.findBySourceUrl(jobData.sourceUrl));
+    let jobId: string | undefined;
+    let isExisting = false;
 
-    let jobId = existing?.id;
+    if (dedupResult.existingJobId && dedupResult.action === "skip") {
+      jobId = dedupResult.existingJobId;
+      isExisting = true;
+    } else if (dedupResult.existingJobId && dedupResult.action === "update") {
+      jobId = dedupResult.existingJobId;
+      const catalogInput = toCatalogUpsertInput(jobData);
+      await prismaJobCatalogRepository.upsertCatalogJob({ ...catalogInput, id: jobId });
+      isExisting = true;
+    }
 
     if (!jobId) {
       const created = await this.jobRepository.createManualJob(input.userId, {
@@ -64,10 +77,18 @@ export class ConfirmJobImportUseCase {
         source,
         modality: jobData.modality ?? undefined,
         location: jobData.location ?? undefined,
+        externalId: jobData.externalId,
+        contentHash: jobData.contentHash,
+        technologies: jobData.technologies,
       });
       jobId = created.id;
-    } else if (shouldUpdateSourceUrlOnImport(existing?.sourceUrl, jobData.sourceUrl)) {
-      await this.jobRepository.updateSourceUrl(jobId, jobData.sourceUrl);
+    } else {
+      const existingMatch =
+        (await this.dedupLookup.findBySourceAndExternalId(jobData.provider, jobData.externalId)) ??
+        (await this.dedupLookup.findBySourceUrl(jobData.sourceUrl));
+      if (shouldUpdateSourceUrlOnImport(existingMatch?.sourceUrl, jobData.sourceUrl)) {
+        await this.jobRepository.updateSourceUrl(jobId, jobData.sourceUrl);
+      }
     }
 
     const job = await this.jobRepository.findByIdForUser(jobId, { userId: input.userId });
@@ -89,8 +110,14 @@ export class ConfirmJobImportUseCase {
     }
 
     return {
-      data: { job, tracking },
-      message: input.addToPipeline ? "Job imported and added to pipeline" : "Job imported",
+      data: { job, tracking, isExisting },
+      message: isExisting
+        ? input.addToPipeline
+          ? "Existing job linked to pipeline"
+          : "Job already exists"
+        : input.addToPipeline
+          ? "Job imported and added to pipeline"
+          : "Job imported",
     };
   }
 }

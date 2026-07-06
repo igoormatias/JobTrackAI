@@ -5,6 +5,15 @@ const chartPointSchema = z.object({
   value: z.number(),
 });
 
+const companyInsightSchema = z.object({
+  label: z.string(),
+  totalJobs: z.number(),
+  inProgress: z.number(),
+  favorites: z.number(),
+  lastInteractionAt: z.string(),
+  bestMatchScore: z.number(),
+});
+
 export const dashboardDataSchema = z.object({
   kpis: z.array(
     z.object({
@@ -35,16 +44,20 @@ export const dashboardDataSchema = z.object({
     z.object({
       id: z.string(),
       applicationId: z.string(),
+      trackingId: z.string().nullable().optional(),
       jobTitle: z.string(),
       companyName: z.string(),
       scheduledAt: z.string(),
       stage: z.string(),
       status: z.string(),
+      meetingType: z.string().nullable().optional(),
+      location: z.string().nullable().optional(),
+      source: z.enum(["interview", "google"]).optional(),
       link: z.string().nullable(),
     }),
   ),
   topTechnologies: z.array(chartPointSchema),
-  topCompanies: z.array(chartPointSchema),
+  topCompanies: z.array(companyInsightSchema),
   jobSync: z.object({
     lastSyncAt: z.string().nullable(),
     totalCatalogJobs: z.number(),

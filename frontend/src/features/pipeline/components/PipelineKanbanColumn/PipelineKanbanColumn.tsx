@@ -5,7 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { memo } from "react";
 
 import { cn } from "@/lib/utils";
-import type { Application, PipelineColumn } from "@/types";
+import type { Application, PipelineColumn, PipelineStage } from "@/types";
 
 import { PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
 import { PipelineDraggableCard } from "../PipelineDraggableCard";
@@ -16,6 +16,7 @@ export type PipelineKanbanColumnProps = {
   onFavorite: (application: Application) => void;
   onDelete: (application: Application) => void;
   onScheduleInterview: (application: Application) => void;
+  onChangeStage?: (applicationId: string, stage: PipelineStage) => void;
   activeCardId?: string | null;
   className?: string;
 };
@@ -26,6 +27,7 @@ const PipelineKanbanColumnComponent = ({
   onFavorite,
   onDelete,
   onScheduleInterview,
+  onChangeStage,
   activeCardId,
   className,
 }: PipelineKanbanColumnProps) => {
@@ -60,6 +62,7 @@ const PipelineKanbanColumnComponent = ({
                 onFavorite={onFavorite}
                 onDelete={onDelete}
                 onScheduleInterview={onScheduleInterview}
+                onChangeStage={onChangeStage}
                 isPending={activeCardId === application.id}
               />
             ))

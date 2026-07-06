@@ -43,3 +43,38 @@ export const parseLinkedinSearchHtml = (html: string): LinkedinRawJob[] => {
 
   return jobs;
 };
+
+const extractJobIdFromUrl = (url: string): string | null => {
+  const match = url.match(/\/jobs\/view\/(\d+)/i);
+  return match?.[1] ?? null;
+};
+
+export const parseLinkedinJobViewHtml = (html: string, sourceUrl: string): LinkedinRawJob | null => {
+  const $ = load(html);
+  const externalId = extractJobIdFromUrl(sourceUrl);
+  if (!externalId) return null;
+
+  const ogTitle = $('meta[property="og:title"]').attr("content")?.trim();
+  const title =
+    $("h1.top-card-layout__title, h1").first().text().trim() ||
+    ogTitle?.split("|")[0]?.trim() ||
+    "";
+  const company =
+    $("a.topcard__org-name-link, .topcard__flavor--bullet").first().text().trim() ||
+    $('meta[property="og:description"]').attr("content")?.split("·")[0]?.trim() ||
+    "";
+  const location = $(".topcard__flavor--bullet").eq(1).text().trim() || undefined;
+  const description =
+    $(".description__text, .show-more-less-html").first().text().trim().slice(0, 2000) || undefined;
+
+  if (!title) return null;
+
+  return {
+    title,
+    company: company || "Empresa não informada",
+    location,
+    sourceUrl: stripQuery(sourceUrl),
+    externalId,
+    description,
+  };
+};

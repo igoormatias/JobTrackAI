@@ -114,6 +114,7 @@ export const useJobFilters = () => {
   return {
     urlState,
     setUrlState,
+    setFilters: setUrlState,
     urlFilters,
     listParams,
     hasActiveFilters: hasActiveJobFilters(urlFilters),

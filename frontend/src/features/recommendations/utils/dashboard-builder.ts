@@ -1,4 +1,4 @@
-import type { Application, DashboardActivity, DashboardChartPoint, DashboardData, DashboardInsight, Job } from "@/types";
+import type { Application, DashboardCompanyInsight, DashboardActivity, DashboardChartPoint, DashboardData, DashboardInsight, Job } from "@/types";
 
 import { AREA_OPTIONS } from "@/features/onboarding/constants/areas";
 import { PIPELINE_STAGE_LABELS } from "@/features/pipeline/constants/pipeline-columns";
@@ -29,6 +29,34 @@ const topEntries = (record: Record<string, number>, limit = 5) =>
     .sort(([, a], [, b]) => b - a)
     .slice(0, limit)
     .map(([label, value]) => ({ label, value }));
+
+const toCompanyInsights = (
+  entries: { label: string; value: number }[],
+  jobs: Job[],
+  applications: Application[],
+): DashboardCompanyInsight[] =>
+  entries.map(({ label, value }) => {
+    const companyJobs = jobs.filter((job) => job.company.name === label);
+    const companyApplications = applications.filter((app) => app.job.company.name === label);
+    const bestMatchScore = companyJobs.reduce((max, job) => Math.max(max, job.matchScore.score), 0);
+    const lastInteractionAt =
+      companyApplications
+        .map((app) => app.updatedAt)
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ??
+      companyJobs
+        .map((job) => job.publishedAt)
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ??
+      new Date().toISOString();
+
+    return {
+      label,
+      totalJobs: value,
+      inProgress: companyApplications.filter((app) => app.stage !== "closed" && app.stage !== "hired").length,
+      favorites: companyJobs.filter((job) => job.isFavorite).length,
+      lastInteractionAt,
+      bestMatchScore,
+    };
+  });
 
 const isWithinDays = (date: string, days: number): boolean =>
   new Date(date) > new Date(Date.now() - days * 86400000);
@@ -239,7 +267,7 @@ export const buildPersonalizedDashboard = ({
       value,
     })),
     topTechnologies: topEntries(techCounts),
-    topCompanies: topEntries(companyCounts),
+    topCompanies: toCompanyInsights(topEntries(companyCounts), compatibleJobs.length > 0 ? compatibleJobs : sortedJobs, applications),
     recentActivities: buildRecentActivities(sortedJobs, applications, favoriteJobs),
     upcomingInterviews,
     insight,

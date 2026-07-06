@@ -82,6 +82,11 @@ const SORTED_ALIASES: AliasEntry[] = Object.entries(TITLE_ALIASES_BY_AREA)
   )
   .sort((a, b) => b.alias.length - a.alias.length);
 
+export const getTitleSearchHintsForArea = (area: ProfessionalArea | null | undefined): string[] => {
+  if (!area) return [];
+  return TITLE_ALIASES_BY_AREA[area] ?? [];
+};
+
 export class JobTitleNormalizer {
   normalizeTitle(title: string): string {
     return normalizeTitle(title);

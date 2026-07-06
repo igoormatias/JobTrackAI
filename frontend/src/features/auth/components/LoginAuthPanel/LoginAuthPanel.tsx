@@ -39,6 +39,6 @@ export const LoginAuthPanel = () => (
       </div>
     </motion.div>
 
-    <LoginSiteFooter className="mt-6 w-full" />
+    <LoginSiteFooter className="mt-6 w-full text-center lg:text-left" />
   </section>
 );

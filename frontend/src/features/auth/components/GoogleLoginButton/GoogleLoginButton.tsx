@@ -129,7 +129,7 @@ export const GoogleLoginButton = () => {
       </div>
 
       {errorMessage ? (
-        <p role="alert" className="text-center text-sm text-destructive">
+        <p role="alert" className="text-center text-sm text-destructive lg:text-left">
           {errorMessage}
         </p>
       ) : null}

@@ -14,11 +14,13 @@ import type {
   DashboardActivityDto,
   DashboardActivityTypeDto,
   DashboardChartPointDto,
+  DashboardCompanyInsightDto,
   DashboardDataDto,
   DashboardInsightDto,
   DashboardInterviewDto,
   DashboardKpiDto,
 } from "../../application/dto/dashboard-response.dto.js";
+import { skillMatcher } from "../../../match/domain/services/skill-matcher.service.js";
 
 const AREA_LABELS: Record<string, string> = {
   frontend: "Frontend",
@@ -124,6 +126,80 @@ const buildInsight = (
   };
 };
 
+const buildCompanyInsights = (
+  trackings: Array<{
+    stage: string;
+    isFavorite: boolean;
+    updatedAt: Date;
+    rulesMatchScore: number | null;
+    job: Job;
+  }>,
+): DashboardCompanyInsightDto[] => {
+  const byCompany = new Map<string, DashboardCompanyInsightDto & { lastDate: Date }>();
+
+  for (const tracking of trackings) {
+    const label = tracking.job.companyName;
+    const key = tracking.job.companySlug || label.toLowerCase();
+    const existing = byCompany.get(key);
+    const inProgress = !["discovery", "closed"].includes(tracking.stage);
+    const matchScore = tracking.rulesMatchScore ?? 0;
+    const lastDate = tracking.updatedAt;
+
+    if (!existing) {
+      byCompany.set(key, {
+        label,
+        totalJobs: 1,
+        inProgress: inProgress ? 1 : 0,
+        favorites: tracking.isFavorite ? 1 : 0,
+        lastInteractionAt: lastDate.toISOString(),
+        bestMatchScore: matchScore,
+        lastDate,
+      });
+      continue;
+    }
+
+    existing.totalJobs += 1;
+    if (inProgress) existing.inProgress += 1;
+    if (tracking.isFavorite) existing.favorites += 1;
+    if (matchScore > existing.bestMatchScore) existing.bestMatchScore = matchScore;
+    if (lastDate > existing.lastDate) {
+      existing.lastDate = lastDate;
+      existing.lastInteractionAt = lastDate.toISOString();
+    }
+  }
+
+  return [...byCompany.values()]
+    .sort((a, b) => b.inProgress - a.inProgress || b.totalJobs - a.totalJobs)
+    .slice(0, 5)
+    .map(({ lastDate: _lastDate, ...item }) => item);
+};
+
+const buildTechnologyCounts = (
+  trackings: Array<{ job: Job }>,
+  _profile: Profile | null,
+): Record<string, number> => {
+  const counts: Record<string, number> = {};
+
+  for (const { job } of trackings) {
+    const metadata = parseJobMetadata(job.metadata);
+    const skillNames = new Set<string>();
+
+    for (const tech of metadata.technologies ?? []) {
+      if (tech.name?.trim()) skillNames.add(tech.name.trim());
+    }
+    for (const req of metadata.requirements ?? []) {
+      if (req?.trim()) skillNames.add(req.trim());
+    }
+
+    for (const raw of skillNames) {
+      const canonical = skillMatcher.canonicalize(raw) ?? raw;
+      counts[canonical] = (counts[canonical] ?? 0) + 1;
+    }
+  }
+
+  return counts;
+};
+
 const deriveProviderStatus = (
   enabled: boolean,
   latestExecutionStatus: string | undefined,
@@ -161,7 +237,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
       interviewsFutureTotal,
       stageGroups,
       timelineEvents,
-      upcomingInterviews,
+      userTrackingsWithJobs,
       trackings,
       catalogJobs,
       profile,
@@ -216,14 +292,10 @@ export class PrismaDashboardRepository implements DashboardRepository {
         orderBy: { occurredAt: "desc" },
         take: 8,
       }),
-      prisma.interview.findMany({
-        where: {
-          tracking: { userId },
-          scheduledAt: { gte: now },
-        },
-        include: { tracking: { include: { job: true } } },
-        orderBy: { scheduledAt: "asc" },
-        take: 5,
+      prisma.jobTracking.findMany({
+        where: { userId },
+        include: { job: true },
+        orderBy: { updatedAt: "desc" },
       }),
       prisma.jobTracking.findMany({
         where: { userId },
@@ -317,11 +389,8 @@ export class PrismaDashboardRepository implements DashboardRepository {
       .sort((a, b) => b.match.score - a.match.score);
 
     const topMatchedJobs = jobsWithMatch.slice(0, 10);
-    const techCounts = countBy(
-      topMatchedJobs.flatMap(({ job }) => parseJobMetadata(job.metadata).technologies ?? []),
-      (tech) => tech.name,
-    );
-    const companyCounts = countBy(topMatchedJobs, ({ job }) => job.companyName);
+    const techCounts = buildTechnologyCounts(userTrackingsWithJobs, profile);
+    const topCompanies = buildCompanyInsights(userTrackingsWithJobs);
     const areaCounts = countBy(catalogJobs, (job) => job.area ?? "other");
 
     const trendPercent =
@@ -396,27 +465,6 @@ export class PrismaDashboardRepository implements DashboardRepository {
       .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())
       .slice(0, 8);
 
-    const mappedInterviews: DashboardInterviewDto[] = upcomingInterviews.map((interview) => {
-      const stage = interview.tracking.stage;
-      const stageLabel =
-        PIPELINE_STAGE_LABELS[stage as keyof typeof PIPELINE_STAGE_LABELS] ?? stage;
-
-      return {
-        id: interview.id,
-        applicationId: interview.trackingId,
-        trackingId: interview.trackingId,
-        jobTitle: interview.tracking.job.title,
-        companyName: interview.tracking.job.companyName,
-        scheduledAt: interview.scheduledAt.toISOString(),
-        stage: stageLabel,
-        status: stageLabel,
-        meetingType: interview.meetingType,
-        location: interview.location,
-        source: "interview" as const,
-        link: interview.link,
-      };
-    });
-
     return {
       kpis,
       jobsByArea: Object.entries(areaCounts)
@@ -430,10 +478,10 @@ export class PrismaDashboardRepository implements DashboardRepository {
           PIPELINE_STAGE_LABELS[group.stage as keyof typeof PIPELINE_STAGE_LABELS] ?? group.stage,
         value: group._count._all,
       })),
-      topTechnologies: topEntries(techCounts),
-      topCompanies: topEntries(companyCounts),
+      topTechnologies: topEntries(techCounts, 10),
+      topCompanies,
       recentActivities,
-      upcomingInterviews: mappedInterviews,
+      upcomingInterviews: [],
       insight: buildInsight(
         profile,
         jobsWithMatch.map(({ job, match }) => ({ score: match.score, area: job.area })),

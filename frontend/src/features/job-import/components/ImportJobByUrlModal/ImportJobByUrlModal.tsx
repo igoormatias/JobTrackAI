@@ -1,6 +1,7 @@
 "use client";
 
 import { Link2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -33,6 +34,7 @@ export const ImportJobByUrlModal = ({
   defaultAddToPipeline = false,
   onSuccess,
 }: ImportJobByUrlModalProps) => {
+  const router = useRouter();
   const [url, setUrl] = useState("");
   const [preview, setPreview] = useState<JobImportPreview | null>(null);
   const [addToPipeline, setAddToPipeline] = useState(defaultAddToPipeline);
@@ -69,8 +71,12 @@ export const ImportJobByUrlModal = ({
     confirmMutation.mutate(
       { url: url.trim(), addToPipeline },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
           onOpenChange(false);
+          if (result.isExisting) {
+            router.push(`/jobs/${result.job.id}`);
+            return;
+          }
           onSuccess?.();
         },
       },
@@ -88,7 +94,7 @@ export const ImportJobByUrlModal = ({
             Importar vaga por URL
           </ModalTitle>
           <ModalDescription>
-            Cole o link da vaga no Gupy para visualizar e importar para o JobTrack AI.
+            Cole o link da vaga no Gupy ou LinkedIn para visualizar e importar para o JobTrack AI.
           </ModalDescription>
         </ModalHeader>
 
@@ -98,7 +104,7 @@ export const ImportJobByUrlModal = ({
             <Input
               id="job-import-url"
               type="url"
-              placeholder="https://portal.gupy.io/job/12345"
+              placeholder="https://portal.gupy.io/job/12345 ou https://linkedin.com/jobs/view/..."
               value={url}
               onChange={(event) => setUrl(event.target.value)}
               disabled={isBusy}

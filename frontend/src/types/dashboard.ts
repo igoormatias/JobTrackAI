@@ -11,6 +11,15 @@ export type DashboardChartPoint = {
   value: number;
 };
 
+export type DashboardCompanyInsight = {
+  label: string;
+  totalJobs: number;
+  inProgress: number;
+  favorites: number;
+  lastInteractionAt: string;
+  bestMatchScore: number;
+};
+
 export type DashboardActivityType =
   | "job"
   | "application"
@@ -86,7 +95,7 @@ export type DashboardData = {
   jobsByArea: DashboardChartPoint[];
   applicationsByStage: DashboardChartPoint[];
   topTechnologies: DashboardChartPoint[];
-  topCompanies: DashboardChartPoint[];
+  topCompanies: DashboardCompanyInsight[];
   recentActivities: DashboardActivity[];
   upcomingInterviews: DashboardInterview[];
   insight: DashboardInsight;

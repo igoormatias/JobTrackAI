@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { Bell } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
+import { Skeleton } from "@/components/feedback/Skeleton";
 import { NotificationBadge } from "@/components/badges/NotificationBadge";
 import { Button } from "@/components/ui/Button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
@@ -23,10 +25,18 @@ const formatNotificationTime = (value: string): string => {
 };
 
 export const HeaderNotificationButton = () => {
+  const [open, setOpen] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
   const { data, isLoading } = useNotifications({ limit: 20 });
   const markReadMutation = useMarkNotificationsRead();
   const notifications = data?.data ?? [];
   const unreadCount = notifications.filter((item) => !item.read).length;
+
+  useEffect(() => {
+    if (open && listRef.current) {
+      listRef.current.scrollTop = 0;
+    }
+  }, [open]);
 
   const handleMarkAllRead = () => {
     const unreadIds = notifications.filter((item) => !item.read).map((item) => item.id);
@@ -35,7 +45,7 @@ export const HeaderNotificationButton = () => {
   };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -59,9 +69,17 @@ export const HeaderNotificationButton = () => {
             Marcar todas como lidas
           </Button>
         </div>
-        <div className="max-h-80 overflow-y-auto">
+        <div ref={listRef} className="max-h-80 overflow-y-auto scrollbar-app">
           {isLoading ? (
-            <p className="px-4 py-6 text-sm text-muted-foreground">Carregando...</p>
+            <div className="space-y-3 p-4" aria-busy="true" aria-label="Carregando notificações">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+              ))}
+            </div>
           ) : notifications.length === 0 ? (
             <p className="px-4 py-6 text-sm text-muted-foreground">Nenhuma notificação por enquanto.</p>
           ) : (

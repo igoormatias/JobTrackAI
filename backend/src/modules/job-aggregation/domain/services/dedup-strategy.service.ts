@@ -28,7 +28,7 @@ export class DedupStrategy {
     if (byHash) {
       return {
         action: "skip",
-        reason: "content_hash",
+        reason: "unchanged",
         existingJobId: byHash.id,
       };
     }
@@ -36,8 +36,16 @@ export class DedupStrategy {
     const normalizedUrl = normalizeSourceUrl(job.sourceUrl);
     const byUrl = await this.lookup.findBySourceUrl(normalizedUrl);
     if (byUrl) {
+      if (byUrl.contentHash && byUrl.contentHash === job.contentHash) {
+        return {
+          action: "skip",
+          reason: "unchanged",
+          existingJobId: byUrl.id,
+        };
+      }
+
       return {
-        action: "skip",
+        action: "update",
         reason: "source_url",
         existingJobId: byUrl.id,
       };

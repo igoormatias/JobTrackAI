@@ -25,6 +25,7 @@ export type ConfirmJobImportResult = {
     id: string;
     stage: string;
   };
+  isExisting?: boolean;
 };
 
 export const previewJobImport = async (url: string): Promise<JobImportPreview> => {

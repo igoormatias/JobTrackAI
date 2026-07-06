@@ -54,7 +54,7 @@ describe("DedupStrategy", () => {
     expect(result.existingJobId).toBe("job-1");
   });
 
-  it("should skip when content hash matches", async () => {
+  it("should skip unchanged when content hash matches existing job", async () => {
     const lookup = createLookup({
       findByContentHash: vi.fn().mockResolvedValue({ id: "job-2", source: "gupy", contentHash: "hash-123" }),
     });
@@ -63,7 +63,25 @@ describe("DedupStrategy", () => {
     const result = await strategy.evaluate(baseJob);
 
     expect(result.action).toBe("skip");
-    expect(result.reason).toBe("content_hash");
+    expect(result.reason).toBe("unchanged");
+  });
+
+  it("should update when source url matches with different hash", async () => {
+    const lookup = createLookup({
+      findBySourceUrl: vi.fn().mockResolvedValue({
+        id: "job-3",
+        source: "gupy",
+        contentHash: "old-hash",
+        sourceUrl: baseJob.sourceUrl,
+      }),
+    });
+    const strategy = new DedupStrategy(lookup);
+
+    const result = await strategy.evaluate(baseJob);
+
+    expect(result.action).toBe("update");
+    expect(result.reason).toBe("source_url");
+    expect(result.existingJobId).toBe("job-3");
   });
 
   it("should import when no duplicate is found", async () => {

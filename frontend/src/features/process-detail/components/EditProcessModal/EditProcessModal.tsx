@@ -22,11 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import type { JobPriority } from "@/types";
+import { PIPELINE_COLUMN_CONFIG } from "@/features/pipeline/constants/pipeline-columns";
+import type { JobPriority, PipelineStage } from "@/types";
 
 import type { TrackingDetail, UpdateProcessPayload } from "@/features/tracking/services/tracking-service";
 
 const processFormSchema = z.object({
+  stage: z.string(),
   notes: z.string().optional(),
   feedback: z.string().optional(),
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]),
@@ -47,6 +49,7 @@ export type EditProcessModalProps = {
   tracking: TrackingDetail;
   isSubmitting?: boolean;
   onSubmit: (payload: UpdateProcessPayload) => void;
+  onStageChange?: (stage: PipelineStage) => void;
 };
 
 const toFormValues = (tracking: TrackingDetail): ProcessFormValues => {
@@ -55,6 +58,7 @@ const toFormValues = (tracking: TrackingDetail): ProcessFormValues => {
     : undefined;
 
   return {
+    stage: tracking.stage,
     notes: tracking.notes ?? "",
     feedback: tracking.feedback ?? "",
     priority: tracking.priority,
@@ -74,6 +78,7 @@ export const EditProcessModal = ({
   tracking,
   isSubmitting = false,
   onSubmit,
+  onStageChange,
 }: EditProcessModalProps) => {
   const form = useForm<ProcessFormValues>({
     resolver: zodResolver(processFormSchema),
@@ -89,6 +94,10 @@ export const EditProcessModal = ({
       values.processLinkLabel && values.processLinkUrl
         ? { [values.processLinkLabel]: values.processLinkUrl }
         : null;
+
+    if (values.stage !== tracking.stage) {
+      onStageChange?.(values.stage as PipelineStage);
+    }
 
     onSubmit({
       notes: values.notes || null,
@@ -111,6 +120,25 @@ export const EditProcessModal = ({
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Status do processo</Label>
+            <Select
+              value={form.watch("stage")}
+              onValueChange={(value) => form.setValue("stage", value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PIPELINE_COLUMN_CONFIG.map((column) => (
+                  <SelectItem key={column.stage} value={column.stage}>
+                    {column.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="notes">Observações</Label>
             <Textarea id="notes" rows={3} {...form.register("notes")} />

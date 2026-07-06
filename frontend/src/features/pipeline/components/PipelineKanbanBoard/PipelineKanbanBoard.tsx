@@ -95,6 +95,7 @@ export const PipelineKanbanBoard = ({
             onFavorite={onFavorite}
             onDelete={onDelete}
             onScheduleInterview={onScheduleInterview}
+            onChangeStage={mobile ? onMove : undefined}
             activeCardId={activeApplication?.id}
             className={mobile ? "w-full" : undefined}
           />

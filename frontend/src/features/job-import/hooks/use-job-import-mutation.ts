@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import { queryKeys } from "@/lib/query-client/query-keys";
 
 import {
@@ -23,13 +24,16 @@ export const useConfirmJobImportMutation = () => {
   return useMutation({
     mutationFn: (payload: ConfirmJobImportPayload) => confirmJobImport(payload),
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
+      invalidateCareerSurfaces(queryClient);
       if (variables.addToPipeline) {
-        await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
-        await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
       }
       toast.success(
-        variables.addToPipeline ? "Vaga importada e adicionada ao pipeline" : "Vaga importada com sucesso",
+        _data.isExisting
+          ? "Vaga já existente — redirecionando para detalhes"
+          : variables.addToPipeline
+            ? "Vaga importada e adicionada ao pipeline"
+            : "Vaga importada com sucesso",
       );
     },
     onError: () => toast.error("Não foi possível importar a vaga"),

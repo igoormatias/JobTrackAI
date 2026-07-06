@@ -1,8 +1,32 @@
 import { apiClient } from "@/lib/api-client";
-import type { ApiResponse, CreateProfilePayload, Profile, UpdateProfilePayload } from "@/types";
+import type {
+  ApiResponse,
+  CreateProfilePayload,
+  ProfessionalArea,
+  Profile,
+  SalaryRange,
+  Seniority,
+  UpdateProfilePayload,
+  WorkModality,
+} from "@/types";
+
+export type JobSearchHints = {
+  area: ProfessionalArea | null;
+  titleHints: string[];
+  skillNames: string[];
+  seniority: Seniority | null;
+  modality: WorkModality | null;
+  location: string | null;
+  salaryExpectation: SalaryRange | null;
+};
 
 export const getProfile = async (): Promise<Profile> => {
   const { data } = await apiClient.get<ApiResponse<Profile>>("/profile");
+  return data.data;
+};
+
+export const getJobSearchHints = async (): Promise<JobSearchHints> => {
+  const { data } = await apiClient.get<ApiResponse<JobSearchHints>>("/profile/job-search-hints");
   return data.data;
 };
 

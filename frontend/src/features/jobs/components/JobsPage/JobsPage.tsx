@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Link2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +19,7 @@ import { JOBS_LAYOUT } from "../../constants/jobs-constants";
 import { useInfiniteJobs } from "../../hooks/use-infinite-jobs";
 import { useJobFilters } from "../../hooks/use-job-filters";
 import { useJobMutations } from "../../hooks/use-job-mutations";
+import { hasProfileDefaultFilters, loadProfileDefaultFilters } from "../../utils/profile-default-filters";
 import { JobsResultsWidget } from "../../widgets/JobsResultsWidget";
 import { JobsToolbarWidget } from "../../widgets/JobsToolbarWidget";
 
@@ -33,11 +34,31 @@ const getEmptyVariant = (
 
 export const JobsPage = () => {
   const filters = useJobFilters();
+  const { hasActiveFilters, setFilters, setSearchInputValue } = filters;
   const { favoriteMutation, viewMutation } = useJobMutations();
   const createTrackingMutation = useCreateTrackingMutation();
   const [trackingJob, setTrackingJob] = useState<Job | null>(null);
   const [trackingModalOpen, setTrackingModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const profileDefaultsApplied = useRef(false);
+
+  useEffect(() => {
+    if (profileDefaultsApplied.current || hasActiveFilters) return;
+
+    profileDefaultsApplied.current = true;
+
+    void loadProfileDefaultFilters()
+      .then((defaults) => {
+        if (!hasProfileDefaultFilters(defaults)) return;
+        if (defaults.search) {
+          setSearchInputValue(defaults.search);
+        }
+        void setFilters(defaults);
+      })
+      .catch(() => {
+        profileDefaultsApplied.current = false;
+      });
+  }, [hasActiveFilters, setFilters, setSearchInputValue]);
 
   const { data: companiesData } = useQuery({
     queryKey: queryKeys.companies.list({ limit: 30 }),

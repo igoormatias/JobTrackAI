@@ -1,9 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
+
+import { MultiSelect } from "@/components/data-display/DataDisplay";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Slider } from "@/components/ui/Slider";
+import { getSkillsForArea } from "@/features/onboarding/constants/skills-by-area";
 import type { JobSource, ProfessionalArea, Seniority, WorkModality } from "@/types";
 
 import {
@@ -25,7 +29,19 @@ export type JobsFilterFieldsProps = {
 const toggleArrayValue = <T extends string>(values: T[], value: T): T[] =>
   values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
 
-export const JobsFilterFields = ({ urlState, setUrlState, companies }: JobsFilterFieldsProps) => (
+export const JobsFilterFields = ({ urlState, setUrlState, companies }: JobsFilterFieldsProps) => {
+  const skillOptions = useMemo(() => {
+    const areas = urlState.areas.length
+      ? urlState.areas
+      : JOB_AREA_OPTIONS.map((option) => option.value);
+    const skills = new Set<string>();
+    for (const area of areas) {
+      getSkillsForArea(area as ProfessionalArea).forEach((skill) => skills.add(skill));
+    }
+    return [...skills].map((skill) => ({ value: skill, label: skill }));
+  }, [urlState.areas]);
+
+  return (
   <div className="space-y-6">
     <section className="space-y-3">
       <h4 className="text-sm font-medium">Área profissional</h4>
@@ -104,6 +120,18 @@ export const JobsFilterFields = ({ urlState, setUrlState, companies }: JobsFilte
     </section>
 
     <section className="space-y-3">
+      <MultiSelect
+        id="jobs-skills-filter"
+        label="Competências"
+        placeholder="Filtrar por competência..."
+        options={skillOptions}
+        value={urlState.skills}
+        onChange={(skills) => void setUrlState({ skills })}
+        searchable
+      />
+    </section>
+
+    <section className="space-y-3">
       <Label htmlFor="jobs-location-filter">Localização</Label>
       <Input
         id="jobs-location-filter"
@@ -177,4 +205,5 @@ export const JobsFilterFields = ({ urlState, setUrlState, companies }: JobsFilte
       />
     </section>
   </div>
-);
+  );
+};

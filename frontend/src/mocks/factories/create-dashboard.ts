@@ -1,4 +1,4 @@
-import type { Application, DashboardData, DashboardInsight, Job } from "@/types";
+import type { Application, DashboardCompanyInsight, DashboardData, DashboardInsight, Job } from "@/types";
 
 import { buildApplicationsTimeline, buildPersonalizedDashboard } from "@/features/recommendations/utils/dashboard-builder";
 import type { RecommendationProfile } from "@/features/recommendations/types/recommendation.types";
@@ -37,6 +37,16 @@ export const createDashboard = ({ jobs, applications, profile }: CreateDashboard
       .sort(([, a], [, b]) => b - a)
       .slice(0, limit)
       .map(([label, value]) => ({ label, value }));
+
+  const toCompanyInsights = (entries: { label: string; value: number }[]): DashboardCompanyInsight[] =>
+    entries.map(({ label, value }) => ({
+      label,
+      totalJobs: value,
+      inProgress: Math.min(value, Math.max(1, Math.floor(value * 0.4))),
+      favorites: Math.min(value, Math.max(0, Math.floor(value * 0.2))),
+      lastInteractionAt: new Date(Date.now() - Math.random() * 14 * 86400000).toISOString(),
+      bestMatchScore: Math.min(98, 70 + (value % 25)),
+    }));
 
   const upcomingInterviews = applications
     .filter((app) => app.nextInterviewAt)
@@ -112,7 +122,7 @@ export const createDashboard = ({ jobs, applications, profile }: CreateDashboard
       value,
     })),
     topTechnologies: topEntries(techCounts),
-    topCompanies: topEntries(companyCounts),
+    topCompanies: toCompanyInsights(topEntries(companyCounts)),
     recentActivities: [
       ...jobs.slice(0, 3).map((job, index) => ({
         id: `activity_job_${index}`,

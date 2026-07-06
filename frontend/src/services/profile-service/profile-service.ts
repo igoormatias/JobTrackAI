@@ -1,2 +1,8 @@
 /** @deprecated Use `@/features/account/services` — mantido para compatibilidade. */
-export { createProfile, getProfile, updateProfile } from "@/features/account/services";
+export {
+  createProfile,
+  getJobSearchHints,
+  getProfile,
+  updateProfile,
+  type JobSearchHints,
+} from "@/features/account/services";

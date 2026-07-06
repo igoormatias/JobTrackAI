@@ -110,6 +110,9 @@ export class PrismaJobRepository {
       area?: string;
       modality?: string;
       location?: string;
+      externalId?: string;
+      contentHash?: string;
+      technologies?: Array<{ name: string }>;
     },
   ): Promise<PrismaJob> {
     const slug = input.title
@@ -128,12 +131,14 @@ export class PrismaJobRepository {
         description: input.description,
         sourceUrl: input.sourceUrl,
         source: input.source,
+        externalId: input.externalId,
+        contentHash: input.contentHash,
         area: input.area ?? "frontend",
         modality: input.modality ?? "remote",
         location: input.location ?? "",
         isCatalog: false,
         metadata: {
-          technologies: [],
+          technologies: input.technologies ?? [],
           requirements: [],
           benefits: [],
           company: {
