@@ -1,7 +1,12 @@
 import { logger } from "../../../../config/logger.js";
+import { prisma } from "../../../../database/prisma.js";
 import type { JobCatalogRepository } from "../../../job-catalog/domain/repositories/job-catalog.repository.js";
 import type { CatalogJobUpsertInput } from "../../../job-catalog/domain/value-objects/catalog-list-filters.js";
 import type { JobSyncNotificationService } from "../../../notifications/application/job-sync-notification.service.js";
+import type {
+  ImportedJobKey,
+  NewJobNotificationService,
+} from "../../../notifications/application/new-job-notification.service.js";
 import type { ProviderExecution } from "../../domain/entities/provider-execution.entity.js";
 import type { JobProviderPort } from "../../domain/ports/job-provider.port.js";
 import type { DedupLookupRepository } from "../../domain/repositories/dedup-lookup.repository.js";
@@ -9,7 +14,7 @@ import type { JobImportRepository } from "../../domain/repositories/job-import.r
 import type { ProviderExecutionRepository } from "../../domain/repositories/provider-execution.repository.js";
 import type { ProviderRegistryRepository } from "../../domain/repositories/provider-registry.repository.js";
 import { DedupStrategy } from "../../domain/services/dedup-strategy.service.js";
-import { jobNormalizer } from "../../domain/services/job-normalizer.service.js";
+import { jobNormalizer, normalizeSourceUrl } from "../../domain/services/job-normalizer.service.js";
 import { jobValidator } from "../../domain/services/job-validator.service.js";
 import { syncProviderRegistryFromEnv } from "../../infrastructure/bootstrap/sync-provider-registry.js";
 import { toCatalogUpsertInput } from "../../infrastructure/mappers/normalized-job-to-catalog.mapper.js";
@@ -36,6 +41,7 @@ export class JobAggregationService {
     private readonly catalogRepo: JobCatalogRepository,
     private readonly dedupLookup: DedupLookupRepository,
     private readonly jobSyncNotifications?: JobSyncNotificationService,
+    private readonly newJobNotifications?: NewJobNotificationService,
   ) {}
 
   async runProvider(providerName: string): Promise<ProviderExecution> {
@@ -80,6 +86,7 @@ export class JobAggregationService {
     };
     const importRecords: Array<Parameters<JobImportRepository["create"]>[0]> = [];
     const upsertBatch: Array<{ input: CatalogJobUpsertInput; action: "import" | "update" }> = [];
+    const importedKeys: ImportedJobKey[] = [];
     const seenExternalIds = new Set<string>();
     const unchangedExternalIds: string[] = [];
 
@@ -132,6 +139,47 @@ export class JobAggregationService {
 
             const dedupResult = await dedup.evaluate(validation.job);
 
+            if (dedupResult.action === "attach_alternate") {
+              const existingJobId = dedupResult.existingJobId!;
+              await prisma.jobAlternateSource.upsert({
+                where: {
+                  source_externalId: {
+                    source: validation.job.provider,
+                    externalId: validation.job.externalId,
+                  },
+                },
+                create: {
+                  jobId: existingJobId,
+                  source: validation.job.provider,
+                  externalId: validation.job.externalId,
+                  sourceUrl: normalizeSourceUrl(validation.job.sourceUrl),
+                  contentHash: validation.job.contentHash,
+                  isPrimary: false,
+                },
+                update: {
+                  sourceUrl: normalizeSourceUrl(validation.job.sourceUrl),
+                  contentHash: validation.job.contentHash,
+                },
+              });
+
+              counts.duplicateCount += 1;
+              importRecords.push({
+                executionId: execution.id,
+                providerName,
+                externalId: validation.job.externalId,
+                sourceUrl: validation.job.sourceUrl,
+                contentHash: validation.job.contentHash,
+                status: "alternate_attached",
+                jobId: existingJobId,
+              });
+
+              if (validation.job.externalId) {
+                seenExternalIds.add(validation.job.externalId);
+              }
+
+              continue;
+            }
+
             if (dedupResult.action === "skip") {
               counts.duplicateCount += 1;
               importRecords.push({
@@ -155,7 +203,14 @@ export class JobAggregationService {
             upsertBatch.push({ input: catalogInput, action: dedupResult.action });
 
             if (upsertBatch.length >= BATCH_SIZE) {
-              await this.flushBatch(upsertBatch, importRecords, execution.id, providerName, counts);
+              await this.flushBatch(
+                upsertBatch,
+                importRecords,
+                execution.id,
+                providerName,
+                counts,
+                importedKeys,
+              );
             }
           } catch (error) {
             counts.failedCount += 1;
@@ -172,7 +227,14 @@ export class JobAggregationService {
       }
 
       if (upsertBatch.length > 0) {
-        await this.flushBatch(upsertBatch, importRecords, execution.id, providerName, counts);
+        await this.flushBatch(
+          upsertBatch,
+          importRecords,
+          execution.id,
+          providerName,
+          counts,
+          importedKeys,
+        );
       }
 
       if (unchangedExternalIds.length > 0) {
@@ -186,6 +248,10 @@ export class JobAggregationService {
 
       if (closedCount > 0 && this.jobSyncNotifications) {
         await this.jobSyncNotifications.notifyClosedJobs(closedJobIds);
+      }
+
+      if (importedKeys.length > 0 && this.newJobNotifications) {
+        await this.newJobNotifications.notifyForImportedJobs(providerName, importedKeys);
       }
 
       if (importRecords.length > 0) {
@@ -239,6 +305,7 @@ export class JobAggregationService {
     executionId: string,
     providerName: string,
     counts: AggregationCounts,
+    importedKeys: ImportedJobKey[],
   ): Promise<void> {
     const items = batch.splice(0, batch.length);
     const inputs = items.map((item) => item.input);
@@ -247,6 +314,13 @@ export class JobAggregationService {
     counts.importedCount += result.imported + result.updated;
 
     for (const item of items) {
+      if (item.action === "import" && item.input.externalId) {
+        importedKeys.push({
+          source: item.input.source,
+          externalId: item.input.externalId,
+        });
+      }
+
       importRecords.push({
         executionId,
         providerName,

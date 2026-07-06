@@ -30,6 +30,12 @@ export const urlFiltersToJobListParams = (filters: JobUrlFilters): JobListParams
   dateFrom: filters.dateFrom || undefined,
   dateTo: filters.dateTo || undefined,
   isFavorite: filters.isFavorite,
+  suggested: filters.suggested,
+  strictProfileMatch:
+    filters.suggested === true ||
+    filters.matchMin !== undefined ||
+    Boolean(filters.areas?.length) ||
+    Boolean(filters.skills?.length),
   sources: filters.sources,
 });
 
@@ -76,6 +82,7 @@ export const parseJobUrlSearchParams = (searchParams: URLSearchParams): JobUrlFi
       : searchParams.get("isFavorite") === "false"
         ? false
         : undefined,
+  suggested: searchParams.get("suggested") === "true" ? true : undefined,
   sources: parseCsv(searchParams.get("sources")) as JobUrlFilters["sources"],
 });
 
@@ -97,6 +104,7 @@ export const serializeJobUrlSearchParams = (filters: JobUrlFilters): Record<stri
   if (filters.dateFrom) entries.dateFrom = filters.dateFrom;
   if (filters.dateTo) entries.dateTo = filters.dateTo;
   if (filters.isFavorite !== undefined) entries.isFavorite = String(filters.isFavorite);
+  if (filters.suggested) entries.suggested = "true";
   if (filters.sources?.length) entries.sources = serializeCsv(filters.sources)!;
 
   return entries;
@@ -104,7 +112,8 @@ export const serializeJobUrlSearchParams = (filters: JobUrlFilters): Record<stri
 
 export const hasActiveJobFilters = (filters: JobUrlFilters): boolean =>
   Boolean(
-    filters.search ||
+    filters.suggested ||
+      filters.search ||
       filters.areas?.length ||
       filters.companyIds?.length ||
       filters.seniorities?.length ||

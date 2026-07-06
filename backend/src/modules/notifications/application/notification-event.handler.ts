@@ -90,16 +90,20 @@ export class NotificationEventHandler {
   private async onInterviewReminder(event: DomainEvent): Promise<void> {
     if (!(event instanceof InterviewReminderEvent)) return;
 
+    const title =
+      event.payload.reminderKind === "24h" ? "Entrevista amanhã" : "Entrevista em breve";
+
     await this.notificationService.create({
       userId: event.payload.userId,
       type: "interview_reminder",
-      title: "Entrevista próxima",
+      title,
       message: `${event.payload.jobTitle} · ${event.payload.companyName} — ${new Date(event.payload.scheduledAt).toLocaleString("pt-BR")}.`,
       actionUrl: `/pipeline`,
       metadata: {
         trackingId: event.payload.trackingId,
         interviewId: event.payload.interviewId,
         scheduledAt: event.payload.scheduledAt,
+        reminderKind: event.payload.reminderKind,
       },
     });
   }

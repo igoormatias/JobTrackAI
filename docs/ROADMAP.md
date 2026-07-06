@@ -246,11 +246,15 @@ Dívida documentada em [MVP_SCOPE.md](./MVP_SCOPE.md#dívida-técnica-documentad
 
 ## V2
 
+### Busca global (Cmd+K)
+
+Paleta de comandos estilo Linear/Raycast para navegação rápida entre vagas, pipeline, calendário e notificações. Removida do header no MVP (Etapa 16) em favor de busca contextual por tela.
+
 Funcionalidades **fora do MVP**. Não implementar antes de concluir o escopo MVP.
 
 ### Integrações e infraestrutura
 
-- ✅ **Importação por URL** — Etapa 21 (Gupy real; LinkedIn/Programathor stub)
+- ✅ **Importação por URL** — Etapa 21 (Gupy + LinkedIn + Programathor real)
 - ✅ **WebSocket** — Etapa 21 (local); polling fallback Vercel
 - ⬜ **Integrações avançadas** — novas fontes e normalização em produção
 

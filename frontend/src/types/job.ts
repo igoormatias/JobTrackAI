@@ -27,6 +27,12 @@ export const DEFAULT_JOB_PRIORITY: JobPriority = "MEDIUM";
 
 export const DEFAULT_JOB_VISIBILITY: JobVisibility = "VISIBLE";
 
+export type JobAlternateSource = {
+  source: JobSource;
+  sourceUrl: string;
+  isPrimary: boolean;
+};
+
 export type Job = {
   id: string;
   title: string;
@@ -47,6 +53,7 @@ export type Job = {
   technologies: Technology[];
   source: JobSource;
   sourceUrl: string;
+  alternateSources?: JobAlternateSource[];
   status: JobStatus;
   isFavorite: boolean;
   trackingId?: string;

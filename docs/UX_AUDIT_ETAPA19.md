@@ -92,6 +92,36 @@ Auditoria do frontend e match engine antes da estabilização. Cada item documen
 
 ---
 
+## Etapa 16 — Melhorias Gerais UX (Busca, Notificações, Dedup, Programathor)
+
+| Área | Causa raiz | Impacto | Solução |
+|------|------------|---------|---------|
+| Header search | Input sem wiring | Ambiguidade de escopo | Removido; busca contextual por tela |
+| Filtros sugeridos | `clearFilters` não zerava `suggested` | Sugestões “fantasma” | `suggested` na URL + botão reaplicar |
+| Catálogo strict | `isAreaCompatible` permissivo no sort match | Vagas administrativas com filtro Frontend | `strictProfileMatch` + blocklist de títulos |
+| Busca Explorar | `q` limitado | Tech/provider não encontrados | Full-text em metadata JSON + skills em description |
+| Feedback busca | Sem timing | UX opaca | `queryMs` no meta + barra no `JobsResultsHeader` |
+| Dedup cross-provider | 1 job por provider | Duplicatas LinkedIn/Gupy | ADR-035 `JobAlternateSource` + chip “Disponível em” |
+| Notificações | Popover básico; sem categorias | Baixo valor percebido | Inbox `/notifications` + categorias + produtores |
+| Vagas relacionadas | `JobCard compact` + truncate | Títulos ilegíveis | `RelatedJobCard` dedicado com tooltip |
+| Timeline processo | Card duplicado; alinhamento fraco | Histórico confuso | Grid + tooltips + `variant="embedded"` |
+| Labels | “Ver vaga” / “Abrir vaga” misturados | Inconsistência | `action-labels.ts` + `action-tooltips.ts` |
+| Programathor | Stub | Fonte ausente no catálogo | Parser + search + health + import URL |
+| Calendário | Sem busca local | Difícil achar entrevista | `SearchInput` filtrando eventos carregados |
+
+### Páginas validadas (Etapa 16)
+
+- [x] Explorar Vagas — feedback `{total} · {queryMs}ms`; empty com limpar pesquisa/filtros
+- [x] Job Details — RelatedJobCard; multi-source dropdown
+- [x] Pipeline — busca contextual (toolbar existente); timeline alinhada no detalhe
+- [x] Notificações — `/notifications` com tabs, agrupamento data, ações por tipo
+- [x] Calendário — busca contextual client-side
+- [x] Dashboard — health providers inclui Programathor quando habilitado
+
+Viewport alvo: 320px – 1280px+ · `min-w-0` · `break-words` · modais `max-h-[90vh]`
+
+---
+
 ## Profile / Onboarding / Auth
 
 | Página | Causa raiz | Impacto | Solução |

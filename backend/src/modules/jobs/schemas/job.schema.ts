@@ -45,6 +45,14 @@ export const jobListQuerySchema = z.object({
   visibility: z.enum(["visible", "hidden", "all"]).optional(),
   priority: z.enum(["high", "medium", "low"]).optional(),
   sources: z.union([z.string(), z.array(z.string())]).optional(),
+  suggested: z
+    .union([z.literal("true"), z.literal("false"), z.boolean()])
+    .optional()
+    .transform((value) => value === "true" || value === true),
+  strictProfileMatch: z
+    .union([z.literal("true"), z.literal("false"), z.boolean()])
+    .optional()
+    .transform((value) => value === "true" || value === true),
 });
 
 export const favoriteJobSchema = z.object({

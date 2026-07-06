@@ -32,6 +32,8 @@ export type PipelineApplicationJob = Pick<
   | "salaryMax"
 > & {
   updatedAt: string;
+  source?: Job["source"];
+  alternateSources?: Job["alternateSources"];
 };
 
 export type Application = {

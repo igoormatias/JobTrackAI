@@ -89,6 +89,7 @@ export class InterviewReminderEvent extends DomainEvent {
       jobTitle: string;
       companyName: string;
       scheduledAt: string;
+      reminderKind: "24h" | "30min";
     },
   ) {
     super();

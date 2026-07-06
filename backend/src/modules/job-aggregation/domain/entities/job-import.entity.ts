@@ -1,4 +1,10 @@
-export type JobImportStatus = "imported" | "duplicate" | "failed" | "skipped" | "updated";
+export type JobImportStatus =
+  | "imported"
+  | "duplicate"
+  | "failed"
+  | "skipped"
+  | "updated"
+  | "alternate_attached";
 
 export type JobImportRecord = {
   id: string;

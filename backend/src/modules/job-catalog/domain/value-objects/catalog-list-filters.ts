@@ -28,6 +28,8 @@ export type CatalogListFilters = {
   visibility?: "visible" | "hidden" | "all";
   priority?: "high" | "medium" | "low";
   sources?: JobSource[];
+  suggested?: boolean;
+  strictProfileMatch?: boolean;
 };
 
 export type CatalogListResultMeta = {
@@ -37,6 +39,7 @@ export type CatalogListResultMeta = {
   hasMore: boolean;
   jobsWithSalary: number;
   salaryCoverageRatio: number;
+  queryMs?: number;
 };
 
 export type CatalogListResult<TJob> = {

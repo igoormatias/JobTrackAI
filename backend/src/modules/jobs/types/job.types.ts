@@ -32,6 +32,12 @@ export type JobTechnology = {
   slug: string;
 };
 
+export type JobAlternateSource = {
+  source: JobSource;
+  sourceUrl: string;
+  isPrimary: boolean;
+};
+
 export type JobCompany = {
   id: string;
   name: string;
@@ -58,6 +64,7 @@ export type Job = {
   technologies: JobTechnology[];
   source: JobSource;
   sourceUrl: string;
+  alternateSources?: JobAlternateSource[];
   status: JobStatus;
   isFavorite: boolean;
   trackingId?: string;
@@ -96,6 +103,8 @@ export type JobListParams = {
   visibility?: "visible" | "hidden" | "all";
   priority?: "high" | "medium" | "low";
   sources?: JobSource[];
+  suggested?: boolean;
+  strictProfileMatch?: boolean;
 };
 
 export type CursorPaginationMeta = {
@@ -105,6 +114,7 @@ export type CursorPaginationMeta = {
   hasMore: boolean;
   jobsWithSalary: number;
   salaryCoverageRatio: number;
+  queryMs?: number;
 };
 
 export type JobListResult = {

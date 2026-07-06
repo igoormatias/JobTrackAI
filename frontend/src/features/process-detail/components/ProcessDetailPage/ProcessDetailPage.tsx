@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { CareerAnalysisCard } from "@/features/ai/components/CareerAnalysisCard";
+import { ACTION_LABELS } from "@/constants/action-labels";
+import { OpenOriginalJobButton, JobAvailableSources } from "@/features/jobs/components/JobAvailableSources";
 import { formatModality } from "@/features/jobs/utils/job-formatters";
 import { PIPELINE_STAGE_LABELS } from "@/features/pipeline/constants/pipeline-columns";
 import { PipelineApplicationTimeline } from "@/features/pipeline/components/PipelineApplicationTimeline";
@@ -29,7 +31,6 @@ import {
   useUpdateTrackingProcessMutation,
 } from "@/features/tracking/hooks/use-tracking-mutations/use-tracking-mutations";
 import { createInterview } from "@/features/tracking/services/tracking-service";
-import { openJobUrl } from "@/lib/jobs/open-job-url";
 import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import type { Application, JobPriority, PipelineStage, TimelineEvent, TimelineEventType } from "@/types";
 
@@ -180,27 +181,19 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => setStageSheetOpen(true)}>
-            Alterar status
+            {ACTION_LABELS.updateStage}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-            Editar processo
+            {ACTION_LABELS.editProcess}
           </Button>
           <Link href={`/jobs/${tracking.job.id}`}>
             <Button variant="outline" size="sm">
-              Ver vaga
+              {ACTION_LABELS.viewJobDescription}
             </Button>
           </Link>
-          {tracking.job.sourceUrl ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => openJobUrl({ sourceUrl: tracking.job.sourceUrl, status: tracking.job.status })}
-            >
-              Abrir vaga
-            </Button>
-          ) : null}
+          <OpenOriginalJobButton job={tracking.job} size="sm" variant="outline" />
           <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
-            Excluir processo
+            {ACTION_LABELS.deleteProcess}
           </Button>
         </div>
       </div>
@@ -218,6 +211,7 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
               <p>
                 <span className="font-medium text-foreground">Cargo:</span> {tracking.job.title}
               </p>
+              <JobAvailableSources job={tracking.job} />
               {tracking.job.location ? (
                 <p>
                   <span className="font-medium text-foreground">Localização:</span> {tracking.job.location}
@@ -401,7 +395,11 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
               <CardTitle className="text-base">Histórico</CardTitle>
             </CardHeader>
             <CardContent>
-              <PipelineApplicationTimeline events={timeline} />
+              <PipelineApplicationTimeline
+                events={timeline}
+                currentStage={tracking.stage}
+                variant="embedded"
+              />
             </CardContent>
           </Card>
         </div>

@@ -9,6 +9,14 @@ const normalizeText = (value: string): string =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 
+const slugify = (value: string): string =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 export const computeContentHash = (input: {
   title: string;
   company: string;
@@ -23,6 +31,25 @@ export const computeContentHash = (input: {
   ].join("|");
 
   return createHash("sha256").update(payload).digest("hex");
+};
+
+export const computeJobFingerprint = (input: {
+  company: string;
+  title: string;
+  location?: string | null;
+}): string => {
+  const payload = [
+    slugify(input.company),
+    normalizeText(input.title),
+    normalizeText(input.location ?? ""),
+  ].join("|");
+
+  return createHash("sha256").update(payload).digest("hex");
+};
+
+export const computeDescriptionHash = (description: string): string => {
+  const normalized = normalizeText(description.replace(/\s+/g, " "));
+  return createHash("sha256").update(normalized).digest("hex");
 };
 
 export const normalizeSourceUrl = (url: string): string => {

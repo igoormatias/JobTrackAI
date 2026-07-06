@@ -4,6 +4,7 @@ import { providerRunRateLimiter } from "../../../../../middlewares/rate-limit.js
 import { requireAuth } from "../../../../../middlewares/auth-middleware.js";
 import { eventBus } from "../../../../../shared/events/event-bus.js";
 import { JobSyncNotificationService } from "../../../../notifications/application/job-sync-notification.service.js";
+import { NewJobNotificationService } from "../../../../notifications/application/new-job-notification.service.js";
 import { NotificationService } from "../../../../notifications/application/notification.service.js";
 import { prismaNotificationRepository } from "../../../../notifications/infrastructure/repositories/prisma-notification.repository.js";
 import { prismaJobCatalogRepository } from "../../../../job-catalog/infrastructure/repositories/prisma-job-catalog.repository.js";
@@ -21,6 +22,7 @@ import { ProviderController } from "../controllers/provider.controller.js";
 const buildAggregationService = (): JobAggregationService => {
   const notificationService = new NotificationService(prismaNotificationRepository, eventBus);
   const jobSyncNotifications = new JobSyncNotificationService(notificationService, eventBus);
+  const newJobNotifications = new NewJobNotificationService(notificationService);
 
   return new JobAggregationService(
     createProviderMap(),
@@ -30,6 +32,7 @@ const buildAggregationService = (): JobAggregationService => {
     prismaJobCatalogRepository,
     prismaDedupLookupRepository,
     jobSyncNotifications,
+    newJobNotifications,
   );
 };
 

@@ -19,6 +19,12 @@ import {
 } from "../../constants/jobs-constants";
 import type { JobUrlFilters } from "../../types/job-url-filters";
 import { hasActiveJobFilters, urlFiltersToJobListParams } from "../../utils/job-list-params";
+import {
+  hasProfileDefaultFilters,
+  JOBS_SKIP_PROFILE_DEFAULTS_KEY,
+  loadProfileDefaultFilters,
+  shouldSkipProfileDefaults,
+} from "../../utils/profile-default-filters";
 
 const sortValues = ["recent", "match", "date", "salary", "company", "title", "priority"] as const;
 const dirValues = ["asc", "desc"] as const;
@@ -126,6 +132,18 @@ export const useJobFilters = () => {
     });
   };
 
+  const applyProfileDefaults = async () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem(JOBS_SKIP_PROFILE_DEFAULTS_KEY);
+    }
+    const defaults = await loadProfileDefaultFilters();
+    if (!hasProfileDefaultFilters(defaults)) return;
+    if (defaults.search) {
+      setSearchDraft(defaults.search);
+    }
+    await setUrlState(defaults);
+  };
+
   return {
     urlState,
     setUrlState,
@@ -134,6 +152,8 @@ export const useJobFilters = () => {
     listParams,
     hasActiveFilters: hasActiveJobFilters(urlFilters),
     clearFilters,
+    applyProfileDefaults,
+    canApplyProfileDefaults: shouldSkipProfileDefaults() && !urlState.suggested,
     searchInputValue: searchDraft,
     setSearchInputValue: setSearchDraft,
   };

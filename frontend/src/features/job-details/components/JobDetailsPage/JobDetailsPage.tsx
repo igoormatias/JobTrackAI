@@ -113,7 +113,7 @@ export const JobDetailsPage = () => {
 
   return (
     <div className={JOB_DETAILS_LAYOUT.page}>
-      <JobDetailsHeader onOpenJob={handleOpenJob} canOpenJob={Boolean(job.sourceUrl)} />
+      <JobDetailsHeader job={job} />
       <JobDetailsBreadcrumb jobTitle={job.title} />
 
       <div className={JOB_DETAILS_LAYOUT.grid}>

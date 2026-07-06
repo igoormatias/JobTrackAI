@@ -1,8 +1,10 @@
 "use client";
 
-import { JobCard } from "@/features/jobs/components/JobCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { openJobUrl } from "@/lib/jobs/open-job-url";
 import type { Job } from "@/types";
+
+import { RelatedJobCard } from "../RelatedJobCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 export type JobRelatedJobsSectionProps = {
   jobs: Job[];
@@ -16,9 +18,13 @@ export const JobRelatedJobsSection = ({ jobs }: JobRelatedJobsSectionProps) => {
       <CardHeader>
         <CardTitle className="text-base">Vagas relacionadas</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="grid gap-3 lg:grid-cols-1">
         {jobs.map((job) => (
-          <JobCard key={job.id} job={job} variant="compact" />
+          <RelatedJobCard
+            key={job.id}
+            job={job}
+            onOpenOriginal={(item) => openJobUrl({ sourceUrl: item.sourceUrl, status: item.status })}
+          />
         ))}
       </CardContent>
     </Card>

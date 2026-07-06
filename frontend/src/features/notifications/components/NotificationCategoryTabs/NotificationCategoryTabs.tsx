@@ -1,0 +1,44 @@
+"use client";
+
+import type { NotificationCategory } from "@/types";
+
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
+
+const TABS: Array<{ id: NotificationCategory | "all"; label: string }> = [
+  { id: "all", label: "Todas" },
+  { id: "jobs", label: "Novas vagas" },
+  { id: "pipeline", label: "Pipeline" },
+  { id: "calendar", label: "Calendário" },
+  { id: "system", label: "Sistema" },
+];
+
+export type NotificationCategoryTabsProps = {
+  value: NotificationCategory | "all";
+  counts?: Partial<Record<NotificationCategory | "all", number>>;
+  onChange: (value: NotificationCategory | "all") => void;
+};
+
+export const NotificationCategoryTabs = ({
+  value,
+  counts,
+  onChange,
+}: NotificationCategoryTabsProps) => (
+  <div className="flex flex-wrap gap-2">
+    {TABS.map((tab) => (
+      <Button
+        key={tab.id}
+        type="button"
+        size="sm"
+        variant={value === tab.id ? "secondary" : "outline"}
+        className={cn("gap-1")}
+        onClick={() => onChange(tab.id)}
+      >
+        {tab.label}
+        {counts?.[tab.id] ? (
+          <span className="rounded-full bg-primary/15 px-1.5 text-[10px]">{counts[tab.id]}</span>
+        ) : null}
+      </Button>
+    ))}
+  </div>
+);

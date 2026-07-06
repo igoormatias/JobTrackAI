@@ -6,10 +6,15 @@ export type NotificationType =
   | "dashboard_update"
   | "job_closed";
 
+export type NotificationCategory = "jobs" | "pipeline" | "calendar" | "system";
+export type NotificationPriority = "low" | "normal" | "high";
+
 export type NotificationEntity = {
   id: string;
   userId: string;
   type: NotificationType;
+  category: NotificationCategory;
+  priority: NotificationPriority;
   title: string;
   message: string;
   read: boolean;
@@ -32,10 +37,17 @@ export type NotificationListParams = {
   limit?: number;
   read?: boolean;
   type?: NotificationType;
+  category?: NotificationCategory;
+  q?: string;
 };
 
 export type MarkNotificationsReadInput = {
   userId: string;
   ids?: string[];
   all?: boolean;
+};
+
+export type DeleteNotificationsInput = {
+  userId: string;
+  ids: string[];
 };

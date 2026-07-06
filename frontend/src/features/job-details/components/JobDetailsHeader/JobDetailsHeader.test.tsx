@@ -5,18 +5,32 @@ import { describe, expect, it, vi } from "vitest";
 import { JobDetailsHeader } from "./JobDetailsHeader";
 
 describe("JobDetailsHeader", () => {
-  it("renders Abrir vaga and calls handler with sourceUrl flow", async () => {
-    const onOpenJob = vi.fn();
+  it("renders open original job button", async () => {
     const user = userEvent.setup();
 
-    render(<JobDetailsHeader onOpenJob={onOpenJob} canOpenJob />);
+    render(
+      <JobDetailsHeader
+        job={{
+          source: "linkedin",
+          sourceUrl: "https://linkedin.com/jobs/1",
+          status: "active",
+        }}
+      />,
+    );
 
-    await user.click(screen.getByRole("button", { name: "Abrir vaga" }));
-    expect(onOpenJob).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole("button", { name: /Abrir vaga original \(LinkedIn\)/i }));
   });
 
-  it("disables Abrir vaga when URL unavailable", () => {
-    render(<JobDetailsHeader onOpenJob={vi.fn()} canOpenJob={false} />);
-    expect(screen.getByRole("button", { name: "Abrir vaga" })).toBeDisabled();
+  it("disables open button when URL unavailable", () => {
+    render(
+      <JobDetailsHeader
+        job={{
+          source: "manual",
+          sourceUrl: "",
+          status: "active",
+        }}
+      />,
+    );
+    expect(screen.getByRole("button", { name: /Abrir vaga original/i })).toBeDisabled();
   });
 });

@@ -1,6 +1,6 @@
 # JobTrack AI — Implementation Status
 
-Last updated: Etapa 15 (UX Pipeline, Responsividade, IA).  
+Last updated: Etapa 16 (Melhorias Gerais UX).  
 Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 
 | Module | Frontend | Backend API | Prisma | Tests | Notes |
@@ -8,8 +8,8 @@ Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 | Auth | ✅ | ✅ | ✅ User | ✅ | Google OAuth real; rate limit login |
 | Onboarding | ✅ | ✅ | ✅ Profile | ✅ | `blockedSkills` removido (Etapa 17) |
 | Profile / Settings | ✅ | ✅ | ✅ | ✅ | Clean Architecture; `features/account/` |
-| Jobs (catalog) | ✅ | ✅ | ✅ Job | ✅ | Catálogo global; `locationScope`; filtros sugeridos (Etapa 14) |
-| Job Aggregation | — | ✅ | ✅ Registry/Execution/Import | ✅ | Gupy + LinkedIn import; dedup idempotente (Etapa XX) |
+| Jobs (catalog) | ✅ | ✅ | ✅ Job | ✅ | Strict match; `queryMs`; ranking unificado; dedup v2 (Etapa 16) |
+| Job Aggregation | — | ✅ | ✅ Registry/Execution/Import | ✅ | Gupy + LinkedIn + Programathor; dedup cross-provider ADR-035 |
 | Job Details | ✅ | ✅ | ✅ | ✅ | Match rules-v2; related via catalog |
 | Match Engine | ✅ types | ✅ | — | ✅ | `rules-v2`; JobTitleNormalizer + SkillMatcher |
 | AI Career | ✅ | ✅ | ✅ Skill/AIAnalysis | ✅ | Gemini on-demand; cache-first; Etapa 18 |
@@ -21,9 +21,9 @@ Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 | Calendar | ✅ | ✅ | ✅ CalendarIntegration | ✅ | Google ativo; Outlook stub (v1.5) |
 | Pipeline | ✅ | ✅ view | ✅ via tracking | ✅ | Mobile: sem DnD; tap → detalhe; ações ⋮ (Etapa 15) |
 | Dashboard | ✅ | ✅ | ✅ aggregates + jobSync | ✅ | Cards com dados do tracking; KPI entrevistas unificado |
-| Notifications | ✅ | ✅ | ✅ Notification | ✅ | Header popover + mark read |
+| Notifications | ✅ | ✅ | ✅ Notification | ✅ | Inbox `/notifications`; categorias; unread-count; delete (Etapa 16) |
 | Companies | ✅ | ✅ | derived from Job | ✅ | No separate model |
-| Job Import (URL) | ✅ | ✅ | ✅ Job | ✅ | Gupy + LinkedIn; dedup `isExisting`; Programathor stub |
+| Job Import (URL) | ✅ | ✅ | ✅ Job | ✅ | Gupy + LinkedIn + Programathor; dedup `isExisting` |
 | Resume Intelligence | ✅ | ✅ | ✅ Resume* | ✅ | Currículo Inteligente; Etapa 22 |
 | Realtime | ✅ polling | ✅ socket* | — | ✅ | *Socket local; `tracking:analysis-update` (v1.5) |
 | CI/CD | ✅ | ✅ | ✅ validate | ✅ | `.github/workflows/ci.yml` |

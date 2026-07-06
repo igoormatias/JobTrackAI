@@ -1,5 +1,10 @@
 /** Reference: telegram-vagas-gupy-bot/main.py — ProgramaThor HTML scraping */
-export const PROGRAMATHOR_JOBS_URL = "https://programathor.com.br/jobs";
+export const PROGRAMATHOR_BASE_URL = "https://programathor.com.br";
+
+export const PROGRAMATHOR_JOBS_URL = `${PROGRAMATHOR_BASE_URL}/jobs`;
+
+/** Typical page size on ProgramaThor listing (varies slightly per page). */
+export const PROGRAMATHOR_DEFAULT_PAGE_SIZE = 16;
 
 export const PROGRAMATHOR_SELECTORS = {
   card: "div.cell-list",

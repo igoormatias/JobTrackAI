@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { memo } from "react";
-import { Bookmark, ExternalLink } from "lucide-react";
+import { Bookmark, ExternalLink, Eye } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { ACTION_LABELS, openOriginalJobLabel } from "@/constants/action-labels";
+import { ACTION_TOOLTIPS } from "@/constants/action-tooltips";
+import { JobAvailableSources } from "@/features/jobs/components/JobAvailableSources";
 import { MatchReasonsList } from "@/features/recommendations/components/MatchReasonsList";
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
 import { formatSalaryRange } from "@/features/dashboard/utils/format-salary-range";
@@ -103,6 +106,7 @@ export const JobCard = memo(
                 ))}
               </div>
               <MatchReasonsList matchScore={job.matchScore} />
+              <JobAvailableSources job={job} />
             </>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
@@ -127,9 +131,15 @@ export const JobCard = memo(
               {job.isFavorite ? "Salvo" : "Salvar"}
             </Button>
             <Link href={`/jobs/${job.id}`} onClick={() => onViewDetails?.(job)} className="w-full sm:w-auto">
-              <Button type="button" size="sm" variant="outline" className="w-full sm:w-auto">
-                <ExternalLink className="mr-1 h-4 w-4" />
-                Ver detalhes
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="w-full sm:w-auto"
+                title={ACTION_TOOLTIPS.viewJobDescription}
+              >
+                <Eye className="mr-1 h-4 w-4" />
+                {ACTION_LABELS.viewJobDescription}
               </Button>
             </Link>
             <Button
@@ -138,12 +148,19 @@ export const JobCard = memo(
               variant="outline"
               onClick={() => onOpenJob?.(job)}
               className="w-full sm:w-auto"
+              title={ACTION_TOOLTIPS.openOriginalJob}
             >
               <ExternalLink className="mr-1 h-4 w-4" />
-              Abrir vaga
+              {openOriginalJobLabel(job.source)}
             </Button>
-            <Button type="button" size="sm" onClick={() => onAddToPipeline?.(job)} className="w-full sm:w-auto">
-              Iniciar processo
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => onAddToPipeline?.(job)}
+              className="w-full sm:w-auto"
+              title={ACTION_TOOLTIPS.startProcess}
+            >
+              {ACTION_LABELS.startProcess}
             </Button>
           </div>
         </CardContent>

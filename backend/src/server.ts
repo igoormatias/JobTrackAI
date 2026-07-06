@@ -8,6 +8,7 @@ import { RunAllProvidersUseCase } from "./modules/job-aggregation/application/us
 import { syncProviderRegistryFromEnv } from "./modules/job-aggregation/infrastructure/bootstrap/sync-provider-registry.js";
 import { createJobAggregationService } from "./modules/job-aggregation/infrastructure/http/routes/provider.routes.js";
 import { ProviderSyncScheduler } from "./modules/job-aggregation/infrastructure/scheduler/provider-sync.scheduler.js";
+import { NotificationReminderScheduler } from "./modules/notifications/infrastructure/scheduler/notification-reminder.scheduler.js";
 import { SchedulerService } from "./modules/scheduler/services/scheduler.service.js";
 import { eventBus } from "./shared/events/event-bus.js";
 import { setupRealtimeBridge } from "./shared/events/realtime-bridge.js";
@@ -32,6 +33,9 @@ export const startServer = async (): Promise<void> => {
     const runAllProviders = new RunAllProvidersUseCase(aggregationService);
     const providerScheduler = new ProviderSyncScheduler(runAllProviders, env.SYNC_INTERVAL);
     providerScheduler.start();
+
+    const reminderScheduler = new NotificationReminderScheduler(eventBus);
+    reminderScheduler.start();
   }
 
   await connectRedis();

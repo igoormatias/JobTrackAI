@@ -1,9 +1,18 @@
 import { subHours } from "date-fns";
 import { faker } from "@faker-js/faker";
 
-import type { Notification, NotificationType } from "@/types";
+import type { Notification, NotificationCategory, NotificationType } from "@/types";
 
 import { createId } from "../utils/mock-utils";
+
+const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = {
+  new_job: "jobs",
+  recommendation: "jobs",
+  job_closed: "jobs",
+  pipeline_change: "pipeline",
+  interview_reminder: "calendar",
+  dashboard_update: "system",
+};
 
 export type CreateNotificationInput = {
   index: number;
@@ -64,6 +73,7 @@ export const createNotification = ({
     id: createId("notification", index),
     userId,
     type,
+    category: TYPE_TO_CATEGORY[type],
     title: title ?? defaults.title,
     message: message ?? defaults.message,
     read,

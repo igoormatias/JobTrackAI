@@ -498,6 +498,7 @@ export class PrismaJobTrackingRepository {
 
     const hoursUntil = (scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
     if (hoursUntil <= 48 && hoursUntil > 0) {
+      const reminderKind = hoursUntil <= 2 ? "30min" : "24h";
       await eventBus.publish(
         new InterviewReminderEvent({
           userId,
@@ -506,6 +507,7 @@ export class PrismaJobTrackingRepository {
           jobTitle: tracking.job.title,
           companyName: tracking.job.companyName,
           scheduledAt: scheduledAt.toISOString(),
+          reminderKind,
         }),
       );
     }

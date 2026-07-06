@@ -1,6 +1,6 @@
 import type { JobSortField, SortDirection } from "./api";
 import type { JobSource } from "./job";
-import type { NotificationType } from "./notification";
+import type { NotificationCategory, NotificationType } from "./notification";
 import type { PipelineStage } from "./application";
 import type { ProfessionalArea, Seniority, WorkModality } from "./profile";
 
@@ -37,6 +37,8 @@ export type JobListParams = {
   visibility?: JobVisibilityFilter;
   priority?: JobPriorityFilter;
   sources?: JobSource[];
+  suggested?: boolean;
+  strictProfileMatch?: boolean;
 };
 
 export type ApplicationListParams = {
@@ -52,6 +54,8 @@ export type NotificationListParams = {
   limit?: number;
   read?: boolean;
   type?: NotificationType;
+  category?: NotificationCategory;
+  q?: string;
 };
 
 export type CompanyListParams = {

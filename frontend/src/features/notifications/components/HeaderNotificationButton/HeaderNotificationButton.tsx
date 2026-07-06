@@ -8,11 +8,20 @@ import { Skeleton } from "@/components/feedback/Skeleton";
 import { NotificationBadge } from "@/components/badges/NotificationBadge";
 import { Button } from "@/components/ui/Button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
+import { Badge } from "@/components/ui/Badge";
 import {
   useMarkNotificationsRead,
   useNotifications,
+  useUnreadNotificationCount,
 } from "@/features/notifications/hooks/use-notifications";
-import type { Notification } from "@/types";
+import type { Notification, NotificationCategory } from "@/types";
+
+const CATEGORY_LABELS: Record<NotificationCategory, string> = {
+  jobs: "Vagas",
+  pipeline: "Pipeline",
+  calendar: "Calendário",
+  system: "Sistema",
+};
 
 const formatNotificationTime = (value: string): string => {
   const date = new Date(value);
@@ -27,10 +36,10 @@ const formatNotificationTime = (value: string): string => {
 export const HeaderNotificationButton = () => {
   const [open, setOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
-  const { data, isLoading } = useNotifications({ limit: 20 });
+  const { data, isLoading } = useNotifications({ limit: 8 });
+  const { data: unreadCount = 0 } = useUnreadNotificationCount();
   const markReadMutation = useMarkNotificationsRead();
   const notifications = data?.data ?? [];
-  const unreadCount = notifications.filter((item) => !item.read).length;
 
   useEffect(() => {
     if (open && listRef.current) {
@@ -39,9 +48,13 @@ export const HeaderNotificationButton = () => {
   }, [open]);
 
   const handleMarkAllRead = () => {
-    const unreadIds = notifications.filter((item) => !item.read).map((item) => item.id);
-    if (unreadIds.length === 0) return;
-    markReadMutation.mutate({ ids: unreadIds });
+    markReadMutation.mutate({ all: true });
+  };
+
+  const handleItemClick = (notification: Notification) => {
+    if (!notification.read) {
+      markReadMutation.mutate({ ids: [notification.id] });
+    }
   };
 
   return (
@@ -59,15 +72,20 @@ export const HeaderNotificationButton = () => {
       <PopoverContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h2 className="text-sm font-semibold text-foreground">Notificações</h2>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={unreadCount === 0 || markReadMutation.isPending}
-            onClick={handleMarkAllRead}
-          >
-            Marcar todas como lidas
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button type="button" variant="ghost" size="sm" asChild>
+              <Link href="/notifications">Ver todas</Link>
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={unreadCount === 0 || markReadMutation.isPending}
+              onClick={handleMarkAllRead}
+            >
+              Marcar lidas
+            </Button>
+          </div>
         </div>
         <div ref={listRef} className="max-h-80 overflow-y-auto scrollbar-app">
           {isLoading ? (
@@ -87,6 +105,11 @@ export const HeaderNotificationButton = () => {
               {notifications.map((notification: Notification) => {
                 const content = (
                   <>
+                    <div className="mb-1 flex items-center gap-2">
+                      <Badge variant="secondary" className="text-[10px]">
+                        {CATEGORY_LABELS[notification.category]}
+                      </Badge>
+                    </div>
                     <p className="font-medium">{notification.title}</p>
                     {notification.message ? (
                       <p className="mt-1 text-muted-foreground">{notification.message}</p>
@@ -103,11 +126,21 @@ export const HeaderNotificationButton = () => {
                     className={`px-4 py-3 text-sm ${notification.read ? "text-muted-foreground" : "bg-primary/5 text-foreground"}`}
                   >
                     {notification.actionUrl ? (
-                      <Link href={notification.actionUrl} className="block hover:opacity-90">
+                      <Link
+                        href={notification.actionUrl}
+                        className="block hover:opacity-90"
+                        onClick={() => handleItemClick(notification)}
+                      >
                         {content}
                       </Link>
                     ) : (
-                      content
+                      <button
+                        type="button"
+                        className="block w-full text-left hover:opacity-90"
+                        onClick={() => handleItemClick(notification)}
+                      >
+                        {content}
+                      </button>
                     )}
                   </li>
                 );

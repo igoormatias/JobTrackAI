@@ -98,6 +98,7 @@ export const JobsPage = () => {
   );
 
   const total = data?.pages[0]?.meta.total ?? 0;
+  const queryMs = data?.pages[0]?.meta.queryMs;
   const salaryCoverageRatio = data?.pages[0]?.meta.salaryCoverageRatio ?? 1;
   const showSalaryFilter = salaryCoverageRatio >= SALARY_FILTER_MIN_COVERAGE;
 
@@ -158,6 +159,18 @@ export const JobsPage = () => {
             Limpar sugestões
           </Button>
         </div>
+      ) : filters.canApplyProfileDefaults ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-border px-4 py-2 text-sm text-muted-foreground">
+          <span>Filtros do perfil não estão ativos.</span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void filters.applyProfileDefaults()}
+          >
+            Aplicar filtros sugeridos
+          </Button>
+        </div>
       ) : null}
       <JobsToolbarWidget
         filters={filters}
@@ -167,6 +180,7 @@ export const JobsPage = () => {
       <JobsResultsWidget
         jobs={jobs}
         total={total}
+        queryMs={queryMs}
         sort={filters.urlFilters.sort ?? "match"}
         direction={filters.urlFilters.dir ?? "desc"}
         isLoading={isLoading}
@@ -182,6 +196,10 @@ export const JobsPage = () => {
         onAddToPipeline={handleAddToPipeline}
         onViewDetails={handleViewDetails}
         onClearFilters={() => filters.clearFilters({ skipProfileDefaults: true })}
+        onClearSearch={() => {
+          filters.setSearchInputValue("");
+          void filters.setUrlState({ search: "" });
+        }}
         onRetry={() => void refetch()}
         favoritePendingId={
           favoriteMutation.isPending ? favoriteMutation.variables?.id : undefined

@@ -10,6 +10,7 @@ export type JobsEmptyStateVariant = "no-jobs" | "no-results" | "restrictive" | "
 export type JobsEmptyStateProps = {
   variant: JobsEmptyStateVariant;
   onClearFilters?: () => void;
+  onClearSearch?: () => void;
   onRetry?: () => void;
 };
 
@@ -36,7 +37,7 @@ const config = {
   },
 } as const;
 
-export const JobsEmptyState = ({ variant, onClearFilters, onRetry }: JobsEmptyStateProps) => {
+export const JobsEmptyState = ({ variant, onClearFilters, onClearSearch, onRetry }: JobsEmptyStateProps) => {
   const state = config[variant];
 
   return (
@@ -49,11 +50,20 @@ export const JobsEmptyState = ({ variant, onClearFilters, onRetry }: JobsEmptySt
           <Button type="button" variant="outline" onClick={onRetry}>
             Tentar novamente
           </Button>
-        ) : onClearFilters ? (
-          <Button type="button" onClick={onClearFilters}>
-            Limpar filtros
-          </Button>
-        ) : null
+        ) : (
+          <div className="flex flex-wrap justify-center gap-2">
+            {onClearSearch ? (
+              <Button type="button" variant="outline" onClick={onClearSearch}>
+                Limpar pesquisa
+              </Button>
+            ) : null}
+            {onClearFilters ? (
+              <Button type="button" onClick={onClearFilters}>
+                Limpar filtros
+              </Button>
+            ) : null}
+          </div>
+        )
       }
     />
   );

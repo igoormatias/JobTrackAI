@@ -9,6 +9,7 @@ import {
   matchEngineService,
   type MatchProfileInput,
 } from "../../../match/domain/services/match-engine.service.js";
+import { passesStrictProfileMatch } from "../../../match/domain/services/strict-job-filter.service.js";
 import {
   buildUserJobContext,
   mapPrismaJobToDomain,
@@ -16,6 +17,7 @@ import {
   toMatchScore,
 } from "../../../jobs/infrastructure/mappers/job.mapper.js";
 import type { Job } from "../../../jobs/types/job.types.js";
+import type { JobSource } from "../../../../shared/domain/job-source.js";
 import type {
   JobCatalogRepository,
   RelatedJobsQuery,
@@ -81,6 +83,16 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
   }
 
   async list(filters: CatalogListFilters): Promise<CatalogListResult<Job>> {
+    const startedAt = Date.now();
+    const result = await this.listInternal(filters);
+    const data = await this.attachAlternateSources(result.data);
+    return {
+      data,
+      meta: { ...result.meta, queryMs: Date.now() - startedAt },
+    };
+  }
+
+  private async listInternal(filters: CatalogListFilters): Promise<CatalogListResult<Job>> {
     const normalized = normalizeCatalogFilters(filters);
     const limit = normalized.limit ?? 20;
     const sortBy = normalized.sortBy ?? "recent";
@@ -118,9 +130,10 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
     const hasMore = records.length > limit;
     const pageRecords = hasMore ? records.slice(0, limit) : records;
     const ctx = await this.loadUserContext(normalized.userId);
-    const data = pageRecords.map((record) =>
+    let data = pageRecords.map((record) =>
       this.mapWithContext(record, ctx, normalized.profile),
     );
+    data = this.filterJobsForProfile(data, normalized);
 
     const last = pageRecords[pageRecords.length - 1];
     const nextCursor = hasMore && last ? encodeCursor(last.publishedAt, last.id) : null;
@@ -148,7 +161,9 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
     if (!job) return null;
 
     const userCtx = await this.loadUserContextForJob(context.userId, id);
-    return this.mapWithContext(job, userCtx, context.profile);
+    const mapped = this.mapWithContext(job, userCtx, context.profile);
+    const [withAlternates] = await this.attachAlternateSources([mapped]);
+    return withAlternates ?? null;
   }
 
   async findRelated(query: RelatedJobsQuery): Promise<Job[]> {
@@ -369,31 +384,20 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
 
     const ctx = await this.loadUserContext(filters.userId);
     let jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
-
-    if (filters.profile?.area) {
-      jobs = jobs.filter((job) =>
-        isAreaCompatible(filters.profile!, {
-          title: job.title,
-          area: job.area,
-          seniority: job.seniority,
-          modality: job.modality,
-          location: job.location,
-          salaryMin: job.salaryMin,
-          salaryMax: job.salaryMax,
-          technologies: job.technologies,
-          requirements: job.requirements,
-        }),
-      );
-    }
+    jobs = this.filterJobsForProfile(jobs, filters);
 
     if (filters.matchMin !== undefined) {
       jobs = jobs.filter((job) => job.matchScore.score >= filters.matchMin!);
     }
 
-    jobs.sort((a, b) => {
-      const direction = filters.sortDirection === "asc" ? 1 : -1;
-      return (a.matchScore.score - b.matchScore.score) * direction;
-    });
+    if (filters.profile) {
+      this.sortByUnifiedRanking(jobs);
+    } else {
+      jobs.sort((a, b) => {
+        const direction = filters.sortDirection === "asc" ? 1 : -1;
+        return (a.matchScore.score - b.matchScore.score) * direction;
+      });
+    }
 
     let startIndex = 0;
     if (filters.cursor) {
@@ -433,41 +437,30 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
 
     const ctx = await this.loadUserContext(filters.userId);
     let jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
-
-    if (filters.profile?.area) {
-      jobs = jobs.filter((job) =>
-        isAreaCompatible(filters.profile!, {
-          title: job.title,
-          area: job.area,
-          seniority: job.seniority,
-          modality: job.modality,
-          location: job.location,
-          salaryMin: job.salaryMin,
-          salaryMax: job.salaryMax,
-          technologies: job.technologies,
-          requirements: job.requirements,
-        }),
-      );
-    }
+    jobs = this.filterJobsForProfile(jobs, filters);
 
     const direction = filters.sortDirection === "asc" ? 1 : -1;
 
-    jobs.sort((a, b) => {
-      if (sortBy === "priority") {
-        const priorityDiff =
-          (getPriorityWeight(a.priority) - getPriorityWeight(b.priority)) * direction;
-        if (priorityDiff !== 0) return priorityDiff;
-      }
+    if (sortBy === "recent" && filters.profile) {
+      this.sortByUnifiedRanking(jobs);
+    } else {
+      jobs.sort((a, b) => {
+        if (sortBy === "priority") {
+          const priorityDiff =
+            (getPriorityWeight(a.priority) - getPriorityWeight(b.priority)) * direction;
+          if (priorityDiff !== 0) return priorityDiff;
+        }
 
-      const dateDiff =
-        (new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()) * direction;
-      if (dateDiff !== 0) return -dateDiff;
+        const dateDiff =
+          (new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()) * direction;
+        if (dateDiff !== 0) return -dateDiff;
 
-      const matchDiff = (a.matchScore.score - b.matchScore.score) * direction;
-      if (matchDiff !== 0) return -matchDiff;
+        const matchDiff = (a.matchScore.score - b.matchScore.score) * direction;
+        if (matchDiff !== 0) return -matchDiff;
 
-      return getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
-    });
+        return getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
+      });
+    }
 
     let startIndex = 0;
     if (filters.cursor) {
@@ -483,6 +476,98 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
       data,
       meta: { limit, total, hasMore, nextCursor, ...salaryMeta },
     };
+  }
+
+  private filterJobsForProfile(jobs: Job[], filters: CatalogListFilters): Job[] {
+    if (!filters.profile) return jobs;
+
+    if (filters.strictProfileMatch) {
+      return jobs.filter((job) =>
+        passesStrictProfileMatch(filters.profile!, {
+          title: job.title,
+          area: job.area,
+          seniority: job.seniority,
+          modality: job.modality,
+          location: job.location,
+          salaryMin: job.salaryMin,
+          salaryMax: job.salaryMax,
+          technologies: job.technologies,
+          requirements: job.requirements,
+        }),
+      );
+    }
+
+    if (filters.profile.area) {
+      return jobs.filter((job) =>
+        isAreaCompatible(filters.profile!, {
+          title: job.title,
+          area: job.area,
+          seniority: job.seniority,
+          modality: job.modality,
+          location: job.location,
+          salaryMin: job.salaryMin,
+          salaryMax: job.salaryMax,
+          technologies: job.technologies,
+          requirements: job.requirements,
+        }),
+      );
+    }
+
+    return jobs;
+  }
+
+  private sortByUnifiedRanking(jobs: Job[]): void {
+    jobs.sort((a, b) => {
+      const matchDiff = b.matchScore.score - a.matchScore.score;
+      if (matchDiff !== 0) return matchDiff;
+
+      const dateDiff =
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      if (dateDiff !== 0) return dateDiff;
+
+      return a.title.localeCompare(b.title, "pt-BR");
+    });
+  }
+
+  private async attachAlternateSources(jobs: Job[]): Promise<Job[]> {
+    if (jobs.length === 0) return jobs;
+
+    const alternates = await prisma.jobAlternateSource.findMany({
+      where: { jobId: { in: jobs.map((job) => job.id) } },
+    });
+
+    const byJobId = new Map<string, typeof alternates>();
+    for (const alternate of alternates) {
+      const existing = byJobId.get(alternate.jobId) ?? [];
+      existing.push(alternate);
+      byJobId.set(alternate.jobId, existing);
+    }
+
+    return jobs.map((job) => {
+      const jobAlternates = byJobId.get(job.id) ?? [];
+      const sources = [
+        { source: job.source, sourceUrl: job.sourceUrl, isPrimary: true },
+        ...jobAlternates
+          .filter((alternate) => Boolean(alternate.sourceUrl))
+          .map((alternate) => ({
+            source: alternate.source as JobSource,
+            sourceUrl: alternate.sourceUrl!,
+            isPrimary: alternate.isPrimary,
+          })),
+      ];
+
+      const uniqueSources = sources.filter(
+        (source, index, list) =>
+          list.findIndex(
+            (item) => item.source === source.source && item.sourceUrl === source.sourceUrl,
+          ) === index,
+      );
+
+      return {
+        ...job,
+        alternateSources: uniqueSources.length > 1 ? uniqueSources : undefined,
+      };
+    });
   }
 
   private async resolveTrackingFilters(filters: CatalogListFilters): Promise<TrackingFilterContext> {

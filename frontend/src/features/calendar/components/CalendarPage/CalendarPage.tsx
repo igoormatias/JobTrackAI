@@ -21,6 +21,7 @@ import { useMemo, useState } from "react";
 
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { SearchInput } from "@/components/ui/SearchInput";
 import { Badge } from "@/components/ui/Badge";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
@@ -116,6 +117,7 @@ const EventChip = ({
 export const CalendarPage = () => {
   const [view, setView] = useState<CalendarView>("agenda");
   const [anchor, setAnchor] = useState(() => new Date());
+  const [search, setSearch] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventItem | null>(null);
   const { data: status } = useCalendarStatusQuery();
 
@@ -136,10 +138,26 @@ export const CalendarPage = () => {
     range.to.toISOString(),
   );
 
-  const sortedEvents = useMemo(
-    () => [...events].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()),
-    [events],
-  );
+  const sortedEvents = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const filtered = query
+      ? events.filter((event) => {
+          const haystack = [
+            event.summary,
+            event.companyName,
+            event.jobTitle,
+            event.stage,
+            event.location,
+            event.description,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          return haystack.includes(query);
+        })
+      : events;
+    return [...filtered].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+  }, [events, search]);
 
   const agendaGroups = useMemo(() => {
     const groups = new Map<string, CalendarEventItem[]>();
@@ -172,6 +190,15 @@ export const CalendarPage = () => {
         <PageHeader
           title="Career Calendar"
           description="Entrevistas, follow-ups e lembretes da sua jornada."
+        />
+
+        <SearchInput
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          onClear={() => setSearch("")}
+          placeholder="Buscar eventos, empresa ou cargo..."
+          aria-label="Buscar no calendário"
+          className="max-w-md"
         />
 
         <div className="flex flex-col gap-4">

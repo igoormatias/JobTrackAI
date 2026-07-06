@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, Menu, Search, Settings, User } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { LogOut, Menu, Settings, User } from "lucide-react";
+import { type ReactNode } from "react";
 
 import { useCurrentUser, useLogoutMutation } from "@/features/auth";
 import { HeaderNotificationButton } from "@/features/notifications/components/HeaderNotificationButton";
@@ -16,12 +16,10 @@ import {
   DropdownSeparator,
   DropdownTrigger,
 } from "@/components/ui/Dropdown";
-import { SearchInput } from "@/components/ui/SearchInput";
 import { cn } from "@/lib/utils";
 
 export type AppHeaderProps = {
   title?: string;
-  showSearch?: boolean;
   actions?: ReactNode;
   className?: string;
 };
@@ -37,21 +35,17 @@ const getPageTitle = (pathname: string): string => {
   if (pathname.startsWith("/dashboard")) return "JobTrack AI";
   if (pathname.startsWith("/jobs")) return "Vagas";
   if (pathname.startsWith("/pipeline")) return "Pipeline";
+  if (pathname.startsWith("/calendar")) return "Calendário";
+  if (pathname.startsWith("/notifications")) return "Notificações";
   if (pathname.startsWith("/profile")) return "Perfil";
   if (pathname.startsWith("/settings")) return "Configurações";
   return "JobTrack AI";
 };
 
-export const AppHeader = ({
-  title,
-  showSearch = true,
-  actions,
-  className,
-}: AppHeaderProps) => {
+export const AppHeader = ({ title, actions, className }: AppHeaderProps) => {
   const pathname = usePathname();
   const { user } = useCurrentUser();
   const logoutMutation = useLogoutMutation();
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const displayTitle = title ?? getPageTitle(pathname);
 
@@ -67,17 +61,6 @@ export const AppHeader = ({
           <h1 className="text-lg font-bold text-foreground lg:text-xl">{displayTitle}</h1>
 
           <div className="flex items-center gap-2 lg:hidden">
-            {showSearch ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Abrir busca"
-                aria-expanded={mobileSearchOpen}
-                onClick={() => setMobileSearchOpen((open) => !open)}
-              >
-                <Search className="h-5 w-5" aria-hidden="true" />
-              </Button>
-            ) : null}
             <HeaderNotificationButton />
             <Dropdown>
               <DropdownTrigger asChild>
@@ -112,9 +95,6 @@ export const AppHeader = ({
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          {showSearch ? (
-            <SearchInput placeholder="Buscar vagas, empresas..." className="w-64" aria-label="Busca global" />
-          ) : null}
           {actions}
           <HeaderNotificationButton />
           <Dropdown>
@@ -151,12 +131,6 @@ export const AppHeader = ({
           </Dropdown>
         </div>
       </div>
-
-      {showSearch && mobileSearchOpen ? (
-        <div className="border-t border-border px-4 pb-4 lg:hidden">
-          <SearchInput placeholder="Buscar vagas, empresas..." aria-label="Busca global" />
-        </div>
-      ) : null}
     </header>
   );
 };

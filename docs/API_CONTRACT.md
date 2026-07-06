@@ -310,14 +310,19 @@ Atualizado automaticamente em cada movimentação de card. Editável indiretamen
 
 ## Notificações (MVP — eventos internos)
 
-Contrato alvo (MSW implementado; backend em evolução):
-
 | Método | Rota | Auth | Descrição |
 |--------|------|------|-----------|
-| `GET` | `/notifications` | Sim | Lista notificações internas |
-| `PATCH` | `/notifications/read` | Sim | Marca como lidas |
+| `GET` | `/notifications` | Sim | Lista notificações (`category`, `q`, `read`, cursor) |
+| `GET` | `/notifications/unread-count` | Sim | Contagem de não lidas |
+| `PATCH` | `/notifications/read` | Sim | Marca como lidas (`ids[]` ou `all: true`) |
+| `DELETE` | `/notifications/:id` | Sim | Soft delete de uma notificação |
+| `DELETE` | `/notifications` | Sim | Soft delete em lote (`ids[]` no body) |
 
-**Tipos de evento MVP:** nova vaga, mudança de status, entrevista próxima, nova recomendação.
+**Campos:** `category` (`jobs` · `pipeline` · `calendar` · `system`), `priority` (`low` · `normal` · `high`), soft delete via `deletedAt`.
+
+**Tipos de evento MVP:** nova vaga (match ≥ 75 após sync), mudança de pipeline, entrevista (24h e 30min antes), vaga encerrada.
+
+**Producers:** sync de providers (`new_job`, max 5/usuário/sync), event bus (pipeline), scheduler de lembretes (entrevistas).
 
 ---
 

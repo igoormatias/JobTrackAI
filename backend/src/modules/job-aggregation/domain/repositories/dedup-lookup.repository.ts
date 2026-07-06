@@ -10,5 +10,7 @@ export interface DedupLookupRepository {
   findBySourceAndExternalId(source: string, externalId: string): Promise<ExistingJobMatch | null>;
   findByContentHash(contentHash: string): Promise<ExistingJobMatch | null>;
   findBySourceUrl(sourceUrl: string): Promise<ExistingJobMatch | null>;
+  findByFingerprint(fingerprint: string): Promise<ExistingJobMatch | null>;
+  findByDescriptionHash(descriptionHash: string): Promise<ExistingJobMatch | null>;
   countCatalogJobs(): Promise<number>;
 }

@@ -20,6 +20,8 @@ const createLookup = (overrides: Partial<DedupLookupRepository> = {}): DedupLook
   findBySourceAndExternalId: vi.fn().mockResolvedValue(null),
   findByContentHash: vi.fn().mockResolvedValue(null),
   findBySourceUrl: vi.fn().mockResolvedValue(null),
+  findByFingerprint: vi.fn().mockResolvedValue(null),
+  findByDescriptionHash: vi.fn().mockResolvedValue(null),
   countCatalogJobs: vi.fn().mockResolvedValue(0),
   ...overrides,
 });
@@ -88,5 +90,39 @@ describe("DedupStrategy", () => {
     const strategy = new DedupStrategy(createLookup());
     const result = await strategy.evaluate(baseJob);
     expect(result.action).toBe("import");
+  });
+
+  it("should attach alternate when fingerprint matches a different provider", async () => {
+    const lookup = createLookup({
+      findByFingerprint: vi.fn().mockResolvedValue({
+        id: "job-linkedin",
+        source: "linkedin",
+        externalId: "ln-456",
+      }),
+    });
+    const strategy = new DedupStrategy(lookup);
+
+    const result = await strategy.evaluate(baseJob);
+
+    expect(result.action).toBe("attach_alternate");
+    expect(result.reason).toBe("fingerprint_match");
+    expect(result.existingJobId).toBe("job-linkedin");
+  });
+
+  it("should attach alternate when description hash matches a different provider", async () => {
+    const lookup = createLookup({
+      findByDescriptionHash: vi.fn().mockResolvedValue({
+        id: "job-linkedin",
+        source: "linkedin",
+        externalId: "ln-456",
+      }),
+    });
+    const strategy = new DedupStrategy(lookup);
+
+    const result = await strategy.evaluate(baseJob);
+
+    expect(result.action).toBe("attach_alternate");
+    expect(result.reason).toBe("description_hash");
+    expect(result.existingJobId).toBe("job-linkedin");
   });
 });

@@ -1,4 +1,8 @@
 import { jobTitleNormalizer } from "../../../match/domain/services/job-title-normalizer.service.js";
+import {
+  computeDescriptionHash,
+  computeJobFingerprint,
+} from "../../domain/services/job-normalizer.service.js";
 import type { NormalizedJob } from "../../domain/entities/normalized-job.entity.js";
 import type { CatalogJobUpsertInput } from "../../../job-catalog/domain/value-objects/catalog-list-filters.js";
 
@@ -30,6 +34,12 @@ export const toCatalogUpsertInput = (job: NormalizedJob): CatalogJobUpsertInput 
   publishedAt: job.publishedAt,
   lastCheckedAt: new Date(),
   metadata: {
+    jobFingerprint: computeJobFingerprint({
+      company: job.company,
+      title: job.title,
+      location: job.location,
+    }),
+    descriptionHash: computeDescriptionHash(job.description || `${job.title} na ${job.company}`),
     technologies: job.technologies.map((name, index) => ({
       id: `tech_${slugify(name)}_${index}`,
       name,

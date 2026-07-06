@@ -11,6 +11,12 @@ const toCatalogFilters = (userId: string, params: JobListParams, profile: Awaite
   userId,
   profile,
   ...params,
+  strictProfileMatch:
+    params.strictProfileMatch === true ||
+    params.suggested === true ||
+    params.matchMin !== undefined ||
+    Boolean(params.areas?.length) ||
+    Boolean(params.skills?.length),
 });
 
 export class ListCatalogJobsUseCase implements UseCase<{ userId: string; params: JobListParams }, JobListResult> {

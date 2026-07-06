@@ -10,6 +10,7 @@ export type CursorPaginationMeta = {
   hasMore: boolean;
   jobsWithSalary?: number;
   salaryCoverageRatio?: number;
+  queryMs?: number;
 };
 
 export type CursorPaginatedResponse<T> = {

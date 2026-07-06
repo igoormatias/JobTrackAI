@@ -1,5 +1,6 @@
 import type {
   CreateNotificationInput,
+  DeleteNotificationsInput,
   MarkNotificationsReadInput,
   NotificationEntity,
   NotificationListParams,
@@ -13,4 +14,7 @@ export interface NotificationRepository {
     params: NotificationListParams,
   ): Promise<CursorPaginatedResult<NotificationEntity>>;
   markAsRead(input: MarkNotificationsReadInput): Promise<number>;
+  countUnread(userId: string): Promise<number>;
+  softDelete(userId: string, id: string): Promise<boolean>;
+  softDeleteMany(input: DeleteNotificationsInput): Promise<number>;
 }

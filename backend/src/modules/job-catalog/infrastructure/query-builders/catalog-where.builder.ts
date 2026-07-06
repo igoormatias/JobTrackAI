@@ -88,6 +88,7 @@ export const buildCatalogWhere = (
         { description: { contains: query, mode: "insensitive" } },
         { location: { contains: query, mode: "insensitive" } },
         { source: { contains: lowerQuery, mode: "insensitive" } },
+        { metadata: { string_contains: query, mode: "insensitive" } },
       ],
     });
   }
@@ -155,6 +156,7 @@ export const buildCatalogWhere = (
         OR: [
           { title: { contains: skill, mode: "insensitive" } },
           { description: { contains: skill, mode: "insensitive" } },
+          { metadata: { string_contains: skill, mode: "insensitive" } },
         ],
       });
     }

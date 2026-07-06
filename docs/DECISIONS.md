@@ -687,6 +687,37 @@ Substitui `JobEngagement` + `Application` no código e persistência. Um único 
 
 ---
 
+## ADR-035 — Dedup v2: cross-provider matching + alternate sources
+
+**Status:** Aceito  
+**Data:** 2026-07
+
+**Contexto:** Dedup v1 (Etapa 17) cobria apenas `source + externalId`, `contentHash` e `sourceUrl` dentro do mesmo provider. Vagas idênticas publicadas em Gupy e LinkedIn geravam registros duplicados no catálogo global.
+
+**Decisão:**
+
+- **`JobAlternateSource`** — tabela filha de `Job` com `@@unique([source, externalId])`; armazena URLs e hashes de providers alternativos sem criar novo `Job`
+- **Fingerprint** — `sha256(companySlug | titleNormalized | locationNormalized)` via `computeJobFingerprint`
+- **Description hash** — `sha256(descriptionNormalized)` via `computeDescriptionHash`; persistido em `Job.metadata.descriptionHash`
+- **Ação `attach_alternate`** — quando fingerprint ou description hash bate em job existente de **outro** provider, cria `JobAlternateSource` em vez de novo catálogo
+- **Ordem de avaliação:** `source+externalId` → `contentHash` → `sourceUrl` → fingerprint → description hash → `import`
+- Script idempotente `backend/scripts/backfill-merge-duplicates.ts` para fundir duplicatas legadas
+
+**Motivos:**
+
+- Preserva um único `Job` canônico por oportunidade real
+- Mantém rastreabilidade de URLs por provider (abrir vaga na origem)
+- Compatível com pipeline/tracking existente (`jobId` único)
+
+**Consequências:**
+
+- Prisma: model `JobAlternateSource`, relação `Job.alternateSources`
+- `dedup-result.vo.ts`: ação `attach_alternate`
+- `job-aggregation.service.ts`: upsert em `JobAlternateSource` no sync de providers
+- `JobImport.status`: valor `alternate_attached` para auditoria
+
+---
+
 ## Template para novas decisões
 
 ```markdown

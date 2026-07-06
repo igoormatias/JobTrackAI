@@ -9,6 +9,7 @@ import { JobsResultsHeader } from "../../components/JobsResultsHeader";
 export type JobsResultsWidgetProps = {
   jobs: Job[];
   total: number;
+  queryMs?: number;
   sort: JobSortField;
   direction: SortDirection;
   isLoading: boolean;
@@ -24,6 +25,7 @@ export type JobsResultsWidgetProps = {
   onAddToPipeline: (job: Job) => void;
   onViewDetails: (job: Job) => void;
   onClearFilters?: () => void;
+  onClearSearch?: () => void;
   onRetry?: () => void;
   favoritePendingId?: string;
 };
@@ -31,6 +33,7 @@ export type JobsResultsWidgetProps = {
 export const JobsResultsWidget = ({
   jobs,
   total,
+  queryMs,
   sort,
   direction,
   isLoading,
@@ -46,6 +49,7 @@ export const JobsResultsWidget = ({
   onAddToPipeline,
   onViewDetails,
   onClearFilters,
+  onClearSearch,
   onRetry,
   favoritePendingId,
 }: JobsResultsWidgetProps) => {
@@ -60,7 +64,11 @@ export const JobsResultsWidget = ({
   if (!isLoading && jobs.length === 0) {
     return (
       <div className="w-full min-w-0">
-        <JobsEmptyState variant={emptyVariant} onClearFilters={onClearFilters} />
+        <JobsEmptyState
+          variant={emptyVariant}
+          onClearFilters={onClearFilters}
+          onClearSearch={onClearSearch}
+        />
       </div>
     );
   }
@@ -69,6 +77,8 @@ export const JobsResultsWidget = ({
     <div className="space-y-4">
       <JobsResultsHeader
         total={total}
+        queryMs={queryMs}
+        isLoading={isLoading}
         sort={sort}
         direction={direction}
         onSortChange={onSortChange}

@@ -59,8 +59,9 @@ model Job {
   metadata    Json?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  trackings   JobTracking[]
-  views       JobView[]
+  trackings        JobTracking[]
+  views            JobView[]
+  alternateSources JobAlternateSource[]
 
   @@unique([source, externalId])
   @@index([isCatalog])
@@ -75,6 +76,22 @@ model Job {
   @@index([status])
   @@index([contentHash])
   @@index([sourceUrl])
+}
+
+model JobAlternateSource {
+  id          String   @id @default(cuid())
+  jobId       String
+  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  source      String
+  externalId  String
+  sourceUrl   String?
+  contentHash String?
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([source, externalId])
+  @@index([jobId])
 }
 
 model JobProviderRegistry {
@@ -224,14 +241,18 @@ model Notification {
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String
+  category  String
+  priority  String    @default("normal")
   title     String
   message   String
   readAt    DateTime?
   metadata  Json?
+  deletedAt DateTime?
   createdAt DateTime  @default(now())
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
+  @@index([userId, category, createdAt])
 }
 
 model Profile {

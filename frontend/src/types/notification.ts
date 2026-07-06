@@ -6,10 +6,16 @@ export type NotificationType =
   | "dashboard_update"
   | "job_closed";
 
+export type NotificationCategory = "jobs" | "pipeline" | "calendar" | "system";
+
+export type NotificationPriority = "low" | "normal" | "high";
+
 export type Notification = {
   id: string;
   userId: string;
   type: NotificationType;
+  category: NotificationCategory;
+  priority?: NotificationPriority;
   title: string;
   message: string;
   read: boolean;
@@ -21,4 +27,8 @@ export type Notification = {
 export type MarkNotificationsReadPayload = {
   ids?: string[];
   all?: boolean;
+};
+
+export type DeleteNotificationsPayload = {
+  ids: string[];
 };

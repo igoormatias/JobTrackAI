@@ -1,9 +1,18 @@
 import { subHours } from "date-fns";
 
-import type { Application, Job, Notification, NotificationType } from "@/types";
+import type { Application, Job, Notification, NotificationCategory, NotificationType } from "@/types";
 
 import { sortJobsByMatchAndDate } from "./job-sorter";
 import type { RecommendationProfile } from "../types/recommendation.types";
+
+const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = {
+  new_job: "jobs",
+  recommendation: "jobs",
+  job_closed: "jobs",
+  pipeline_change: "pipeline",
+  interview_reminder: "calendar",
+  dashboard_update: "system",
+};
 
 export type BuildNotificationsInput = {
   userId: string;
@@ -48,6 +57,7 @@ export const buildPersonalizedNotifications = ({
       id: `notification_${String(index).padStart(4, "0")}`,
       userId,
       type: "new_job",
+      category: TYPE_TO_CATEGORY.new_job,
       title: "Nova vaga encontrada",
       message: `Nova vaga ${primarySkill} encontrada — ${job.title} na ${job.company.name}.`,
       read: index > 3,
@@ -63,6 +73,7 @@ export const buildPersonalizedNotifications = ({
       id: `notification_${String(index).padStart(4, "0")}`,
       userId,
       type: "recommendation",
+      category: TYPE_TO_CATEGORY.recommendation,
       title: "Nova recomendação",
       message: `Encontramos uma vaga com ${job.matchScore.score}% de match — ${job.title}.`,
       read: index > 5,
@@ -81,6 +92,7 @@ export const buildPersonalizedNotifications = ({
       id: `notification_${String(index).padStart(4, "0")}`,
       userId,
       type,
+      category: TYPE_TO_CATEGORY[type],
       title: type === "pipeline_change" ? "Atualização no pipeline" : "Próxima entrevista",
       message:
         type === "pipeline_change"
@@ -98,6 +110,7 @@ export const buildPersonalizedNotifications = ({
     id: `notification_${String(index).padStart(4, "0")}`,
     userId,
     type: "dashboard_update",
+    category: TYPE_TO_CATEGORY.dashboard_update,
     title: "Dashboard atualizado",
     message: `Encontramos ${relevantJobs.length} vagas compatíveis com seu perfil.`,
     read: false,

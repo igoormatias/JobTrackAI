@@ -21,8 +21,11 @@ export const createNotificationRoutes = (): Router => {
   const controller = new NotificationController(notificationService);
 
   router.use(requireAuth);
+  router.get("/unread-count", controller.getUnreadCount);
   router.get("/", controller.listNotifications);
   router.patch("/read", controller.markAsRead);
+  router.delete("/", controller.deleteMany);
+  router.delete("/:id", controller.deleteOne);
 
   return router;
 };
