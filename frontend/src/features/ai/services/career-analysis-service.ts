@@ -37,6 +37,12 @@ export const getCareerAnalysisErrorMessage = (error: unknown): string => {
     if (code === "AI_DEBOUNCE") {
       return "Aguarde alguns segundos antes de gerar outra análise.";
     }
+    if (code === "DATABASE_SCHEMA_OUTDATED") {
+      return "Análise IA temporariamente indisponível. Tente novamente em alguns minutos.";
+    }
+    if (code === "AI_ANALYSIS_FAILED" || code === "INTERNAL_ERROR") {
+      return "Não foi possível gerar a análise IA. Tente novamente.";
+    }
     if (error.response?.status === 404) {
       return "Processo seletivo não encontrado.";
     }

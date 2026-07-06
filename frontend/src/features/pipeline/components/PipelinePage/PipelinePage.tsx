@@ -32,6 +32,10 @@ export const PipelinePage = () => {
     router.push(`/pipeline/${application.id}`);
   };
 
+  const openEdit = (application: Application) => {
+    router.push(`/pipeline/${application.id}?edit=1`);
+  };
+
   if (isLoading) return <PipelineBoardSkeleton />;
 
   if (isError) {
@@ -72,6 +76,7 @@ export const PipelinePage = () => {
       <PipelineBoardWidget
         data={data as PipelineData}
         onOpenDetails={openDetails}
+        onEdit={openEdit}
         suppressEmptyState={manualModalOpen}
       />
 

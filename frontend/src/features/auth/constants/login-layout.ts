@@ -8,13 +8,13 @@ export const LOGIN_LAYOUT = {
     "w-full min-h-[380px] rounded-2xl border border-border/80 bg-card/90 p-8 shadow-xl backdrop-blur-xl sm:min-h-[400px] sm:p-10",
   authStack: "flex flex-col gap-6 sm:gap-8",
   heroTitle:
-    "text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl xl:text-[2.75rem] xl:leading-tight",
+    "break-words text-3xl font-semibold leading-snug tracking-tight text-foreground sm:text-4xl xl:text-[2.75rem] xl:leading-tight",
   heroHighlight: "bg-gradient-to-r from-primary via-indigo-400 to-violet-400 bg-clip-text text-transparent",
-  heroSubtitle: "max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg",
-  productGrid: "grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4",
+  heroSubtitle: "max-w-xl break-words text-base leading-relaxed text-muted-foreground sm:text-lg",
+  productGrid: "grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4",
   productCard:
-    "rounded-xl border border-border/60 bg-card/50 p-4 backdrop-blur-sm transition-colors hover:border-primary/30 hover:bg-card/70",
-  legal: "text-center text-xs leading-relaxed text-muted-foreground lg:text-left",
+    "min-w-0 rounded-xl border border-border/60 bg-card/50 p-4 backdrop-blur-sm transition-colors hover:border-primary/30 hover:bg-card/70",
+  legal: "break-words text-center text-xs leading-relaxed text-muted-foreground lg:text-left",
   footer: "text-xs text-muted-foreground",
   /** @deprecated Legacy LoginCard layout */
   shell: "layout-shell w-full max-w-[400px]",

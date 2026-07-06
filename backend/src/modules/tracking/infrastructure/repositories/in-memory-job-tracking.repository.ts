@@ -63,6 +63,8 @@ const toJobSnapshot = (job: Job, tracking: Pick<JobTrackingEntity, "isFavorite" 
   sourceUrl: job.sourceUrl,
   source: job.source as JobSource,
   status: job.status,
+  salaryMin: job.salaryMin,
+  salaryMax: job.salaryMax,
   isFavorite: tracking.isFavorite,
   priority: tracking.priority,
   visibility: tracking.visibility,
@@ -135,6 +137,7 @@ const createSeedTracking = (index: number, stage: PipelineStage): JobTrackingEnt
     notes: null,
     feedback: null,
     recruiterName: null,
+    recruiterRole: null,
     recruiterEmail: null,
     recruiterPhone: null,
     recruiterLinkedin: null,
@@ -213,6 +216,7 @@ export class InMemoryJobTrackingRepository {
       notes: input.notes ?? null,
       feedback: null,
       recruiterName: null,
+      recruiterRole: null,
       recruiterEmail: null,
       recruiterPhone: null,
       recruiterLinkedin: null,
@@ -362,6 +366,7 @@ export class InMemoryJobTrackingRepository {
 
     if (input.feedback !== undefined) tracking.feedback = input.feedback;
     if (input.recruiterName !== undefined) tracking.recruiterName = input.recruiterName;
+    if (input.recruiterRole !== undefined) tracking.recruiterRole = input.recruiterRole;
     if (input.recruiterEmail !== undefined) tracking.recruiterEmail = input.recruiterEmail;
     if (input.recruiterPhone !== undefined) tracking.recruiterPhone = input.recruiterPhone;
     if (input.recruiterLinkedin !== undefined) tracking.recruiterLinkedin = input.recruiterLinkedin;

@@ -59,6 +59,7 @@ export const updateProcessSchema = z.object({
   priority: z.enum(JOB_PRIORITIES).optional(),
   isFavorite: z.boolean().optional(),
   recruiterName: z.string().nullable().optional(),
+  recruiterRole: z.string().nullable().optional(),
   recruiterEmail: z.union([z.string().email(), z.literal(""), z.null()]).optional(),
   recruiterPhone: z.string().nullable().optional(),
   recruiterLinkedin: z.union([z.string().url(), z.literal(""), z.null()]).optional(),

@@ -28,6 +28,8 @@ export type PipelineApplicationJob = Pick<
   | "status"
   | "area"
   | "isFavorite"
+  | "salaryMin"
+  | "salaryMax"
 > & {
   updatedAt: string;
 };

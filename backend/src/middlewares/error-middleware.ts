@@ -8,9 +8,14 @@ type PrismaKnownError = {
   code?: string;
 };
 
-const prismaErrorMap: Record<string, { statusCode: number; message: string }> = {
-  P2002: { statusCode: 409, message: "Unique constraint failed" },
-  P2025: { statusCode: 404, message: "Record not found" },
+const prismaErrorMap: Record<string, { statusCode: number; code: string; message: string }> = {
+  P2002: { statusCode: 409, code: "P2002", message: "Unique constraint failed" },
+  P2025: { statusCode: 404, code: "P2025", message: "Record not found" },
+  P2021: {
+    statusCode: 503,
+    code: "DATABASE_SCHEMA_OUTDATED",
+    message: "Database schema is outdated. Run prisma migrate deploy.",
+  },
 };
 
 export const errorMiddleware = (
@@ -48,7 +53,7 @@ export const errorMiddleware = (
     const mapped = prismaErrorMap[prismaError.code];
     res.status(mapped.statusCode).json({
       status: "error",
-      code: prismaError.code,
+      code: mapped.code,
       message: mapped.message,
       correlationId,
     });

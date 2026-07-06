@@ -21,7 +21,7 @@ export const LoginProductCard = ({ icon: Icon, title, description, accent, index
     >
       <Icon className="h-5 w-5 text-primary" aria-hidden />
     </div>
-    <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
+    <h3 className="break-words text-sm font-semibold text-foreground">{title}</h3>
+    <p className="mt-1 break-words text-xs leading-relaxed text-muted-foreground">{description}</p>
   </motion.article>
 );

@@ -32,6 +32,8 @@ const application = {
     sourceUrl: "https://portal.gupy.io/job/10115",
     status: "active",
     isFavorite: false,
+    salaryMin: null,
+    salaryMax: null,
     updatedAt: new Date().toISOString(),
   },
   timeline: [],

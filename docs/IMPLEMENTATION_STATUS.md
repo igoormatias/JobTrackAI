@@ -1,6 +1,6 @@
 # JobTrack AI — Implementation Status
 
-Last updated: Etapa 14 (Pipeline CRM + Explorar Vagas).  
+Last updated: Etapa 15 (UX Pipeline, Responsividade, IA).  
 Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 
 | Module | Frontend | Backend API | Prisma | Tests | Notes |
@@ -14,12 +14,12 @@ Legend: ✅ Done · 🚧 In progress · ⬜ Pending · 🧪 Test-only mock
 | Match Engine | ✅ types | ✅ | — | ✅ | `rules-v2`; JobTitleNormalizer + SkillMatcher |
 | AI Career | ✅ | ✅ | ✅ Skill/AIAnalysis | ✅ | Gemini on-demand; cache-first; Etapa 18 |
 | Job Tracking | ✅ | ✅ | ✅ | ✅ | ApplicationProcess alias; campos processo expandidos (Etapa 14) |
-| Process Detail | ✅ | ✅ | ✅ | ✅ | `/pipeline/[trackingId]`; PATCH `/process` (v1.5) |
+| Process Detail | ✅ | ✅ | ✅ recruiterRole | ✅ | Seções CRM; entrevistas; ChangeStageSheet (Etapa 15) |
 | Match Background | — | ✅ | ✅ aiAnalysisStatus | ✅ | IA após ProcessCreated; cache-first (v1.5) |
 | Timeline | ✅ | ✅ | ✅ TimelineEvent | ✅ | |
 | Interviews | ✅ | ✅ | ✅ Interview | ✅ | Calendar sync quando integrado (v1.5) |
 | Calendar | ✅ | ✅ | ✅ CalendarIntegration | ✅ | Google ativo; Outlook stub (v1.5) |
-| Pipeline | ✅ | ✅ view | ✅ via tracking | ✅ | Mobile: alterar status sem DnD (Etapa XX) |
+| Pipeline | ✅ | ✅ view | ✅ via tracking | ✅ | Mobile: sem DnD; tap → detalhe; ações ⋮ (Etapa 15) |
 | Dashboard | ✅ | ✅ | ✅ aggregates + jobSync | ✅ | Cards com dados do tracking; KPI entrevistas unificado |
 | Notifications | ✅ | ✅ | ✅ Notification | ✅ | Header popover + mark read |
 | Companies | ✅ | ✅ | derived from Job | ✅ | No separate model |
@@ -90,6 +90,16 @@ Validated flows (no regressions expected):
 | Processo | `recruiterLinkedin`, `tags`, `salaryExpectation`; timeline padronizada |
 | Explorar | `locationPreference`; banner filtros sugeridos; limpar com skip defaults |
 | UI | "Iniciar processo"; "Ver vaga" no detalhe do processo |
+
+## Etapa 15 — entregas
+
+| Parte | Entrega |
+|-------|---------|
+| Process detail | 8 seções CRM; entrevistas; salário publicado; `recruiterRole` |
+| Pipeline mobile | Sem DnD &lt; lg; tap → detalhe; `ChangeStageSheet` compartilhado |
+| Card actions | Desktop ícones; mobile menu ⋮; editar via `?edit=1` |
+| Login | `text-balance` removido; `break-words` / `min-w-0` |
+| IA 500 | `buildSnapshot` hardened; P2021 → 503; `aiAnalysisStatus` em `generate` |
 
 ## Out of scope (V2+)
 

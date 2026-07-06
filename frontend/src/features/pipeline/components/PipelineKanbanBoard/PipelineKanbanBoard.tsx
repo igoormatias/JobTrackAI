@@ -23,9 +23,8 @@ export type PipelineKanbanBoardProps = {
   columns: PipelineColumn[];
   onMove: (applicationId: string, stage: PipelineStage) => void;
   onOpenDetails: (application: Application) => void;
+  onEdit?: (application: Application) => void;
   onFavorite: (application: Application) => void;
-  onDelete: (application: Application) => void;
-  onScheduleInterview: (application: Application) => void;
   isMovePending?: boolean;
   visibleStage?: PipelineStage | null;
   mobile?: boolean;
@@ -35,14 +34,14 @@ export const PipelineKanbanBoard = ({
   columns,
   onMove,
   onOpenDetails,
+  onEdit,
   onFavorite,
-  onDelete,
-  onScheduleInterview,
   isMovePending,
   visibleStage,
   mobile,
 }: PipelineKanbanBoardProps) => {
   const [activeApplication, setActiveApplication] = useState<Application | null>(null);
+  const enableDrag = !mobile;
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor),
@@ -79,6 +78,28 @@ export const PipelineKanbanBoard = ({
     onMove(applicationId, targetStage);
   };
 
+  const columnNodes = displayColumns.map((column) => (
+    <PipelineKanbanColumn
+      key={column.stage}
+      column={column}
+      onOpenDetails={onOpenDetails}
+      onEdit={onEdit}
+      onFavorite={onFavorite}
+      onChangeStage={mobile ? onMove : undefined}
+      activeCardId={activeApplication?.id}
+      className={mobile ? "w-full" : undefined}
+      enableDrag={enableDrag}
+    />
+  ));
+
+  if (!enableDrag) {
+    return (
+      <div className={PIPELINE_LAYOUT.mobileColumn} aria-live="polite">
+        {columnNodes}
+      </div>
+    );
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -86,20 +107,8 @@ export const PipelineKanbanBoard = ({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className={mobile ? PIPELINE_LAYOUT.mobileColumn : PIPELINE_LAYOUT.board} aria-live="polite">
-        {displayColumns.map((column) => (
-          <PipelineKanbanColumn
-            key={column.stage}
-            column={column}
-            onOpenDetails={onOpenDetails}
-            onFavorite={onFavorite}
-            onDelete={onDelete}
-            onScheduleInterview={onScheduleInterview}
-            onChangeStage={mobile ? onMove : undefined}
-            activeCardId={activeApplication?.id}
-            className={mobile ? "w-full" : undefined}
-          />
-        ))}
+      <div className={PIPELINE_LAYOUT.board} aria-live="polite">
+        {columnNodes}
       </div>
 
       <DragOverlay>
@@ -107,9 +116,8 @@ export const PipelineKanbanBoard = ({
           <PipelineApplicationCard
             application={activeApplication}
             onOpenDetails={onOpenDetails}
+            onEdit={onEdit}
             onFavorite={onFavorite}
-            onDelete={onDelete}
-            onScheduleInterview={onScheduleInterview}
             isDragging
             isPending={isMovePending}
           />

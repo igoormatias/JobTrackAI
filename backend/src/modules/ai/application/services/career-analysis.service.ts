@@ -1,5 +1,6 @@
 import { env } from "../../../../config/env.js";
 import { logger } from "../../../../config/logger.js";
+import { prisma } from "../../../../database/prisma.js";
 import { AppError } from "../../../../shared/errors/app-error.js";
 import { NotFoundError } from "../../../../shared/errors/not-found-error.js";
 import { MATCH_ENGINE_VERSION } from "../../../../shared/domain/match-weights.js";
@@ -23,6 +24,34 @@ import { toCareerAnalysisResponseDto } from "../mappers/career-analysis.mapper.j
 
 const startOfUtcDay = (date = new Date()): Date =>
   new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+
+const normalizeStringList = (values: unknown): string[] => {
+  if (!Array.isArray(values)) return [];
+  return values
+    .map((value) => {
+      if (typeof value === "string") return value.trim();
+      if (value && typeof value === "object" && "name" in value) {
+        const name = (value as { name?: unknown }).name;
+        return typeof name === "string" ? name.trim() : "";
+      }
+      return "";
+    })
+    .filter(Boolean);
+};
+
+const normalizeTechnologyNames = (values: unknown): string[] => {
+  if (!Array.isArray(values)) return [];
+  return values
+    .map((value) => {
+      if (typeof value === "string") return value.trim();
+      if (value && typeof value === "object" && "name" in value) {
+        const name = (value as { name?: unknown }).name;
+        return typeof name === "string" ? name.trim() : "";
+      }
+      return "";
+    })
+    .filter(Boolean);
+};
 
 export class CareerAnalysisService {
   constructor(
@@ -48,80 +77,99 @@ export class CareerAnalysisService {
     trackingId: string,
     refresh: boolean,
   ): Promise<CareerAnalysisResponseDto> {
-    const startedAt = Date.now();
-    const context = await this.contextRepo.loadForUser(userId, trackingId);
-    if (!context) throw new NotFoundError("Tracking not found");
+    try {
+      const startedAt = Date.now();
+      const context = await this.contextRepo.loadForUser(userId, trackingId);
+      if (!context) throw new NotFoundError("Tracking not found");
 
-    const snapshot = await this.buildSnapshot(context);
-    const contentHash = computeAnalysisHash(snapshot);
+      const snapshot = await this.buildSnapshot(context);
+      const contentHash = computeAnalysisHash(snapshot);
 
-    const cached = await this.analysisRepo.findByTrackingAndHash(trackingId, contentHash);
-    if (cached) {
-      await this.analysisRepo.logUsage({
-        userId,
-        trackingId,
-        wasCached: true,
-        durationMs: Date.now() - startedAt,
-        model: cached.model,
-      });
-      logger.info({ userId, trackingId, cache: "hit" }, "Career analysis cache hit");
-      return toCareerAnalysisResponseDto(cached, { cached: true });
-    }
-
-    if (!refresh) {
-      const latest = await this.analysisRepo.findLatestByTracking(trackingId);
-      if (latest) {
+      const cached = await this.analysisRepo.findByTrackingAndHash(trackingId, contentHash);
+      if (cached) {
         await this.analysisRepo.logUsage({
           userId,
           trackingId,
           wasCached: true,
           durationMs: Date.now() - startedAt,
-          model: latest.model,
+          model: cached.model,
         });
-        return toCareerAnalysisResponseDto(latest, { cached: true, stale: true });
+        await this.markAnalysisStatus(trackingId, true);
+        logger.info({ userId, trackingId, cache: "hit" }, "Career analysis cache hit");
+        return toCareerAnalysisResponseDto(cached, { cached: true });
       }
-    }
 
-    await this.assertRateLimits(userId);
+      if (!refresh) {
+        const latest = await this.analysisRepo.findLatestByTracking(trackingId);
+        if (latest) {
+          await this.analysisRepo.logUsage({
+            userId,
+            trackingId,
+            wasCached: true,
+            durationMs: Date.now() - startedAt,
+            model: latest.model,
+          });
+          return toCareerAnalysisResponseDto(latest, { cached: true, stale: true });
+        }
+      }
 
-    const model = resolveGeminiModel();
-    const raw = await this.provider.analyzeCareer({ snapshot, model });
+      await this.assertRateLimits(userId);
 
-    const stored = await this.analysisRepo.upsert({
-      trackingId,
-      contentHash,
-      result: raw,
-      provider: this.provider.providerName,
-      model,
-      promptVersion: env.PROMPT_VERSION,
-      matchEngineVersion: MATCH_ENGINE_VERSION,
-      confidence: raw.confidence,
-    });
+      const model = resolveGeminiModel();
+      const raw = await this.provider.analyzeCareer({ snapshot, model });
 
-    await this.analysisRepo.logUsage({
-      userId,
-      trackingId,
-      wasCached: false,
-      durationMs: Date.now() - startedAt,
-      model,
-      promptTokens: raw.promptTokens,
-      completionTokens: raw.completionTokens,
-    });
+      const stored = await this.analysisRepo.upsert({
+        trackingId,
+        contentHash,
+        result: raw,
+        provider: this.provider.providerName,
+        model,
+        promptVersion: env.PROMPT_VERSION,
+        matchEngineVersion: MATCH_ENGINE_VERSION,
+        confidence: raw.confidence,
+      });
 
-    logger.info(
-      {
+      await this.analysisRepo.logUsage({
         userId,
         trackingId,
-        cache: "miss",
+        wasCached: false,
         durationMs: Date.now() - startedAt,
         model,
         promptTokens: raw.promptTokens,
         completionTokens: raw.completionTokens,
-      },
-      "Career analysis generated",
-    );
+      });
 
-    return toCareerAnalysisResponseDto(stored, { cached: false });
+      await this.markAnalysisStatus(trackingId, false);
+
+      logger.info(
+        {
+          userId,
+          trackingId,
+          cache: "miss",
+          durationMs: Date.now() - startedAt,
+          model,
+          promptTokens: raw.promptTokens,
+          completionTokens: raw.completionTokens,
+        },
+        "Career analysis generated",
+      );
+
+      return toCareerAnalysisResponseDto(stored, { cached: false });
+    } catch (error) {
+      if (error instanceof AppError || error instanceof NotFoundError) throw error;
+      logger.error({ error, userId, trackingId }, "Career analysis generation failed");
+      throw new AppError("Failed to generate career analysis", 502, "AI_ANALYSIS_FAILED");
+    }
+  }
+
+  private async markAnalysisStatus(trackingId: string, cached: boolean): Promise<void> {
+    await prisma.jobTracking.update({
+      where: { id: trackingId },
+      data: {
+        aiAnalysisStatus: cached ? "CACHED" : "COMPLETED",
+        aiAnalyzedAt: new Date(),
+      },
+    });
   }
 
   private async assertRateLimits(userId: string): Promise<void> {
@@ -141,17 +189,15 @@ export class CareerAnalysisService {
     context: Awaited<ReturnType<CareerAnalysisContextRepository["loadForUser"]>> & object,
   ): Promise<AnalysisSnapshot> {
     const metadata = parseJobMetadata(context.job.metadata as never);
-    const technologies = metadata.technologies ?? [];
-    const requirements = metadata.requirements ?? [];
+    const technologyNames = normalizeTechnologyNames(metadata.technologies);
+    const requirements = normalizeStringList(metadata.requirements);
+    const technologies = technologyNames.map((name) => ({ id: name, name, slug: name.toLowerCase() }));
 
     const userSkills = await this.userSkillRepo.listByUserId(context.userId);
     const skillNames =
-      userSkills.length > 0 ? userSkills.map((s) => s.skillName) : context.profile.skillNames;
+      userSkills.length > 0 ? userSkills.map((s) => s.skillName) : context.profile.skillNames ?? [];
 
-    const normalized = await this.skillNormalizer.compare(
-      skillNames,
-      technologies.map((t) => t.name),
-    );
+    const normalized = await this.skillNormalizer.compare(skillNames, technologyNames);
 
     const matchProfile: MatchProfileInput = {
       area: context.profile.area,

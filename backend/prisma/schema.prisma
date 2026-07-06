@@ -152,6 +152,7 @@ model JobTracking {
   notes              String?
   feedback           String?
   recruiterName      String?
+  recruiterRole      String?
   recruiterEmail     String?
   recruiterPhone     String?
   recruiterLinkedin  String?

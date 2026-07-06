@@ -39,6 +39,7 @@ export type MoveTrackingStagePayload = {
 export type TrackingDetail = JobTracking & {
   feedback: string | null;
   recruiterName: string | null;
+  recruiterRole: string | null;
   recruiterEmail: string | null;
   recruiterPhone: string | null;
   recruiterLinkedin: string | null;
@@ -50,6 +51,7 @@ export type TrackingDetail = JobTracking & {
   aiAnalyzedAt: string | null;
   stage: PipelineStage;
   timeline: TimelineEvent[];
+  createdAt: string;
 };
 
 export type UpdateProcessPayload = {
@@ -58,6 +60,7 @@ export type UpdateProcessPayload = {
   priority?: JobPriority;
   isFavorite?: boolean;
   recruiterName?: string | null;
+  recruiterRole?: string | null;
   recruiterEmail?: string | null;
   recruiterPhone?: string | null;
   recruiterLinkedin?: string | null;
@@ -133,6 +136,9 @@ export type TrackingInterview = {
   id: string;
   trackingId: string;
   scheduledAt: string;
+  timezone?: string | null;
+  location?: string | null;
+  meetingType?: string | null;
   link: string | null;
   notes: string | null;
   createdAt: string;

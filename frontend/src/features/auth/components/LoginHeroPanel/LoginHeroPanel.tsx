@@ -20,7 +20,7 @@ export const LoginHeroPanel = () => (
       <JobTrackLogo variant="full" theme="dark" priority className="h-10 w-auto sm:h-11" />
 
       <div className="space-y-4">
-        <Caption className="uppercase tracking-[0.2em] text-primary/80">{LOGIN_HERO.eyebrow}</Caption>
+        <Caption className="break-words uppercase tracking-[0.2em] text-primary/80">{LOGIN_HERO.eyebrow}</Caption>
         <Heading id="login-hero-title" level={1} className={LOGIN_LAYOUT.heroTitle}>
           {LOGIN_HERO.title}
           <span className="mt-2 block">

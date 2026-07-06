@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { AppError } from "../../../../shared/errors/app-error.js";
+
 export const careerAnalysisResultSchema = z.object({
   summary: z.string().min(1),
   matchExplanation: z.string().min(1),
@@ -48,6 +50,6 @@ export const parseCareerAnalysisResponse = (raw: string): CareerAnalysisResultSc
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid AI response";
-    throw new Error(`Failed to parse career analysis: ${message}`);
+    throw new AppError(`Failed to parse career analysis: ${message}`, 502, "AI_PROVIDER_ERROR");
   }
 };

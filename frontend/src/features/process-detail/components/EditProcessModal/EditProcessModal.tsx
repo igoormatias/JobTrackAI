@@ -34,11 +34,14 @@ const processFormSchema = z.object({
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]),
   isFavorite: z.boolean(),
   recruiterName: z.string().optional(),
+  recruiterRole: z.string().optional(),
   recruiterEmail: z.string().optional(),
   recruiterPhone: z.string().optional(),
   recruiterLinkedin: z.string().optional(),
   tags: z.string().optional(),
   negotiatedSalary: z.string().optional(),
+  salaryExpectationMin: z.string().optional(),
+  salaryExpectationMax: z.string().optional(),
   processLinkLabel: z.string().optional(),
   processLinkUrl: z.string().optional(),
 });
@@ -66,11 +69,14 @@ const toFormValues = (tracking: TrackingDetail): ProcessFormValues => {
     priority: tracking.priority,
     isFavorite: tracking.isFavorite,
     recruiterName: tracking.recruiterName ?? "",
+    recruiterRole: tracking.recruiterRole ?? "",
     recruiterEmail: tracking.recruiterEmail ?? "",
     recruiterPhone: tracking.recruiterPhone ?? "",
     recruiterLinkedin: tracking.recruiterLinkedin ?? "",
     tags: tracking.tags?.join(", ") ?? "",
     negotiatedSalary: tracking.negotiatedSalary?.toString() ?? "",
+    salaryExpectationMin: tracking.salaryExpectation?.min?.toString() ?? "",
+    salaryExpectationMax: tracking.salaryExpectation?.max?.toString() ?? "",
     processLinkLabel: firstLink?.[0] ?? "",
     processLinkUrl: typeof firstLink?.[1] === "string" ? firstLink[1] : "",
   };
@@ -109,6 +115,7 @@ export const EditProcessModal = ({
       priority: values.priority as JobPriority,
       isFavorite: values.isFavorite,
       recruiterName: values.recruiterName || null,
+      recruiterRole: values.recruiterRole || null,
       recruiterEmail: values.recruiterEmail || null,
       recruiterPhone: values.recruiterPhone || null,
       recruiterLinkedin: values.recruiterLinkedin || null,
@@ -116,6 +123,14 @@ export const EditProcessModal = ({
         ? values.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
         : undefined,
       negotiatedSalary: values.negotiatedSalary ? Number(values.negotiatedSalary) : null,
+      salaryExpectation:
+        values.salaryExpectationMin || values.salaryExpectationMax
+          ? {
+              min: values.salaryExpectationMin ? Number(values.salaryExpectationMin) : 0,
+              max: values.salaryExpectationMax ? Number(values.salaryExpectationMax) : 0,
+              currency: "BRL" as const,
+            }
+          : null,
       processLinks,
     });
   });
@@ -192,6 +207,11 @@ export const EditProcessModal = ({
             <Input id="recruiterName" {...form.register("recruiterName")} />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="recruiterRole">Cargo do recrutador(a)</Label>
+            <Input id="recruiterRole" placeholder="Ex: Tech Recruiter" {...form.register("recruiterRole")} />
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="recruiterEmail">E-mail</Label>
@@ -216,6 +236,17 @@ export const EditProcessModal = ({
           <div className="space-y-2">
             <Label htmlFor="negotiatedSalary">Valor da oferta / salário negociado (R$)</Label>
             <Input id="negotiatedSalary" type="number" {...form.register("negotiatedSalary")} />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="salaryExpectationMin">Pretensão salarial — mínimo (R$)</Label>
+              <Input id="salaryExpectationMin" type="number" {...form.register("salaryExpectationMin")} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="salaryExpectationMax">Pretensão salarial — máximo (R$)</Label>
+              <Input id="salaryExpectationMax" type="number" {...form.register("salaryExpectationMax")} />
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

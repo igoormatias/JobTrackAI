@@ -23,6 +23,8 @@ export type TrackingJobSnapshot = {
   sourceUrl: string | null;
   source: JobSource;
   status: string;
+  salaryMin: number | null;
+  salaryMax: number | null;
   isFavorite: boolean;
   priority: JobPriority;
   visibility: JobVisibility;
@@ -55,6 +57,7 @@ export type JobTrackingEntity = {
   notes: string | null;
   feedback: string | null;
   recruiterName: string | null;
+  recruiterRole: string | null;
   recruiterEmail: string | null;
   recruiterPhone: string | null;
   recruiterLinkedin: string | null;
@@ -111,6 +114,7 @@ export type UpdateProcessInput = {
   priority?: JobPriority;
   isFavorite?: boolean;
   recruiterName?: string | null;
+  recruiterRole?: string | null;
   recruiterEmail?: string | null;
   recruiterPhone?: string | null;
   recruiterLinkedin?: string | null;

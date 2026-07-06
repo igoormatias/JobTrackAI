@@ -13,27 +13,28 @@ import { PipelineDraggableCard } from "../PipelineDraggableCard";
 export type PipelineKanbanColumnProps = {
   column: PipelineColumn;
   onOpenDetails: (application: Application) => void;
+  onEdit?: (application: Application) => void;
   onFavorite: (application: Application) => void;
-  onDelete: (application: Application) => void;
-  onScheduleInterview: (application: Application) => void;
   onChangeStage?: (applicationId: string, stage: PipelineStage) => void;
   activeCardId?: string | null;
   className?: string;
+  enableDrag?: boolean;
 };
 
 const PipelineKanbanColumnComponent = ({
   column,
   onOpenDetails,
+  onEdit,
   onFavorite,
-  onDelete,
-  onScheduleInterview,
   onChangeStage,
   activeCardId,
   className,
+  enableDrag = true,
 }: PipelineKanbanColumnProps) => {
   const { setNodeRef, isOver } = useDroppable({
     id: column.stage,
     data: { type: "column", stage: column.stage },
+    disabled: !enableDrag,
   });
 
   return (
@@ -47,11 +48,14 @@ const PipelineKanbanColumnComponent = ({
         <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{column.count}</span>
       </header>
 
-      <SortableContext items={column.applications.map((app) => app.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext
+        items={column.applications.map((app) => app.id)}
+        strategy={verticalListSortingStrategy}
+      >
         <div className="space-y-3">
           {column.applications.length === 0 ? (
             <p className="rounded-lg border border-dashed border-border/60 p-4 text-center text-xs text-muted-foreground">
-              Arraste candidaturas para cá
+              {enableDrag ? "Arraste candidaturas para cá" : "Nenhum processo neste status"}
             </p>
           ) : (
             column.applications.map((application) => (
@@ -59,11 +63,11 @@ const PipelineKanbanColumnComponent = ({
                 key={application.id}
                 application={application}
                 onOpenDetails={onOpenDetails}
+                onEdit={onEdit}
                 onFavorite={onFavorite}
-                onDelete={onDelete}
-                onScheduleInterview={onScheduleInterview}
                 onChangeStage={onChangeStage}
                 isPending={activeCardId === application.id}
+                enableDrag={enableDrag}
               />
             ))
           )}

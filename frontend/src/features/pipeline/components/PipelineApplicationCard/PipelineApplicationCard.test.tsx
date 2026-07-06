@@ -26,6 +26,8 @@ const baseApplication: Application = {
     sourceUrl: "https://example.com",
     status: "active",
     isFavorite: false,
+    salaryMin: null,
+    salaryMax: null,
     updatedAt: "2026-06-01T12:00:00.000Z",
     matchScore: {
       score: 90,
@@ -41,20 +43,18 @@ const baseApplication: Application = {
 };
 
 describe("PipelineApplicationCard", () => {
-  it("renders application data and actions", () => {
+  it("renders application data and desktop actions", () => {
     render(
       <PipelineApplicationCard
         application={baseApplication}
         onOpenDetails={vi.fn()}
         onFavorite={vi.fn()}
-        onDelete={vi.fn()}
-        onScheduleInterview={vi.fn()}
       />,
     );
 
     expect(screen.getByText("Frontend Engineer")).toBeInTheDocument();
     expect(screen.getByText("Nubank")).toBeInTheDocument();
-    expect(screen.getByLabelText("Abrir detalhes")).toBeInTheDocument();
+    expect(screen.getByLabelText("Abrir processo")).toBeInTheDocument();
   });
 
   it("applies favorite surface styles when job is favorited", () => {
@@ -66,8 +66,6 @@ describe("PipelineApplicationCard", () => {
         }}
         onOpenDetails={vi.fn()}
         onFavorite={vi.fn()}
-        onDelete={vi.fn()}
-        onScheduleInterview={vi.fn()}
       />,
     );
 
@@ -86,8 +84,6 @@ describe("PipelineApplicationCard", () => {
         application={baseApplication}
         onOpenDetails={vi.fn()}
         onFavorite={vi.fn()}
-        onDelete={vi.fn()}
-        onScheduleInterview={vi.fn()}
       />,
     );
 

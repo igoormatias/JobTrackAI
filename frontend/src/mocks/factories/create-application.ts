@@ -127,6 +127,8 @@ export const createApplication = ({ index, userId, job, stage }: CreateApplicati
       status: job.status,
       area: job.area,
       isFavorite: job.isFavorite,
+      salaryMin: job.salaryMin,
+      salaryMax: job.salaryMax,
       updatedAt: job.updatedAt,
     },
     timeline: buildTimelineForStage(id, stage, appliedAt),

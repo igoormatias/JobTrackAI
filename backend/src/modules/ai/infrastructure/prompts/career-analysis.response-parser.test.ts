@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { AppError } from "../../../../shared/errors/app-error.js";
 import { parseCareerAnalysisResponse } from "./career-analysis.response-parser.js";
 
 const validPayload = {
@@ -30,6 +31,6 @@ describe("parseCareerAnalysisResponse", () => {
   it("rejects invalid confidence", () => {
     expect(() =>
       parseCareerAnalysisResponse(JSON.stringify({ ...validPayload, confidence: 2 })),
-    ).toThrow(/Failed to parse career analysis/);
+    ).toThrow(AppError);
   });
 });

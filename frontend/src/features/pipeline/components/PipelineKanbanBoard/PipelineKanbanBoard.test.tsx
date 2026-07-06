@@ -45,6 +45,8 @@ describe("PipelineKanbanBoard", () => {
                     sourceUrl: "https://example.com",
                     status: "active",
                     isFavorite: false,
+                    salaryMin: null,
+                    salaryMax: null,
                     updatedAt: new Date().toISOString(),
                     matchScore: { score: 80, label: "good", reasons: [], missingSkills: [] },
                   },
@@ -58,8 +60,6 @@ describe("PipelineKanbanBoard", () => {
           onMove={vi.fn()}
           onOpenDetails={vi.fn()}
           onFavorite={vi.fn()}
-          onDelete={vi.fn()}
-          onScheduleInterview={vi.fn()}
         />
       </Wrapper>,
     );

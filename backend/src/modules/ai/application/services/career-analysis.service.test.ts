@@ -1,5 +1,13 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
+vi.mock("../../../../database/prisma.js", () => ({
+  prisma: {
+    jobTracking: {
+      update: vi.fn().mockResolvedValue({}),
+    },
+  },
+}));
+
 import { AppError } from "../../../../shared/errors/app-error.js";
 import type { CareerAnalysisRecord, CareerAnalysisResult } from "../../domain/entities/career-analysis.entity.js";
 import type { AIAnalysisRepository } from "../../domain/repositories/ai-analysis.repository.js";
@@ -147,5 +155,23 @@ describe("CareerAnalysisService", () => {
     vi.mocked(analysisRepo.countRealUsageSince).mockResolvedValue(99);
 
     await expect(service.generate("user-1", "track-1", true)).rejects.toBeInstanceOf(AppError);
+  });
+
+  it("buildSnapshot tolerates malformed metadata requirements and technologies", async () => {
+    const malformedContext: CareerAnalysisContext = {
+      ...context,
+      job: {
+        ...context.job,
+        metadata: {
+          technologies: [123, { name: "React" }, "TypeScript"],
+          requirements: [456, "Node.js", { name: "GraphQL" }],
+        },
+      },
+    };
+    vi.mocked(contextRepo.loadForUser).mockResolvedValue(malformedContext);
+
+    await expect(service.generate("user-1", "track-1", true)).resolves.toMatchObject({
+      cached: false,
+    });
   });
 });

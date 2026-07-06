@@ -40,6 +40,8 @@ export const enrichApplicationJob = (application: Application, jobs: Job[]): App
       sourceUrl: scored.sourceUrl,
       status: scored.status,
       isFavorite: scored.isFavorite,
+      salaryMin: scored.salaryMin,
+      salaryMax: scored.salaryMax,
       updatedAt: scored.updatedAt,
     },
   };

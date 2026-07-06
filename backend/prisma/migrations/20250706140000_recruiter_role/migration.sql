@@ -1,0 +1,1 @@
+ALTER TABLE "JobTracking" ADD COLUMN IF NOT EXISTS "recruiterRole" TEXT;

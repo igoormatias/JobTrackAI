@@ -63,7 +63,32 @@ Auditoria do frontend e match engine antes da estabilização. Cada item documen
 | Componente | Causa raiz | Impacto | Solução |
 |------------|------------|---------|---------|
 | Kanban board | Scroll horizontal nativo | Esperado no board | `scrollbar-app` (Etapa anterior) |
-| `PipelineApplicationCard` | — | Favorito OK | Sem alteração nesta etapa |
+| `PipelineApplicationCard` | Ações espalhadas; DnD ativo em mobile | Difícil usar no celular | Desktop: ícones compactos; mobile: menu ⋮; tap → detalhe |
+| Pipeline mobile | DnD em viewport &lt; lg | Arrastar para coluna invisível | `enableDrag={false}`; `ChangeStageSheet` compartilhado |
+| Process detail | Campos editáveis ocultos | CRM incompleto | 8 seções; entrevistas; `recruiterRole`; pretensão salarial |
+| Login | `text-balance` no H1 | Palavras isoladas por linha | `break-words` + `leading-snug`; `min-w-0` nos cards |
+| Análise IA | 500 opaco em prod | Botão quebrado | `buildSnapshot` hardened; P2021 → 503; `aiAnalysisStatus` |
+
+---
+
+## Etapa 15 — UX Pipeline, Responsividade e IA
+
+| Área | Causa raiz | Impacto | Solução |
+|------|------------|---------|---------|
+| Process detail | Layout monolítico; campos só no modal | Usuário não vê CRM completo | Seções: vaga, processo, recrutadora, entrevistas, proposta, links, tags, notas, feedback |
+| `recruiterRole` | Campo inexistente | Cargo da recrutadora perdido | Migration Prisma + EditProcessModal + seção dedicada |
+| Pipeline mobile | DnD + botão status duplicado | UX confusa em tablet/phone | Sem DnD &lt; lg; card clicável → `/pipeline/[id]`; menu ⋮ com ações |
+| Pipeline desktop | Sem atalho editar/status | Muitos cliques | Barra de ícones: abrir, editar, vaga, status, favoritar |
+| Login hero | `text-balance` (mesmo anti-padrão Etapa 13) | Título quebrado em 375px | Removido; `break-words` em hero, cards e legal |
+| `POST /ai/career-analysis` | Metadata malformada / schema desatualizado | 500 em ~150ms | Sanitize lists; `AppError` explícito; P2021 → `DATABASE_SCHEMA_OUTDATED` |
+
+### Páginas validadas (Etapa 15)
+
+- [x] Login — 320px / 375px / 768px / 1024px / 1280px
+- [x] Pipeline — DnD desktop; mobile tap + sheet status + menu ações
+- [x] Detalhes do processo — seções completas; Alterar status via sheet
+- [x] Jobs / Dashboard — `min-w-0` / `break-words` sem regressão
+- [x] Análise IA — erros amigáveis; invalidação de cache no sucesso
 
 ---
 
