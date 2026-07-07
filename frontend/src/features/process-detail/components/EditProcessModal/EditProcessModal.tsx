@@ -34,7 +34,6 @@ const processFormSchema = z.object({
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]),
   isFavorite: z.boolean(),
   recruiterName: z.string().optional(),
-  recruiterRole: z.string().optional(),
   recruiterEmail: z.string().optional(),
   recruiterPhone: z.string().optional(),
   recruiterLinkedin: z.string().optional(),
@@ -69,7 +68,6 @@ const toFormValues = (tracking: TrackingDetail): ProcessFormValues => {
     priority: tracking.priority,
     isFavorite: tracking.isFavorite,
     recruiterName: tracking.recruiterName ?? "",
-    recruiterRole: tracking.recruiterRole ?? "",
     recruiterEmail: tracking.recruiterEmail ?? "",
     recruiterPhone: tracking.recruiterPhone ?? "",
     recruiterLinkedin: tracking.recruiterLinkedin ?? "",
@@ -115,7 +113,6 @@ export const EditProcessModal = ({
       priority: values.priority as JobPriority,
       isFavorite: values.isFavorite,
       recruiterName: values.recruiterName || null,
-      recruiterRole: values.recruiterRole || null,
       recruiterEmail: values.recruiterEmail || null,
       recruiterPhone: values.recruiterPhone || null,
       recruiterLinkedin: values.recruiterLinkedin || null,
@@ -205,11 +202,6 @@ export const EditProcessModal = ({
           <div className="space-y-2">
             <Label htmlFor="recruiterName">Recrutador(a)</Label>
             <Input id="recruiterName" {...form.register("recruiterName")} />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="recruiterRole">Cargo do recrutador(a)</Label>
-            <Input id="recruiterRole" placeholder="Ex: Tech Recruiter" {...form.register("recruiterRole")} />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

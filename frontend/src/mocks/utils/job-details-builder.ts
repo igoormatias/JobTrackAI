@@ -124,7 +124,7 @@ export const buildJobTimeline = (jobId: string): JobTimelineStep[] => {
   const currentIndex = PIPELINE_STAGES.indexOf(application.stage);
 
   return PIPELINE_STAGES.map((stage, index) => {
-    const timelineEvent = application.timeline.find((event) =>
+    const timelineEvent = (application.timeline ?? []).find((event) =>
       event.metadata && typeof event.metadata === "object" && "to" in event.metadata
         ? event.metadata.to === stage
         : false,

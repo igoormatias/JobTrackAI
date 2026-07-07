@@ -360,7 +360,6 @@ export class PrismaJobTrackingRepository {
 
     if (input.feedback !== undefined) data.feedback = input.feedback;
     if (input.recruiterName !== undefined) data.recruiterName = input.recruiterName;
-    if (input.recruiterRole !== undefined) data.recruiterRole = input.recruiterRole;
     if (input.recruiterEmail !== undefined) data.recruiterEmail = input.recruiterEmail || null;
     if (input.recruiterPhone !== undefined) data.recruiterPhone = input.recruiterPhone;
     if (input.recruiterLinkedin !== undefined) data.recruiterLinkedin = input.recruiterLinkedin || null;

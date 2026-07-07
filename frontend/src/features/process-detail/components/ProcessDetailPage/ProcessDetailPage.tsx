@@ -131,7 +131,6 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
   const processLinks = tracking.processLinks ? Object.entries(tracking.processLinks) : [];
   const hasRecruiter =
     tracking.recruiterName ||
-    tracking.recruiterRole ||
     tracking.recruiterEmail ||
     tracking.recruiterPhone ||
     tracking.recruiterLinkedin;
@@ -260,7 +259,6 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
               </CardHeader>
               <CardContent className="space-y-1 break-words text-sm text-muted-foreground">
                 {tracking.recruiterName ? <p>{tracking.recruiterName}</p> : null}
-                {tracking.recruiterRole ? <p>{tracking.recruiterRole}</p> : null}
                 {tracking.recruiterEmail ? <p>{tracking.recruiterEmail}</p> : null}
                 {tracking.recruiterPhone ? <p>{tracking.recruiterPhone}</p> : null}
                 {tracking.recruiterLinkedin ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { LayoutList, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -16,9 +16,13 @@ export type PipelineToolbarProps = {
   search: string;
   sortBy: string;
   sortDirection: string;
+  isFavoriteOnly: boolean;
+  isCompact: boolean;
   onSearchChange: (value: string) => void;
   onSortByChange: (value: string) => void;
   onSortDirectionChange: (value: string) => void;
+  onFavoriteOnlyChange: (value: boolean) => void;
+  onCompactToggle: () => void;
   onClearFilters: () => void;
   hasActiveFilters: boolean;
 };
@@ -27,9 +31,13 @@ export const PipelineToolbar = ({
   search,
   sortBy,
   sortDirection,
+  isFavoriteOnly,
+  isCompact,
   onSearchChange,
   onSortByChange,
   onSortDirectionChange,
+  onFavoriteOnlyChange,
+  onCompactToggle,
   onClearFilters,
   hasActiveFilters,
 }: PipelineToolbarProps) => (
@@ -39,7 +47,7 @@ export const PipelineToolbar = ({
       <Input
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
-        placeholder="Buscar empresa, cargo ou tecnologia"
+        placeholder="Buscar vaga, empresa, tecnologia, recrutador…"
         className="pl-9"
         aria-label="Buscar no pipeline"
       />
@@ -52,9 +60,12 @@ export const PipelineToolbar = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="updated">Última atualização</SelectItem>
-          <SelectItem value="recent">Mais recentes</SelectItem>
-          <SelectItem value="match">Maior match</SelectItem>
+          <SelectItem value="recent">Data de cadastro</SelectItem>
+          <SelectItem value="match">Match</SelectItem>
           <SelectItem value="company">Empresa</SelectItem>
+          <SelectItem value="favorite">Favoritos</SelectItem>
+          <SelectItem value="priority">Prioridade</SelectItem>
+          <SelectItem value="salary">Salário</SelectItem>
         </SelectContent>
       </Select>
 
@@ -67,6 +78,28 @@ export const PipelineToolbar = ({
           <SelectItem value="asc">Asc</SelectItem>
         </SelectContent>
       </Select>
+
+      <Button
+        type="button"
+        variant={isFavoriteOnly ? "default" : "outline"}
+        size="sm"
+        onClick={() => onFavoriteOnlyChange(!isFavoriteOnly)}
+        aria-pressed={isFavoriteOnly}
+      >
+        Só favoritos
+      </Button>
+
+      <Button
+        type="button"
+        variant={isCompact ? "default" : "outline"}
+        size="sm"
+        onClick={onCompactToggle}
+        aria-pressed={isCompact}
+        className="gap-1.5"
+      >
+        <LayoutList className="h-4 w-4" />
+        Compacta
+      </Button>
 
       {hasActiveFilters ? (
         <Button type="button" variant="outline" size="sm" onClick={onClearFilters}>

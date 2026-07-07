@@ -80,10 +80,10 @@ export const applicationsHandlers = [
 
     if (payload.stage && payload.stage !== previousStage) {
       updated.timeline = [
-        ...updated.timeline,
+        ...(updated.timeline ?? []),
         createTimelineEvent({
           applicationId: updated.id,
-          index: updated.timeline.length + 1,
+          index: (updated.timeline ?? []).length + 1,
           type: "stage_changed",
           title: `Avançou para ${PIPELINE_STAGE_LABELS[payload.stage]}`,
           occurredAt: new Date().toISOString(),

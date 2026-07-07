@@ -5,14 +5,22 @@ import { CSS } from "@dnd-kit/utilities";
 import { useState } from "react";
 
 import { ChangeStageSheet } from "@/features/tracking/components/ChangeStageSheet";
+import { cn } from "@/lib/utils";
 import type { Application, PipelineStage } from "@/types";
 
+import { PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
+import type { PipelineDensity } from "../../hooks/use-pipeline-density";
 import { PipelineApplicationCard, type PipelineApplicationCardProps } from "../PipelineApplicationCard";
 
-type PipelineDraggableCardProps = Omit<PipelineApplicationCardProps, "isDragging" | "onChangeStage"> & {
+type PipelineDraggableCardProps = Omit<
+  PipelineApplicationCardProps,
+  "isDragging" | "onChangeStage" | "dragHandleProps"
+> & {
   application: Application;
   onChangeStage?: (applicationId: string, stage: PipelineStage) => void;
   enableDrag?: boolean;
+  density?: PipelineDensity;
+  isHidden?: boolean;
 };
 
 export const PipelineDraggableCard = ({
@@ -20,12 +28,14 @@ export const PipelineDraggableCard = ({
   application,
   enableDrag = true,
   onEdit,
+  density = "default",
+  isHidden = false,
   ...props
 }: PipelineDraggableCardProps) => {
   const [stageSheetOpen, setStageSheetOpen] = useState(false);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: application.id,
-    data: { type: "card", application },
+    data: { type: "card", application, stage: application.stage },
     disabled: !enableDrag,
   });
 
@@ -45,8 +55,7 @@ export const PipelineDraggableCard = ({
       <div
         ref={setNodeRef}
         style={style}
-        {...(enableDrag ? listeners : {})}
-        {...(enableDrag ? attributes : {})}
+        className={cn(PIPELINE_LAYOUT.cardWrapper, isHidden && "invisible")}
       >
         <PipelineApplicationCard
           {...props}
@@ -54,7 +63,9 @@ export const PipelineDraggableCard = ({
           onEdit={onEdit}
           isDragging={isDragging}
           enableDrag={enableDrag}
+          density={density}
           onChangeStage={onChangeStage ? handleChangeStageRequest : undefined}
+          dragHandleProps={enableDrag ? { ...listeners, ...attributes } : undefined}
         />
       </div>
 

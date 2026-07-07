@@ -6,6 +6,7 @@ import {
   Bookmark,
   ExternalLink,
   Eye,
+  GripVertical,
   MoreVertical,
   Pencil,
   RefreshCw,
@@ -13,11 +14,9 @@ import {
 } from "lucide-react";
 import { memo } from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Chip } from "@/components/ui/Chip";
 import {
   Dropdown,
   DropdownContent,
@@ -25,13 +24,13 @@ import {
   DropdownTrigger,
 } from "@/components/ui/Dropdown";
 import { FAVORITE_JOB_BADGE_CLASS, FAVORITE_JOB_SURFACE_CLASS } from "@/features/jobs/constants/jobs-constants";
-import { formatModality, getCompanyInitials } from "@/features/jobs/utils/job-formatters";
+import { formatModality } from "@/features/jobs/utils/job-formatters";
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
 import { openJobUrl } from "@/lib/jobs/open-job-url";
 import { cn } from "@/lib/utils";
 import type { Application } from "@/types";
 
-import { PIPELINE_STAGE_LABELS } from "../../constants/pipeline-columns";
+import type { PipelineDensity } from "../../hooks/use-pipeline-density";
 
 export type PipelineApplicationCardProps = {
   application: Application;
@@ -43,6 +42,8 @@ export type PipelineApplicationCardProps = {
   isDragging?: boolean;
   isPending?: boolean;
   enableDrag?: boolean;
+  density?: PipelineDensity;
+  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
 };
 
 const PipelineApplicationCardComponent = ({
@@ -55,9 +56,14 @@ const PipelineApplicationCardComponent = ({
   isDragging,
   isPending,
   enableDrag = true,
+  density = "default",
+  dragHandleProps,
 }: PipelineApplicationCardProps) => {
   const { job } = application;
   const stageUpdatedAt = application.lastStageUpdatedAt ?? application.appliedAt;
+  const isCompact = density === "compact";
+  const techNames = job.technologies.map((tech) => tech.name).join(", ");
+  const locationLine = [job.location, formatModality(job.modality)].filter(Boolean).join(" · ");
 
   const handleOpenJob = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -87,119 +93,164 @@ const PipelineApplicationCardComponent = ({
     </>
   );
 
+  const actionButtons = (
+    <div className={cn("flex shrink-0 items-center gap-0.5", isCompact ? "" : "opacity-0 transition-opacity group-hover:opacity-100")} onClick={stopPropagation}>
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="h-7 w-7 p-0"
+        onClick={() => onOpenDetails(application)}
+        aria-label="Abrir processo"
+      >
+        <Eye className="h-3.5 w-3.5" />
+      </Button>
+      {onEdit ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-7 w-7 p-0"
+          onClick={() => onEdit(application)}
+          aria-label="Editar processo"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+      ) : null}
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="h-7 w-7 p-0"
+        onClick={handleOpenJob}
+        aria-label="Abrir vaga"
+      >
+        <ExternalLink className="h-3.5 w-3.5" />
+      </Button>
+      {onChangeStage ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-7 w-7 p-0"
+          onClick={() => onChangeStage(application)}
+          aria-label="Alterar status"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+        </Button>
+      ) : null}
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="h-7 w-7 p-0"
+        onClick={() => onFavorite(application)}
+        aria-label={job.isFavorite ? "Desfavoritar" : "Favoritar"}
+      >
+        <Bookmark className={cn("h-3.5 w-3.5", job.isFavorite && "fill-current")} />
+      </Button>
+      {onDelete ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+          onClick={() => onDelete(application)}
+          aria-label="Excluir processo"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      ) : null}
+    </div>
+  );
+
   return (
     <Card
+      data-kanban-card
       className={cn(
-        "border transition-shadow",
-        enableDrag ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+        "group border transition-shadow",
+        enableDrag ? "cursor-pointer" : "cursor-pointer",
         job.isFavorite ? FAVORITE_JOB_SURFACE_CLASS : "border-border/60",
-        isDragging && "opacity-60 shadow-lg",
+        isDragging && "opacity-50 shadow-lg",
         isPending && "opacity-70",
+        isCompact ? "shadow-none" : "hover:shadow-sm",
       )}
       aria-label={`${job.title} em ${job.company.name}`}
-      onClick={enableDrag ? undefined : () => onOpenDetails(application)}
+      onClick={() => onOpenDetails(application)}
     >
-      <CardContent className="space-y-3 p-4">
-        <div className="flex items-start gap-3">
-          <Avatar className="h-10 w-10 shrink-0">
-            {job.company.logoUrl ? <AvatarImage src={job.company.logoUrl} alt={job.company.name} /> : null}
-            <AvatarFallback>{getCompanyInitials(job.company.name)}</AvatarFallback>
-          </Avatar>
+      <CardContent className={cn(isCompact ? "space-y-1.5 p-2.5" : "space-y-2 p-3")}>
+        <div className="flex items-start gap-2">
+          {enableDrag && dragHandleProps ? (
+            <button
+              type="button"
+              data-kanban-drag-handle
+              className="mt-0.5 shrink-0 cursor-grab touch-none rounded p-0.5 text-muted-foreground hover:bg-muted active:cursor-grabbing"
+              aria-label="Arrastar processo"
+              onClick={stopPropagation}
+              {...dragHandleProps}
+            >
+              <GripVertical className="h-4 w-4" />
+            </button>
+          ) : null}
+
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="break-words font-semibold text-foreground">{job.title}</p>
-              {job.isFavorite ? <Badge className={FAVORITE_JOB_BADGE_CLASS}>Favorita</Badge> : null}
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p
+                  className={cn(
+                    "font-semibold text-foreground",
+                    isCompact ? "truncate text-sm" : "line-clamp-2 text-sm leading-snug",
+                  )}
+                >
+                  {job.title}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">{job.company.name}</p>
+              </div>
+              {job.isFavorite ? (
+                <Badge className={cn(FAVORITE_JOB_BADGE_CLASS, "shrink-0 text-[10px]")}>Favorita</Badge>
+              ) : null}
             </div>
-            <p className="truncate text-sm text-muted-foreground">{job.company.name}</p>
           </div>
-          <div className="lg:hidden" onClick={stopPropagation}>
+
+          <div className="shrink-0" onClick={stopPropagation}>
+            {isCompact ? (
+              <Dropdown>
+                <DropdownTrigger asChild>
+                  <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0" aria-label="Ações do processo">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownTrigger>
+                <DropdownContent align="end">{menuItems}</DropdownContent>
+              </Dropdown>
+            ) : (
+              <div className="hidden lg:block">{actionButtons}</div>
+            )}
+          </div>
+        </div>
+
+        <div className={cn("flex items-center justify-between gap-2", isCompact && "gap-1")}>
+          <MatchScoreBadge matchScore={job.matchScore} className={isCompact ? "scale-90 origin-left" : undefined} />
+          <span className="shrink-0 text-[11px] text-muted-foreground" data-testid="pipeline-stage-updated-at">
+            {formatDistanceToNow(new Date(stageUpdatedAt), { addSuffix: true, locale: ptBR })}
+          </span>
+        </div>
+
+        {!isCompact && locationLine ? (
+          <p className="truncate text-[11px] text-muted-foreground" title={techNames || undefined}>
+            {locationLine}
+          </p>
+        ) : null}
+
+        <div className="flex items-center justify-between gap-2 lg:hidden" onClick={stopPropagation}>
+          {!isCompact ? (
             <Dropdown>
               <DropdownTrigger asChild>
-                <Button type="button" size="sm" variant="ghost" aria-label="Ações do processo">
+                <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0" aria-label="Ações do processo">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownTrigger>
               <DropdownContent align="end">{menuItems}</DropdownContent>
             </Dropdown>
-          </div>
-        </div>
-
-        <MatchScoreBadge matchScore={job.matchScore} />
-
-        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-          <span className="truncate">{job.location}</span>
-          <span>·</span>
-          <span>{formatModality(job.modality)}</span>
-        </div>
-
-        <div className="flex flex-wrap gap-1">
-          {job.technologies.slice(0, 3).map((tech) => (
-            <Chip key={tech.id}>{tech.name}</Chip>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">{PIPELINE_STAGE_LABELS[application.stage]}</Badge>
-          <span className="text-xs text-muted-foreground" data-testid="pipeline-stage-updated-at">
-            {formatDistanceToNow(new Date(stageUpdatedAt), { addSuffix: true, locale: ptBR })}
-          </span>
-        </div>
-
-        <div className="hidden flex-wrap gap-1 lg:flex" onClick={stopPropagation}>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => onOpenDetails(application)}
-            aria-label="Abrir processo"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          {onEdit ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => onEdit(application)}
-              aria-label="Editar processo"
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          ) : null}
-          <Button type="button" size="sm" variant="outline" onClick={handleOpenJob} aria-label="Abrir vaga">
-            <ExternalLink className="h-4 w-4" />
-          </Button>
-          {onChangeStage ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => onChangeStage(application)}
-              aria-label="Alterar status"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          ) : null}
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => onFavorite(application)}
-            aria-label={job.isFavorite ? "Desfavoritar" : "Favoritar"}
-          >
-            <Bookmark className={cn("h-4 w-4", job.isFavorite && "fill-current")} />
-          </Button>
-          {onDelete ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => onDelete(application)}
-              aria-label="Excluir processo"
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
           ) : null}
         </div>
       </CardContent>

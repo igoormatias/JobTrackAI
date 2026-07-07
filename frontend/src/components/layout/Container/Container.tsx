@@ -3,13 +3,14 @@ import { type HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export type ContainerProps = HTMLAttributes<HTMLDivElement> & {
-  size?: "default" | "narrow" | "wide";
+  size?: "default" | "narrow" | "wide" | "full";
 };
 
 const sizeClasses: Record<NonNullable<ContainerProps["size"]>, string> = {
   default: "max-w-6xl",
   narrow: "max-w-3xl",
   wide: "max-w-7xl",
+  full: "max-w-none",
 };
 
 export const Container = ({ size = "default", className, children, ...props }: ContainerProps) => {

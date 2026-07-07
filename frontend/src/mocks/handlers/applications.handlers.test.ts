@@ -11,7 +11,7 @@ describe("applications handlers", () => {
     );
 
     const application = list.data[0]!;
-    const timelineLength = application.timeline.length;
+    const timelineLength = (application.timeline ?? []).length;
 
     const { data } = await apiClient.patch<ApiResponse<Application>>(
       `/applications/${application.id}`,
@@ -19,6 +19,6 @@ describe("applications handlers", () => {
     );
 
     expect(data.data.stage).toBe("hr");
-    expect(data.data.timeline.length).toBe(timelineLength + 1);
+    expect((data.data.timeline ?? []).length).toBe(timelineLength + 1);
   });
 });

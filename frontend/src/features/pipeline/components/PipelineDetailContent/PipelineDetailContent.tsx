@@ -16,7 +16,7 @@ export type PipelineDetailContentProps = {
 };
 
 export const PipelineDetailContent = ({ application }: PipelineDetailContentProps) => {
-  const { data: timeline = application.timeline } = useApplicationTimelineQuery(application.id);
+  const { data: timeline = application.timeline ?? [] } = useApplicationTimelineQuery(application.id);
   const { job } = application;
 
   return (

@@ -140,9 +140,9 @@ export const moveApplicationStage = (id: string, stage: PipelineStage): Applicat
     updatedAt: new Date().toISOString(),
     lastStageUpdatedAt: new Date().toISOString(),
     timeline: [
-      ...current.timeline,
+      ...(current.timeline ?? []),
       {
-        id: `timeline_${id}_${current.timeline.length + 1}`,
+        id: `timeline_${id}_${(current.timeline ?? []).length + 1}`,
         applicationId: id,
         type: "stage_changed",
         title: `Avançou para ${PIPELINE_STAGE_LABELS[stage]}`,

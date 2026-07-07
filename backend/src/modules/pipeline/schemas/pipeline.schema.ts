@@ -15,7 +15,7 @@ export const pipelineListQuerySchema = z.object({
     .enum(["true", "false"])
     .optional()
     .transform((value) => (value === undefined ? undefined : value === "true")),
-  sortBy: z.enum(["recent", "match", "company", "updated"]).optional(),
+  sortBy: z.enum(["recent", "match", "company", "updated", "favorite", "priority", "salary"]).optional(),
   sortDirection: z.enum(["asc", "desc"]).optional(),
 });
 

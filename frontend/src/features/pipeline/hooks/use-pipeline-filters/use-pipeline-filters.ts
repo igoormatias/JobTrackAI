@@ -27,7 +27,7 @@ const stageValues = [
   "rejected",
 ] as const;
 
-const sortValues = ["recent", "match", "company", "updated"] as const;
+const sortValues = ["recent", "match", "company", "updated", "favorite", "priority", "salary"] as const;
 const dirValues = ["asc", "desc"] as const;
 
 const pipelineFiltersParsers = {

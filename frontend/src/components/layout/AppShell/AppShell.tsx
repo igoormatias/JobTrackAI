@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { type ReactNode } from "react";
 
 import { Container } from "@/components/layout/Container";
+import { useContainerSize } from "@/components/layout/ContainerSizeContext";
 import { AppHeader } from "@/components/navigation/AppHeader";
 import { BottomNav } from "@/components/navigation/BottomNav";
 import { Sidebar } from "@/components/navigation/Sidebar";
@@ -19,6 +20,7 @@ export type AppShellProps = {
 
 export const AppShell = ({ children, headerTitle, className }: AppShellProps) => {
   const reducedMotion = useReducedMotion();
+  const containerSize = useContainerSize();
 
   return (
     <div className={cn("flex min-h-screen bg-background", className)}>
@@ -28,10 +30,12 @@ export const AppShell = ({ children, headerTitle, className }: AppShellProps) =>
         <AppHeader title={headerTitle} />
 
         <motion.main
-          className="min-w-0 flex-1 pb-20 lg:pb-6"
+          className="flex min-h-0 min-w-0 flex-1 flex-col pb-20 lg:pb-6"
           {...(reducedMotion ? {} : pageTransition)}
         >
-          <Container className="py-6">{children}</Container>
+          <Container size={containerSize} className="flex min-h-0 flex-1 flex-col py-6">
+            {children}
+          </Container>
         </motion.main>
       </div>
 

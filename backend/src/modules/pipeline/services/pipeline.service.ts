@@ -15,7 +15,7 @@ import type {
   TimelineEvent,
 } from "../types/pipeline.types.js";
 
-const toApplication = (tracking: JobTrackingEntity): Application => ({
+const toApplicationSummary = (tracking: JobTrackingEntity): Application => ({
   id: tracking.id,
   jobId: tracking.jobId,
   companyId: tracking.companyId,
@@ -48,6 +48,13 @@ const toApplication = (tracking: JobTrackingEntity): Application => ({
     isFavorite: tracking.isFavorite,
     updatedAt: tracking.job.updatedAt,
   },
+  appliedAt: tracking.lastStageUpdatedAt ?? tracking.createdAt,
+  updatedAt: tracking.updatedAt,
+  lastStageUpdatedAt: tracking.lastStageUpdatedAt ?? undefined,
+});
+
+const toApplication = (tracking: JobTrackingEntity): Application => ({
+  ...toApplicationSummary(tracking),
   timeline: tracking.timeline.map((event) => ({
     id: event.id,
     applicationId: tracking.id,
@@ -56,9 +63,6 @@ const toApplication = (tracking: JobTrackingEntity): Application => ({
     occurredAt: event.occurredAt,
     metadata: event.metadata,
   })) as TimelineEvent[],
-  appliedAt: tracking.lastStageUpdatedAt ?? tracking.createdAt,
-  updatedAt: tracking.updatedAt,
-  lastStageUpdatedAt: tracking.lastStageUpdatedAt ?? undefined,
 });
 
 const buildKpis = (applications: Application[]): PipelineKpis => {
@@ -105,12 +109,14 @@ export class PipelineService {
       companyId: params.companyId,
       stage: params.stage,
       area: params.area,
+      technology: params.technology,
+      matchMin: params.matchMin,
       isFavorite: params.isFavorite,
       sortBy: params.sortBy,
       sortDirection: params.sortDirection,
     });
 
-    const applications = trackings.map(toApplication);
+    const applications = trackings.map(toApplicationSummary);
 
     return {
       columns: buildColumns(applications),
@@ -131,12 +137,12 @@ export class PipelineService {
 
   async favoriteApplication(userId: string, id: string): Promise<Application> {
     const updated = await trackingService.toggleFavorite(userId, id);
-    return toApplication(updated);
+    return toApplicationSummary(updated);
   }
 
   async archiveApplication(userId: string, id: string): Promise<Application> {
     const updated = await trackingService.archive(userId, id);
-    return toApplication(updated);
+    return toApplicationSummary(updated);
   }
 
   async deleteApplication(userId: string, id: string): Promise<void> {

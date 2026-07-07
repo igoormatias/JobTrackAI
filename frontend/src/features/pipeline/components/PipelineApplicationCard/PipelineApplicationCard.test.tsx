@@ -49,12 +49,13 @@ describe("PipelineApplicationCard", () => {
         application={baseApplication}
         onOpenDetails={vi.fn()}
         onFavorite={vi.fn()}
+        dragHandleProps={{}}
       />,
     );
 
     expect(screen.getByText("Frontend Engineer")).toBeInTheDocument();
     expect(screen.getByText("Nubank")).toBeInTheDocument();
-    expect(screen.getByLabelText("Abrir processo")).toBeInTheDocument();
+    expect(screen.getByLabelText("Arrastar processo")).toBeInTheDocument();
   });
 
   it("applies favorite surface styles when job is favorited", () => {

@@ -59,7 +59,6 @@ export const updateProcessSchema = z.object({
   priority: z.enum(JOB_PRIORITIES).optional(),
   isFavorite: z.boolean().optional(),
   recruiterName: z.string().nullable().optional(),
-  recruiterRole: z.string().nullable().optional(),
   recruiterEmail: z.union([z.string().email(), z.literal(""), z.null()]).optional(),
   recruiterPhone: z.string().nullable().optional(),
   recruiterLinkedin: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
@@ -84,7 +83,7 @@ export const trackingListQuerySchema = z.object({
   isFavorite: z.coerce.boolean().optional(),
   priority: z.enum(JOB_PRIORITIES).optional(),
   visibility: z.enum(["VISIBLE", "HIDDEN", "all"]).optional(),
-  sortBy: z.enum(["recent", "match", "company", "updated", "priority", "salary"]).optional(),
+  sortBy: z.enum(["recent", "match", "company", "updated", "priority", "salary", "favorite"]).optional(),
   sortDirection: z.enum(["asc", "desc"]).optional(),
 });
 

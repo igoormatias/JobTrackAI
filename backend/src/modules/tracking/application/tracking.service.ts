@@ -1,6 +1,6 @@
 import type { JobPriority } from "../../../shared/domain/job-priority.js";
 import type { JobVisibility } from "../../../shared/domain/job-visibility.js";
-import type { PipelineStage } from "../../../shared/domain/pipeline-stage.js";
+import { PIPELINE_STAGE_LABELS, type PipelineStage } from "../../../shared/domain/pipeline-stage.js";
 import { NotFoundError } from "../../../shared/errors/not-found-error.js";
 import type {
   CreateTrackingInput,
@@ -26,10 +26,12 @@ export type TrackingListParams = {
   stage?: PipelineStage;
   area?: string;
   source?: string;
+  technology?: string;
+  matchMin?: number;
   isFavorite?: boolean;
   priority?: JobPriority;
   visibility?: JobVisibility | "all";
-  sortBy?: "recent" | "match" | "company" | "updated" | "priority" | "salary";
+  sortBy?: "recent" | "match" | "company" | "updated" | "priority" | "salary" | "favorite";
   sortDirection?: "asc" | "desc";
 };
 
@@ -77,21 +79,41 @@ export class TrackingService {
     return this.applyListFilters(result, params);
   }
 
+  private matchesSearch(item: JobTrackingEntity, query: string): boolean {
+    const haystacks = [
+      item.job.title,
+      item.job.company.name,
+      item.notes ?? "",
+      item.feedback ?? "",
+      item.recruiterName ?? "",
+      item.recruiterEmail ?? "",
+      PIPELINE_STAGE_LABELS[item.stage],
+      ...item.job.technologies.map((tech) => tech.name),
+    ];
+
+    return haystacks.some((value) => value.toLowerCase().includes(query));
+  }
+
   private applyListFilters(result: JobTrackingEntity[], params: TrackingListParams): JobTrackingEntity[] {
-    const query = params.q?.toLowerCase();
+    const query = params.q?.toLowerCase().trim();
 
     if (query) {
-      result = result.filter(
-        (item) =>
-          item.job.title.toLowerCase().includes(query) ||
-          item.job.company.name.toLowerCase().includes(query),
-      );
+      result = result.filter((item) => this.matchesSearch(item, query));
     }
 
     if (params.companyId) result = result.filter((item) => item.companyId === params.companyId);
     if (params.stage) result = result.filter((item) => item.stage === params.stage);
     if (params.area) result = result.filter((item) => item.job.area === params.area);
     if (params.source) result = result.filter((item) => item.job.source === params.source);
+    if (params.technology) {
+      const technology = params.technology.toLowerCase();
+      result = result.filter((item) =>
+        item.job.technologies.some((tech) => tech.name.toLowerCase().includes(technology)),
+      );
+    }
+    if (params.matchMin !== undefined) {
+      result = result.filter((item) => item.job.matchScore.score >= params.matchMin!);
+    }
     if (params.isFavorite !== undefined) {
       result = result.filter((item) => item.isFavorite === params.isFavorite);
     }
@@ -112,6 +134,17 @@ export class TrackingService {
         case "priority": {
           const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
           return (order[a.priority] - order[b.priority]) * direction;
+        }
+        case "salary": {
+          const salaryA = a.job.salaryMax ?? a.job.salaryMin ?? 0;
+          const salaryB = b.job.salaryMax ?? b.job.salaryMin ?? 0;
+          return (salaryA - salaryB) * direction;
+        }
+        case "favorite": {
+          if (a.isFavorite !== b.isFavorite) {
+            return Number(b.isFavorite) - Number(a.isFavorite);
+          }
+          return (new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) * direction;
         }
         case "recent":
           return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * direction;

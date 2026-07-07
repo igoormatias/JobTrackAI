@@ -39,7 +39,6 @@ export type MoveTrackingStagePayload = {
 export type TrackingDetail = JobTracking & {
   feedback: string | null;
   recruiterName: string | null;
-  recruiterRole: string | null;
   recruiterEmail: string | null;
   recruiterPhone: string | null;
   recruiterLinkedin: string | null;
@@ -60,7 +59,6 @@ export type UpdateProcessPayload = {
   priority?: JobPriority;
   isFavorite?: boolean;
   recruiterName?: string | null;
-  recruiterRole?: string | null;
   recruiterEmail?: string | null;
   recruiterPhone?: string | null;
   recruiterLinkedin?: string | null;

@@ -55,24 +55,31 @@ export const PipelinePage = () => {
 
   return (
     <div className={PIPELINE_LAYOUT.page}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Pipeline de carreira</h1>
-          <p className="text-sm text-muted-foreground">Acompanhe toda a sua jornada de candidaturas</p>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button type="button" variant="outline" onClick={() => setImportModalOpen(true)}>
-            <Link2 className="size-4" aria-hidden />
-            Importar por URL
-          </Button>
-          <Button type="button" onClick={() => setManualModalOpen(true)}>
-            Adicionar Processo
-          </Button>
+      <div className={PIPELINE_LAYOUT.pageHeader}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Pipeline de carreira</h1>
+            <p className="text-sm text-muted-foreground">Acompanhe toda a sua jornada de candidaturas</p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button type="button" variant="outline" onClick={() => setImportModalOpen(true)}>
+              <Link2 className="size-4" aria-hidden />
+              Importar por URL
+            </Button>
+            <Button type="button" onClick={() => setManualModalOpen(true)}>
+              Adicionar Processo
+            </Button>
+          </div>
         </div>
       </div>
 
-      {data ? <PipelineKpisWidget kpis={data.kpis} /> : null}
-      <PipelineToolbarWidget />
+      <div className={PIPELINE_LAYOUT.pageHeader}>
+        {data ? <PipelineKpisWidget kpis={data.kpis} /> : null}
+        <div className="mt-6">
+          <PipelineToolbarWidget />
+        </div>
+      </div>
+
       <PipelineBoardWidget
         data={data as PipelineData}
         onOpenDetails={openDetails}

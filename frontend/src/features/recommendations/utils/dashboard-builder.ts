@@ -141,7 +141,7 @@ const buildRecentActivities = (
 
   const statusActivities: DashboardActivity[] = applications
     .flatMap((app, appIndex) =>
-      app.timeline.slice(-1).map((event, eventIndex) => ({
+      (app.timeline ?? []).slice(-1).map((event, eventIndex) => ({
         id: `activity_status_${appIndex}_${eventIndex}`,
         type: "status_change" as const,
         title: "Status alterado",

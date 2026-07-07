@@ -13,7 +13,7 @@ import { PipelineBoardSkeleton } from "../../components/PipelineBoardSkeleton";
 import { PipelineColumnNav } from "../../components/PipelineColumnNav";
 import { PipelineEmptyState } from "../../components/PipelineEmptyState";
 import { PipelineKanbanBoard } from "../../components/PipelineKanbanBoard";
-import { PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
+import { usePipelineDensity } from "../../hooks/use-pipeline-density";
 import {
   useDeleteApplicationMutation,
   useFavoriteApplicationMutation,
@@ -35,6 +35,7 @@ export const PipelineBoardWidget = ({
   data: dataProp,
 }: PipelineBoardWidgetProps) => {
   const { listParams } = usePipelineFilters();
+  const { density } = usePipelineDensity();
   const { data: queryData, isLoading: isQueryLoading } = usePipelineQuery(listParams, {
     enabled: dataProp === undefined,
   });
@@ -106,49 +107,38 @@ export const PipelineBoardWidget = ({
     return <PipelineEmptyState variant="all" />;
   }
 
+  const boardProps = {
+    columns: data.columns,
+    onMove: handleMove,
+    onOpenDetails,
+    onEdit,
+    onFavorite: handleFavorite,
+    onDelete: handleDeleteRequest,
+    isMovePending: moveMutation.isPending,
+    density,
+  };
+
   return (
-    <div className={PIPELINE_LAYOUT.page}>
-      <PipelineColumnNav
-        activeStage={mobileStage}
-        counts={columnCounts}
-        onChange={setMobileStage}
-      />
-
-      {showMobileStageHint ? (
-        <p className="text-sm text-muted-foreground lg:hidden">
-          Exibindo {visibleMobileCount} de {data.totalApplications} processos nesta etapa. Use as abas acima
-          para ver os demais.
-        </p>
-      ) : null}
-
-      <p className="hidden text-xs text-muted-foreground lg:block">
-        Role horizontalmente para ver todas as etapas do pipeline.
-      </p>
-
+    <>
       <div className="lg:hidden">
-        <PipelineKanbanBoard
-          columns={data.columns}
-          onMove={handleMove}
-          onOpenDetails={onOpenDetails}
-          onEdit={onEdit}
-          onFavorite={handleFavorite}
-          onDelete={handleDeleteRequest}
-          isMovePending={moveMutation.isPending}
-          visibleStage={mobileStage}
-          mobile
+        <PipelineColumnNav
+          activeStage={mobileStage}
+          counts={columnCounts}
+          onChange={setMobileStage}
         />
+
+        {showMobileStageHint ? (
+          <p className="px-3 text-sm text-muted-foreground">
+            Exibindo {visibleMobileCount} de {data.totalApplications} processos nesta etapa. Use as abas acima
+            para ver os demais.
+          </p>
+        ) : null}
+
+        <PipelineKanbanBoard {...boardProps} visibleStage={mobileStage} mobile />
       </div>
 
-      <div className="hidden lg:block">
-        <PipelineKanbanBoard
-          columns={data.columns}
-          onMove={handleMove}
-          onOpenDetails={onOpenDetails}
-          onEdit={onEdit}
-          onFavorite={handleFavorite}
-          onDelete={handleDeleteRequest}
-          isMovePending={moveMutation.isPending}
-        />
+      <div className="hidden min-h-0 flex-1 lg:flex">
+        <PipelineKanbanBoard {...boardProps} />
       </div>
 
       <DeleteProcessDialog
@@ -169,6 +159,6 @@ export const PipelineBoardWidget = ({
         onConfirm={confirmMove}
         isPending={moveMutation.isPending}
       />
-    </div>
+    </>
   );
 };

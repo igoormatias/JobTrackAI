@@ -57,7 +57,6 @@ export type JobTrackingEntity = {
   notes: string | null;
   feedback: string | null;
   recruiterName: string | null;
-  recruiterRole: string | null;
   recruiterEmail: string | null;
   recruiterPhone: string | null;
   recruiterLinkedin: string | null;
@@ -114,7 +113,6 @@ export type UpdateProcessInput = {
   priority?: JobPriority;
   isFavorite?: boolean;
   recruiterName?: string | null;
-  recruiterRole?: string | null;
   recruiterEmail?: string | null;
   recruiterPhone?: string | null;
   recruiterLinkedin?: string | null;

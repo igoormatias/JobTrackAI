@@ -5,17 +5,24 @@ import {
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
-  closestCorners,
+  closestCenter,
+  pointerWithin,
   useSensor,
   useSensors,
+  type CollisionDetection,
   type DragEndEvent,
+  type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { Application, PipelineColumn, PipelineStage } from "@/types";
 
+import { cn } from "@/lib/utils";
+
 import { PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
+import type { PipelineDensity } from "../../hooks/use-pipeline-density";
+import { PipelineBoardShell } from "../PipelineBoardShell";
 import { PipelineApplicationCard } from "../PipelineApplicationCard";
 import { PipelineKanbanColumn } from "../PipelineKanbanColumn";
 
@@ -29,6 +36,17 @@ export type PipelineKanbanBoardProps = {
   isMovePending?: boolean;
   visibleStage?: PipelineStage | null;
   mobile?: boolean;
+  density?: PipelineDensity;
+};
+
+const columnCollision: CollisionDetection = (args) => {
+  const pointerCollisions = pointerWithin(args).filter((collision) => {
+    const data = collision.data?.droppableContainer?.data?.current as { type?: string } | undefined;
+    return data?.type === "column";
+  });
+
+  if (pointerCollisions.length > 0) return pointerCollisions;
+  return closestCenter(args);
 };
 
 export const PipelineKanbanBoard = ({
@@ -41,11 +59,12 @@ export const PipelineKanbanBoard = ({
   isMovePending,
   visibleStage,
   mobile,
+  density = "default",
 }: PipelineKanbanBoardProps) => {
   const [activeApplication, setActiveApplication] = useState<Application | null>(null);
   const enableDrag = !mobile;
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 12 } }),
     useSensor(KeyboardSensor),
   );
 
@@ -58,6 +77,10 @@ export const PipelineKanbanBoard = ({
       .flatMap((column) => column.applications)
       .find((item) => item.id === event.active.id);
     setActiveApplication(application ?? null);
+  };
+
+  const handleDragOver = (_event: DragOverEvent) => {
+    // Column highlight handled by useDroppable isOver per column
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -80,6 +103,10 @@ export const PipelineKanbanBoard = ({
     onMove(applicationId, targetStage);
   };
 
+  const handleDragCancel = useCallback(() => {
+    setActiveApplication(null);
+  }, []);
+
   const columnNodes = displayColumns.map((column) => (
     <PipelineKanbanColumn
       key={column.stage}
@@ -90,15 +117,25 @@ export const PipelineKanbanBoard = ({
       onDelete={onDelete}
       onChangeStage={mobile ? onMove : undefined}
       activeCardId={activeApplication?.id}
-      className={mobile ? "w-full" : undefined}
+      placeholderApplicationId={activeApplication?.id ?? null}
+      className={mobile ? "w-full border-0 bg-transparent" : undefined}
       enableDrag={enableDrag}
+      density={density}
+      isDragging={Boolean(activeApplication)}
     />
   ));
+
+  const boardHint = (
+    <p className={cn(PIPELINE_LAYOUT.boardHint, mobile ? "px-1" : "hidden lg:block")}>
+      Shift + rolagem, botão central do mouse ou arraste na área vazia para navegar horizontalmente.
+    </p>
+  );
 
   if (!enableDrag) {
     return (
       <div className={PIPELINE_LAYOUT.mobileColumn} aria-live="polite">
         {columnNodes}
+        {boardHint}
       </div>
     );
   }
@@ -106,25 +143,31 @@ export const PipelineKanbanBoard = ({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={columnCollision}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
     >
-      <div className={PIPELINE_LAYOUT.board} aria-live="polite">
+      <PipelineBoardShell isDragging={Boolean(activeApplication)} hint={boardHint}>
         {columnNodes}
-      </div>
+      </PipelineBoardShell>
 
-      <DragOverlay>
+      <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.18, 0.67, 0.6, 1)" }}>
         {activeApplication ? (
-          <PipelineApplicationCard
-            application={activeApplication}
-            onOpenDetails={onOpenDetails}
-            onEdit={onEdit}
-            onFavorite={onFavorite}
-            onDelete={onDelete}
-            isDragging
-            isPending={isMovePending}
-          />
+          <div className="w-[clamp(380px,22vw,420px)] rotate-2">
+            <PipelineApplicationCard
+              application={activeApplication}
+              onOpenDetails={onOpenDetails}
+              onEdit={onEdit}
+              onFavorite={onFavorite}
+              onDelete={onDelete}
+              isDragging
+              isPending={isMovePending}
+              density={density}
+              enableDrag
+            />
+          </div>
         ) : null}
       </DragOverlay>
     </DndContext>

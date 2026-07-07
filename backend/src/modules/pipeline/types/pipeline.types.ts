@@ -49,7 +49,7 @@ export type Application = {
   nextStep: string | null;
   nextInterviewAt: string | null;
   job: PipelineApplicationJob;
-  timeline: TimelineEvent[];
+  timeline?: TimelineEvent[];
   appliedAt: string;
   updatedAt: string;
   lastStageUpdatedAt?: string;
@@ -85,6 +85,6 @@ export type PipelineListParams = {
   technology?: string;
   matchMin?: number;
   isFavorite?: boolean;
-  sortBy?: "recent" | "match" | "company" | "updated";
+  sortBy?: "recent" | "match" | "company" | "updated" | "favorite" | "priority" | "salary";
   sortDirection?: "asc" | "desc";
 };

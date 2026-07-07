@@ -79,7 +79,6 @@ export const mapTrackingToEntity = (
     notes: tracking.notes,
     feedback: tracking.feedback,
     recruiterName: tracking.recruiterName,
-    recruiterRole: tracking.recruiterRole,
     recruiterEmail: tracking.recruiterEmail,
     recruiterPhone: tracking.recruiterPhone,
     recruiterLinkedin: tracking.recruiterLinkedin,

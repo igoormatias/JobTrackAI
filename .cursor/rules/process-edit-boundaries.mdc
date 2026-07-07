@@ -17,7 +17,7 @@ alwaysApply: false
 
 - `notes`, `feedback`
 - `priority`, `isFavorite`
-- `recruiterName`, `recruiterEmail`, `recruiterPhone`
+- `recruiterName`, `recruiterEmail`, `recruiterPhone`, `recruiterLinkedin`
 - `negotiatedSalary`, `processLinks`
 
 Timeline automática para `notes`, `priority`, `isFavorite`.

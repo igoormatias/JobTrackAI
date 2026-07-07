@@ -24,7 +24,7 @@ describe("buildFixtureStore", () => {
     store.applications.forEach((application) => {
       expect(jobIds.has(application.jobId)).toBe(true);
       expect(companyIds.has(application.companyId)).toBe(true);
-      expect(application.timeline.length).toBeGreaterThan(0);
+      expect((application.timeline ?? []).length).toBeGreaterThan(0);
     });
   });
 

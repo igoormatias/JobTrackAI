@@ -31,6 +31,6 @@ describe("pipeline handlers", () => {
       `/pipeline/${application.id}/timeline`,
     );
 
-    expect(data.data.length).toBeGreaterThan(0);
+    expect((data.data ?? []).length).toBeGreaterThan(0);
   });
 });

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { invalidateCareerSurfaces } from "@/lib/query-client/invalidate-career-surfaces";
 import { queryKeys } from "@/lib/query-client/query-keys";
-import type { JobPriority, JobVisibility, PipelineStage } from "@/types";
+import type { JobPriority, JobVisibility, PipelineData, PipelineStage } from "@/types";
 
 import {
   createTracking,
@@ -19,6 +19,7 @@ import {
   type CreateTrackingFromJobPayload,
   type UpdateProcessPayload,
 } from "../../services/tracking-service";
+import { moveApplicationInPipelineData } from "@/features/pipeline/utils/optimistic-pipeline-move";
 
 const invalidateNotifications = (queryClient: ReturnType<typeof useQueryClient>): void => {
   void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
@@ -51,6 +52,25 @@ export const useMoveTrackingStageMutation = () => {
   return useMutation({
     mutationFn: ({ id, stage, occurredAt }: { id: string; stage: PipelineStage; occurredAt: string }) =>
       moveTrackingStage(id, { stage, occurredAt }),
+    onMutate: async ({ id, stage }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.pipeline.all });
+
+      const previousEntries = queryClient.getQueriesData<PipelineData>({
+        queryKey: queryKeys.pipeline.boards(),
+      });
+
+      for (const [queryKey, data] of previousEntries) {
+        if (!data) continue;
+        queryClient.setQueryData(queryKey, moveApplicationInPipelineData(data, id, stage));
+      }
+
+      return { previousEntries };
+    },
+    onError: (_error, _variables, context) => {
+      context?.previousEntries.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+    },
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.pipeline.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.tracking.all });
