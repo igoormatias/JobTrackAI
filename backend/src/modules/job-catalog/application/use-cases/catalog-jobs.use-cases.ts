@@ -7,17 +7,25 @@ import { loadMatchProfileForUser } from "../mappers/match-profile.mapper.js";
 
 export { loadMatchProfileForUser };
 
-const toCatalogFilters = (userId: string, params: JobListParams, profile: Awaited<ReturnType<typeof loadMatchProfileForUser>>): CatalogListFilters => ({
-  userId,
-  profile,
-  ...params,
-  strictProfileMatch:
-    params.strictProfileMatch === true ||
-    params.suggested === true ||
-    params.matchMin !== undefined ||
-    Boolean(params.areas?.length) ||
-    Boolean(params.skills?.length),
-});
+const toCatalogFilters = (
+  userId: string,
+  params: JobListParams,
+  profile: Awaited<ReturnType<typeof loadMatchProfileForUser>>,
+): CatalogListFilters => {
+  const hasExplicitAreas = Boolean(params.areas?.length);
+  const curatedByProfile =
+    params.suggested === true && !hasExplicitAreas && Boolean(profile?.area);
+
+  const { strictProfileMatch: _strict, matchMin: _matchMin, ...rest } = params;
+
+  return {
+    userId,
+    profile,
+    ...rest,
+    areas: hasExplicitAreas ? params.areas : curatedByProfile ? [profile!.area!] : undefined,
+    suggested: params.suggested,
+  };
+};
 
 export class ListCatalogJobsUseCase implements UseCase<{ userId: string; params: JobListParams }, JobListResult> {
   constructor(private readonly catalogRepository: JobCatalogRepository = prismaJobCatalogRepository) {}

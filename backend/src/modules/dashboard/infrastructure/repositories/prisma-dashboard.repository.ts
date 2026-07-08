@@ -308,7 +308,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
         // Discovery recommendations — larger pool; area filtered in memory via match engine
         where: { isCatalog: true, status: "active" },
         orderBy: { publishedAt: "desc" },
-        take: 200,
+        take: 500,
       }),
       prisma.profile.findUnique({ where: { userId } }),
       prisma.job.count({ where: { isCatalog: true } }),

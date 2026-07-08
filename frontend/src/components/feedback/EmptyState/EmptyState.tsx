@@ -21,7 +21,7 @@ export const EmptyState = ({
   return (
     <div
       className={cn(
-        "flex w-full min-w-0 flex-col items-center gap-4 px-4 py-12 text-center",
+        "flex w-full min-w-[min(100%,20rem)] flex-col items-stretch gap-4 px-4 py-12 text-center sm:items-center",
         className,
       )}
     >
@@ -30,17 +30,13 @@ export const EmptyState = ({
           <Icon className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
         </div>
       ) : null}
-      <div className="mx-auto w-full min-w-0 max-w-md space-y-2 overflow-hidden">
-        <h3 className="break-words text-lg font-semibold text-foreground [overflow-wrap:anywhere]">
-          {title}
-        </h3>
+      <div className="mx-auto w-full min-w-[min(100%,18rem)] max-w-md space-y-2">
+        <h3 className="break-words text-lg font-semibold text-foreground">{title}</h3>
         {description ? (
-          <p className="break-words text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
-            {description}
-          </p>
+          <p className="break-words text-sm leading-relaxed text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      {action ? <div className="mx-auto flex flex-wrap justify-center gap-2">{action}</div> : null}
+      {action ? <div className="mx-auto flex w-full max-w-md flex-wrap justify-center gap-2">{action}</div> : null}
     </div>
   );
 };

@@ -47,7 +47,7 @@ export const toCatalogUpsertInput = (job: NormalizedJob): CatalogJobUpsertInput 
   return {
     companyName: job.company,
     companySlug: slugify(job.company),
-    area: job.area ?? jobTitleNormalizer.inferArea(job.title) ?? null,
+    area: job.area ?? jobTitleNormalizer.inferArea(job.title) ?? "other",
     title: job.title,
     slug: slugify(`${job.title}-${job.company}-${job.externalId}`),
     description,

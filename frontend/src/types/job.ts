@@ -59,6 +59,9 @@ export type Job = {
   status: JobStatus;
   isFavorite: boolean;
   trackingId?: string;
+  isTracked?: boolean;
+  stage?: string | null;
+  trackingStatus?: string | null;
   priority?: JobPriority;
   visibility?: JobVisibility;
   hiddenAt?: string | null;

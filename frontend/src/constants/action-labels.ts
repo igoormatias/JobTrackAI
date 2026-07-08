@@ -21,6 +21,8 @@ export const ACTION_LABELS = {
   viewCalendar: "Ver calendário",
   viewCompany: "Ver empresa",
   openProcess: "Abrir processo",
+  openPipeline: "Abrir Pipeline",
+  viewProcess: "Ver processo",
   deleteProcess: "Excluir processo",
   addToPipeline: "Iniciar processo seletivo",
   changeFavorite: "Salvar vaga",

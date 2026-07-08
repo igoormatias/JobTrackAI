@@ -39,6 +39,7 @@ export type CatalogListResultMeta = {
   hasMore: boolean;
   jobsWithSalary: number;
   salaryCoverageRatio: number;
+  filtersApplied?: Record<string, string | number | boolean | string[]>;
   queryMs?: number;
 };
 

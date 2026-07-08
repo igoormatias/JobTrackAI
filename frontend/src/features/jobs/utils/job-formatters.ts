@@ -35,3 +35,15 @@ export const formatModality = (modality: string): string => {
   };
   return labels[modality] ?? modality;
 };
+
+export const formatSeniority = (seniority: string): string => {
+  const labels: Record<string, string> = {
+    intern: "Estágio",
+    junior: "Júnior",
+    mid: "Pleno",
+    senior: "Sênior",
+    lead: "Lead",
+    staff: "Staff",
+  };
+  return labels[seniority] ?? seniority;
+};

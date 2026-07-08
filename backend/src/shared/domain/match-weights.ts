@@ -48,4 +48,4 @@ export const MATCH_WEIGHTS = MATCH_WEIGHTS_V3;
 
 export const MATCH_ENGINE_VERSION = "rules-v3" as const;
 
-export const DASHBOARD_TOP_MATCH_THRESHOLD = 60;
+export const DASHBOARD_TOP_MATCH_THRESHOLD = 70;

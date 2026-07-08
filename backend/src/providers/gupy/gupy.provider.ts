@@ -4,6 +4,11 @@ import {
   computeContentHash,
   normalizeSourceUrl,
 } from "../../modules/job-aggregation/domain/services/job-normalizer.service.js";
+import {
+  extractSectionsFromHtml,
+  normalizeGluedDescription,
+  sanitizeJobHtml,
+} from "../../shared/utils/job-html.utils.js";
 import type { JobProvider, ProviderRawResult, ProviderSearchParams } from "../job-provider.interface.js";
 import { GUPY_API_URL, GUPY_DEFAULT_LIMIT, GUPY_HEADERS } from "./gupy.constants.js";
 import type { GupyApiResponse, GupyRawJob } from "./gupy.types.js";
@@ -40,12 +45,27 @@ const mapGupyJob = (raw: GupyRawJob): NormalizedJob => {
   const publishedAt = raw.publishedDate ? new Date(raw.publishedDate) : new Date();
   const sourceUrl = resolveGupySourceUrl(raw);
   const location = [raw.city, raw.state].filter(Boolean).join(", ") || null;
+  const rawDescription = raw.description?.trim() || "";
+  const sections = rawDescription.includes("<")
+    ? extractSectionsFromHtml(rawDescription)
+    : null;
+  const description =
+    sections?.descriptionText ||
+    normalizeGluedDescription(rawDescription) ||
+    `${raw.name} na ${raw.careerPageName}`;
+  const descriptionHtml =
+    sections?.descriptionHtml ??
+    sanitizeJobHtml(rawDescription.includes("<") ? rawDescription : `<p>${description}</p>`);
 
   const job: NormalizedJob = {
     title: raw.name.trim(),
     company: raw.careerPageName.trim(),
-    description: raw.description?.trim() || `${raw.name} na ${raw.careerPageName}`,
-    technologies: raw.skills ?? [],
+    description,
+    descriptionHtml,
+    requirements: sections?.requirements ?? [],
+    responsibilities: sections?.responsibilities ?? [],
+    benefits: sections?.benefits ?? [],
+    technologies: raw.skills ?? sections?.technologies ?? [],
     modality: mapModality(raw.workplaceType),
     location,
     sourceUrl,

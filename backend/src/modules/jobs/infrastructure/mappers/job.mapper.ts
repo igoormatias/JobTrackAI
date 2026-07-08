@@ -1,6 +1,8 @@
 import type { Job as PrismaJob, JobTracking, JobView } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 
+import type { PipelineStage } from "../../../../shared/domain/pipeline-stage.js";
+import { PIPELINE_STAGE_LABELS } from "../../../../shared/domain/pipeline-stage.js";
 import type { Job, JobEngagementState, MatchScore } from "../../types/job.types.js";
 import type { MatchResultDto } from "../../../match/domain/services/match-engine.service.js";
 
@@ -28,10 +30,18 @@ export const getEngagementState = (
   tracking: JobTracking | null | undefined,
   viewed: boolean,
 ): JobEngagementState => {
-  if (tracking && tracking.stage !== "discovery") return "applied";
-  if (tracking?.isFavorite) return "favorited";
+  if (tracking) {
+    if (tracking.stage === "closed") return "rejected";
+    if (tracking.isFavorite) return "favorited";
+    return "applied";
+  }
   if (viewed) return "viewed";
   return "new";
+};
+
+export const getTrackingStatusLabel = (stage: PipelineStage | null | undefined): string | null => {
+  if (!stage) return null;
+  return PIPELINE_STAGE_LABELS[stage] ?? stage;
 };
 
 export const mapPrismaJobToDomain = (
@@ -92,6 +102,9 @@ export const mapPrismaJobToDomain = (
     status: (record.status as Job["status"]) ?? "active",
     isFavorite: tracking?.isFavorite ?? false,
     trackingId: tracking?.id,
+    isTracked: Boolean(tracking),
+    stage: (tracking?.stage as PipelineStage) ?? null,
+    trackingStatus: tracking ? getTrackingStatusLabel(tracking.stage as PipelineStage) : null,
     priority: (tracking?.priority as Job["priority"]) ?? "MEDIUM",
     visibility: (tracking?.visibility as Job["visibility"]) ?? "VISIBLE",
     hiddenAt: tracking?.hiddenAt?.toISOString() ?? null,

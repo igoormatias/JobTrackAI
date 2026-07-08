@@ -21,7 +21,7 @@ export const JobsFilterBar = ({
   onOpenAllFilters,
   showSalaryFilter = true,
 }: JobsFilterBarProps) => {
-  const { urlState, setUrlState, hasActiveFilters, clearFilters } = filters;
+  const { urlState, setUrlState, hasActiveFilters, activeFilterCount, clearFilters } = filters;
 
   return (
     <div className="hidden min-w-0 space-y-3 lg:block">
@@ -29,6 +29,11 @@ export const JobsFilterBar = ({
         <Button type="button" variant="outline" size="sm" onClick={onOpenAllFilters}>
           <SlidersHorizontal className="mr-1 h-4 w-4" />
           Todos os Filtros
+          {activeFilterCount > 0 ? (
+            <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
+              {activeFilterCount}
+            </span>
+          ) : null}
         </Button>
         {hasActiveFilters ? (
           <Button type="button" variant="ghost" size="sm" onClick={() => clearFilters({ skipProfileDefaults: true })}>

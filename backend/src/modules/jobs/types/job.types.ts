@@ -70,6 +70,9 @@ export type Job = {
   status: JobStatus;
   isFavorite: boolean;
   trackingId?: string;
+  isTracked: boolean;
+  stage?: string | null;
+  trackingStatus?: string | null;
   priority?: JobPriority;
   visibility?: JobVisibility;
   hiddenAt?: string | null;
@@ -116,6 +119,7 @@ export type CursorPaginationMeta = {
   hasMore: boolean;
   jobsWithSalary: number;
   salaryCoverageRatio: number;
+  filtersApplied?: Record<string, string | number | boolean | string[]>;
   queryMs?: number;
 };
 

@@ -527,6 +527,7 @@ export class InMemoryJobTrackingRepository {
       sourceUrl: input.job.sourceUrl ?? "",
       status: "active",
       isFavorite: false,
+      isTracked: false,
       engagementState: "new",
       matchScore: { score: 0, label: "low", reasons: [], missingSkills: [] },
       publishedAt: now,

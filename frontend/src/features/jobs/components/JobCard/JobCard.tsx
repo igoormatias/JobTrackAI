@@ -12,14 +12,21 @@ import { Chip } from "@/components/ui/Chip";
 import { ACTION_LABELS, openOriginalJobLabel } from "@/constants/action-labels";
 import { ACTION_TOOLTIPS } from "@/constants/action-tooltips";
 import { JobAvailableSources } from "@/features/jobs/components/JobAvailableSources";
+import { PIPELINE_STAGE_LABELS } from "@/features/pipeline/constants/pipeline-columns";
 import { MatchReasonsList } from "@/features/recommendations/components/MatchReasonsList";
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
 import { formatSalaryRange } from "@/features/dashboard/utils/format-salary-range";
 import { cn } from "@/lib/utils";
-import type { Job } from "@/types";
+import type { Job, PipelineStage } from "@/types";
 
 import { JOB_ENGAGEMENT_LABELS, FAVORITE_JOB_BADGE_CLASS, FAVORITE_JOB_SURFACE_CLASS } from "../../constants/jobs-constants";
-import { formatPublishedAgo, getCompanyInitials, getJobSourceLabel } from "../../utils/job-formatters";
+import {
+  formatModality,
+  formatPublishedAgo,
+  formatSeniority,
+  getCompanyInitials,
+  getJobSourceLabel,
+} from "../../utils/job-formatters";
 
 export type JobCardProps = {
   job: Job;
@@ -40,6 +47,11 @@ const engagementBorderClass: Record<Job["engagementState"], string> = {
   rejected: "border-destructive/40",
 };
 
+const getPipelineStageLabel = (stage: string | null | undefined): string => {
+  if (!stage) return "Na Pipeline";
+  return PIPELINE_STAGE_LABELS[stage as PipelineStage] ?? stage;
+};
+
 export const JobCard = memo(
   ({
     job,
@@ -52,6 +64,8 @@ export const JobCard = memo(
     className,
   }: JobCardProps) => {
     const isCompact = variant === "compact";
+    const isTracked = Boolean(job.isTracked ?? job.trackingId);
+    const pipelineHref = job.trackingId ? `/pipeline/${job.trackingId}` : "/pipeline";
 
     return (
       <Card
@@ -70,19 +84,34 @@ export const JobCard = memo(
                 ) : null}
                 <AvatarFallback>{getCompanyInitials(job.company.name)}</AvatarFallback>
               </Avatar>
-              <div className="min-w-0 space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="truncate font-semibold text-foreground">{job.title}</h3>
-                  <Badge variant="outline" className="text-xs">
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="flex flex-wrap items-start gap-2">
+                  <h3 className="line-clamp-2 font-semibold leading-snug text-foreground">{job.title}</h3>
+                  <Badge variant="outline" className="shrink-0 text-xs">
                     {JOB_ENGAGEMENT_LABELS[job.engagementState]}
                   </Badge>
                   {job.isFavorite ? (
-                    <Badge className={FAVORITE_JOB_BADGE_CLASS}>Favorita</Badge>
+                    <Badge className={cn(FAVORITE_JOB_BADGE_CLASS, "shrink-0")}>Favorita</Badge>
                   ) : null}
                 </div>
                 <p className="truncate text-sm text-muted-foreground">
-                  {job.company.name} · {job.modality} · {job.location}
+                  {job.company.name} · {job.location}
                 </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  {job.seniority ? (
+                    <Badge variant="secondary" className="text-xs">
+                      {formatSeniority(job.seniority)}
+                    </Badge>
+                  ) : null}
+                  <Badge variant="outline" className="text-xs">
+                    {formatModality(job.modality)}
+                  </Badge>
+                  {isTracked ? (
+                    <Badge variant="outline" className="border-emerald-500/40 text-xs text-emerald-700 dark:text-emerald-300">
+                      Na Pipeline · {getPipelineStageLabel(job.stage)}
+                    </Badge>
+                  ) : null}
+                </div>
                 <p className="truncate text-xs text-muted-foreground">
                   {formatSalaryRange(job.salaryMin, job.salaryMax, job.currency)} · {getJobSourceLabel(job.source)} ·{" "}
                   Publicado {formatPublishedAgo(job.publishedAt)}
@@ -110,7 +139,12 @@ export const JobCard = memo(
             </>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">{job.modality}</Badge>
+              {job.seniority ? (
+                <Badge variant="secondary" className="text-xs">
+                  {formatSeniority(job.seniority)}
+                </Badge>
+              ) : null}
+              <Badge variant="outline">{formatModality(job.modality)}</Badge>
               <span className="text-xs text-muted-foreground">
                 {formatSalaryRange(job.salaryMin, job.salaryMax, job.currency)}
               </span>
@@ -154,15 +188,23 @@ export const JobCard = memo(
               <ExternalLink className="mr-1 h-4 w-4" />
               {job.sourceUrl ? openOriginalJobLabel(job.source) : ACTION_LABELS.noOriginalJob}
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => onAddToPipeline?.(job)}
-              className="w-full sm:w-auto"
-              title={ACTION_TOOLTIPS.startProcess}
-            >
-              {ACTION_LABELS.startProcess}
-            </Button>
+            {isTracked ? (
+              <Link href={pipelineHref} className="w-full sm:w-auto">
+                <Button type="button" size="sm" className="w-full sm:w-auto">
+                  {ACTION_LABELS.viewProcess}
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => onAddToPipeline?.(job)}
+                className="w-full sm:w-auto"
+                title={ACTION_TOOLTIPS.startProcess}
+              >
+                {ACTION_LABELS.startProcess}
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

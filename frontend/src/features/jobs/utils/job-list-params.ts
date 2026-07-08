@@ -26,16 +26,10 @@ export const urlFiltersToJobListParams = (filters: JobUrlFilters): JobListParams
   salaryMin: filters.salaryMin && filters.salaryMin > 0 ? filters.salaryMin : undefined,
   salaryMax: filters.salaryMax && filters.salaryMax > 0 ? filters.salaryMax : undefined,
   skills: filters.skills,
-  matchMin: filters.matchMin,
   dateFrom: filters.dateFrom || undefined,
   dateTo: filters.dateTo || undefined,
   isFavorite: filters.isFavorite,
   suggested: filters.suggested,
-  strictProfileMatch:
-    filters.suggested === true ||
-    filters.matchMin !== undefined ||
-    Boolean(filters.areas?.length) ||
-    Boolean(filters.skills?.length),
   sources: filters.sources,
 });
 
@@ -110,22 +104,24 @@ export const serializeJobUrlSearchParams = (filters: JobUrlFilters): Record<stri
   return entries;
 };
 
+export const countActiveJobFilters = (filters: JobUrlFilters): number => {
+  let count = 0;
+  if (filters.search) count += 1;
+  if (filters.areas?.length) count += 1;
+  if (filters.companyIds?.length) count += 1;
+  if (filters.seniorities?.length) count += 1;
+  if (filters.modalities?.length) count += 1;
+  if (filters.locationScope || filters.location || filters.locationState || filters.locationCity) count += 1;
+  if ((filters.salaryMin !== undefined && filters.salaryMin > 0) || (filters.salaryMax !== undefined && filters.salaryMax > 0)) {
+    count += 1;
+  }
+  if (filters.skills?.length) count += 1;
+  if (filters.dateFrom || filters.dateTo) count += 1;
+  if (filters.isFavorite !== undefined) count += 1;
+  if (filters.sources?.length) count += 1;
+  if (filters.suggested) count += 1;
+  return count;
+};
+
 export const hasActiveJobFilters = (filters: JobUrlFilters): boolean =>
-  Boolean(
-    filters.suggested ||
-      filters.search ||
-      filters.areas?.length ||
-      filters.companyIds?.length ||
-      filters.seniorities?.length ||
-      filters.modalities?.length ||
-      filters.locationScope ||
-      filters.location ||
-      (filters.salaryMin !== undefined && filters.salaryMin > 0) ||
-      (filters.salaryMax !== undefined && filters.salaryMax > 0) ||
-      filters.skills?.length ||
-      filters.matchMin !== undefined ||
-      filters.dateFrom ||
-      filters.dateTo ||
-      filters.isFavorite !== undefined ||
-      filters.sources?.length,
-  );
+  countActiveJobFilters(filters) > 0;

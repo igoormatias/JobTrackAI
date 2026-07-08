@@ -7,6 +7,5 @@ export const useTopJobs = () =>
     limit: 10,
     sortBy: "match",
     sortDirection: "desc",
-    matchMin: 60,
-    strictProfileMatch: true,
+    suggested: true,
   });

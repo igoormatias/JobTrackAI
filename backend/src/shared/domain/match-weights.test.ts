@@ -7,8 +7,8 @@ describe("match-weights", () => {
     expect(MATCH_ENGINE_VERSION).toBe("rules-v3");
   });
 
-  it("uses dashboard threshold of 60", () => {
-    expect(DASHBOARD_TOP_MATCH_THRESHOLD).toBe(60);
+  it("uses dashboard threshold of 70", () => {
+    expect(DASHBOARD_TOP_MATCH_THRESHOLD).toBe(70);
   });
 
   it("gives skills the highest weight", () => {

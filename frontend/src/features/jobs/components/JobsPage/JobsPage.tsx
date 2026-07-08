@@ -141,7 +141,7 @@ export const JobsPage = () => {
   }
 
   return (
-    <div className={`${JOBS_LAYOUT.page} min-w-0`}>
+    <div className={`${JOBS_LAYOUT.page} w-full min-w-0`}>
       <PageHeader
         title="Explorar Vagas"
         description="Oportunidades personalizadas com base no seu perfil profissional."

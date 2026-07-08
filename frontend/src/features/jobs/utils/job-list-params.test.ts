@@ -1,45 +1,38 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  countActiveJobFilters,
   hasActiveJobFilters,
-  jobListParamsToUrlFilters,
-  parseJobUrlSearchParams,
   urlFiltersToJobListParams,
 } from "./job-list-params";
 
 describe("job-list-params", () => {
-  it("maps search URL param to API q", () => {
-    const params = urlFiltersToJobListParams({ search: "react" });
-    expect(params.q).toBe("react");
-  });
-
-  it("parses comma-separated arrays from URL", () => {
-    const filters = parseJobUrlSearchParams(
-      new URLSearchParams("search=react&areas=frontend,backend&skills=react,nextjs"),
-    );
-
-    expect(filters.search).toBe("react");
-    expect(filters.areas).toEqual(["frontend", "backend"]);
-    expect(filters.skills).toEqual(["react", "nextjs"]);
-  });
-
-  it("round-trips singular legacy params to URL filters", () => {
-    const filters = jobListParamsToUrlFilters({
-      area: "frontend",
-      companyId: "company_0001",
-      seniority: "senior",
-      modality: "remote",
+  it("does not derive strictProfileMatch from suggested filters", () => {
+    const params = urlFiltersToJobListParams({
+      suggested: true,
+      areas: ["frontend"],
+      skills: ["react"],
+      sort: "match",
+      dir: "desc",
     });
 
-    expect(filters.areas).toEqual(["frontend"]);
-    expect(filters.companyIds).toEqual(["company_0001"]);
-    expect(filters.seniorities).toEqual(["senior"]);
-    expect(filters.modalities).toEqual(["remote"]);
+    expect(params.suggested).toBe(true);
+    expect(params.areas).toEqual(["frontend"]);
+    expect(params).not.toHaveProperty("strictProfileMatch");
+    expect(params).not.toHaveProperty("matchMin");
   });
 
-  it("detects active filters", () => {
-    expect(hasActiveJobFilters({})).toBe(false);
-    expect(hasActiveJobFilters({ search: "node" })).toBe(true);
-    expect(hasActiveJobFilters({ matchMin: 80 })).toBe(true);
+  it("counts active filter categories", () => {
+    const count = countActiveJobFilters({
+      search: "react",
+      areas: ["frontend"],
+      modalities: ["remote"],
+      suggested: true,
+      sort: "recent",
+      dir: "desc",
+    });
+
+    expect(count).toBe(4);
+    expect(hasActiveJobFilters({ sort: "recent", dir: "desc" })).toBe(false);
   });
 });

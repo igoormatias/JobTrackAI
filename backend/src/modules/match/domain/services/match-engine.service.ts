@@ -273,6 +273,17 @@ export class MatchEngineService {
       ...missing.filter((name) => !COMMON_MISSING_PRIORITY.includes(name)),
     ].slice(0, 4);
 
+    if (profile.skillNames.length > 0 && skillPts < weights.skillsMax * 0.5) {
+      reasons.push({
+        id: "reason_skills_gap",
+        label:
+          prioritized.length > 0
+            ? `Competências em falta: ${prioritized.slice(0, 3).join(", ")}`
+            : "Algumas competências do perfil não aparecem na vaga",
+        matched: false,
+      });
+    }
+
     return {
       score: finalScore,
       label: getMatchLabel(finalScore),

@@ -50,6 +50,7 @@ const createJob = (index: number): Job => {
     sourceUrl: `https://gupy.com.br/vagas/${index}`,
     status: "active",
     isFavorite: index <= 3,
+    isTracked: false,
     engagementState: index <= 3 ? "favorited" : "new",
     matchScore: createMatchScore(95 - (index % 20)),
     publishedAt: now,

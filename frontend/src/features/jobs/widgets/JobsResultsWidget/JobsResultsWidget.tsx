@@ -74,7 +74,7 @@ export const JobsResultsWidget = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="w-full min-w-0 space-y-4">
       <JobsResultsHeader
         total={total}
         queryMs={queryMs}

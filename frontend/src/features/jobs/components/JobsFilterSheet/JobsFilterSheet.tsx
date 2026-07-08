@@ -27,14 +27,18 @@ export const JobsFilterSheet = ({
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
-  const { clearFilters, hasActiveFilters } = filters;
+  const { clearFilters, hasActiveFilters, activeFilterCount } = filters;
 
   return (
     <div className="lg:hidden">
       <Button type="button" variant="outline" className="w-full" onClick={() => setOpen(true)}>
         <SlidersHorizontal className="mr-2 h-4 w-4" />
         Filtros
-        {hasActiveFilters ? " (ativos)" : ""}
+        {activeFilterCount > 0 ? (
+          <span className="ml-2 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
+            {activeFilterCount}
+          </span>
+        ) : null}
       </Button>
 
       <BottomSheet

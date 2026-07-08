@@ -72,4 +72,20 @@ describe("JobCard", () => {
     expect(onFavorite).toHaveBeenCalledWith(job);
     expect(onAddToPipeline).toHaveBeenCalledWith(job);
   });
+
+  it("hides start process and shows pipeline link when tracked", () => {
+    const trackedJob = {
+      ...job,
+      isTracked: true,
+      trackingId: "tracking_1",
+      stage: "applied" as const,
+      engagementState: "applied" as const,
+    };
+
+    render(<JobCard job={trackedJob} />);
+
+    expect(screen.queryByRole("button", { name: "Iniciar processo seletivo" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Na Pipeline · Aplicada/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver processo" })).toHaveAttribute("href", "/pipeline/tracking_1");
+  });
 });

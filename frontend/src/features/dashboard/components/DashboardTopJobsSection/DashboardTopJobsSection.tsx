@@ -12,7 +12,7 @@ import type { Job } from "@/types";
 
 import { DashboardTopJobCard } from "../DashboardTopJobCard";
 
-const TOP_MATCH_THRESHOLD = 60;
+const TOP_MATCH_THRESHOLD = 70;
 
 export type DashboardTopJobsSectionProps = {
   jobs: Job[];
@@ -42,7 +42,7 @@ export const DashboardTopJobsSection = ({ jobs, isLoading = false }: DashboardTo
           <EmptyState
             icon={Briefcase}
             title="Não encontramos vagas altamente compatíveis."
-            description="Nenhuma oportunidade com Match acima de 60% no momento. Explore o catálogo ou ajuste seu perfil."
+            description="Nenhuma oportunidade com Match acima de 70% no momento. Explore o catálogo ou ajuste seu perfil."
             action={
               <Button asChild>
                 <Link href="/jobs">{ACTION_LABELS.exploreJobs}</Link>

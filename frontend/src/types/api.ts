@@ -10,6 +10,7 @@ export type CursorPaginationMeta = {
   hasMore: boolean;
   jobsWithSalary?: number;
   salaryCoverageRatio?: number;
+  filtersApplied?: Record<string, string | number | boolean | string[]>;
   queryMs?: number;
 };
 

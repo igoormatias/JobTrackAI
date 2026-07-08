@@ -4,6 +4,11 @@ import {
   computeContentHash,
   normalizeSourceUrl,
 } from "../../modules/job-aggregation/domain/services/job-normalizer.service.js";
+import {
+  extractSectionsFromHtml,
+  normalizeGluedDescription,
+  sanitizeJobHtml,
+} from "../../shared/utils/job-html.utils.js";
 import type { JobProvider, ProviderRawResult, ProviderSearchParams } from "../job-provider.interface.js";
 import { parseLinkedinSearchHtml } from "./linkedin-html.parser.js";
 import {
@@ -25,11 +30,26 @@ const mapModality = (location?: string, remoteHint?: boolean): string | null => 
 const mapLinkedinJob = (raw: LinkedinRawJob): NormalizedJob => {
   const publishedAt = raw.publishedDate ? new Date(raw.publishedDate) : new Date();
   const sourceUrl = normalizeSourceUrl(raw.sourceUrl);
+  const rawDescription = raw.description?.trim() || "";
+  const sections = rawDescription.includes("<")
+    ? extractSectionsFromHtml(rawDescription)
+    : null;
+  const description =
+    sections?.descriptionText ||
+    normalizeGluedDescription(rawDescription) ||
+    `${raw.title} na ${raw.company}`;
+  const descriptionHtml =
+    sections?.descriptionHtml ??
+    sanitizeJobHtml(rawDescription.includes("<") ? rawDescription : `<p>${description}</p>`);
 
   const job: NormalizedJob = {
     title: raw.title.trim(),
     company: raw.company.trim(),
-    description: raw.description?.trim() || `${raw.title} na ${raw.company}`,
+    description,
+    descriptionHtml,
+    requirements: sections?.requirements ?? [],
+    responsibilities: sections?.responsibilities ?? [],
+    benefits: sections?.benefits ?? [],
     technologies: [],
     seniority: null,
     modality: raw.modality ?? mapModality(raw.location),

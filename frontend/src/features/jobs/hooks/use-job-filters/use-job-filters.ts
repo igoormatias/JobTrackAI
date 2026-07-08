@@ -18,7 +18,7 @@ import {
   DEFAULT_JOB_SORT_DIRECTION,
 } from "../../constants/jobs-constants";
 import type { JobUrlFilters } from "../../types/job-url-filters";
-import { hasActiveJobFilters, urlFiltersToJobListParams } from "../../utils/job-list-params";
+import { hasActiveJobFilters, urlFiltersToJobListParams, countActiveJobFilters } from "../../utils/job-list-params";
 import {
   hasProfileDefaultFilters,
   JOBS_SKIP_PROFILE_DEFAULTS_KEY,
@@ -151,6 +151,7 @@ export const useJobFilters = () => {
     urlFilters,
     listParams,
     hasActiveFilters: hasActiveJobFilters(urlFilters),
+    activeFilterCount: countActiveJobFilters(urlFilters),
     clearFilters,
     applyProfileDefaults,
     canApplyProfileDefaults: shouldSkipProfileDefaults() && !urlState.suggested,

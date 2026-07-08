@@ -4,13 +4,11 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../../database/prisma.js";
 import { resolveSourceUrlOnSync } from "../../../../shared/utils/source-url-merge.utils.js";
 import type { JobPriority } from "../../../../shared/domain/job-priority.js";
-import {
-  isAreaCompatible,
+import {  
   matchEngineService,
   type MatchProfileInput,
   type MatchUserContext,
 } from "../../../match/domain/services/match-engine.service.js";
-import { passesStrictProfileMatch } from "../../../match/domain/services/strict-job-filter.service.js";
 import {
   buildUserJobContext,
   mapPrismaJobToDomain,
@@ -38,13 +36,9 @@ import {
   encodeCursor,
   normalizeCatalogFilters,
 } from "../query-builders/catalog-where.builder.js";
-import {
-  buildHybridRankSql,
-  buildHybridWhereSql,
-  sanitizeSearchQuery,
-} from "../query-builders/hybrid-search.sql.js";
+import { buildFiltersAppliedMeta } from "../query-builders/filters-applied.builder.js";
 
-const CATALOG_MATCH_CAP = 500;
+const MATCH_SORT_WINDOW = 300;
 
 const priorityWeight: Record<string, number> = {
   HIGH: 3,
@@ -103,169 +97,177 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
     const limit = normalized.limit ?? 20;
     const sortBy = normalized.sortBy ?? "recent";
     const sortDirection = normalized.sortDirection ?? "desc";
+    const filtersApplied = buildFiltersAppliedMeta(normalized);
 
     const trackingContext = await this.resolveTrackingFilters(normalized);
     if (trackingContext.includeJobIds && trackingContext.includeJobIds.length === 0) {
       return {
         data: [],
-        meta: { limit, total: 0, hasMore: false, nextCursor: null, ...emptySalaryMeta },
+        meta: {
+          limit,
+          total: 0,
+          hasMore: false,
+          nextCursor: null,
+          filtersApplied,
+          ...emptySalaryMeta,
+        },
       };
     }
 
     const baseWhere = buildCatalogWhere(normalized, trackingContext);
-    const queryText = sanitizeSearchQuery(normalized.q?.trim() ?? "");
-
-    // Hybrid FTS + trigram ranking when user typed a search term
-    if (queryText.length >= 2 && sortBy !== "match" && normalized.matchMin === undefined) {
-      return this.listWithHybridSearch(normalized, trackingContext, queryText, limit);
-    }
-
     const total = await prisma.job.count({ where: baseWhere });
     const salaryMeta = await this.resolveSalaryCoverageMeta(normalized, trackingContext);
 
-    if (sortBy === "match" || normalized.matchMin !== undefined) {
-      return this.listWithMatchSort(normalized, baseWhere, total, limit, salaryMeta);
+    if (sortBy === "match") {
+      return this.listWithMatchSort(
+        normalized,
+        baseWhere,
+        total,
+        limit,
+        salaryMeta,
+        filtersApplied,
+      );
     }
 
-    if (sortBy === "recent" || sortBy === "priority") {
-      return this.listWithCompositeSort(normalized, baseWhere, total, limit, sortBy, salaryMeta);
+    if (sortBy === "priority") {
+      return this.listWithPrioritySort(
+        normalized,
+        baseWhere,
+        total,
+        limit,
+        sortDirection,
+        salaryMeta,
+        filtersApplied,
+      );
     }
 
-    const cursorWhere = normalized.cursor ? buildCursorWhere(normalized.cursor, sortDirection) : undefined;
-    const where: Prisma.JobWhereInput = cursorWhere ? { AND: [baseWhere, cursorWhere] } : baseWhere;
+    const sqlSortBy =
+      sortBy === "recent" || sortBy === "date" ? "date" : sortBy;
+    const cursorWhere = normalized.cursor
+      ? buildCursorWhere(normalized.cursor, sortDirection)
+      : undefined;
+    const where: Prisma.JobWhereInput = cursorWhere
+      ? { AND: [baseWhere, cursorWhere] }
+      : baseWhere;
 
     const records = await prisma.job.findMany({
       where,
-      orderBy: buildCatalogOrderBy(sortBy, sortDirection),
+      orderBy: buildCatalogOrderBy(sqlSortBy, sortDirection),
       take: limit + 1,
     });
 
     const hasMore = records.length > limit;
     const pageRecords = hasMore ? records.slice(0, limit) : records;
     const ctx = await this.loadUserContext(normalized.userId);
-    let data = pageRecords.map((record) =>
+    const data = pageRecords.map((record) =>
       this.mapWithContext(record, ctx, normalized.profile),
     );
-    data = this.filterJobsForProfile(data, normalized);
 
     const last = pageRecords[pageRecords.length - 1];
     const nextCursor = hasMore && last ? encodeCursor(last.publishedAt, last.id) : null;
 
     return {
       data,
-      meta: { limit, total, hasMore, nextCursor, ...salaryMeta },
+      meta: { limit, total, hasMore, nextCursor, filtersApplied, ...salaryMeta },
     };
   }
 
-  private async listWithHybridSearch(
+  private async listWithMatchSort(
     filters: CatalogListFilters,
-    trackingContext: TrackingFilterContext,
-    queryText: string,
+    baseWhere: Prisma.JobWhereInput,
+    total: number,
     limit: number,
+    salaryMeta: { jobsWithSalary: number; salaryCoverageRatio: number },
+    filtersApplied: ReturnType<typeof buildFiltersAppliedMeta>,
   ): Promise<CatalogListResult<Job>> {
-    const salaryMeta = await this.resolveSalaryCoverageMeta(filters, trackingContext);
+    const records = await prisma.job.findMany({
+      where: baseWhere,
+      orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
+      take: Math.min(MATCH_SORT_WINDOW, total),
+    });
 
-    try {
-      const excludeIds = trackingContext.excludeJobIds ?? [];
-      const includeIds = trackingContext.includeJobIds;
-      const idFilterSql = includeIds
-        ? `AND id = ANY($3::text[])`
-        : excludeIds.length > 0
-          ? `AND NOT (id = ANY($3::text[]))`
-          : "";
-      const idParam = includeIds ?? excludeIds;
+    const ctx = await this.loadUserContext(filters.userId);
+    const jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
 
-      const ranked = await prisma.$queryRawUnsafe<Array<{ id: string; rank: number }>>(
-        `
-        SELECT id, ${buildHybridRankSql("$1")} AS rank
-        FROM "Job"
-        WHERE ${buildHybridWhereSql("$1")}
-          AND ("isCatalog" = true OR "userId" = $2)
-          AND "status" = 'active'
-          AND ("expiresAt" IS NULL OR "expiresAt" > NOW())
-          ${idFilterSql}
-        ORDER BY rank DESC, "publishedAt" DESC, id DESC
-        LIMIT $4
-        `,
-        queryText,
-        filters.userId,
-        idParam,
-        Math.min(limit * 4, CATALOG_MATCH_CAP),
+    jobs.sort((a, b) => {
+      const direction = filters.sortDirection === "asc" ? 1 : -1;
+      const matchDiff = (b.matchScore.score - a.matchScore.score) * direction;
+      if (matchDiff !== 0) return matchDiff;
+      return (
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
       );
+    });
 
-      if (ranked.length === 0) {
-        return {
-          data: [],
-          meta: { limit, total: 0, hasMore: false, nextCursor: null, ...salaryMeta },
-        };
-      }
-
-      const ids = ranked.map((row) => row.id);
-      const records = await prisma.job.findMany({
-        where: { id: { in: ids } },
-      });
-      const byId = new Map(records.map((record) => [record.id, record]));
-      const ordered = ids.map((id) => byId.get(id)).filter(Boolean) as PrismaJob[];
-
-      const ctx = await this.loadUserContext(filters.userId);
-      let jobs = ordered.map((record) => this.mapWithContext(record, ctx, filters.profile));
-      jobs = this.filterJobsForProfile(jobs, filters);
-
-      jobs.sort((a, b) => {
-        const aTitle = a.title.toLowerCase().includes(queryText.toLowerCase()) ? 1 : 0;
-        const bTitle = b.title.toLowerCase().includes(queryText.toLowerCase()) ? 1 : 0;
-        if (bTitle !== aTitle) return bTitle - aTitle;
-        return b.matchScore.score - a.matchScore.score;
-      });
-
-      const data = jobs.slice(0, limit);
-      const hasMore = jobs.length > limit;
-      return {
-        data,
-        meta: {
-          limit,
-          total: jobs.length,
-          hasMore,
-          nextCursor: hasMore ? (data[data.length - 1]?.id ?? null) : null,
-          ...salaryMeta,
-        },
-      };
-    } catch {
-      const baseWhere = buildCatalogWhere(filters, trackingContext);
-      const total = await prisma.job.count({ where: baseWhere });
-      const records = await prisma.job.findMany({
-        where: baseWhere,
-        orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
-        take: Math.min(limit * 5, CATALOG_MATCH_CAP),
-      });
-      const ctx = await this.loadUserContext(filters.userId);
-      let jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
-      jobs = this.filterJobsForProfile(jobs, filters);
-      jobs.sort((a, b) => {
-        const q = queryText.toLowerCase();
-        const scoreOf = (job: Job) => {
-          let s = 0;
-          if (job.title.toLowerCase().includes(q)) s += 100;
-          if (job.company.name.toLowerCase().includes(q)) s += 70;
-          if (job.technologies.some((t) => t.name.toLowerCase().includes(q))) s += 55;
-          if (job.location.toLowerCase().includes(q)) s += 35;
-          if (job.description.toLowerCase().includes(q)) s += 15;
-          return s;
-        };
-        return scoreOf(b) - scoreOf(a);
-      });
-      const data = jobs.slice(0, limit);
-      return {
-        data,
-        meta: {
-          limit,
-          total,
-          hasMore: jobs.length > limit,
-          nextCursor: jobs.length > limit ? (data[data.length - 1]?.id ?? null) : null,
-          ...salaryMeta,
-        },
-      };
+    let startIndex = 0;
+    if (filters.cursor) {
+      const foundIndex = jobs.findIndex((job) => job.id === filters.cursor);
+      startIndex = foundIndex >= 0 ? foundIndex + 1 : 0;
     }
+
+    const data = jobs.slice(startIndex, startIndex + limit);
+    const hasMore = startIndex + limit < jobs.length;
+    const nextCursor = hasMore ? (data[data.length - 1]?.id ?? null) : null;
+
+    return {
+      data,
+      meta: {
+        limit,
+        total,
+        hasMore,
+        nextCursor,
+        filtersApplied,
+        ...salaryMeta,
+      },
+    };
+  }
+
+  private async listWithPrioritySort(
+    filters: CatalogListFilters,
+    baseWhere: Prisma.JobWhereInput,
+    total: number,
+    limit: number,
+    sortDirection: CatalogListFilters["sortDirection"],
+    salaryMeta: { jobsWithSalary: number; salaryCoverageRatio: number },
+    filtersApplied: ReturnType<typeof buildFiltersAppliedMeta>,
+  ): Promise<CatalogListResult<Job>> {
+    const records = await prisma.job.findMany({
+      where: baseWhere,
+      orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
+      take: Math.min(MATCH_SORT_WINDOW, total),
+    });
+
+    const ctx = await this.loadUserContext(filters.userId);
+    const jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
+    const direction = sortDirection === "asc" ? 1 : -1;
+
+    jobs.sort((a, b) => {
+      const priorityDiff =
+        (getPriorityWeight(a.priority) - getPriorityWeight(b.priority)) * direction;
+      if (priorityDiff !== 0) return priorityDiff;
+      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    });
+
+    let startIndex = 0;
+    if (filters.cursor) {
+      const foundIndex = jobs.findIndex((job) => job.id === filters.cursor);
+      startIndex = foundIndex >= 0 ? foundIndex + 1 : 0;
+    }
+
+    const data = jobs.slice(startIndex, startIndex + limit);
+    const hasMore = startIndex + limit < jobs.length;
+    const nextCursor = hasMore ? (data[data.length - 1]?.id ?? null) : null;
+
+    return {
+      data,
+      meta: {
+        limit,
+        total,
+        hasMore,
+        nextCursor,
+        filtersApplied,
+        ...salaryMeta,
+      },
+    };
   }
 
   async count(filters: CatalogListFilters): Promise<number> {
@@ -505,165 +507,6 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
     };
   }
 
-  private async listWithMatchSort(
-    filters: CatalogListFilters,
-    baseWhere: Prisma.JobWhereInput,
-    total: number,
-    limit: number,
-    salaryMeta: { jobsWithSalary: number; salaryCoverageRatio: number },
-  ): Promise<CatalogListResult<Job>> {
-    const records = await prisma.job.findMany({
-      where: baseWhere,
-      orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
-      take: CATALOG_MATCH_CAP,
-    });
-
-    const ctx = await this.loadUserContext(filters.userId);
-    let jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
-    jobs = this.filterJobsForProfile(jobs, filters);
-
-    if (filters.matchMin !== undefined) {
-      jobs = jobs.filter((job) => job.matchScore.score >= filters.matchMin!);
-    }
-
-    if (filters.profile) {
-      this.sortByUnifiedRanking(jobs);
-    } else {
-      jobs.sort((a, b) => {
-        const direction = filters.sortDirection === "asc" ? 1 : -1;
-        return (a.matchScore.score - b.matchScore.score) * direction;
-      });
-    }
-
-    let startIndex = 0;
-    if (filters.cursor) {
-      const foundIndex = jobs.findIndex((job) => job.id === filters.cursor);
-      startIndex = foundIndex >= 0 ? foundIndex + 1 : 0;
-    }
-
-    const data = jobs.slice(startIndex, startIndex + limit);
-    const hasMore = startIndex + limit < jobs.length;
-    const nextCursor = hasMore ? (data[data.length - 1]?.id ?? null) : null;
-
-    return {
-      data,
-      meta: {
-        limit,
-        total: filters.matchMin !== undefined ? jobs.length : total,
-        hasMore,
-        nextCursor,
-        ...salaryMeta,
-      },
-    };
-  }
-
-  private async listWithCompositeSort(
-    filters: CatalogListFilters,
-    baseWhere: Prisma.JobWhereInput,
-    total: number,
-    limit: number,
-    sortBy: "recent" | "priority",
-    salaryMeta: { jobsWithSalary: number; salaryCoverageRatio: number },
-  ): Promise<CatalogListResult<Job>> {
-    const records = await prisma.job.findMany({
-      where: baseWhere,
-      orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
-      take: CATALOG_MATCH_CAP,
-    });
-
-    const ctx = await this.loadUserContext(filters.userId);
-    let jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
-    jobs = this.filterJobsForProfile(jobs, filters);
-
-    const direction = filters.sortDirection === "asc" ? 1 : -1;
-
-    if (sortBy === "recent" && filters.profile) {
-      this.sortByUnifiedRanking(jobs);
-    } else {
-      jobs.sort((a, b) => {
-        if (sortBy === "priority") {
-          const priorityDiff =
-            (getPriorityWeight(a.priority) - getPriorityWeight(b.priority)) * direction;
-          if (priorityDiff !== 0) return priorityDiff;
-        }
-
-        const dateDiff =
-          (new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()) * direction;
-        if (dateDiff !== 0) return -dateDiff;
-
-        const matchDiff = (a.matchScore.score - b.matchScore.score) * direction;
-        if (matchDiff !== 0) return -matchDiff;
-
-        return getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
-      });
-    }
-
-    let startIndex = 0;
-    if (filters.cursor) {
-      const foundIndex = jobs.findIndex((job) => job.id === filters.cursor);
-      startIndex = foundIndex >= 0 ? foundIndex + 1 : 0;
-    }
-
-    const data = jobs.slice(startIndex, startIndex + limit);
-    const hasMore = startIndex + limit < jobs.length;
-    const nextCursor = hasMore ? (data[data.length - 1]?.id ?? null) : null;
-
-    return {
-      data,
-      meta: { limit, total, hasMore, nextCursor, ...salaryMeta },
-    };
-  }
-
-  private filterJobsForProfile(jobs: Job[], filters: CatalogListFilters): Job[] {
-    if (!filters.profile) return jobs;
-
-    if (filters.strictProfileMatch) {
-      return jobs.filter((job) =>
-        passesStrictProfileMatch(filters.profile!, {
-          title: job.title,
-          area: job.area,
-          seniority: job.seniority,
-          modality: job.modality,
-          location: job.location,
-          salaryMin: job.salaryMin,
-          salaryMax: job.salaryMax,
-          technologies: job.technologies,
-          requirements: job.requirements,
-        }),
-      );
-    }
-
-    if (filters.profile.area) {
-      return jobs.filter((job) =>
-        isAreaCompatible(filters.profile!, {
-          title: job.title,
-          area: job.area,
-          seniority: job.seniority,
-          modality: job.modality,
-          location: job.location,
-          salaryMin: job.salaryMin,
-          salaryMax: job.salaryMax,
-          technologies: job.technologies,
-          requirements: job.requirements,
-        }),
-      );
-    }
-
-    return jobs;
-  }
-
-  private sortByUnifiedRanking(jobs: Job[]): void {
-    jobs.sort((a, b) => {
-      const matchDiff = b.matchScore.score - a.matchScore.score;
-      if (matchDiff !== 0) return matchDiff;
-
-      const dateDiff =
-        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-      if (dateDiff !== 0) return dateDiff;
-
-      return a.title.localeCompare(b.title, "pt-BR");
-    });
-  }
 
   private async attachAlternateSources(jobs: Job[]): Promise<Job[]> {
     if (jobs.length === 0) return jobs;

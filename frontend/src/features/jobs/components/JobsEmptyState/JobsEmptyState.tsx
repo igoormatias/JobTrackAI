@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { AlertCircle, FilterX, SearchX, Briefcase } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { ACTION_LABELS } from "@/constants/action-labels";
 
 export type JobsEmptyStateVariant = "no-jobs" | "no-results" | "restrictive" | "error";
 
@@ -60,6 +62,11 @@ export const JobsEmptyState = ({ variant, onClearFilters, onClearSearch, onRetry
             {onClearFilters ? (
               <Button type="button" onClick={onClearFilters}>
                 Limpar filtros
+              </Button>
+            ) : null}
+            {variant === "restrictive" || variant === "no-results" ? (
+              <Button asChild variant="outline">
+                <Link href="/jobs">{ACTION_LABELS.exploreJobs}</Link>
               </Button>
             ) : null}
           </div>
