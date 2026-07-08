@@ -113,7 +113,14 @@ const SECTION_PATTERNS: Array<{ key: keyof Omit<StructuredJobSections, "descript
   },
   {
     key: "requirements",
-    patterns: [/requisitos?/i, /o que buscamos/i, /necess[aá]rio/i, /obrigat[oó]ri/i, /qualifica[cç]/i], /experi[eê]ncia/i],
+    patterns: [
+      /requisitos?/i,
+      /o que buscamos/i,
+      /necess[aá]rio/i,
+      /obrigat[oó]ri/i,
+      /qualifica[cç]/i,
+      /experi[eê]ncia/i,
+    ],
   },
   {
     key: "benefits",

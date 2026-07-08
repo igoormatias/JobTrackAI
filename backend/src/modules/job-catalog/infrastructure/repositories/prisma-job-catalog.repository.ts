@@ -43,7 +43,6 @@ import {
   buildHybridWhereSql,
   sanitizeSearchQuery,
 } from "../query-builders/hybrid-search.sql.js";
-import type { MatchUserContext } from "../../../match/domain/services/match-engine.service.js";
 
 const CATALOG_MATCH_CAP = 500;
 
