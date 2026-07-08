@@ -36,8 +36,8 @@ describe("JobDetailsPage", () => {
     await screen.findByRole("heading", { name: "Frontend Engineer" });
 
     expect(await screen.findByText("Por que essa vaga?")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Abrir vaga" }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("button", { name: "Iniciar processo" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: /Abrir vaga original/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Iniciar processo seletivo" }).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Insights").length).toBeGreaterThan(0);
   });
 });

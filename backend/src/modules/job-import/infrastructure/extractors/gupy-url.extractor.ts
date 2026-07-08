@@ -95,7 +95,17 @@ export class GupyUrlExtractor implements UrlJobExtractor {
     const job = gupyProvider.normalize(parsed.raw);
 
     return {
-      job: { ...job, description: parsed.description },
+      job: {
+        ...job,
+        description: parsed.description,
+        descriptionHtml: parsed.descriptionHtml,
+        requirements: parsed.requirements,
+        responsibilities: parsed.responsibilities,
+        benefits: parsed.benefits,
+        technologies: parsed.technologies.length > 0 ? parsed.technologies : job.technologies,
+        seniority: parsed.seniority ?? job.seniority,
+        modality: parsed.modality ?? job.modality,
+      },
       warnings: parsed.warnings.length > 0 ? parsed.warnings : undefined,
     };
   }

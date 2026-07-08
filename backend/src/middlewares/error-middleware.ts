@@ -6,6 +6,7 @@ import { AppError } from "../shared/errors/app-error.js";
 
 type PrismaKnownError = {
   code?: string;
+  message?: string;
 };
 
 const prismaErrorMap: Record<string, { statusCode: number; code: string; message: string }> = {
@@ -16,6 +17,22 @@ const prismaErrorMap: Record<string, { statusCode: number; code: string; message
     code: "DATABASE_SCHEMA_OUTDATED",
     message: "Database schema is outdated. Run prisma migrate deploy.",
   },
+  P2010: {
+    statusCode: 400,
+    code: "INVALID_QUERY",
+    message: "A consulta não pôde ser processada. Tente outros termos de busca.",
+  },
+};
+
+const isPostgresFunctionError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) return false;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("does not exist") &&
+    (message.includes("lower(jsonb)") ||
+      message.includes("function lower") ||
+      message.includes("operator does not exist"))
+  );
 };
 
 export const errorMiddleware = (
@@ -47,6 +64,17 @@ export const errorMiddleware = (
     return;
   }
 
+  if (isPostgresFunctionError(error)) {
+    logger.error({ error, correlationId }, "Invalid search query against JSONB/scalar");
+    res.status(400).json({
+      status: "error",
+      code: "INVALID_SEARCH_QUERY",
+      message: "Não foi possível processar a busca. Tente outros termos.",
+      correlationId,
+    });
+    return;
+  }
+
   const prismaError = error as PrismaKnownError;
 
   if (prismaError.code && prismaErrorMap[prismaError.code]) {
@@ -55,6 +83,17 @@ export const errorMiddleware = (
       status: "error",
       code: mapped.code,
       message: mapped.message,
+      correlationId,
+    });
+    return;
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    logger.error({ error, correlationId, code: error.code }, "Prisma known request error");
+    res.status(400).json({
+      status: "error",
+      code: error.code,
+      message: "Não foi possível processar a solicitação.",
       correlationId,
     });
     return;

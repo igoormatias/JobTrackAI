@@ -73,17 +73,37 @@ export const NotificationInboxPage = () => {
     <div className="mx-auto w-full max-w-3xl space-y-6 pb-24">
       <PageHeader
         title="Notificações"
-        description="Central de alertas sobre vagas, pipeline e calendário."
+        description="Central inteligente de acompanhamento da carreira: vagas, pipeline, follow-ups e sync."
         actions={
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={markReadMutation.isPending || unreadByCategory.all === 0}
-            onClick={handleMarkAllRead}
-          >
-            Marcar todas como lidas
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={markReadMutation.isPending || unreadByCategory.all === 0}
+              onClick={handleMarkAllRead}
+            >
+              Marcar todas como lidas
+            </Button>
+            {category !== "all" ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={
+                  markReadMutation.isPending ||
+                  notifications.filter((item) => !item.read).length === 0
+                }
+                onClick={() => {
+                  const ids = notifications.filter((item) => !item.read).map((item) => item.id);
+                  if (ids.length === 0) return;
+                  markReadMutation.mutate({ ids });
+                }}
+              >
+                Marcar categoria como lida
+              </Button>
+            ) : null}
+          </div>
         }
       />
 

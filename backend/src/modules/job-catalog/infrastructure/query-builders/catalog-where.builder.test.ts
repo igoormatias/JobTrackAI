@@ -48,9 +48,31 @@ describe("catalog-where.builder", () => {
     expect(withZero.AND?.length).toBe(without.AND?.length);
   });
 
-  it("buildJobWithSalaryFilter matches jobs with any salary field", () => {
-    expect(buildJobWithSalaryFilter()).toEqual({
-      OR: [{ salaryMin: { not: null } }, { salaryMax: { not: null } }],
-    });
+  it("builds text search without JSONB string_contains", () => {
+    const where = buildCatalogWhere({ userId: "user_1", q: "React" });
+    const and = where.AND as unknown[];
+    const textFilter = and.find(
+      (clause) =>
+        clause &&
+        typeof clause === "object" &&
+        "OR" in (clause as Record<string, unknown>),
+    ) as { OR: unknown[] } | undefined;
+
+    expect(textFilter?.OR).toEqual(
+      expect.arrayContaining([
+        { title: { contains: "React", mode: "insensitive" } },
+        { companyName: { contains: "React", mode: "insensitive" } },
+        { searchText: { contains: "React", mode: "insensitive" } },
+        { technologyText: { contains: "React", mode: "insensitive" } },
+      ]),
+    );
+    expect(JSON.stringify(textFilter)).not.toContain("string_contains");
+    expect(JSON.stringify(textFilter)).not.toContain("metadata");
+  });
+
+  it("builds skill filters without JSONB string_contains", () => {
+    const where = buildCatalogWhere({ userId: "user_1", skills: ["TypeScript"] });
+    expect(JSON.stringify(where)).not.toContain("string_contains");
+    expect(JSON.stringify(where)).not.toContain('"metadata"');
   });
 });

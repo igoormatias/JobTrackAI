@@ -8,6 +8,7 @@ import {
   isAreaCompatible,
   matchEngineService,
   type MatchProfileInput,
+  type MatchUserContext,
 } from "../../../match/domain/services/match-engine.service.js";
 import { passesStrictProfileMatch } from "../../../match/domain/services/strict-job-filter.service.js";
 import {
@@ -37,6 +38,12 @@ import {
   encodeCursor,
   normalizeCatalogFilters,
 } from "../query-builders/catalog-where.builder.js";
+import {
+  buildHybridRankSql,
+  buildHybridWhereSql,
+  sanitizeSearchQuery,
+} from "../query-builders/hybrid-search.sql.js";
+import type { MatchUserContext } from "../../../match/domain/services/match-engine.service.js";
 
 const CATALOG_MATCH_CAP = 500;
 
@@ -107,6 +114,13 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
     }
 
     const baseWhere = buildCatalogWhere(normalized, trackingContext);
+    const queryText = sanitizeSearchQuery(normalized.q?.trim() ?? "");
+
+    // Hybrid FTS + trigram ranking when user typed a search term
+    if (queryText.length >= 2 && sortBy !== "match" && normalized.matchMin === undefined) {
+      return this.listWithHybridSearch(normalized, trackingContext, queryText, limit);
+    }
+
     const total = await prisma.job.count({ where: baseWhere });
     const salaryMeta = await this.resolveSalaryCoverageMeta(normalized, trackingContext);
 
@@ -142,6 +156,117 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
       data,
       meta: { limit, total, hasMore, nextCursor, ...salaryMeta },
     };
+  }
+
+  private async listWithHybridSearch(
+    filters: CatalogListFilters,
+    trackingContext: TrackingFilterContext,
+    queryText: string,
+    limit: number,
+  ): Promise<CatalogListResult<Job>> {
+    const salaryMeta = await this.resolveSalaryCoverageMeta(filters, trackingContext);
+
+    try {
+      const excludeIds = trackingContext.excludeJobIds ?? [];
+      const includeIds = trackingContext.includeJobIds;
+      const idFilterSql = includeIds
+        ? `AND id = ANY($3::text[])`
+        : excludeIds.length > 0
+          ? `AND NOT (id = ANY($3::text[]))`
+          : "";
+      const idParam = includeIds ?? excludeIds;
+
+      const ranked = await prisma.$queryRawUnsafe<Array<{ id: string; rank: number }>>(
+        `
+        SELECT id, ${buildHybridRankSql("$1")} AS rank
+        FROM "Job"
+        WHERE ${buildHybridWhereSql("$1")}
+          AND ("isCatalog" = true OR "userId" = $2)
+          AND "status" = 'active'
+          AND ("expiresAt" IS NULL OR "expiresAt" > NOW())
+          ${idFilterSql}
+        ORDER BY rank DESC, "publishedAt" DESC, id DESC
+        LIMIT $4
+        `,
+        queryText,
+        filters.userId,
+        idParam,
+        Math.min(limit * 4, CATALOG_MATCH_CAP),
+      );
+
+      if (ranked.length === 0) {
+        return {
+          data: [],
+          meta: { limit, total: 0, hasMore: false, nextCursor: null, ...salaryMeta },
+        };
+      }
+
+      const ids = ranked.map((row) => row.id);
+      const records = await prisma.job.findMany({
+        where: { id: { in: ids } },
+      });
+      const byId = new Map(records.map((record) => [record.id, record]));
+      const ordered = ids.map((id) => byId.get(id)).filter(Boolean) as PrismaJob[];
+
+      const ctx = await this.loadUserContext(filters.userId);
+      let jobs = ordered.map((record) => this.mapWithContext(record, ctx, filters.profile));
+      jobs = this.filterJobsForProfile(jobs, filters);
+
+      jobs.sort((a, b) => {
+        const aTitle = a.title.toLowerCase().includes(queryText.toLowerCase()) ? 1 : 0;
+        const bTitle = b.title.toLowerCase().includes(queryText.toLowerCase()) ? 1 : 0;
+        if (bTitle !== aTitle) return bTitle - aTitle;
+        return b.matchScore.score - a.matchScore.score;
+      });
+
+      const data = jobs.slice(0, limit);
+      const hasMore = jobs.length > limit;
+      return {
+        data,
+        meta: {
+          limit,
+          total: jobs.length,
+          hasMore,
+          nextCursor: hasMore ? (data[data.length - 1]?.id ?? null) : null,
+          ...salaryMeta,
+        },
+      };
+    } catch {
+      const baseWhere = buildCatalogWhere(filters, trackingContext);
+      const total = await prisma.job.count({ where: baseWhere });
+      const records = await prisma.job.findMany({
+        where: baseWhere,
+        orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
+        take: Math.min(limit * 5, CATALOG_MATCH_CAP),
+      });
+      const ctx = await this.loadUserContext(filters.userId);
+      let jobs = records.map((record) => this.mapWithContext(record, ctx, filters.profile));
+      jobs = this.filterJobsForProfile(jobs, filters);
+      jobs.sort((a, b) => {
+        const q = queryText.toLowerCase();
+        const scoreOf = (job: Job) => {
+          let s = 0;
+          if (job.title.toLowerCase().includes(q)) s += 100;
+          if (job.company.name.toLowerCase().includes(q)) s += 70;
+          if (job.technologies.some((t) => t.name.toLowerCase().includes(q))) s += 55;
+          if (job.location.toLowerCase().includes(q)) s += 35;
+          if (job.description.toLowerCase().includes(q)) s += 15;
+          return s;
+        };
+        return scoreOf(b) - scoreOf(a);
+      });
+      const data = jobs.slice(0, limit);
+      return {
+        data,
+        meta: {
+          limit,
+          total,
+          hasMore: jobs.length > limit,
+          nextCursor: jobs.length > limit ? (data[data.length - 1]?.id ?? null) : null,
+          ...salaryMeta,
+        },
+      };
+    }
   }
 
   async count(filters: CatalogListFilters): Promise<number> {
@@ -342,6 +467,12 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
       expiresAt: data.expiresAt ?? null,
       lastCheckedAt: data.lastCheckedAt ?? new Date(),
       metadata: data.metadata as Prisma.InputJsonValue,
+      searchText: data.searchText ?? null,
+      technologyText: data.technologyText ?? null,
+      technologySlugs: data.technologySlugs ?? [],
+      requirementsText: data.requirementsText ?? null,
+      benefitsText: data.benefitsText ?? null,
+      descriptionHtml: data.descriptionHtml ?? null,
     };
   }
 
@@ -366,6 +497,12 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
       lastCheckedAt: data.lastCheckedAt ?? new Date(),
       removedAt: data.removedAt,
       metadata: data.metadata as Prisma.InputJsonValue,
+      searchText: data.searchText ?? null,
+      technologyText: data.technologyText ?? null,
+      technologySlugs: data.technologySlugs ?? [],
+      requirementsText: data.requirementsText ?? null,
+      benefitsText: data.benefitsText ?? null,
+      descriptionHtml: data.descriptionHtml ?? null,
     };
   }
 
@@ -614,29 +751,65 @@ export class PrismaJobCatalogRepository implements JobCatalogRepository {
 
   private async loadUserContext(userId: string) {
     const [trackings, views] = await Promise.all([
-      prisma.jobTracking.findMany({ where: { userId } }),
+      prisma.jobTracking.findMany({ where: { userId }, include: { job: true } }),
       prisma.jobView.findMany({ where: { userId } }),
     ]);
-    return buildUserJobContext(trackings, views);
+    const base = buildUserJobContext(
+      trackings.map(({ job: _job, ...tracking }) => tracking),
+      views,
+    );
+    const favoriteCompanySlugs = [
+      ...new Set(
+        trackings
+          .filter((t) => t.isFavorite)
+          .map((t) => (t.job.companySlug ?? t.job.companyName).toLowerCase()),
+      ),
+    ];
+    const pipelineCompanySlugs = [
+      ...new Set(
+        trackings
+          .filter((t) => !["discovery", "closed"].includes(t.stage))
+          .map((t) => (t.job.companySlug ?? t.job.companyName).toLowerCase()),
+      ),
+    ];
+    const savedJobCompanySlugs = favoriteCompanySlugs;
+    const matchContext: MatchUserContext = {
+      favoriteCompanySlugs,
+      pipelineCompanySlugs,
+      savedJobCompanySlugs,
+      viewedJobIds: base.viewedJobIds,
+    };
+    return { ...base, matchContext };
   }
 
   private async loadUserContextForJob(userId: string, jobId: string) {
-    const [tracking, view] = await Promise.all([
-      prisma.jobTracking.findUnique({ where: { userId_jobId: { userId, jobId } } }),
+    const [trackingWithJob, view, ctx] = await Promise.all([
+      prisma.jobTracking.findUnique({
+        where: { userId_jobId: { userId, jobId } },
+      }),
       prisma.jobView.findUnique({ where: { userId_jobId: { userId, jobId } } }),
+      this.loadUserContext(userId),
     ]);
-    return buildUserJobContext(tracking ? [tracking] : [], view ? [view] : []);
+    return {
+      ...buildUserJobContext(trackingWithJob ? [trackingWithJob] : [], view ? [view] : []),
+      matchContext: { ...ctx.matchContext, jobId },
+    };
   }
 
   private mapWithContext(
     record: PrismaJob,
-    ctx: ReturnType<typeof buildUserJobContext>,
+    ctx: Awaited<ReturnType<PrismaJobCatalogRepository["loadUserContext"]>>,
     profile?: MatchProfileInput | null,
   ): Job {
     const tracking = ctx.trackingsByJobId.get(record.id);
     const viewed = ctx.viewedJobIds.has(record.id);
     const matchScore = profile
-      ? toMatchScore(matchEngineService.compute(profile, toMatchJobInput(record)))
+      ? toMatchScore(
+          matchEngineService.compute(profile, toMatchJobInput(record), {
+            ...ctx.matchContext,
+            jobId: record.id,
+          }),
+        )
       : undefined;
     return mapPrismaJobToDomain(record, { tracking, viewed, matchScore });
   }

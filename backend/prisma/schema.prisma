@@ -57,6 +57,18 @@ model Job {
   lastCheckedAt DateTime?
   removedAt   DateTime?
   metadata    Json?
+  /// Plain-text blob used for full-text / ILIKE search (never JSONB).
+  searchText       String?  @db.Text
+  /// Space-separated technology names for ILIKE / trigram search.
+  technologyText   String?  @db.Text
+  /// Canonical technology slugs for exact array containment filters.
+  technologySlugs  String[] @default([])
+  /// Flattened requirements text for search / display.
+  requirementsText String?  @db.Text
+  /// Flattened benefits text for search / display.
+  benefitsText     String?  @db.Text
+  /// Sanitized HTML description for faithful Job Details rendering.
+  descriptionHtml  String?  @db.Text
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   trackings        JobTracking[]
@@ -76,6 +88,7 @@ model Job {
   @@index([status])
   @@index([contentHash])
   @@index([sourceUrl])
+  @@index([technologySlugs])
 }
 
 model JobAlternateSource {

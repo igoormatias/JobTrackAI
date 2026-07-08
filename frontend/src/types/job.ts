@@ -48,8 +48,10 @@ export type Job = {
   salaryMax: number | null;
   currency: "BRL";
   description: string;
+  descriptionHtml?: string | null;
   requirements: string[];
   benefits: string[];
+  responsibilities?: string[];
   technologies: Technology[];
   source: JobSource;
   sourceUrl: string;

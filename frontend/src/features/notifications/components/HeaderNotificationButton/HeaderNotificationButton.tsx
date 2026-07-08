@@ -17,10 +17,13 @@ import {
 import type { Notification, NotificationCategory } from "@/types";
 
 const CATEGORY_LABELS: Record<NotificationCategory, string> = {
-  jobs: "Vagas",
+  jobs: "Novas vagas",
+  favorites: "Empresas favoritas",
   pipeline: "Pipeline",
+  followup: "Follow-up",
   calendar: "Calendário",
-  system: "Sistema",
+  system: "Sincronizações",
+  alerts: "Alertas",
 };
 
 const formatNotificationTime = (value: string): string => {

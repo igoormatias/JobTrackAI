@@ -3,6 +3,7 @@
 import { Bookmark } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
+import { ACTION_LABELS } from "@/constants/action-labels";
 import type { Job } from "@/types";
 
 import { JOB_DETAILS_LAYOUT } from "../../constants/job-details-constants";
@@ -30,7 +31,7 @@ export const JobDetailsBottomActions = ({
           variant={job.isFavorite ? "secondary" : "outline"}
           onClick={onFavorite}
           disabled={isFavoritePending}
-          aria-label={job.isFavorite ? "Desfavoritar vaga" : "Salvar vaga"}
+          aria-label={job.isFavorite ? "Desfavoritar vaga" : ACTION_LABELS.saveJob}
         >
           <Bookmark className={job.isFavorite ? "fill-current" : ""} />
         </Button>
@@ -40,7 +41,7 @@ export const JobDetailsBottomActions = ({
           onClick={onAddToPipeline}
           disabled={isAddToPipelinePending}
         >
-          Iniciar processo
+          {ACTION_LABELS.startProcess}
         </Button>
       </div>
     </div>

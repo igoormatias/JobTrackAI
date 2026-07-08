@@ -52,7 +52,16 @@ export class ProgramathorUrlExtractor implements UrlJobExtractor {
       );
     }
 
-    return { job: programathorProvider.normalize(parsed) };
+    const job = programathorProvider.normalize(parsed);
+    return {
+      job: {
+        ...job,
+        descriptionHtml: parsed.descriptionHtml ?? null,
+        requirements: parsed.requirements ?? [],
+        responsibilities: parsed.responsibilities ?? [],
+        benefits: parsed.benefits ?? [],
+      },
+    };
   }
 }
 

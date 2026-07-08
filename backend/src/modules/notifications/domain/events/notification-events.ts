@@ -111,3 +111,51 @@ export class JobClosedEvent extends DomainEvent {
     super();
   }
 }
+
+export class FollowupReminderEvent extends DomainEvent {
+  readonly eventName = "followup_reminder";
+
+  constructor(
+    readonly payload: {
+      userId: string;
+      trackingId: string;
+      jobTitle: string;
+      companyName: string;
+      stage: string;
+      daysIdle: number;
+    },
+  ) {
+    super();
+  }
+}
+
+export class SyncCompleteEvent extends DomainEvent {
+  readonly eventName = "sync_complete";
+
+  constructor(
+    readonly payload: {
+      userId: string;
+      providerName: string;
+      importedCount: number;
+      foundCount: number;
+    },
+  ) {
+    super();
+  }
+}
+
+export class FavoriteCompanyJobEvent extends DomainEvent {
+  readonly eventName = "favorite_company_job";
+
+  constructor(
+    readonly payload: {
+      userId: string;
+      jobId: string;
+      jobTitle: string;
+      companyName: string;
+      matchScore?: number;
+    },
+  ) {
+    super();
+  }
+}

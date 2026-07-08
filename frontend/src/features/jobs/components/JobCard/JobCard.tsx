@@ -128,7 +128,7 @@ export const JobCard = memo(
               className="w-full sm:w-auto"
             >
               <Bookmark className={cn("mr-1 h-4 w-4", job.isFavorite && "fill-current")} />
-              {job.isFavorite ? "Salvo" : "Salvar"}
+              {job.isFavorite ? ACTION_LABELS.savedJob : ACTION_LABELS.saveJob}
             </Button>
             <Link href={`/jobs/${job.id}`} onClick={() => onViewDetails?.(job)} className="w-full sm:w-auto">
               <Button
@@ -149,9 +149,10 @@ export const JobCard = memo(
               onClick={() => onOpenJob?.(job)}
               className="w-full sm:w-auto"
               title={ACTION_TOOLTIPS.openOriginalJob}
+              disabled={!job.sourceUrl}
             >
               <ExternalLink className="mr-1 h-4 w-4" />
-              {openOriginalJobLabel(job.source)}
+              {job.sourceUrl ? openOriginalJobLabel(job.source) : ACTION_LABELS.noOriginalJob}
             </Button>
             <Button
               type="button"

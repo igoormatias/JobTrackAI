@@ -43,7 +43,7 @@ describe("DashboardTopJobCard", () => {
 
     expect(screen.getByText("Senior Frontend Engineer")).toBeInTheDocument();
     expect(screen.getByText(/Nubank/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Ver vaga" })).toHaveAttribute("href", "/jobs/job_1");
+    expect(screen.getAllByRole("link", { name: "Ver descrição" })[0]).toHaveAttribute("href", "/jobs/job_1");
     expect(screen.getByText(/92%/)).toBeInTheDocument();
   });
 });

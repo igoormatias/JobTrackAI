@@ -19,9 +19,10 @@ export const useKanbanBoardNavigation = (scrollRef: RefObject<HTMLDivElement | n
     if (!node) return;
 
     const handleWheel = (event: WheelEvent) => {
-      if (!event.shiftKey) return;
+      // Shift+wheel or native horizontal delta (trackpad)
+      if (!event.shiftKey && Math.abs(event.deltaX) < Math.abs(event.deltaY)) return;
       event.preventDefault();
-      node.scrollLeft += event.deltaY;
+      node.scrollLeft += event.shiftKey ? event.deltaY : event.deltaX || event.deltaY;
     };
 
     let panning = false;

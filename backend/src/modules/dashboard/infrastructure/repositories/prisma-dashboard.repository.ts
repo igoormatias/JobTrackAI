@@ -2,6 +2,7 @@ import type { Job, Profile } from "@prisma/client";
 
 import { prisma } from "../../../../database/prisma.js";
 import {
+  DASHBOARD_TOP_MATCH_THRESHOLD,
   isAreaCompatible,
   matchEngineService,
   type MatchJobInput,
@@ -17,8 +18,8 @@ import type {
   DashboardCompanyInsightDto,
   DashboardDataDto,
   DashboardInsightDto,
-  DashboardInterviewDto,
   DashboardKpiDto,
+  DashboardTopJobDto,
 } from "../../application/dto/dashboard-response.dto.js";
 import { skillMatcher } from "../../../match/domain/services/skill-matcher.service.js";
 
@@ -62,6 +63,8 @@ const toMatchJobInput = (job: Job): MatchJobInput => {
     seniority: job.seniority,
     modality: job.modality,
     location: job.location,
+    companyName: job.companyName,
+    companySlug: job.companySlug,
     salaryMin: job.salaryMin,
     salaryMax: job.salaryMax,
     technologies: metadata.technologies ?? [],
@@ -302,10 +305,10 @@ export class PrismaDashboardRepository implements DashboardRepository {
         select: { createdAt: true, stage: true },
       }),
       prisma.job.findMany({
-        // Discovery recommendations only — pipeline KPIs use jobTracking above
+        // Discovery recommendations — larger pool; area filtered in memory via match engine
         where: { isCatalog: true, status: "active" },
         orderBy: { publishedAt: "desc" },
-        take: 80,
+        take: 200,
       }),
       prisma.profile.findUnique({ where: { userId } }),
       prisma.job.count({ where: { isCatalog: true } }),
@@ -379,14 +382,35 @@ export class PrismaDashboardRepository implements DashboardRepository {
     ]);
 
     const matchProfile = toMatchProfileInput(profile);
-    const eligibleJobs = profile?.area
-      ? catalogJobs.filter((job) => isAreaCompatible(matchProfile, toMatchJobInput(job)))
-      : catalogJobs;
+    const favoriteCompanySlugs = [
+      ...new Set(
+        userTrackingsWithJobs
+          .filter((t) => t.isFavorite)
+          .map((t) => (t.job.companySlug ?? t.job.companyName).toLowerCase()),
+      ),
+    ];
+    const pipelineCompanySlugs = [
+      ...new Set(
+        userTrackingsWithJobs
+          .filter((t) => !["discovery", "closed"].includes(t.stage))
+          .map((t) => (t.job.companySlug ?? t.job.companyName).toLowerCase()),
+      ),
+    ];
+
+    const eligibleJobs = catalogJobs.filter((job) =>
+      isAreaCompatible(matchProfile, toMatchJobInput(job)),
+    );
     const jobsWithMatch = eligibleJobs
       .map((job) => ({
         job,
-        match: matchEngineService.compute(matchProfile, toMatchJobInput(job)),
+        match: matchEngineService.compute(matchProfile, toMatchJobInput(job), {
+          favoriteCompanySlugs,
+          pipelineCompanySlugs,
+          savedJobCompanySlugs: favoriteCompanySlugs,
+          jobId: job.id,
+        }),
       }))
+      .filter(({ match }) => match.score >= DASHBOARD_TOP_MATCH_THRESHOLD)
       .sort((a, b) => b.match.score - a.match.score);
 
     const topMatchedJobs = jobsWithMatch.slice(0, 10);
@@ -481,6 +505,20 @@ export class PrismaDashboardRepository implements DashboardRepository {
       })),
       topTechnologies: topEntries(techCounts, 10),
       topCompanies,
+      topJobs: topMatchedJobs.map(({ job, match }) => ({
+        id: job.id,
+        title: job.title,
+        companyName: job.companyName,
+        companySlug: job.companySlug,
+        modality: job.modality,
+        location: job.location,
+        source: job.source,
+        sourceUrl: job.sourceUrl,
+        matchScore: match.score,
+        matchLabel: match.label,
+        reasons: match.reasons.filter((reason) => reason.matched).slice(0, 6),
+        publishedAt: job.publishedAt.toISOString(),
+      })),
       recentActivities,
       upcomingInterviews: [],
       insight: buildInsight(

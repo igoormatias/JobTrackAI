@@ -14,7 +14,7 @@ const SOURCE_LABELS: Record<JobSource, string> = {
 export const ACTION_LABELS = {
   viewJobDescription: "Ver descrição",
   openOriginalJob: "Abrir vaga original",
-  startProcess: "Iniciar processo",
+  startProcess: "Iniciar processo seletivo",
   editProcess: "Editar processo",
   updateStage: "Atualizar etapa",
   scheduleInterview: "Agendar entrevista",
@@ -22,9 +22,13 @@ export const ACTION_LABELS = {
   viewCompany: "Ver empresa",
   openProcess: "Abrir processo",
   deleteProcess: "Excluir processo",
-  addToPipeline: "Adicionar ao Pipeline",
-  changeFavorite: "Favoritar",
+  addToPipeline: "Iniciar processo seletivo",
+  changeFavorite: "Salvar vaga",
+  saveJob: "Salvar vaga",
+  savedJob: "Salvo",
   viewDetails: "Ver detalhes",
+  noOriginalJob: "Sem vaga original disponível",
+  exploreJobs: "Explorar vagas",
 } as const;
 
 export const openOriginalJobLabel = (source?: JobSource | string | null): string => {

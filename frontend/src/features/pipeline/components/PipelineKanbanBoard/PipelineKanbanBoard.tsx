@@ -64,7 +64,7 @@ export const PipelineKanbanBoard = ({
   const [activeApplication, setActiveApplication] = useState<Application | null>(null);
   const enableDrag = !mobile;
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 12 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor),
   );
 
@@ -155,7 +155,7 @@ export const PipelineKanbanBoard = ({
 
       <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.18, 0.67, 0.6, 1)" }}>
         {activeApplication ? (
-          <div className="w-[clamp(380px,22vw,420px)] rotate-2">
+          <div className="w-[clamp(280px,18vw,360px)] rotate-1 opacity-95 shadow-xl">
             <PipelineApplicationCard
               application={activeApplication}
               onOpenDetails={onOpenDetails}

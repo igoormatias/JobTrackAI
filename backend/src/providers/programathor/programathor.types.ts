@@ -9,6 +9,10 @@ export type ProgramathorRawJob = {
   salaryMin?: number | null;
   salaryMax?: number | null;
   description?: string;
+  descriptionHtml?: string | null;
+  requirements?: string[];
+  responsibilities?: string[];
+  benefits?: string[];
   publishedAt?: string;
   externalId: string;
 };

@@ -8,6 +8,7 @@ type JobMetadata = {
   technologies?: Array<{ id: string; name: string; slug: string }>;
   requirements?: string[];
   benefits?: string[];
+  responsibilities?: string[];
   company?: { id: string; name: string; slug: string; logoUrl: string | null; industry?: string };
 };
 
@@ -69,7 +70,7 @@ export const mapPrismaJobToDomain = (
       slug: company.slug,
       logoUrl: company.logoUrl,
     },
-    area: record.area ?? "frontend",
+    area: record.area ?? "other",
     seniority: record.seniority ?? "mid",
     modality: record.modality ?? "remote",
     location: record.location ?? "",
@@ -77,8 +78,14 @@ export const mapPrismaJobToDomain = (
     salaryMax: record.salaryMax,
     currency: "BRL",
     description: record.description ?? "",
-    requirements: meta.requirements ?? [],
-    benefits: meta.benefits ?? [],
+    descriptionHtml: record.descriptionHtml ?? null,
+    requirements:
+      meta.requirements ??
+      (record.requirementsText ? record.requirementsText.split("\n").filter(Boolean) : []),
+    benefits:
+      meta.benefits ??
+      (record.benefitsText ? record.benefitsText.split("\n").filter(Boolean) : []),
+    responsibilities: meta.responsibilities ?? [],
     technologies: meta.technologies ?? [],
     source: record.source as Job["source"],
     sourceUrl: record.sourceUrl ?? "",
@@ -104,6 +111,8 @@ export const toMatchJobInput = (record: PrismaJob) => {
     seniority: record.seniority,
     modality: record.modality,
     location: record.location,
+    companyName: record.companyName,
+    companySlug: record.companySlug,
     salaryMin: record.salaryMin,
     salaryMax: record.salaryMax,
     technologies: meta.technologies ?? [],

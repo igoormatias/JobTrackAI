@@ -8,10 +8,14 @@ import type { RecommendationProfile } from "../types/recommendation.types";
 const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = {
   new_job: "jobs",
   recommendation: "jobs",
-  job_closed: "jobs",
+  job_closed: "alerts",
   pipeline_change: "pipeline",
   interview_reminder: "calendar",
   dashboard_update: "system",
+  favorite_company: "favorites",
+  followup_reminder: "followup",
+  sync_complete: "system",
+  alert: "alerts",
 };
 
 export type BuildNotificationsInput = {

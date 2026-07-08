@@ -65,4 +65,30 @@ export class JobSyncNotificationService {
 
     return notified;
   }
+
+  /**
+   * Targeted sync notice for a single user (e.g. manual sync from dashboard).
+   * Avoid broadcasting to all users after provider cron runs.
+   */
+  async notifySyncCompleteForUser(input: {
+    userId: string;
+    providerName: string;
+    importedCount: number;
+    foundCount: number;
+  }): Promise<void> {
+    if (input.importedCount <= 0) return;
+
+    await this.notificationService.create({
+      userId: input.userId,
+      type: "sync_complete",
+      title: "Sincronização concluída",
+      message: `${input.providerName}: ${input.importedCount} novas vagas de ${input.foundCount} encontradas.`,
+      actionUrl: "/jobs",
+      metadata: {
+        providerName: input.providerName,
+        importedCount: input.importedCount,
+        foundCount: input.foundCount,
+      },
+    });
+  }
 }

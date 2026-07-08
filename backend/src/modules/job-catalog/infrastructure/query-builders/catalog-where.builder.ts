@@ -80,6 +80,8 @@ export const buildCatalogWhere = (
   const query = normalized.q?.trim();
   if (query) {
     const lowerQuery = query.toLowerCase();
+    // Never apply LOWER()/string_contains on JSONB (Postgres: lower(jsonb) does not exist).
+    // Search uses scalar + derived indexable columns only.
     and.push({
       OR: [
         { title: { contains: query, mode: "insensitive" } },
@@ -88,7 +90,9 @@ export const buildCatalogWhere = (
         { description: { contains: query, mode: "insensitive" } },
         { location: { contains: query, mode: "insensitive" } },
         { source: { contains: lowerQuery, mode: "insensitive" } },
-        { metadata: { string_contains: query, mode: "insensitive" } },
+        { searchText: { contains: query, mode: "insensitive" } },
+        { technologyText: { contains: query, mode: "insensitive" } },
+        { technologySlugs: { has: lowerQuery.replace(/\s+/g, "-") } },
       ],
     });
   }
@@ -152,11 +156,14 @@ export const buildCatalogWhere = (
 
   if (normalized.skills?.length) {
     for (const skill of normalized.skills) {
+      const skillSlug = skill.toLowerCase().trim().replace(/\s+/g, "-");
       and.push({
         OR: [
           { title: { contains: skill, mode: "insensitive" } },
           { description: { contains: skill, mode: "insensitive" } },
-          { metadata: { string_contains: skill, mode: "insensitive" } },
+          { technologyText: { contains: skill, mode: "insensitive" } },
+          { searchText: { contains: skill, mode: "insensitive" } },
+          { technologySlugs: { has: skillSlug } },
         ],
       });
     }

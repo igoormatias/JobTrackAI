@@ -8,9 +8,12 @@ import { cn } from "@/lib/utils";
 const TABS: Array<{ id: NotificationCategory | "all"; label: string }> = [
   { id: "all", label: "Todas" },
   { id: "jobs", label: "Novas vagas" },
+  { id: "favorites", label: "Empresas favoritas" },
   { id: "pipeline", label: "Pipeline" },
+  { id: "followup", label: "Follow-up" },
   { id: "calendar", label: "Calendário" },
-  { id: "system", label: "Sistema" },
+  { id: "system", label: "Sincronizações" },
+  { id: "alerts", label: "Alertas" },
 ];
 
 export type NotificationCategoryTabsProps = {
@@ -24,12 +27,14 @@ export const NotificationCategoryTabs = ({
   counts,
   onChange,
 }: NotificationCategoryTabsProps) => (
-  <div className="flex flex-wrap gap-2">
+  <div className="flex flex-wrap gap-2" role="tablist" aria-label="Categorias de notificação">
     {TABS.map((tab) => (
       <Button
         key={tab.id}
         type="button"
         size="sm"
+        role="tab"
+        aria-selected={value === tab.id}
         variant={value === tab.id ? "secondary" : "outline"}
         className={cn("gap-1")}
         onClick={() => onChange(tab.id)}

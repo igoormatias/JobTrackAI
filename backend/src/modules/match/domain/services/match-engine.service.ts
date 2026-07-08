@@ -1,6 +1,12 @@
-import { MATCH_ENGINE_VERSION, MATCH_WEIGHTS } from "../../../../shared/domain/match-weights.js";
+import {
+  DASHBOARD_TOP_MATCH_THRESHOLD,
+  MATCH_ENGINE_VERSION,
+  MATCH_WEIGHTS,
+} from "../../../../shared/domain/match-weights.js";
 import { jobTitleNormalizer } from "./job-title-normalizer.service.js";
 import { skillMatcher } from "./skill-matcher.service.js";
+
+export { DASHBOARD_TOP_MATCH_THRESHOLD };
 
 export type MatchReasonDto = {
   id: string;
@@ -44,10 +50,20 @@ export type MatchJobInput = {
   seniority?: string | null;
   modality?: string | null;
   location?: string | null;
+  companyName?: string | null;
+  companySlug?: string | null;
   salaryMin?: number | null;
   salaryMax?: number | null;
   technologies: Array<{ name: string; slug: string }>;
   requirements: string[];
+};
+
+export type MatchUserContext = {
+  favoriteCompanySlugs?: string[];
+  pipelineCompanySlugs?: string[];
+  savedJobCompanySlugs?: string[];
+  viewedJobIds?: Set<string>;
+  jobId?: string;
 };
 
 const SENIORITY_RANK: Record<string, number> = {
@@ -79,34 +95,80 @@ export const isAreaCompatible = (
   job: MatchJobInput,
 ): boolean => {
   if (!profile.area) return true;
-  if (job.area) {
+  if (job.area && job.area !== "other") {
     return job.area === profile.area;
   }
   const inferredArea = jobTitleNormalizer.inferArea(job.title ?? "");
   if (inferredArea) {
     return inferredArea === profile.area;
   }
-  return true;
+  // Unknown area — do not assume compatible for recommendations
+  return false;
+};
+
+const titleRoleScore = (profile: MatchProfileInput, job: MatchJobInput): number => {
+  const title = (job.title ?? "").toLowerCase();
+  if (!title) return 0;
+  let score = 0;
+  const weights = MATCH_WEIGHTS;
+
+  const hints = [
+    ...(profile.area ? [profile.area.replace(/_/g, " ")] : []),
+    ...profile.skillNames.slice(0, 6),
+  ];
+  const hits = hints.filter((hint) => title.includes(hint.toLowerCase()));
+  if (hits.length > 0) {
+    score += Math.min(weights.titleRoleMax, 8 + hits.length * 4);
+  }
+
+  const inferred = jobTitleNormalizer.inferArea(job.title ?? "");
+  if (profile.area && inferred === profile.area) {
+    score = Math.max(score, weights.titleRoleMax * 0.85);
+  }
+
+  return Math.min(weights.titleRoleMax, score);
+};
+
+const skillsScore = (profile: MatchProfileInput, job: MatchJobInput, matchedSkills: string[]): number => {
+  const weights = MATCH_WEIGHTS;
+  if (profile.skillNames.length === 0) return weights.skillsMax * 0.35;
+  const jobTerms = getJobTerms(job);
+  if (jobTerms.length === 0) {
+    // Manual / sparse jobs: score from title overlap only
+    const title = (job.title ?? "").toLowerCase();
+    const titleHits = profile.skillNames.filter((skill) =>
+      title.includes(skill.toLowerCase()),
+    );
+    return Math.min(
+      weights.skillsMax,
+      (titleHits.length / Math.max(profile.skillNames.length, 1)) * weights.skillsMax,
+    );
+  }
+  const ratio = matchedSkills.length / Math.max(Math.min(profile.skillNames.length, jobTerms.length), 1);
+  return Math.min(weights.skillsMax, ratio * weights.skillsMax);
 };
 
 export class MatchEngineService {
-  compute(profile: MatchProfileInput, job: MatchJobInput): MatchResultDto {
+  compute(
+    profile: MatchProfileInput,
+    job: MatchJobInput,
+    context: MatchUserContext = {},
+  ): MatchResultDto {
     const weights = MATCH_WEIGHTS;
-    let score = weights.baseScore;
     const reasons: MatchReasonDto[] = [];
-
     const jobTerms = getJobTerms(job);
-    const requirementSet = new Set(job.requirements.map((r) => skillMatcher.canonicalize(r)));
     const matchedSkills = skillMatcher.findMatches(profile.skillNames, jobTerms);
-
     const areaCompatible = isAreaCompatible(profile, job);
     const inferredArea = jobTitleNormalizer.inferArea(job.title ?? "");
 
-    if (profile.area && job.area && profile.area === job.area) {
-      score += weights.areaMatch;
+    let score = 0;
+
+    // Area
+    if (profile.area && job.area && job.area !== "other" && profile.area === job.area) {
+      score += weights.areaMax;
       reasons.push({ id: "reason_area", label: "Área compatível com seu perfil", matched: true });
     } else if (profile.area && inferredArea && inferredArea === profile.area) {
-      score += weights.titleAreaMatch;
+      score += weights.areaMax * 0.8;
       reasons.push({
         id: "reason_title_area",
         label: "Cargo compatível com seu perfil",
@@ -120,45 +182,84 @@ export class MatchEngineService {
       });
     }
 
-    matchedSkills.forEach((skill, index) => {
-      const isRequired = requirementSet.has(skillMatcher.canonicalize(skill));
-      const delta = isRequired ? weights.requiredSkillMatch : weights.desiredSkillMatch;
-      score += delta;
-      reasons.push({ id: `reason_skill_${index}`, label: `${skill} encontrado`, matched: true });
-    });
-
-    const modalityMatch =
-      !profile.modality || profile.modality === "any" || profile.modality === job.modality;
-    if (modalityMatch && profile.modality) {
-      score += weights.modalityMatch;
+    // Title / role
+    const rolePts = titleRoleScore(profile, job);
+    score += rolePts;
+    if (rolePts > 0) {
       reasons.push({
-        id: "reason_modality",
-        label: profile.modality === "any" ? "Aceita qualquer modalidade" : "Modalidade compatível",
+        id: "reason_title",
+        label: "Cargo alinhado às suas competências",
         matched: true,
       });
-    } else if (profile.modality) {
-      reasons.push({ id: "reason_modality", label: "Modalidade incompatível", matched: false });
     }
 
-    if (this.isLocationCompatible(profile, job)) {
-      score += weights.locationMatch;
-      reasons.push({ id: "reason_location", label: "Localização compatível", matched: true });
-    }
+    // Skills / technologies
+    const skillPts = skillsScore(profile, job, matchedSkills);
+    score += skillPts;
+    matchedSkills.slice(0, 6).forEach((skill, index) => {
+      reasons.push({ id: `reason_skill_${index}`, label: skill, matched: true });
+    });
 
-    if (this.isSalaryCompatible(profile, job)) {
-      score += weights.salaryMatch;
-      reasons.push({ id: "reason_salary", label: "Pretensão compatível", matched: true });
-    }
-
+    // Seniority
     if (this.isSeniorityCompatible(profile, job) && profile.seniority) {
-      score += weights.seniorityMatch;
+      score += weights.seniorityMax;
       reasons.push({ id: "reason_seniority", label: "Senioridade compatível", matched: true });
     } else if (!this.isSeniorityCompatible(profile, job) && profile.seniority) {
       score += weights.seniorityMismatchPenalty;
       reasons.push({ id: "reason_seniority", label: "Senioridade incompatível", matched: false });
     }
 
-    let finalScore = Math.max(0, Math.min(100, score));
+    // Modality
+    const modalityMatch =
+      !profile.modality || profile.modality === "any" || profile.modality === job.modality;
+    if (modalityMatch && profile.modality) {
+      score += weights.modalityMax;
+      reasons.push({
+        id: "reason_modality",
+        label: profile.modality === "any" ? "Aceita qualquer modalidade" : "Modalidade compatível",
+        matched: true,
+      });
+    } else if (profile.modality && profile.modality !== "any") {
+      reasons.push({ id: "reason_modality", label: "Modalidade incompatível", matched: false });
+    }
+
+    // Location
+    if (this.isLocationCompatible(profile, job)) {
+      score += weights.locationMax;
+      reasons.push({ id: "reason_location", label: "Localização compatível", matched: true });
+    }
+
+    // Soft boosts
+    if (this.isSalaryCompatible(profile, job) && profile.salaryExpectation) {
+      score += weights.salaryBoost;
+      reasons.push({ id: "reason_salary", label: "Pretensão compatível", matched: true });
+    }
+
+    const companySlug = (job.companySlug ?? job.companyName ?? "").toLowerCase();
+    if (companySlug && context.favoriteCompanySlugs?.some((slug) => companySlug.includes(slug))) {
+      score += weights.favoriteCompanyBoost;
+      reasons.push({
+        id: "reason_favorite_company",
+        label: "Empresa favorita",
+        matched: true,
+      });
+    }
+    if (companySlug && context.pipelineCompanySlugs?.some((slug) => companySlug.includes(slug))) {
+      score += weights.pipelineHistoryBoost;
+      reasons.push({
+        id: "reason_pipeline_company",
+        label: "Empresa com processo em andamento",
+        matched: true,
+      });
+    }
+    if (companySlug && context.savedJobCompanySlugs?.some((slug) => companySlug.includes(slug))) {
+      score += weights.savedHistoryBoost;
+    }
+    if (context.jobId && context.viewedJobIds?.has(context.jobId)) {
+      score += weights.viewedHistoryBoost;
+    }
+
+    let finalScore = Math.max(0, Math.min(100, Math.round(score)));
     if (profile.area && !areaCompatible) {
       finalScore = Math.min(finalScore, weights.areaIncompatibleScoreCap);
     }
@@ -189,8 +290,11 @@ export class MatchEngineService {
   private isLocationCompatible(profile: MatchProfileInput, job: MatchJobInput): boolean {
     const preference = profile.locationPreference;
     const jobLocation = job.location ?? "";
+    if (job.modality === "remote") return true;
     if (!preference) {
-      return profile.location ? jobLocation.toLowerCase().includes(profile.location.toLowerCase()) : true;
+      return profile.location
+        ? jobLocation.toLowerCase().includes(profile.location.toLowerCase())
+        : true;
     }
     if (preference.scope === "country") return true;
     if (preference.scope === "state" && preference.state) {

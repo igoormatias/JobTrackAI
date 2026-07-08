@@ -8,10 +8,14 @@ import { createId } from "../utils/mock-utils";
 const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = {
   new_job: "jobs",
   recommendation: "jobs",
-  job_closed: "jobs",
+  job_closed: "alerts",
   pipeline_change: "pipeline",
   interview_reminder: "calendar",
   dashboard_update: "system",
+  favorite_company: "favorites",
+  followup_reminder: "followup",
+  sync_complete: "system",
+  alert: "alerts",
 };
 
 export type CreateNotificationInput = {
@@ -56,6 +60,26 @@ const notificationDefaults: Record<
     title: "Vaga encerrada",
     message: "Uma vaga que você acompanha não está mais disponível na origem.",
     actionUrl: "/jobs",
+  },
+  favorite_company: {
+    title: "Empresa favorita",
+    message: "Nova vaga publicada por uma empresa que você salvou.",
+    actionUrl: "/jobs",
+  },
+  followup_reminder: {
+    title: "Hora de fazer follow-up",
+    message: "Um processo está há vários dias sem atualização.",
+    actionUrl: "/pipeline",
+  },
+  sync_complete: {
+    title: "Sincronização concluída",
+    message: "Novas vagas foram importadas dos provedores.",
+    actionUrl: "/jobs",
+  },
+  alert: {
+    title: "Alerta",
+    message: "Há um alerta importante sobre seu acompanhamento.",
+    actionUrl: "/notifications",
   },
 };
 

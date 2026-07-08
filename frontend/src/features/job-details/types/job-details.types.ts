@@ -38,6 +38,7 @@ export type JobDescriptionSections = {
   summary: string;
   fullDescription: string;
   requirements: string[];
+  responsibilities: string[];
   desirable: string[];
   benefits: string[];
   additionalInfo: string | null;

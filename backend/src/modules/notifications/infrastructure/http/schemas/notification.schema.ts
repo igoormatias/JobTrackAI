@@ -7,9 +7,21 @@ const notificationTypeSchema = z.enum([
   "interview_reminder",
   "dashboard_update",
   "job_closed",
+  "favorite_company",
+  "followup_reminder",
+  "sync_complete",
+  "alert",
 ]);
 
-const notificationCategorySchema = z.enum(["jobs", "pipeline", "calendar", "system"]);
+const notificationCategorySchema = z.enum([
+  "jobs",
+  "pipeline",
+  "calendar",
+  "system",
+  "followup",
+  "favorites",
+  "alerts",
+]);
 
 export const notificationListQuerySchema = z.object({
   cursor: z.string().optional(),

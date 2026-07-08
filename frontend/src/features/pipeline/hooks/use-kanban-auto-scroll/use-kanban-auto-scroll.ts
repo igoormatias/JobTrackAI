@@ -2,8 +2,8 @@
 
 import { type RefObject, useEffect } from "react";
 
-const EDGE_SIZE = 60;
-const MAX_SPEED = 18;
+const EDGE_SIZE = 90;
+const MAX_SPEED = 28;
 
 export const useKanbanAutoScroll = (
   scrollRef: RefObject<HTMLDivElement | null>,

@@ -1,14 +1,13 @@
 import { load } from "cheerio";
 
 import { parseJobPostingSalary } from "../../shared/utils/parse-job-posting-salary.js";
+import {
+  extractSectionsFromHtml,
+  sanitizeJobHtml,
+} from "../../shared/utils/job-html.utils.js";
+import { inferTechnologiesFromText } from "../../shared/utils/job-search-fields.js";
 import { PROGRAMATHOR_BASE_URL } from "./programathor.constants.js";
 import type { ProgramathorRawJob } from "./programathor.types.js";
-
-const stripHtml = (html: string): string =>
-  load(`<div>${html}</div>`)
-    .text()
-    .replace(/\s+/g, " ")
-    .trim();
 
 const toAbsoluteUrl = (href: string): string => {
   const trimmed = href.trim();
@@ -37,6 +36,7 @@ const mapModalityFromLocation = (location?: string): string | null => {
   const lower = location.toLowerCase();
   if (lower.includes("remoto")) return "remote";
   if (lower.includes("híbrido") || lower.includes("hibrido")) return "hybrid";
+  if (lower.includes("presencial") || lower.includes("on-site")) return "onsite";
   return null;
 };
 
@@ -46,6 +46,7 @@ const mapSeniorityFromText = (text?: string): string | null => {
   if (lower.includes("sênior") || lower.includes("senior")) return "senior";
   if (lower.includes("pleno")) return "mid";
   if (lower.includes("júnior") || lower.includes("junior")) return "junior";
+  if (lower.includes("estágio") || lower.includes("estagio")) return "intern";
   return null;
 };
 
@@ -131,15 +132,23 @@ type JobPostingLd = {
 };
 
 const extractJobPostingJsonLd = (html: string): JobPostingLd | null => {
-  const match = html.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i);
-  if (!match?.[1]) return null;
+  const matches = html.matchAll(
+    /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+  );
 
-  try {
-    const parsed = JSON.parse(match[1].trim()) as JobPostingLd;
-    return parsed["@type"] === "JobPosting" ? parsed : null;
-  } catch {
-    return null;
+  for (const match of matches) {
+    if (!match[1]) continue;
+    try {
+      const parsed = JSON.parse(match[1].trim()) as JobPostingLd | JobPostingLd[];
+      const candidates = Array.isArray(parsed) ? parsed : [parsed];
+      const posting = candidates.find((item) => item["@type"] === "JobPosting");
+      if (posting) return posting;
+    } catch {
+      // continue
+    }
   }
+
+  return null;
 };
 
 const resolveLocationFromLd = (ld: JobPostingLd): string | undefined => {
@@ -151,7 +160,10 @@ const resolveLocationFromLd = (ld: JobPostingLd): string | undefined => {
   return parts.length > 0 ? parts.join(", ") : undefined;
 };
 
-export const parseProgramathorJobViewHtml = (html: string, sourceUrl: string): ProgramathorRawJob | null => {
+export const parseProgramathorJobViewHtml = (
+  html: string,
+  sourceUrl: string,
+): ProgramathorRawJob | null => {
   const externalId = extractProgramathorExternalId(sourceUrl);
   if (!externalId) return null;
 
@@ -172,29 +184,47 @@ export const parseProgramathorJobViewHtml = (html: string, sourceUrl: string): P
   if (!title) return null;
 
   const location = resolveLocationFromLd(ld ?? {}) || undefined;
-  const description = ld?.description ? stripHtml(ld.description).slice(0, 4000) : undefined;
+  const rawHtmlDescription = ld?.description ?? "";
+  const sections = extractSectionsFromHtml(
+    rawHtmlDescription || `<p>${title} na ${company || "Empresa"}</p>`,
+  );
+  const description = sections.descriptionText.slice(0, 8000);
+  const descriptionHtml = sanitizeJobHtml(rawHtmlDescription) ?? sections.descriptionHtml;
   const salaryFromLd = ld?.baseSalary ? parseJobPostingSalary(ld.baseSalary) : null;
   const tags = $("span.tag.color-white.tag-hover, span.tag-list")
     .map((_, tag) => $(tag).text().trim())
     .get()
     .filter(Boolean);
 
+  const technologies = [
+    ...new Set([...tags, ...inferTechnologiesFromText(`${title} ${description}`)]),
+  ];
+
   const modality =
     ld?.jobLocationType === "TELECOMMUTE"
       ? "remote"
       : mapModalityFromLocation(location ?? $("a[href='/jobs-city/remoto']").parent().text());
+
+  const seniority =
+    mapSeniorityFromText(title) ??
+    mapSeniorityFromText($(".cell-list-content-icon").text()) ??
+    null;
 
   return {
     title,
     company: company || "Empresa não informada",
     url: sourceUrl,
     location,
-    tags: [...new Set(tags)],
-    seniority: null,
+    tags: technologies,
+    seniority,
     modality,
     salaryMin: salaryFromLd?.salaryMin ?? null,
     salaryMax: salaryFromLd?.salaryMax ?? null,
     description,
+    descriptionHtml,
+    requirements: sections.requirements,
+    responsibilities: sections.responsibilities,
+    benefits: sections.benefits,
     publishedAt: ld?.datePosted,
     externalId,
   };

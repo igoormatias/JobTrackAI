@@ -2,11 +2,14 @@ import type { DomainEvent } from "../../../shared/domain/domain-event.js";
 import { PIPELINE_STAGE_LABELS } from "../../../shared/domain/pipeline-stage.js";
 import type { NotificationService } from "./notification.service.js";
 import {
+  FavoriteCompanyJobEvent,
+  FollowupReminderEvent,
   InterviewReminderEvent,
   JobFavoritedEvent,
   PriorityChangedEvent,
   ProcessCreatedEvent,
   StatusChangedEvent,
+  SyncCompleteEvent,
 } from "../domain/events/notification-events.js";
 
 const stageLabel = (stage: string): string =>
@@ -21,6 +24,9 @@ export class NotificationEventHandler {
     eventBus.subscribe("job_favorited", (event) => this.onJobFavorited(event));
     eventBus.subscribe("priority_changed", (event) => this.onPriorityChanged(event));
     eventBus.subscribe("interview_reminder", (event) => this.onInterviewReminder(event));
+    eventBus.subscribe("followup_reminder", (event) => this.onFollowupReminder(event));
+    eventBus.subscribe("sync_complete", (event) => this.onSyncComplete(event));
+    eventBus.subscribe("favorite_company_job", (event) => this.onFavoriteCompanyJob(event));
   }
 
   private async onProcessCreated(event: DomainEvent): Promise<void> {
@@ -61,12 +67,13 @@ export class NotificationEventHandler {
 
     await this.notificationService.create({
       userId: event.payload.userId,
-      type: "pipeline_change",
-      title: "Vaga favoritada",
-      message: `${event.payload.jobTitle} · ${event.payload.companyName} foi marcada como favorita.`,
+      type: "favorite_company",
+      title: "Empresa favorita",
+      message: `${event.payload.jobTitle} · ${event.payload.companyName} foi salva. Vagas futuras desta empresa serão destacadas.`,
       actionUrl: `/jobs`,
       metadata: {
         trackingId: event.payload.trackingId,
+        companyName: event.payload.companyName,
       },
     });
   }
@@ -104,6 +111,58 @@ export class NotificationEventHandler {
         interviewId: event.payload.interviewId,
         scheduledAt: event.payload.scheduledAt,
         reminderKind: event.payload.reminderKind,
+      },
+    });
+  }
+
+  private async onFollowupReminder(event: DomainEvent): Promise<void> {
+    if (!(event instanceof FollowupReminderEvent)) return;
+
+    await this.notificationService.create({
+      userId: event.payload.userId,
+      type: "followup_reminder",
+      title: "Hora de fazer follow-up",
+      message: `${event.payload.jobTitle} · ${event.payload.companyName} está há ${event.payload.daysIdle} dias em ${stageLabel(event.payload.stage)}.`,
+      actionUrl: `/pipeline`,
+      metadata: {
+        trackingId: event.payload.trackingId,
+        stage: event.payload.stage,
+        daysIdle: event.payload.daysIdle,
+      },
+    });
+  }
+
+  private async onSyncComplete(event: DomainEvent): Promise<void> {
+    if (!(event instanceof SyncCompleteEvent)) return;
+    if (event.payload.importedCount <= 0) return;
+
+    await this.notificationService.create({
+      userId: event.payload.userId,
+      type: "sync_complete",
+      title: "Sincronização concluída",
+      message: `${event.payload.providerName}: ${event.payload.importedCount} novas vagas de ${event.payload.foundCount} encontradas.`,
+      actionUrl: `/jobs`,
+      metadata: {
+        providerName: event.payload.providerName,
+        importedCount: event.payload.importedCount,
+        foundCount: event.payload.foundCount,
+      },
+    });
+  }
+
+  private async onFavoriteCompanyJob(event: DomainEvent): Promise<void> {
+    if (!(event instanceof FavoriteCompanyJobEvent)) return;
+
+    await this.notificationService.create({
+      userId: event.payload.userId,
+      type: "favorite_company",
+      title: "Nova vaga de empresa favorita",
+      message: `${event.payload.jobTitle} · ${event.payload.companyName} acabou de ser publicada.`,
+      actionUrl: `/jobs/${event.payload.jobId}`,
+      metadata: {
+        jobId: event.payload.jobId,
+        companyName: event.payload.companyName,
+        matchScore: event.payload.matchScore ?? null,
       },
     });
   }

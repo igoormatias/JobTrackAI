@@ -1,21 +1,29 @@
-import type { NotificationType } from "../entities/notification.entity.js";
-
-export type NotificationCategory = "jobs" | "pipeline" | "calendar" | "system";
-export type NotificationPriority = "low" | "normal" | "high";
+import type {
+  NotificationCategory,
+  NotificationPriority,
+  NotificationType,
+} from "../entities/notification.entity.js";
 
 const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = {
   new_job: "jobs",
   recommendation: "jobs",
-  job_closed: "jobs",
+  job_closed: "alerts",
   pipeline_change: "pipeline",
   interview_reminder: "calendar",
   dashboard_update: "system",
+  favorite_company: "favorites",
+  followup_reminder: "followup",
+  sync_complete: "system",
+  alert: "alerts",
 };
 
 const TYPE_TO_PRIORITY: Partial<Record<NotificationType, NotificationPriority>> = {
   new_job: "high",
   interview_reminder: "high",
   job_closed: "normal",
+  favorite_company: "high",
+  followup_reminder: "normal",
+  alert: "high",
 };
 
 export const notificationCategoryMapper = {

@@ -18,7 +18,7 @@ export const JobRelatedJobsSection = ({ jobs }: JobRelatedJobsSectionProps) => {
       <CardHeader>
         <CardTitle className="text-base">Vagas relacionadas</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-3 lg:grid-cols-1">
+      <CardContent className="grid gap-3 sm:grid-cols-1 xl:grid-cols-1">
         {jobs.map((job) => (
           <RelatedJobCard
             key={job.id}

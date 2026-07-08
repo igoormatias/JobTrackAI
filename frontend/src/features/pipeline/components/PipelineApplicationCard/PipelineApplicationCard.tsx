@@ -23,6 +23,7 @@ import {
   DropdownItem,
   DropdownTrigger,
 } from "@/components/ui/Dropdown";
+import { ACTION_LABELS } from "@/constants/action-labels";
 import { FAVORITE_JOB_BADGE_CLASS, FAVORITE_JOB_SURFACE_CLASS } from "@/features/jobs/constants/jobs-constants";
 import { formatModality } from "@/features/jobs/utils/job-formatters";
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
@@ -74,10 +75,10 @@ const PipelineApplicationCardComponent = ({
 
   const menuItems = (
     <>
-      <DropdownItem onClick={() => onOpenDetails(application)}>Abrir processo</DropdownItem>
-      {onEdit ? <DropdownItem onClick={() => onEdit(application)}>Editar processo</DropdownItem> : null}
+      <DropdownItem onClick={() => onOpenDetails(application)}>{ACTION_LABELS.openProcess}</DropdownItem>
+      {onEdit ? <DropdownItem onClick={() => onEdit(application)}>{ACTION_LABELS.editProcess}</DropdownItem> : null}
       <DropdownItem onClick={() => openJobUrl({ sourceUrl: job.sourceUrl, status: job.status })}>
-        Abrir vaga
+        {ACTION_LABELS.openOriginalJob}
       </DropdownItem>
       {onChangeStage ? (
         <DropdownItem onClick={() => onChangeStage(application)}>Alterar status</DropdownItem>
@@ -123,7 +124,7 @@ const PipelineApplicationCardComponent = ({
         variant="ghost"
         className="h-7 w-7 p-0"
         onClick={handleOpenJob}
-        aria-label="Abrir vaga"
+        aria-label="Abrir vaga original"
       >
         <ExternalLink className="h-3.5 w-3.5" />
       </Button>

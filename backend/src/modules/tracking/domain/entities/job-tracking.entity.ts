@@ -83,6 +83,7 @@ export type CreateManualJobInput = {
   area?: string;
   modality?: string;
   location?: string;
+  seniority?: string;
 };
 
 export type CreateTrackingInput = {

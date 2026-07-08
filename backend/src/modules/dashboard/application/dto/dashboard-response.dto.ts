@@ -90,12 +90,29 @@ export type DashboardJobSyncDto = {
   }>;
 };
 
+export type DashboardTopJobDto = {
+  id: string;
+  title: string;
+  companyName: string;
+  companySlug: string | null;
+  modality: string | null;
+  location: string | null;
+  source: string;
+  sourceUrl: string | null;
+  matchScore: number;
+  matchLabel: string;
+  reasons: Array<{ id: string; label: string; matched: boolean }>;
+  publishedAt: string;
+};
+
 export type DashboardDataDto = {
   kpis: DashboardKpiDto[];
   jobsByArea: DashboardChartPointDto[];
   applicationsByStage: DashboardChartPointDto[];
   topTechnologies: DashboardChartPointDto[];
   topCompanies: DashboardCompanyInsightDto[];
+  /** Highly compatible jobs only (match >= 60). Empty when none. */
+  topJobs: DashboardTopJobDto[];
   recentActivities: DashboardActivityDto[];
   upcomingInterviews: DashboardInterviewDto[];
   insight: DashboardInsightDto;

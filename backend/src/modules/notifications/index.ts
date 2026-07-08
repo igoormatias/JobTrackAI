@@ -12,5 +12,8 @@ export {
   PriorityChangedEvent,
   InterviewReminderEvent,
   JobClosedEvent,
+  FollowupReminderEvent,
+  SyncCompleteEvent,
+  FavoriteCompanyJobEvent,
   NotificationCreatedEvent,
 } from "./domain/events/notification-events.js";

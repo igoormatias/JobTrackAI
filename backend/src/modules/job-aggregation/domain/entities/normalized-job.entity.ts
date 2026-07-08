@@ -2,7 +2,12 @@ export type NormalizedJob = {
   title: string;
   company: string;
   description: string;
+  descriptionHtml?: string | null;
   technologies: string[];
+  requirements?: string[];
+  benefits?: string[];
+  responsibilities?: string[];
+  area?: string | null;
   seniority?: string | null;
   modality?: string | null;
   location?: string | null;

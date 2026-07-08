@@ -4,9 +4,20 @@ export type NotificationType =
   | "pipeline_change"
   | "interview_reminder"
   | "dashboard_update"
-  | "job_closed";
+  | "job_closed"
+  | "favorite_company"
+  | "followup_reminder"
+  | "sync_complete"
+  | "alert";
 
-export type NotificationCategory = "jobs" | "pipeline" | "calendar" | "system";
+export type NotificationCategory =
+  | "jobs"
+  | "pipeline"
+  | "calendar"
+  | "system"
+  | "followup"
+  | "favorites"
+  | "alerts";
 export type NotificationPriority = "low" | "normal" | "high";
 
 export type NotificationEntity = {

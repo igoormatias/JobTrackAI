@@ -73,6 +73,12 @@ export type CatalogJobUpsertInput = {
   lastCheckedAt?: Date | null;
   removedAt?: Date | null;
   metadata?: Record<string, unknown>;
+  searchText?: string | null;
+  technologyText?: string | null;
+  technologySlugs?: string[];
+  requirementsText?: string | null;
+  benefitsText?: string | null;
+  descriptionHtml?: string | null;
 };
 
 export type UserJobContextQuery = {

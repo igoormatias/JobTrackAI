@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 
+import { AppErrorBoundary } from "@/components/feedback/AppErrorBoundary";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProviderAutoSync } from "@/features/dashboard/components/ProviderAutoSync";
 
@@ -12,7 +13,7 @@ export type AuthenticatedLayoutProps = {
 export const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => (
   <AppShell>
     <ProviderAutoSync />
-    {children}
+    <AppErrorBoundary>{children}</AppErrorBoundary>
   </AppShell>
 );
 

@@ -1,4 +1,8 @@
 import { jobTitleNormalizer } from "../../../match/domain/services/job-title-normalizer.service.js";
+import {
+  buildJobSearchFields,
+  inferTechnologiesFromText,
+} from "../../../../shared/utils/job-search-fields.js";
 import type { CreateManualJobInput } from "../../../tracking/domain/entities/job-tracking.entity.js";
 import type { CatalogJobUpsertInput } from "../../domain/value-objects/catalog-list-filters.js";
 
@@ -13,6 +17,20 @@ const slugify = (value: string): string =>
 export const manualJobToCatalogInput = (input: CreateManualJobInput): CatalogJobUpsertInput => {
   const companySlug = slugify(input.companyName);
   const titleSlug = slugify(input.title);
+  const description = input.description ?? `${input.title} na ${input.companyName}`;
+  const inferredTech = inferTechnologiesFromText(`${input.title} ${description}`);
+  const techMeta = inferredTech.map((name, index) => ({
+    id: `tech_${slugify(name)}_${index}`,
+    name,
+    slug: slugify(name),
+  }));
+  const searchFields = buildJobSearchFields({
+    title: input.title,
+    companyName: input.companyName,
+    location: input.location,
+    description,
+    technologies: techMeta,
+  });
 
   return {
     companyName: input.companyName,
@@ -20,7 +38,7 @@ export const manualJobToCatalogInput = (input: CreateManualJobInput): CatalogJob
     area: input.area ?? jobTitleNormalizer.inferArea(input.title) ?? "other",
     title: input.title,
     slug: slugify(`${input.title}-${input.companyName}-${input.source}`),
-    description: input.description ?? `${input.title} na ${input.companyName}`,
+    description,
     sourceUrl: input.sourceUrl ?? null,
     source: input.source,
     externalId:
@@ -29,11 +47,18 @@ export const manualJobToCatalogInput = (input: CreateManualJobInput): CatalogJob
         : `manual-${input.source}-${companySlug}-${titleSlug}`,
     modality: input.modality ?? null,
     location: input.location ?? null,
+    seniority: input.seniority ?? null,
     isCatalog: true,
     publishedAt: new Date(),
     lastCheckedAt: new Date(),
+    searchText: searchFields.searchText,
+    technologyText: searchFields.technologyText,
+    technologySlugs: searchFields.technologySlugs,
+    requirementsText: searchFields.requirementsText,
+    benefitsText: searchFields.benefitsText,
+    descriptionHtml: searchFields.descriptionHtml,
     metadata: {
-      technologies: [],
+      technologies: techMeta,
       requirements: [],
       benefits: [],
       company: {
