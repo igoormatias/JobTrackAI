@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { DashboardInsightCardProps } from "../../types";
 
 export const DashboardInsightCard = ({ insight }: DashboardInsightCardProps) => (
-  <Card className="border-primary/20 bg-primary/5">
+  <Card className="h-full border-primary/20 bg-primary/5">
     <CardHeader className="pb-2">
       <div className="flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />

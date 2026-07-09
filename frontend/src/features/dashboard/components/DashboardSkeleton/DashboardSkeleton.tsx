@@ -18,13 +18,16 @@ export const DashboardSkeleton = () => (
     </div>
 
     <div className={DASHBOARD_LAYOUT.grid}>
-      <Skeleton className={`h-48 ${DASHBOARD_LAYOUT.insight}`} />
-      <Skeleton className={`h-64 ${DASHBOARD_LAYOUT.chart}`} />
       <Skeleton className={`h-80 ${DASHBOARD_LAYOUT.topJobs}`} />
       <Skeleton className={`h-80 ${DASHBOARD_LAYOUT.interviews}`} />
+      <Skeleton className={`h-64 ${DASHBOARD_LAYOUT.chart}`} />
+      <Skeleton className={`h-48 ${DASHBOARD_LAYOUT.insight}`} />
       <Skeleton className={`h-72 ${DASHBOARD_LAYOUT.timeline}`} />
       <Skeleton className={`h-56 ${DASHBOARD_LAYOUT.companies}`} />
       <Skeleton className={`h-56 ${DASHBOARD_LAYOUT.technologies}`} />
+      <Skeleton className={`h-56 ${DASHBOARD_LAYOUT.pipeline}`} />
+      <Skeleton className={`h-40 ${DASHBOARD_LAYOUT.sync}`} />
+      <Skeleton className={`h-40 ${DASHBOARD_LAYOUT.health}`} />
     </div>
   </div>
 );

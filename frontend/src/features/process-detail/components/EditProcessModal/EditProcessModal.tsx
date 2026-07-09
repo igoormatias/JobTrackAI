@@ -8,12 +8,12 @@ import { z } from "zod";
 import { SkillsSelector } from "@/components/data-display/SkillsSelector";
 import { Button } from "@/components/ui/Button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/Drawer";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import {
@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { PIPELINE_COLUMN_CONFIG } from "@/features/pipeline/constants/pipeline-columns";
 import { PipelineApplicationTimeline } from "@/features/pipeline/components/PipelineApplicationTimeline";
 import { useIsDesktop } from "@/hooks/use-breakpoint";
+import { cn } from "@/lib/utils";
 import type { JobPriority, PipelineStage, TimelineEvent } from "@/types";
 
 import type { TrackingDetail, UpdateProcessPayload } from "@/features/tracking/services/tracking-service";
@@ -163,21 +164,21 @@ export const EditProcessModal = ({
   const timeline = mapTimeline(tracking);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side={isDesktop ? "right" : "bottom"}
-        className={
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className={cn(
+          "flex flex-col gap-0 overflow-hidden p-0",
           isDesktop
-            ? "flex h-full w-full max-w-2xl flex-col overflow-hidden p-0"
-            : "flex max-h-[92dvh] flex-col overflow-hidden rounded-t-xl p-0"
-        }
+            ? "h-[85vh] max-h-[90vh] w-[min(62.5rem,calc(100vw-4rem))]"
+            : "fixed inset-0 left-0 top-0 h-dvh max-h-dvh w-screen max-w-none translate-x-0 translate-y-0 rounded-none",
+        )}
       >
-        <SheetHeader className="shrink-0 border-b border-border px-6 py-4">
-          <SheetTitle>Editar processo</SheetTitle>
-          <SheetDescription>
+        <DialogHeader className="shrink-0 border-b border-border px-6 py-4 text-left">
+          <DialogTitle>Editar processo</DialogTitle>
+          <DialogDescription>
             {tracking.job.title} · {tracking.job.company.name}
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
           <Tabs defaultValue="dados" className="flex min-h-0 flex-1 flex-col px-6 pt-4">
@@ -373,7 +374,7 @@ export const EditProcessModal = ({
             </Button>
           </div>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 };

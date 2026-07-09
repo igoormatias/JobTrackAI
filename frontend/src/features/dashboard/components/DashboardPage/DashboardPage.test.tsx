@@ -45,5 +45,6 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Insight da semana")).toBeInTheDocument();
     expect(screen.getByText("Melhores vagas")).toBeInTheDocument();
     expect(screen.getByText("Atividades recentes")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver pipeline" })).toHaveAttribute("href", "/pipeline");
   });
 });

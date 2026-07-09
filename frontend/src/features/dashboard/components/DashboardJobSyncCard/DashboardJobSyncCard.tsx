@@ -45,7 +45,7 @@ export const DashboardJobSyncCard = ({ jobSync }: DashboardJobSyncCardProps) => 
   )?.label;
 
   return (
-  <Card>
+  <Card className="h-full">
     <CardHeader className="flex flex-row items-center gap-2 space-y-0">
       <RefreshCw className="h-4 w-4 text-muted-foreground" />
       <CardTitle className="text-base">Sincronização de vagas</CardTitle>

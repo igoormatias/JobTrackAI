@@ -17,6 +17,7 @@ import { MatchReasonsList } from "@/features/recommendations/components/MatchRea
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
 import { formatSalaryRange } from "@/features/dashboard/utils/format-salary-range";
 import { useIsDesktop } from "@/hooks/use-breakpoint";
+import { openJobUrl } from "@/lib/jobs/open-job-url";
 import { cn } from "@/lib/utils";
 import type { Job, PipelineStage } from "@/types";
 
@@ -68,6 +69,14 @@ export const JobCard = memo(
     const isTracked = Boolean(job.isTracked ?? job.trackingId);
     const pipelineHref = job.trackingId ? `/pipeline/${job.trackingId}` : "/pipeline";
     const isDesktop = useIsDesktop();
+
+    const handleOpenOriginalJob = () => {
+      if (onOpenJob) {
+        onOpenJob(job);
+        return;
+      }
+      openJobUrl({ sourceUrl: job.sourceUrl, status: job.status });
+    };
 
     const metaBadges = (
       <div className="flex flex-wrap items-center gap-1.5">
@@ -125,7 +134,7 @@ export const JobCard = memo(
           type="button"
           size="sm"
           variant="outline"
-          onClick={() => onOpenJob?.(job)}
+          onClick={handleOpenOriginalJob}
           className="w-full sm:w-auto"
           title={ACTION_TOOLTIPS.openOriginalJob}
           disabled={!job.sourceUrl}

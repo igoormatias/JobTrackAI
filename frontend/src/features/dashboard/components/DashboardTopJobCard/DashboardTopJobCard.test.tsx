@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { DashboardTopJobCard } from "./DashboardTopJobCard";
@@ -43,7 +44,19 @@ describe("DashboardTopJobCard", () => {
 
     expect(screen.getByText("Senior Frontend Engineer")).toBeInTheDocument();
     expect(screen.getByText(/Nubank/)).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "Ver descrição" })[0]).toHaveAttribute("href", "/jobs/job_1");
+    expect(screen.getByRole("link", { name: "Ver descrição" })).toHaveAttribute("href", "/jobs/job_1");
     expect(screen.getByText(/92%/)).toBeInTheDocument();
+  });
+
+  it("opens original job url via JobCard fallback", async () => {
+    const user = userEvent.setup();
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+
+    render(<DashboardTopJobCard job={job} />);
+
+    await user.click(screen.getByRole("button", { name: /Abrir vaga original/i }));
+
+    expect(openSpy).toHaveBeenCalledWith("https://example.com", "_blank", "noopener,noreferrer");
+    openSpy.mockRestore();
   });
 });

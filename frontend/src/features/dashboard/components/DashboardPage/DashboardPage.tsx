@@ -14,6 +14,7 @@ import { DashboardInsightCard } from "../DashboardInsightCard";
 import { DashboardInterviewsCard } from "../DashboardInterviewsCard";
 import { DashboardJobSyncCard } from "../DashboardJobSyncCard";
 import { DashboardKpiGrid } from "../DashboardKpiGrid";
+import { DashboardPipelineCard } from "../DashboardPipelineCard";
 import { DashboardSkeleton } from "../DashboardSkeleton";
 import { DashboardTechnologiesCard } from "../DashboardTechnologiesCard";
 import { DashboardTopJobsSection } from "../DashboardTopJobsSection";
@@ -43,19 +44,9 @@ export const DashboardPage = () => {
   return (
     <div className={`${DASHBOARD_LAYOUT.page} min-w-0`}>
       <DashboardWelcome />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <DashboardJobSyncCard jobSync={data.jobSync} />
-        <DashboardHealthCard providerHealth={data.jobSync.providerHealth} />
-      </div>
       <DashboardKpiGrid kpis={data.kpis} />
 
       <div className={DASHBOARD_LAYOUT.grid}>
-        <div className={DASHBOARD_LAYOUT.insight}>
-          <DashboardInsightCard insight={data.insight} />
-        </div>
-        <div className={DASHBOARD_LAYOUT.chart}>
-          <DashboardApplicationsChart data={data.applicationsTimeline} />
-        </div>
         <div className={DASHBOARD_LAYOUT.topJobs}>
           <DashboardTopJobsSection jobs={topJobs} isLoading={isTopJobsLoading} />
         </div>
@@ -65,6 +56,12 @@ export const DashboardPage = () => {
             hasCalendarIntegration={data.hasCalendarIntegration}
           />
         </div>
+        <div className={DASHBOARD_LAYOUT.chart}>
+          <DashboardApplicationsChart data={data.applicationsTimeline} />
+        </div>
+        <div className={DASHBOARD_LAYOUT.insight}>
+          <DashboardInsightCard insight={data.insight} />
+        </div>
         <div className={DASHBOARD_LAYOUT.timeline}>
           <DashboardActivityTimeline activities={data.recentActivities} />
         </div>
@@ -73,6 +70,15 @@ export const DashboardPage = () => {
         </div>
         <div className={DASHBOARD_LAYOUT.technologies}>
           <DashboardTechnologiesCard technologies={data.topTechnologies} />
+        </div>
+        <div className={DASHBOARD_LAYOUT.pipeline}>
+          <DashboardPipelineCard applicationsByStage={data.applicationsByStage} />
+        </div>
+        <div className={DASHBOARD_LAYOUT.sync}>
+          <DashboardJobSyncCard jobSync={data.jobSync} />
+        </div>
+        <div className={DASHBOARD_LAYOUT.health}>
+          <DashboardHealthCard providerHealth={data.jobSync.providerHealth} />
         </div>
       </div>
     </div>

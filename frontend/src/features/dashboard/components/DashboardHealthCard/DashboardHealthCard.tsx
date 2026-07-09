@@ -28,7 +28,7 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline" | "warn
 };
 
 export const DashboardHealthCard = ({ providerHealth }: DashboardHealthCardProps) => (
-  <Card>
+  <Card className="h-full">
     <CardHeader className="flex flex-row items-center gap-2 space-y-0">
       <Activity className="h-4 w-4 text-muted-foreground" />
       <CardTitle className="text-base">Saúde dos providers</CardTitle>
