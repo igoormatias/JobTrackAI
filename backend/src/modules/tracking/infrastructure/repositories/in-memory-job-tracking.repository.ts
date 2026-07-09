@@ -382,7 +382,7 @@ export class InMemoryJobTrackingRepository {
         job.company = { ...job.company, name: input.companyName };
       }
       if (input.title !== undefined) job.title = input.title;
-      if (input.sourceUrl !== undefined) job.sourceUrl = input.sourceUrl ?? null;
+      if (input.sourceUrl !== undefined) job.sourceUrl = input.sourceUrl ?? "";
       if (input.description !== undefined) job.description = input.description ?? "";
       job.updatedAt = new Date().toISOString();
     }
