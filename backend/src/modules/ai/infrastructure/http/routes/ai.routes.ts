@@ -16,6 +16,11 @@ import {
   prismaUserSkillRepository,
 } from "../../repositories/prisma-skill-catalog.repository.js";
 import { AiCareerAnalysisController } from "../controllers/ai-career-analysis.controller.js";
+import { AiSkillsController } from "../controllers/ai-skills.controller.js";
+import {
+  NormalizeSkillsUseCase,
+  SearchSkillsCatalogUseCase,
+} from "../../../application/use-cases/skills.use-cases.js";
 
 const buildCareerAnalysisService = (): CareerAnalysisService =>
   new CareerAnalysisService(
@@ -38,6 +43,14 @@ export const createAiRoutes = (): Router => {
 
   router.get("/career-analysis/:trackingId", controller.get);
   router.post("/career-analysis/:trackingId", aiCareerRateLimiter, controller.generate);
+
+  const skillNormalizer = new SkillNormalizer(prismaSkillCatalogRepository);
+  const skillsController = new AiSkillsController(
+    new SearchSkillsCatalogUseCase(prismaSkillCatalogRepository),
+    new NormalizeSkillsUseCase(prismaSkillCatalogRepository, skillNormalizer),
+  );
+  router.get("/skills/catalog", skillsController.catalog);
+  router.post("/skills/normalize", aiCareerRateLimiter, skillsController.normalize);
 
   return router;
 };

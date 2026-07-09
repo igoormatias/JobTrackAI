@@ -1,0 +1,53 @@
+---
+description: Arquitetura feature-based, organização, fragments e tamanho de arquivos (frontend)
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Frontend — estrutura e organização
+
+Fonte humana: [frontend/.cursor/rules.md](frontend/.cursor/rules.md)
+
+## Feature-based
+
+Domínios em `src/features/<feature>/` com:
+
+- `components/` — UI da feature
+- `pages/` — composição de telas
+- `hooks/` — comportamento reutilizável da feature
+- `services/` — API / integrações
+- `utils/` — funções puras
+- `types/` — contratos
+
+Reutilizável entre features → `src/components/` (ui, layout, data-display) ou `src/lib/`, `src/types/`.
+
+## Separar responsabilidades
+
+| Pasta | Papel |
+|-------|--------|
+| `components/` | UI |
+| `hooks/` | estado, efeitos, handlers |
+| `utils/` | funções puras |
+| `context/` | estado global do módulo |
+
+Não misturar provider, navegação e utils no mesmo nível sem subpastas.
+
+## Tamanho e fragments
+
+- **> 100 linhas** → dividir o arquivo
+- **> 150 linhas** → obrigatório antes de merge (exceto config pura)
+- Sub-UI interna → `fragments/` (não exportar fora do módulo)
+- Lógica com estado/efeitos → extrair `use-*.ts` (não acumular no `.tsx`)
+
+```bash
+ComponentName/
+  ComponentName.tsx
+  use-component-name.ts
+  component-name.utils.ts
+  fragments/
+  index.ts
+```
+
+## Regra de ouro
+
+Se não sabe onde colocar o arquivo, a estrutura está errada — reorganize antes de adicionar código.

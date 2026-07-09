@@ -1,6 +1,6 @@
 import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
-import { afterAll, afterEach, beforeAll } from "vitest";
+import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
 import { resetAuthStore } from "@/mocks/fixtures/auth-store";
 import { resetFixtureStore } from "@/mocks/fixtures";
@@ -19,6 +19,8 @@ class ResizeObserverMock {
 }
 
 global.ResizeObserver = ResizeObserverMock;
+
+window.open = vi.fn();
 
 afterEach(() => {
   cleanup();

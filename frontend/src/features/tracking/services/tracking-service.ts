@@ -54,6 +54,10 @@ export type TrackingDetail = JobTracking & {
 };
 
 export type UpdateProcessPayload = {
+  companyName?: string;
+  title?: string;
+  sourceUrl?: string | null;
+  description?: string | null;
   notes?: string | null;
   feedback?: string | null;
   priority?: JobPriority;

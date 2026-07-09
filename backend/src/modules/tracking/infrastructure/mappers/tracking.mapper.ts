@@ -109,6 +109,8 @@ export const mapTrackingToEntity = (
       status: tracking.job.status,
       salaryMin: tracking.job.salaryMin,
       salaryMax: tracking.job.salaryMax,
+      description: tracking.job.description ?? "",
+      seniority: tracking.job.seniority ?? undefined,
       isFavorite: tracking.isFavorite,
       priority: tracking.priority as JobPriority,
       visibility: tracking.visibility as JobVisibility,

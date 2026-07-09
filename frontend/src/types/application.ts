@@ -34,6 +34,8 @@ export type PipelineApplicationJob = Pick<
   updatedAt: string;
   source?: Job["source"];
   alternateSources?: Job["alternateSources"];
+  description?: string;
+  seniority?: Job["seniority"];
 };
 
 export type Application = {

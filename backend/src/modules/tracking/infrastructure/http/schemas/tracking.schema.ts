@@ -54,6 +54,10 @@ const salaryExpectationSchema = z
   .optional();
 
 export const updateProcessSchema = z.object({
+  companyName: z.string().min(1).optional(),
+  title: z.string().min(1).optional(),
+  sourceUrl: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
+  description: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   feedback: z.string().nullable().optional(),
   priority: z.enum(JOB_PRIORITIES).optional(),

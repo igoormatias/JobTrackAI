@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { SkillsSelector } from "@/components/data-display/SkillsSelector";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -135,22 +136,15 @@ export const ResumeEditor = ({ initialContent, autoSaveMs = 3000 }: ResumeEditor
           Adicionar experiência
         </Button>
 
-        <div className="space-y-2">
-          <Label htmlFor="hard-skills">Hard skills (slugs separados por vírgula)</Label>
-          <Input
-            id="hard-skills"
-            value={content.hardSkills.join(", ")}
-            onChange={(e) =>
-              updateField(
-                "hardSkills",
-                e.target.value
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean),
-              )
-            }
-          />
-        </div>
+        <SkillsSelector
+          id="hard-skills"
+          label="Hard skills"
+          helpText="Adicione suas competências técnicas. Pressione Enter para criar cada chip."
+          placeholder="Ex.: React, TypeScript, Node.js..."
+          value={content.hardSkills}
+          onChange={(skills) => updateField("hardSkills", skills)}
+          useApiSuggestions
+        />
 
         <ResumeCopyActions content={content} />
       </div>

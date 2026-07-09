@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-import { MultiSelect } from "@/components/data-display/DataDisplay";
+import { SkillsSelector } from "@/components/data-display/SkillsSelector";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -126,14 +126,15 @@ export const JobsFilterFields = ({
     </section>
 
     <section className="space-y-3">
-      <MultiSelect
+      <SkillsSelector
         id="jobs-skills-filter"
         label="Competências"
         placeholder="Filtrar por competência..."
         options={skillOptions}
         value={urlState.skills}
         onChange={(skills) => void setUrlState({ skills })}
-        searchable
+        useApiSuggestions
+        normalizeOnAdd={false}
       />
     </section>
 

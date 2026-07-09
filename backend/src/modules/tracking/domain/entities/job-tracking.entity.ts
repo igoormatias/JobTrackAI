@@ -25,6 +25,8 @@ export type TrackingJobSnapshot = {
   status: string;
   salaryMin: number | null;
   salaryMax: number | null;
+  description?: string;
+  seniority?: string | null;
   isFavorite: boolean;
   priority: JobPriority;
   visibility: JobVisibility;
@@ -109,6 +111,10 @@ export type UpdateTrackingNotesInput = {
 };
 
 export type UpdateProcessInput = {
+  companyName?: string;
+  title?: string;
+  sourceUrl?: string | null;
+  description?: string | null;
   notes?: string | null;
   feedback?: string | null;
   priority?: JobPriority;

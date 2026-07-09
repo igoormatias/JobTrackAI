@@ -25,7 +25,8 @@ import {
 } from "@/components/ui/Dropdown";
 import { ACTION_LABELS } from "@/constants/action-labels";
 import { FAVORITE_JOB_BADGE_CLASS, FAVORITE_JOB_SURFACE_CLASS } from "@/features/jobs/constants/jobs-constants";
-import { formatModality } from "@/features/jobs/utils/job-formatters";
+import { formatModality, formatSeniority } from "@/features/jobs/utils/job-formatters";
+import { PIPELINE_STAGE_LABELS } from "@/features/pipeline/constants/pipeline-columns";
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
 import { openJobUrl } from "@/lib/jobs/open-job-url";
 import { cn } from "@/lib/utils";
@@ -63,8 +64,7 @@ const PipelineApplicationCardComponent = ({
   const { job } = application;
   const stageUpdatedAt = application.lastStageUpdatedAt ?? application.appliedAt;
   const isCompact = density === "compact";
-  const techNames = job.technologies.map((tech) => tech.name).join(", ");
-  const locationLine = [job.location, formatModality(job.modality)].filter(Boolean).join(" · ");
+  const stageLabel = PIPELINE_STAGE_LABELS[application.stage] ?? application.stage;
 
   const handleOpenJob = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -95,7 +95,13 @@ const PipelineApplicationCardComponent = ({
   );
 
   const actionButtons = (
-    <div className={cn("flex shrink-0 items-center gap-0.5", isCompact ? "" : "opacity-0 transition-opacity group-hover:opacity-100")} onClick={stopPropagation}>
+    <div
+      className={cn(
+        "flex shrink-0 items-center gap-0.5",
+        isCompact ? "" : "opacity-0 transition-opacity group-hover:opacity-100",
+      )}
+      onClick={stopPropagation}
+    >
       <Button
         type="button"
         size="sm"
@@ -165,12 +171,29 @@ const PipelineApplicationCardComponent = ({
     </div>
   );
 
+  const metaBadges = (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {job.seniority ? (
+        <Badge variant="secondary" className="text-[10px] font-normal">
+          {formatSeniority(job.seniority)}
+        </Badge>
+      ) : null}
+      <Badge variant="outline" className="text-[10px] font-normal">
+        {formatModality(job.modality)}
+      </Badge>
+      {job.location ? (
+        <Badge variant="outline" className="max-w-full truncate text-[10px] font-normal" title={job.location}>
+          {job.location}
+        </Badge>
+      ) : null}
+    </div>
+  );
+
   return (
     <Card
       data-kanban-card
       className={cn(
         "group border transition-shadow",
-        enableDrag ? "cursor-pointer" : "cursor-pointer",
         job.isFavorite ? FAVORITE_JOB_SURFACE_CLASS : "border-border/60",
         isDragging && "opacity-50 shadow-lg",
         isPending && "opacity-70",
@@ -179,7 +202,8 @@ const PipelineApplicationCardComponent = ({
       aria-label={`${job.title} em ${job.company.name}`}
       onClick={() => onOpenDetails(application)}
     >
-      <CardContent className={cn(isCompact ? "space-y-1.5 p-2.5" : "space-y-2 p-3")}>
+      <CardContent className={cn(isCompact ? "space-y-2 p-2.5" : "space-y-2.5 p-3")}>
+        {/* Header: drag handle + company + favorite + actions */}
         <div className="flex items-start gap-2">
           {enableDrag && dragHandleProps ? (
             <button
@@ -194,23 +218,22 @@ const PipelineApplicationCardComponent = ({
             </button>
           ) : null}
 
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <p
-                  className={cn(
-                    "font-semibold text-foreground",
-                    isCompact ? "truncate text-sm" : "line-clamp-2 text-sm leading-snug",
-                  )}
-                >
-                  {job.title}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">{job.company.name}</p>
-              </div>
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-xs font-medium text-muted-foreground">{job.company.name}</p>
               {job.isFavorite ? (
                 <Badge className={cn(FAVORITE_JOB_BADGE_CLASS, "shrink-0 text-[10px]")}>Favorita</Badge>
               ) : null}
             </div>
+
+            <h3
+              className={cn(
+                "font-semibold leading-snug text-foreground",
+                isCompact ? "line-clamp-2 text-sm" : "line-clamp-2 text-sm",
+              )}
+            >
+              {job.title}
+            </h3>
           </div>
 
           <div className="shrink-0" onClick={stopPropagation}>
@@ -229,20 +252,28 @@ const PipelineApplicationCardComponent = ({
           </div>
         </div>
 
-        <div className={cn("flex items-center justify-between gap-2", isCompact && "gap-1")}>
-          <MatchScoreBadge matchScore={job.matchScore} className={isCompact ? "scale-90 origin-left" : undefined} />
+        {/* Meta badges: seniority, modality, location */}
+        {metaBadges}
+
+        {/* Stage badge */}
+        <Badge
+          variant="outline"
+          className="w-fit border-primary/40 text-[10px] font-medium text-primary"
+          data-testid="pipeline-stage-badge"
+        >
+          {stageLabel}
+        </Badge>
+
+        {/* Footer: match + last update */}
+        <div className="flex items-center justify-between gap-2 border-t border-border/40 pt-2">
+          <MatchScoreBadge matchScore={job.matchScore} className={isCompact ? "origin-left scale-90" : undefined} />
           <span className="shrink-0 text-[11px] text-muted-foreground" data-testid="pipeline-stage-updated-at">
             {formatDistanceToNow(new Date(stageUpdatedAt), { addSuffix: true, locale: ptBR })}
           </span>
         </div>
 
-        {!isCompact && locationLine ? (
-          <p className="truncate text-[11px] text-muted-foreground" title={techNames || undefined}>
-            {locationLine}
-          </p>
-        ) : null}
-
-        <div className="flex items-center justify-between gap-2 lg:hidden" onClick={stopPropagation}>
+        {/* Mobile actions */}
+        <div className="flex items-center justify-end gap-2 lg:hidden" onClick={stopPropagation}>
           {!isCompact ? (
             <Dropdown>
               <DropdownTrigger asChild>

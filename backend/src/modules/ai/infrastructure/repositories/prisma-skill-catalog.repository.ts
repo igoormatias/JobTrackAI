@@ -43,6 +43,29 @@ export class PrismaSkillCatalogRepository implements SkillCatalogRepository {
     const aliases = await prisma.skillAlias.findMany({ include: { skill: true } });
     return aliases.map((a) => ({ aliasSlug: a.aliasSlug, skillSlug: a.skill.slug }));
   }
+
+  async search(query: string, limit = 20): Promise<SkillRecord[]> {
+    const normalized = query.trim();
+    if (!normalized) {
+      const records = await prisma.skill.findMany({
+        take: limit,
+        orderBy: { name: "asc" },
+      });
+      return records.map(mapSkill);
+    }
+
+    const records = await prisma.skill.findMany({
+      where: {
+        OR: [
+          { name: { contains: normalized, mode: "insensitive" } },
+          { slug: { contains: normalized, mode: "insensitive" } },
+        ],
+      },
+      take: limit,
+      orderBy: { name: "asc" },
+    });
+    return records.map(mapSkill);
+  }
 }
 
 export class PrismaUserSkillRepository implements UserSkillRepository {

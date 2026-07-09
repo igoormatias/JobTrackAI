@@ -20,7 +20,7 @@ import type { Application, PipelineColumn, PipelineStage } from "@/types";
 
 import { cn } from "@/lib/utils";
 
-import { PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
+import { PIPELINE_COLUMN_WIDTH, PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
 import type { PipelineDensity } from "../../hooks/use-pipeline-density";
 import { PipelineBoardShell } from "../PipelineBoardShell";
 import { PipelineApplicationCard } from "../PipelineApplicationCard";
@@ -155,7 +155,10 @@ export const PipelineKanbanBoard = ({
 
       <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.18, 0.67, 0.6, 1)" }}>
         {activeApplication ? (
-          <div className="w-[clamp(280px,18vw,360px)] rotate-1 opacity-95 shadow-xl">
+          <div
+            className="rotate-1 opacity-95 shadow-2xl ring-2 ring-primary/40"
+            style={{ width: PIPELINE_COLUMN_WIDTH }}
+          >
             <PipelineApplicationCard
               application={activeApplication}
               onOpenDetails={onOpenDetails}

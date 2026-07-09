@@ -16,6 +16,7 @@ import { PIPELINE_STAGE_LABELS } from "@/features/pipeline/constants/pipeline-co
 import { MatchReasonsList } from "@/features/recommendations/components/MatchReasonsList";
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
 import { formatSalaryRange } from "@/features/dashboard/utils/format-salary-range";
+import { useIsDesktop } from "@/hooks/use-breakpoint";
 import { cn } from "@/lib/utils";
 import type { Job, PipelineStage } from "@/types";
 
@@ -66,6 +67,93 @@ export const JobCard = memo(
     const isCompact = variant === "compact";
     const isTracked = Boolean(job.isTracked ?? job.trackingId);
     const pipelineHref = job.trackingId ? `/pipeline/${job.trackingId}` : "/pipeline";
+    const isDesktop = useIsDesktop();
+
+    const metaBadges = (
+      <div className="flex flex-wrap items-center gap-1.5">
+        {job.seniority ? (
+          <Badge variant="secondary" className="text-xs">
+            {formatSeniority(job.seniority)}
+          </Badge>
+        ) : null}
+        <Badge variant="outline" className="text-xs">
+          {formatModality(job.modality)}
+        </Badge>
+        {job.location ? (
+          <Badge variant="outline" className="max-w-48 truncate text-xs" title={job.location}>
+            {job.location}
+          </Badge>
+        ) : null}
+        {isTracked ? (
+          <Badge
+            variant="outline"
+            className="border-emerald-500/40 text-xs text-emerald-700 dark:text-emerald-300"
+          >
+            Na Pipeline · {getPipelineStageLabel(job.stage)}
+          </Badge>
+        ) : null}
+      </div>
+    );
+
+    const actionButtons = (
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+        <Button
+          type="button"
+          size="sm"
+          variant={job.isFavorite ? "secondary" : "outline"}
+          onClick={() => onFavorite?.(job)}
+          disabled={isFavoritePending}
+          aria-label={job.isFavorite ? "Desfavoritar vaga" : "Salvar vaga"}
+          className="w-full sm:w-auto"
+        >
+          <Bookmark className={cn("mr-1 h-4 w-4 shrink-0", job.isFavorite && "fill-current")} />
+          <span className="truncate">{job.isFavorite ? ACTION_LABELS.savedJob : ACTION_LABELS.saveJob}</span>
+        </Button>
+        <Link href={`/jobs/${job.id}`} onClick={() => onViewDetails?.(job)} className="w-full sm:w-auto">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="w-full sm:w-auto"
+            title={ACTION_TOOLTIPS.viewJobDescription}
+          >
+            <Eye className="mr-1 h-4 w-4 shrink-0" />
+            <span className="truncate">{ACTION_LABELS.viewJobDescription}</span>
+          </Button>
+        </Link>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => onOpenJob?.(job)}
+          className="w-full sm:w-auto"
+          title={ACTION_TOOLTIPS.openOriginalJob}
+          disabled={!job.sourceUrl}
+        >
+          <ExternalLink className="mr-1 h-4 w-4 shrink-0" />
+          <span className="truncate">
+            {job.sourceUrl ? openOriginalJobLabel(job.source) : ACTION_LABELS.noOriginalJob}
+          </span>
+        </Button>
+        {isTracked ? (
+          <Link href={pipelineHref} className="w-full sm:w-auto">
+            <Button type="button" size="sm" className="w-full sm:w-auto">
+              <span className="truncate">{ACTION_LABELS.viewProcess}</span>
+            </Button>
+          </Link>
+        ) : (
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => onAddToPipeline?.(job)}
+            className="w-full sm:w-auto"
+            title={ACTION_TOOLTIPS.startProcess}
+          >
+            <span className="truncate">{ACTION_LABELS.startProcess}</span>
+          </Button>
+        )}
+      </div>
+    );
 
     return (
       <Card
@@ -75,50 +163,39 @@ export const JobCard = memo(
           className,
         )}
       >
-        <CardContent className={cn("flex flex-col gap-4", isCompact ? "p-4" : "p-5")}>
+        <CardContent className={cn("flex flex-col gap-4", isCompact ? "p-4" : "p-4 sm:p-5")}>
+          {/* Header: company → title → match */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-1 items-start gap-3">
-              <Avatar className="h-10 w-10 shrink-0">
+              <Avatar className="hidden h-10 w-10 shrink-0 sm:flex">
                 {job.company.logoUrl ? (
                   <AvatarImage src={job.company.logoUrl} alt={job.company.name} />
                 ) : null}
                 <AvatarFallback>{getCompanyInitials(job.company.name)}</AvatarFallback>
               </Avatar>
-              <div className="min-w-0 flex-1 space-y-1">
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <p className="text-sm font-medium text-muted-foreground">{job.company.name}</p>
                 <div className="flex flex-wrap items-start gap-2">
-                  <h3 className="line-clamp-2 font-semibold leading-snug text-foreground">{job.title}</h3>
-                  <Badge variant="outline" className="shrink-0 text-xs">
-                    {JOB_ENGAGEMENT_LABELS[job.engagementState]}
-                  </Badge>
-                  {job.isFavorite ? (
-                    <Badge className={cn(FAVORITE_JOB_BADGE_CLASS, "shrink-0")}>Favorita</Badge>
-                  ) : null}
-                </div>
-                <p className="truncate text-sm text-muted-foreground">
-                  {job.company.name} · {job.location}
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  {job.seniority ? (
-                    <Badge variant="secondary" className="text-xs">
-                      {formatSeniority(job.seniority)}
+                  <h3 className="line-clamp-2 min-w-0 flex-1 font-semibold leading-snug text-foreground">
+                    {job.title}
+                  </h3>
+                  <div className="flex shrink-0 flex-wrap gap-1.5">
+                    <Badge variant="outline" className="text-[10px] sm:text-xs">
+                      {JOB_ENGAGEMENT_LABELS[job.engagementState]}
                     </Badge>
-                  ) : null}
-                  <Badge variant="outline" className="text-xs">
-                    {formatModality(job.modality)}
-                  </Badge>
-                  {isTracked ? (
-                    <Badge variant="outline" className="border-emerald-500/40 text-xs text-emerald-700 dark:text-emerald-300">
-                      Na Pipeline · {getPipelineStageLabel(job.stage)}
-                    </Badge>
-                  ) : null}
+                    {job.isFavorite ? (
+                      <Badge className={cn(FAVORITE_JOB_BADGE_CLASS, "text-[10px] sm:text-xs")}>Favorita</Badge>
+                    ) : null}
+                  </div>
                 </div>
+                {metaBadges}
                 <p className="truncate text-xs text-muted-foreground">
                   {formatSalaryRange(job.salaryMin, job.salaryMax, job.currency)} · {getJobSourceLabel(job.source)} ·{" "}
                   Publicado {formatPublishedAgo(job.publishedAt)}
                 </p>
               </div>
             </div>
-            <MatchScoreBadge matchScore={job.matchScore} className="shrink-0" />
+            <MatchScoreBadge matchScore={job.matchScore} className="shrink-0 self-start" />
           </div>
 
           {!isCompact ? (
@@ -129,12 +206,16 @@ export const JobCard = memo(
                   <Chip key={tech.id}>{tech.name}</Chip>
                 ))}
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="hidden flex-wrap gap-2 sm:flex">
                 {job.requirements.slice(0, 3).map((requirement) => (
                   <Chip key={requirement}>{requirement}</Chip>
                 ))}
               </div>
-              <MatchReasonsList matchScore={job.matchScore} />
+              <MatchReasonsList
+                matchScore={job.matchScore}
+                maxVisible={isDesktop ? 0 : 3}
+                collapsible={!isDesktop}
+              />
               <JobAvailableSources job={job} />
             </>
           ) : (
@@ -151,61 +232,7 @@ export const JobCard = memo(
             </div>
           )}
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <Button
-              type="button"
-              size="sm"
-              variant={job.isFavorite ? "secondary" : "outline"}
-              onClick={() => onFavorite?.(job)}
-              disabled={isFavoritePending}
-              aria-label={job.isFavorite ? "Desfavoritar vaga" : "Salvar vaga"}
-              className="w-full sm:w-auto"
-            >
-              <Bookmark className={cn("mr-1 h-4 w-4", job.isFavorite && "fill-current")} />
-              {job.isFavorite ? ACTION_LABELS.savedJob : ACTION_LABELS.saveJob}
-            </Button>
-            <Link href={`/jobs/${job.id}`} onClick={() => onViewDetails?.(job)} className="w-full sm:w-auto">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="w-full sm:w-auto"
-                title={ACTION_TOOLTIPS.viewJobDescription}
-              >
-                <Eye className="mr-1 h-4 w-4" />
-                {ACTION_LABELS.viewJobDescription}
-              </Button>
-            </Link>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => onOpenJob?.(job)}
-              className="w-full sm:w-auto"
-              title={ACTION_TOOLTIPS.openOriginalJob}
-              disabled={!job.sourceUrl}
-            >
-              <ExternalLink className="mr-1 h-4 w-4" />
-              {job.sourceUrl ? openOriginalJobLabel(job.source) : ACTION_LABELS.noOriginalJob}
-            </Button>
-            {isTracked ? (
-              <Link href={pipelineHref} className="w-full sm:w-auto">
-                <Button type="button" size="sm" className="w-full sm:w-auto">
-                  {ACTION_LABELS.viewProcess}
-                </Button>
-              </Link>
-            ) : (
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => onAddToPipeline?.(job)}
-                className="w-full sm:w-auto"
-                title={ACTION_TOOLTIPS.startProcess}
-              >
-                {ACTION_LABELS.startProcess}
-              </Button>
-            )}
-          </div>
+          {actionButtons}
         </CardContent>
       </Card>
     );

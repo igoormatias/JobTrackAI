@@ -1,6 +1,7 @@
 # Core Frontend Rules
 
-> Detalhes completos: [rules.md](./rules.md) · Qualidade: [quality.md](./quality.md) · Escopo MVP: [../../docs/MVP_SCOPE.md](../../docs/MVP_SCOPE.md)
+> **Regras ativas no Cursor:** `.cursor/rules/frontend-*.mdc`  
+> Detalhes: [rules.md](./rules.md) · Qualidade: [quality.md](./quality.md) · Escopo MVP: [../../docs/MVP_SCOPE.md](../../docs/MVP_SCOPE.md)
 
 ## Estrutura
 

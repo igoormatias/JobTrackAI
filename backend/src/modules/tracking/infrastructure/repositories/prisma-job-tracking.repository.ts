@@ -341,11 +341,75 @@ export class PrismaJobTrackingRepository {
   }
 
   async updateProcess(userId: string, id: string, input: UpdateProcessInput): Promise<JobTrackingEntity> {
-    const current = await prisma.jobTracking.findFirst({ where: { id, userId } });
+    const current = await prisma.jobTracking.findFirst({
+      where: { id, userId },
+      include: { job: true },
+    });
     if (!current) throw new NotFoundError("Tracking not found");
 
     const data: Prisma.JobTrackingUpdateInput = {};
     const timelineCreates: Prisma.TimelineEventCreateWithoutTrackingInput[] = [];
+
+    const hasJobUpdates =
+      input.companyName !== undefined ||
+      input.title !== undefined ||
+      input.sourceUrl !== undefined ||
+      input.description !== undefined;
+
+    if (hasJobUpdates) {
+      const job = current.job;
+      const jobData: Prisma.JobUpdateInput = {};
+      if (input.companyName !== undefined) jobData.companyName = input.companyName;
+      if (input.title !== undefined) jobData.title = input.title;
+      if (input.sourceUrl !== undefined) jobData.sourceUrl = input.sourceUrl || null;
+      if (input.description !== undefined) jobData.description = input.description;
+
+      const canUpdateInPlace = job.userId === userId;
+
+      if (canUpdateInPlace) {
+        await prisma.job.update({ where: { id: job.id }, data: jobData });
+      } else {
+        const forked = await prisma.job.create({
+          data: {
+            userId,
+            companyName: input.companyName ?? job.companyName,
+            companySlug: job.companySlug,
+            title: input.title ?? job.title,
+            slug: `${job.slug}-fork-${Date.now()}`,
+            description: input.description !== undefined ? input.description : job.description,
+            sourceUrl: input.sourceUrl !== undefined ? input.sourceUrl || null : job.sourceUrl,
+            source: job.source,
+            externalId: `fork-${job.id}-${userId}-${Date.now()}`,
+            contentHash: job.contentHash,
+            area: job.area,
+            seniority: job.seniority,
+            modality: job.modality,
+            location: job.location,
+            salaryMin: job.salaryMin,
+            salaryMax: job.salaryMax,
+            currency: job.currency,
+            status: job.status,
+            isCatalog: false,
+            publishedAt: job.publishedAt,
+            metadata: job.metadata ?? undefined,
+            searchText: job.searchText,
+            technologyText: job.technologyText,
+            technologySlugs: job.technologySlugs,
+            requirementsText: job.requirementsText,
+            benefitsText: job.benefitsText,
+            descriptionHtml: job.descriptionHtml,
+          },
+        });
+        data.job = { connect: { id: forked.id } };
+      }
+
+      timelineCreates.push({
+        type: "note_updated",
+        title: "Dados da vaga atualizados",
+        occurredAt: new Date(),
+        createdById: userId,
+      });
+    }
 
     if (input.notes !== undefined && input.notes !== current.notes) {
       data.notes = input.notes;

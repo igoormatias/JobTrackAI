@@ -1,0 +1,30 @@
+---
+description: Responsividade mobile-first do frontend
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Frontend — responsividade
+
+## Princípio
+
+- **Mobile-first**; adaptar para tablet/desktop — não “espremer” layouts
+- Desktop ≠ mobile esticado; mobile ≠ desktop comprimido
+- Simplificar navegação no mobile: sidebar → drawer, menus compactos, cards reordenados
+
+## Breakpoints
+
+- Desktop: `>= 1024px` (`lg:`)
+- Validar: 320, 375, 390, 414, 768, 1024, 1440, 1920px
+
+## Desktop (`lg+`)
+
+- Sidebar fixa + topbar + conteúdo com `max-width` elegante
+- Grid consistente, espaçamento negativo, borders discretos
+- **Não** usar FAB flutuante do mobile no desktop — CTA fixo na toolbar
+
+## Mobile
+
+- Botões e badges com `flex-wrap` / grid 2 colunas quando necessário
+- `min-w-0` + `line-clamp` / `truncate` conscientes (preferir 2 linhas a corte prematuro)
+- Testar cards densos (jobs, pipeline) sem overflow horizontal

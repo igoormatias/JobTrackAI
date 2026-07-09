@@ -1,0 +1,39 @@
+---
+description: Tailwind v4 — tokens e classes canônicas no frontend
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Frontend — Tailwind v4
+
+## Regras
+
+- ❌ Cores hardcoded → ✅ tokens (`bg-primary`, `text-muted-foreground`, `border-border`)
+- ❌ Arbitrário quando existe canônico → ✅ escala Tailwind / modificadores v4
+- Ordem: **tokens** → **modificadores canônicos** → **escala** → **`h-(--var)`** → `[...]` só se inevitável
+
+## Opacidade
+
+`bg-white/5`, `border-white/8`, `text-primary/80` — não `bg-white/[0.05]`
+
+## Radix / shadcn (data attributes)
+
+`data-disabled:`, `data-state-open:`, `data-state-active:`, `data-side-bottom:` — não `data-[state=open]:`
+
+## Escala e posição
+
+- `min-w-32` não `min-w-[8rem]`
+- `left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2` não `left-[50%]`
+- `h-(--radix-select-trigger-height)` não `h-[var(--radix-select-trigger-height)]`
+
+## Descendentes (cmdk, etc.)
+
+`**:[svg]:size-4` não `[&_svg]:size-4`
+
+## Suporte
+
+`supports-backdrop-filter:` não `supports-[backdrop-filter]:`
+
+## Colchetes `[...]`
+
+Apenas quando não houver equivalente: `max-w-[380px]`, `tracking-[0.18em]`, sombras únicas do design.

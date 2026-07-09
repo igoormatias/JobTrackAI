@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { MultiSelect } from "@/components/data-display/DataDisplay";
+import { SkillsSelector } from "@/components/data-display/SkillsSelector";
 import { Label } from "@/components/ui/Label";
 import {
   Select,
@@ -116,7 +116,7 @@ export const ProfileForm = ({ profile, isSaving = false, onSubmit }: ProfileForm
           </Select>
         </div>
 
-        <MultiSelect
+        <SkillsSelector
           id="account-skills"
           label="Competências"
           helpText="Selecione as competências que você domina na área escolhida."
@@ -124,7 +124,7 @@ export const ProfileForm = ({ profile, isSaving = false, onSubmit }: ProfileForm
           options={skillOptions}
           value={watch("skillNames")}
           onChange={(skills) => setValue("skillNames", skills, { shouldDirty: true })}
-          searchable
+          useApiSuggestions
           error={formState.errors.skillNames?.message}
         />
 

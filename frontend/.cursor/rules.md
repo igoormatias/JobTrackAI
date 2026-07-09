@@ -1,5 +1,21 @@
 # Frontend Architecture Rules
 
+> **Regras ativas no Cursor (agente):** `.cursor/rules/frontend-*.mdc`  
+> Este arquivo é documentação humana espelhada. Ao alterar convenções, atualize os `.mdc` correspondentes.
+
+| Tópico | Rule ativa |
+|--------|------------|
+| Estrutura, fragments, tamanho | `frontend-feature-structure.mdc` |
+| Naming, barrels | `frontend-naming-exports.mdc` |
+| Next.js / data | `frontend-nextjs.mdc` |
+| Responsividade | `frontend-responsiveness.mdc` |
+| Testes | `frontend-testing.mdc` |
+| Tailwind v4 | `frontend-tailwind.mdc` |
+| Qualidade / hooks | `frontend-quality.mdc` |
+| Comentários | `self-documenting-code.mdc` |
+| MVP | `mvp-product-scope.mdc` |
+| MSW | `msw-test-only.mdc` |
+
 ## Escopo MVP (obrigatório)
 
 Antes de implementar: *"Esta funcionalidade ajuda o usuário a encontrar vagas ou acompanhar seu processo seletivo?"*

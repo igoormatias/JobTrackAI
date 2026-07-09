@@ -1,6 +1,6 @@
 "use client";
 
-import { MultiSelect } from "@/components/data-display/DataDisplay";
+import { SkillsSelector } from "@/components/data-display/SkillsSelector";
 
 import { getSkillsForArea } from "../../constants/skills-by-area";
 import type { OnboardingFormState } from "../../types/onboarding.types";
@@ -18,7 +18,7 @@ export const SkillsStep = ({ form, onChange, error }: SkillsStepProps) => {
   }));
 
   return (
-    <MultiSelect
+    <SkillsSelector
       id="onboarding-skills"
       label="Competências principais"
       helpText="Selecione as competências que você domina. As opções dependem da área escolhida."
@@ -26,7 +26,7 @@ export const SkillsStep = ({ form, onChange, error }: SkillsStepProps) => {
       options={options}
       value={form.skills}
       onChange={onChange}
-      searchable
+      useApiSuggestions
       error={error ?? undefined}
     />
   );

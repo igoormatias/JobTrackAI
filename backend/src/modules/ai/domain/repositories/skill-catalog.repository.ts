@@ -5,6 +5,7 @@ export interface SkillCatalogRepository {
   findByAlias(aliasSlug: string): Promise<SkillRecord | null>;
   createCustom(name: string, slug: string): Promise<SkillRecord>;
   listAliases(): Promise<Array<{ aliasSlug: string; skillSlug: string }>>;
+  search(query: string, limit?: number): Promise<SkillRecord[]>;
 }
 
 export interface UserSkillRepository {

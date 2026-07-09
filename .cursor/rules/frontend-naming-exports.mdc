@@ -1,0 +1,43 @@
+---
+description: Naming, barrel exports e imports do frontend
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Frontend — naming e exports
+
+## Componentes React
+
+- Pasta + arquivo: **PascalCase** (`JobCard/JobCard.tsx`)
+- Export: **arrow function** com props tipadas
+- Evitar `export function` em componentes
+- Tipos complexos: `ComponentName.types.ts` quando necessário
+
+## Hooks, services, utils
+
+- Pasta e arquivo: **kebab-case**
+- Ex.: `use-job-filters/use-job-filters.ts`, `job-service/job-service.ts`
+
+## Barrel exports (obrigatório)
+
+Todo módulo relevante: pasta própria + `index.ts`.
+
+```ts
+// ✅
+import { JobCard } from "@/features/jobs/components/JobCard";
+import { Button } from "@/components/ui";
+
+// ❌ deep import
+import { JobCard } from "@/features/jobs/components/JobCard/JobCard";
+```
+
+## Evitar
+
+- `navHashToId.ts` → `nav-hash-to-id.ts`
+- `utils.ts`, `helpers.ts`, `data.ts`
+- Nomes genéricos: `data`, `res`, `item`
+
+## Handlers e booleans
+
+- Handlers: `handleClick`, `handleSubmit`, `handleClose`
+- Booleans: `isLoading`, `isOpen`, `hasError`

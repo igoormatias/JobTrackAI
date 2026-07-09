@@ -1,0 +1,30 @@
+---
+description: Next.js App Router e data fetching no frontend
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Frontend — Next.js
+
+## App Router
+
+- **Server Components** por padrão
+- `'use client'` só quando necessário (estado, eventos, browser APIs)
+- `page.tsx` fino — delegar para feature page:
+
+```tsx
+export default function Page() {
+  return <FeaturePage />;
+}
+```
+
+## Dados
+
+- Buscar no servidor sempre que possível
+- Evitar `useEffect` para fetch simples (preferir Server Components, React Query com dados iniciais, ou hooks dedicados)
+
+## Boas práticas
+
+- `next/link` e `next/image`
+- Validar params de rota
+- Nunca expor secrets no client (`NEXT_PUBLIC_*` apenas para valores públicos)

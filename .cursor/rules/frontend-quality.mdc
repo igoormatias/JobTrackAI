@@ -1,0 +1,45 @@
+---
+description: Qualidade, hooks, reutilização e anti-patterns do frontend
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Frontend — qualidade
+
+Fonte: [frontend/.cursor/quality.md](frontend/.cursor/quality.md)
+
+## Estrutura de módulo
+
+```bash
+useSomething/
+  useSomething.ts
+  useSomething.test.ts
+  index.ts
+```
+
+## Criar hook quando
+
+- tem estado, efeito ou lógica condicional
+- lógica repetida, estado compartilhado ou integração com API
+
+Não criar hook só para render.
+
+## Imports
+
+```ts
+// ❌
+import { useX } from "./useX/useX";
+// ✅
+import { useX } from "./useX";
+```
+
+## Anti-patterns
+
+- Pasta sem `index.ts`
+- Deep import ignorando barrel
+- Teste irrelevante / que só asserta implementação
+- Comentários óbvios (ver `self-documenting-code.mdc`)
+
+## Regra final
+
+Lógica relevante → precisa de **teste**, **estrutura** e **padrão**.

@@ -1,0 +1,47 @@
+---
+description: Testes Vitest e Testing Library no frontend
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Frontend — testes
+
+Fonte: [frontend/.cursor/rules.md](frontend/.cursor/rules.md) · [frontend/.cursor/quality.md](frontend/.cursor/quality.md)
+
+## Obrigatório
+
+- Toda alteração de código inclui **teste novo ou atualizado**
+- Exceções: `*.md`, chore/config sem comportamento
+
+## Colocalização
+
+- Testes **ao lado** do módulo (`JobCard.test.tsx` junto de `JobCard.tsx`)
+- **Proibido** `__tests__/` dentro de `src/features/*`
+
+## O que testar
+
+| Testar | Não precisa |
+|--------|-------------|
+| Hooks com estado, `useEffect`, eventos | Render puramente visual |
+| `utils/`, `services/` | Componente trivial sem lógica |
+| Lógica de negócio | — |
+
+## Ferramentas
+
+- Vitest + Testing Library
+- MSW **somente em testes** (ver `msw-test-only.mdc`)
+- `TestProviders` / `createQueryWrapper` para Tooltip e React Query
+
+## Boas práticas
+
+- Testar **comportamento**, não implementação
+- Mockar `window`/`document` quando necessário (`window.open`, `ResizeObserver`)
+- Evitar mocks desnecessários
+
+## Antes de finalizar
+
+```bash
+pnpm lint
+pnpm test
+pnpm build
+```

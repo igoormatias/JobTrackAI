@@ -71,7 +71,7 @@ export const FAVORITE_JOB_SURFACE_CLASS = "border-amber-500/50 bg-amber-500/5";
 export const FAVORITE_JOB_BADGE_CLASS = "bg-amber-500/15 text-amber-700 dark:text-amber-300";
 
 export const JOBS_LAYOUT = {
-  page: "space-y-6",
+  page: "w-full min-w-0 space-y-6",
   toolbar: "space-y-4",
-  list: "grid grid-cols-1 gap-4 lg:grid-cols-2",
+  list: "grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2 xl:gap-6 2xl:grid-cols-2",
 } as const;

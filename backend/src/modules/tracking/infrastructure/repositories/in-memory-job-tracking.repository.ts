@@ -65,6 +65,8 @@ const toJobSnapshot = (job: Job, tracking: Pick<JobTrackingEntity, "isFavorite" 
   status: job.status,
   salaryMin: job.salaryMin,
   salaryMax: job.salaryMax,
+  description: job.description,
+  seniority: job.seniority,
   isFavorite: tracking.isFavorite,
   priority: tracking.priority,
   visibility: tracking.visibility,
@@ -373,6 +375,17 @@ export class InMemoryJobTrackingRepository {
       input.offerValue !== undefined ? input.offerValue : input.negotiatedSalary;
     if (negotiatedSalary !== undefined) tracking.negotiatedSalary = negotiatedSalary;
     if (input.processLinks !== undefined) tracking.processLinks = input.processLinks;
+
+    const job = jobRepository.findById(tracking.jobId);
+    if (job) {
+      if (input.companyName !== undefined) {
+        job.company = { ...job.company, name: input.companyName };
+      }
+      if (input.title !== undefined) job.title = input.title;
+      if (input.sourceUrl !== undefined) job.sourceUrl = input.sourceUrl ?? null;
+      if (input.description !== undefined) job.description = input.description ?? "";
+      job.updatedAt = new Date().toISOString();
+    }
 
     if (input.priority !== undefined && input.priority !== tracking.priority) {
       tracking.priority = input.priority;

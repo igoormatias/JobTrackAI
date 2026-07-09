@@ -1,6 +1,9 @@
 # Frontend Quality Rules
 
-> Fonte canônica: [rules.md](./rules.md) · Escopo MVP: [../../docs/MVP_SCOPE.md](../../docs/MVP_SCOPE.md)
+> **Regras ativas no Cursor:** `.cursor/rules/frontend-quality.mdc` · `.cursor/rules/frontend-testing.mdc`  
+> Fonte canônica agente: `.cursor/rules/frontend-*.mdc`
+
+> Referência humana: [rules.md](./rules.md) · Escopo MVP: [../../docs/MVP_SCOPE.md](../../docs/MVP_SCOPE.md)
 
 ## Escopo MVP
 

@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { TestProviders } from "@/test/providers";
+
 import { JobRelatedJobsSection } from "./JobRelatedJobsSection";
 
 vi.mock("next/link", () => ({
@@ -46,7 +48,11 @@ describe("JobRelatedJobsSection", () => {
   it("renders up to five related job cards", () => {
     const jobs = Array.from({ length: 5 }, (_, index) => createJob(`job_${index + 1}`));
 
-    render(<JobRelatedJobsSection jobs={jobs} />);
+    render(
+      <TestProviders>
+        <JobRelatedJobsSection jobs={jobs} />
+      </TestProviders>,
+    );
 
     expect(screen.getByText("Vagas relacionadas")).toBeInTheDocument();
     expect(screen.getAllByRole("link")).toHaveLength(5);

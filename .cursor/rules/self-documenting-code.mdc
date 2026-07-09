@@ -1,0 +1,59 @@
+---
+description: Código autodescritivo — evitar comentários redundantes que repetem o óbvio
+alwaysApply: true
+---
+
+# Código autodescritivo (sem comentários desnecessários)
+
+O código deve se explicar por nomes, tipos e estrutura. **Não** adicionar comentários que apenas repetem o que já está claro.
+
+## Não comentar
+
+- Props, parâmetros ou variáveis cujo nome já descreve o propósito
+- JSDoc em tipos óbvios (`/** Use API catalog */` em `useApiSuggestions`)
+- O que o código faz linha a linha
+- Seções de arquivo com rótulos redundantes (`// Header`, `// Footer`, `// Handlers`)
+
+## Quando comentar (exceções)
+
+- Regras de negócio não óbvias ou contraintuitivas
+- Workarounds temporários com link para issue/ADR
+- `eslint-disable` / `biome-ignore` com justificativa mínima
+- APIs públicas complexas onde o tipo sozinho não basta (raro)
+
+## Preferir em vez de comentário
+
+| Em vez de | Faça |
+|-----------|------|
+| `// normalize skills via API` | `normalizeOnAdd`, função `normalizeSkills()` |
+| `// max visible before collapse` | `maxVisible`, `collapsible` |
+| `/** Filter threshold */` | `filterThreshold` com valor default nomeado |
+
+## Exemplos
+
+```typescript
+// ❌ BAD
+export type Props = {
+  /** Use API catalog for autocomplete suggestions */
+  useApiSuggestions?: boolean;
+  /** Normalize skills via IA on add */
+  normalizeOnAdd?: boolean;
+};
+
+// ✅ GOOD
+export type Props = {
+  useApiSuggestions?: boolean;
+  normalizeOnAdd?: boolean;
+};
+```
+
+```typescript
+// ❌ BAD
+// Loop through users and filter active ones
+const active = users.filter((u) => u.isActive);
+
+// ✅ GOOD
+const activeUsers = users.filter((user) => user.isActive);
+```
+
+Ao revisar ou gerar código, remover comentários redundantes existentes em vez de acumulá-los.
