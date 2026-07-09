@@ -48,6 +48,7 @@ export const useSkillsSelector = ({
   );
 
   const existingKeys = useMemo(() => new Set(value.map(skillDedupeKey)), [value]);
+  const existingKeysKey = useMemo(() => value.map(skillDedupeKey).sort().join("\0"), [value]);
 
   const staticSuggestions = useMemo(() => {
     const query = input.trim().toLowerCase();
@@ -64,7 +65,7 @@ export const useSkillsSelector = ({
     if (!useApiSuggestions || options.length > 0) return;
     const query = input.trim();
     if (query.length < 2) {
-      setApiSuggestions([]);
+      setApiSuggestions((current) => (current.length === 0 ? current : []));
       return;
     }
 
@@ -79,7 +80,7 @@ export const useSkillsSelector = ({
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [input, useApiSuggestions, options.length, existingKeys]);
+  }, [input, useApiSuggestions, options.length, existingKeysKey]);
 
   const addSkill = useCallback(
     async (raw: string) => {
