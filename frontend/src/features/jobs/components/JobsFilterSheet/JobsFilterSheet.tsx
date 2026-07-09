@@ -27,7 +27,7 @@ export const JobsFilterSheet = ({
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
-  const { clearFilters, hasActiveFilters, activeFilterCount } = filters;
+  const { clearFilters, activeFilterCount } = filters;
 
   return (
     <div className="lg:hidden">

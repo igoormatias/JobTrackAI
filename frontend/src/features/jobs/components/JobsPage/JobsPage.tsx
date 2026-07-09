@@ -101,13 +101,15 @@ export const JobsPage = () => {
   const queryMs = data?.pages[0]?.meta.queryMs;
   const salaryCoverageRatio = data?.pages[0]?.meta.salaryCoverageRatio ?? 1;
   const showSalaryFilter = salaryCoverageRatio >= SALARY_FILTER_MIN_COVERAGE;
+  const { setUrlState } = filters;
+  const { salaryMin, salaryMax } = filters.urlState;
 
   useEffect(() => {
     if (showSalaryFilter) return;
-    if (filters.urlState.salaryMin != null || filters.urlState.salaryMax != null) {
-      void filters.setUrlState({ salaryMin: null, salaryMax: null });
+    if (salaryMin != null || salaryMax != null) {
+      void setUrlState({ salaryMin: null, salaryMax: null });
     }
-  }, [showSalaryFilter, filters.urlState.salaryMin, filters.urlState.salaryMax, filters.setUrlState]);
+  }, [showSalaryFilter, salaryMin, salaryMax, setUrlState]);
 
   const handleSortChange = (sort: JobSortField) => {
     void filters.setUrlState({ sort });

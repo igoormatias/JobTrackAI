@@ -26,7 +26,6 @@ import { useJobTimelineQuery } from "../../hooks/use-job-timeline-query";
 import { useLearningGapsQuery } from "../../hooks/use-learning-gaps-query";
 import { useMarkJobViewedOnMount } from "../../hooks/use-mark-job-viewed-on-mount";
 import { useRelatedJobsQuery } from "../../hooks/use-related-jobs-query";
-import { openJobUrl } from "@/lib/jobs/open-job-url";
 import { JobDetailsMainWidget } from "../../widgets/JobDetailsMainWidget";
 import {
   JobDetailsMobileExtrasWidget,
@@ -84,11 +83,6 @@ export const JobDetailsPage = () => {
     if (!job) return;
     favoriteMutation.mutate({ id: job.id, isFavorite: !job.isFavorite });
   }, [favoriteMutation, job]);
-
-  const handleOpenJob = useCallback(() => {
-    if (!job) return;
-    openJobUrl({ sourceUrl: job.sourceUrl, status: job.status });
-  }, [job]);
 
   const handleAddToPipeline = useCallback(() => {
     if (!job) return;

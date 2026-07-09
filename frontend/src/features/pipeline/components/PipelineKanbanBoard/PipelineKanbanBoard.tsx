@@ -11,7 +11,6 @@ import {
   useSensors,
   type CollisionDetection,
   type DragEndEvent,
-  type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { useCallback, useState } from "react";
@@ -79,10 +78,6 @@ export const PipelineKanbanBoard = ({
     setActiveApplication(application ?? null);
   };
 
-  const handleDragOver = (_event: DragOverEvent) => {
-    // Column highlight handled by useDroppable isOver per column
-  };
-
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveApplication(null);
     const { active, over } = event;
@@ -145,7 +140,6 @@ export const PipelineKanbanBoard = ({
       sensors={sensors}
       collisionDetection={columnCollision}
       onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >

@@ -80,6 +80,8 @@ export const useSkillsSelector = ({
     }, 200);
 
     return () => clearTimeout(timer);
+    // existingKeys is a fresh Set each render; existingKeysKey is its stable signature to avoid an infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, useApiSuggestions, options.length, existingKeysKey]);
 
   const addSkill = useCallback(

@@ -50,7 +50,7 @@ export const NotificationInboxPage = () => {
   const markReadMutation = useMarkNotificationsRead();
   const deleteMutation = useDeleteNotification();
 
-  const notifications = data?.data ?? [];
+  const notifications = useMemo(() => data?.data ?? [], [data]);
 
   const unreadByCategory = useMemo(() => {
     const counts: Partial<Record<NotificationCategory | "all", number>> = {

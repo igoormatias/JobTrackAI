@@ -11,11 +11,6 @@ import { favoriteJob, markJobViewed } from "../../services/jobs-service";
 export const useJobMutations = () => {
   const queryClient = useQueryClient();
 
-  const invalidateJobs = async () => {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all });
-    await queryClient.invalidateQueries({ queryKey: queryKeys.jobDetails.all });
-  };
-
   const updateJobInCache = (updatedJob: Job) => {
     queryClient.setQueriesData({ queryKey: queryKeys.jobs.lists() }, (oldData: unknown) => {
       if (!oldData || typeof oldData !== "object") return oldData;

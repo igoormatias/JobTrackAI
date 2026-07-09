@@ -6,7 +6,6 @@ import { type RefObject, useRef } from "react";
 import type { Application } from "@/types";
 
 import { PIPELINE_LAYOUT } from "../../constants/pipeline-layout";
-import type { PipelineDensity } from "../../hooks/use-pipeline-density";
 import { PipelineDraggableCard } from "../PipelineDraggableCard";
 import type { PipelineKanbanColumnProps } from "../PipelineKanbanColumn/PipelineKanbanColumn";
 
