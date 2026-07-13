@@ -9,9 +9,7 @@ import {
   format,
   isSameDay,
   isSameMonth,
-  isThisWeek,
   isToday,
-  isTomorrow,
   startOfMonth,
   startOfWeek,
 } from "date-fns";
@@ -31,6 +29,7 @@ import { cn } from "@/lib/utils";
 
 import type { CalendarEventItem } from "../../services/calendar-service";
 import { useCalendarEventsQuery, useCalendarStatusQuery } from "../../hooks/use-calendar-queries";
+import { getAgendaGroupLabel, parseLocalDayKey } from "../../utils/agenda-group-label";
 
 type CalendarView = "agenda" | "week" | "month";
 
@@ -56,16 +55,6 @@ const getHeaderLabel = (view: CalendarView, anchor: Date): string => {
     return `${format(start, "d MMM", { locale: ptBR })} – ${format(end, "d MMM yyyy", { locale: ptBR })}`;
   }
   return "Próximos 30 dias";
-};
-
-const getAgendaGroupLabel = (date: Date): string => {
-  if (isToday(date)) return "Hoje";
-  if (isTomorrow(date)) return "Amanhã";
-  if (isThisWeek(date, { weekStartsOn: 1 })) return "Esta semana";
-  const nextWeekStart = addWeeks(startOfWeek(new Date(), { weekStartsOn: 1 }), 1);
-  const nextWeekEnd = endOfWeek(nextWeekStart, { weekStartsOn: 1 });
-  if (date >= nextWeekStart && date <= nextWeekEnd) return "Próxima semana";
-  return format(date, "EEEE, d 'de' MMMM", { locale: ptBR });
 };
 
 const EventTooltipContent = ({ event }: { event: CalendarEventItem }) => (
@@ -169,7 +158,7 @@ export const CalendarPage = () => {
     }
     return Array.from(groups.entries()).map(([dayKey, dayEvents]) => ({
       dayKey,
-      label: getAgendaGroupLabel(new Date(dayKey)),
+      label: getAgendaGroupLabel(parseLocalDayKey(dayKey)),
       events: dayEvents,
     }));
   }, [sortedEvents]);
