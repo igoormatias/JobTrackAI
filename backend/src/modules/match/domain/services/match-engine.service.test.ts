@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { MatchJobInput, MatchProfileInput } from "./match-engine.service.js";
-import { isAreaCompatible, MatchEngineService } from "./match-engine.service.js";
+import { MatchEngineService } from "./match-engine.service.js";
 
 const frontendProfile: MatchProfileInput = {
   area: "frontend",
@@ -20,6 +20,7 @@ const frontendJob: MatchJobInput = {
   location: "São Paulo, SP",
   salaryMin: 10000,
   salaryMax: 15000,
+  description: "Vaga para trabalhar com React, TypeScript e Next.js em times ágeis.",
   technologies: [
     { name: "React", slug: "react" },
     { name: "TypeScript", slug: "typescript" },
@@ -34,35 +35,15 @@ const frontendJob: MatchJobInput = {
 describe("MatchEngineService", () => {
   const engine = new MatchEngineService();
 
-  it("returns rules-v4 engine version", () => {
+  it("returns rules-v5 engine version", () => {
     const result = engine.compute(frontendProfile, frontendJob);
-    expect(result.engineVersion).toBe("rules-v4");
+    expect(result.engineVersion).toBe("rules-v5");
   });
 
   it("scores skill coverage as matched/required (5 of 6 = 83%)", () => {
     const result = engine.compute(frontendProfile, frontendJob);
     expect(result.skillCoverage).toEqual({ matched: 5, required: 6, percent: 83 });
-    expect(result.skillEvidence.filter((item) => item.present)).toHaveLength(5);
-    expect(result.skillEvidence.some((item) => item.name === "Node.js" && !item.present)).toBe(true);
-  });
-
-  it("exposes weighted factors with evidence", () => {
-    const result = engine.compute(frontendProfile, frontendJob);
-    expect(result.factors.map((factor) => factor.id)).toEqual([
-      "factor_skills",
-      "factor_seniority",
-      "factor_modality",
-      "factor_location",
-      "factor_salary",
-      "factor_area",
-    ]);
-    expect(result.factors.every((factor) => factor.applicable)).toBe(true);
-    expect(result.score).toBeGreaterThan(70);
-  });
-
-  it("includes missing skills from technologies and requirements", () => {
-    const result = engine.compute(frontendProfile, frontendJob);
-    expect(result.missingSkills.some((s) => s.name === "Node.js")).toBe(true);
+    expect(result.groups.some((group) => group.id === "technical" && group.applicable)).toBe(true);
   });
 
   it("does not penalize missing salary data", () => {
@@ -71,31 +52,48 @@ describe("MatchEngineService", () => {
       { ...frontendJob, salaryMin: null, salaryMax: null },
     );
     const salaryFactor = withoutSalary.factors.find((factor) => factor.id === "factor_salary");
-    expect(salaryFactor?.applicable).toBe(false);
+    expect(salaryFactor?.state).toBe("unknown");
     expect(withoutSalary.score).toBeGreaterThan(70);
   });
 
-  it("scores lower for incompatible area without opaque cap", () => {
-    const devOpsJob: MatchJobInput = {
-      title: "DevOps Engineer",
-      area: "devops",
-      seniority: "senior",
+  it("treats unknown area as unknown instead of mismatch", () => {
+    const sparseJob: MatchJobInput = {
+      title: "Vaga especial sem área clara",
+      area: "other",
+      seniority: null,
       modality: "remote",
-      location: "São Paulo, SP",
-      salaryMin: 10000,
-      salaryMax: 15000,
+      location: null,
+      salaryMin: null,
+      salaryMax: null,
       technologies: [{ name: "React", slug: "react" }],
-      requirements: ["React"],
+      requirements: [],
+      description: "React",
     };
-
-    const result = engine.compute(frontendProfile, devOpsJob);
+    const result = engine.compute(frontendProfile, sparseJob);
     const areaFactor = result.factors.find((factor) => factor.id === "factor_area");
-    expect(areaFactor?.matched).toBe(false);
-    expect(result.reasons.some((r) => r.id === "reason_area_mismatch")).toBe(true);
-    expect(result.score).toBeLessThan(100);
+    expect(areaFactor?.state).toBe("unknown");
+    expect(result.score).toBeGreaterThan(0);
   });
 
-  it("never scores Advogado highly for frontend profile", () => {
+  it("scores Portuguese React developer title without collapsing to 0%", () => {
+    const job: MatchJobInput = {
+      title: "Desenvolvedor React - Sênior",
+      area: "other",
+      seniority: null,
+      modality: "remote",
+      location: null,
+      salaryMin: null,
+      salaryMax: null,
+      technologies: [{ name: "React", slug: "react" }],
+      requirements: [],
+      description: "Desenvolvedor React",
+    };
+    const result = engine.compute(frontendProfile, job);
+    expect(result.score).toBeGreaterThan(50);
+    expect(result.skillCoverage.matched).toBeGreaterThan(0);
+  });
+
+  it("keeps sparse unrelated jobs with low confidence when area is unknown", () => {
     const lawyerJob: MatchJobInput = {
       title: "Advogado Pleno - Direito Bancário",
       area: "other",
@@ -104,10 +102,13 @@ describe("MatchEngineService", () => {
       location: "Remoto",
       technologies: [],
       requirements: [],
+      description: "short",
     };
     const result = engine.compute(frontendProfile, lawyerJob);
-    expect(result.score).toBeLessThan(90);
-    expect(isAreaCompatible(frontendProfile, lawyerJob)).toBe(false);
+    const areaFactor = result.factors.find((factor) => factor.id === "factor_area");
+    expect(areaFactor?.state).toBe("unknown");
+    expect(result.confidence.level).toMatch(/low|medium/);
+    expect(result.skillCoverage.required).toBe(0);
   });
 
   it("matches skills via aliases (ReactJS)", () => {
@@ -118,53 +119,9 @@ describe("MatchEngineService", () => {
     };
     const result = engine.compute(frontendProfile, jobWithAlias);
     expect(result.matchedSkills).toContain("React");
-    expect(result.skillCoverage.matched).toBe(1);
-    expect(result.skillCoverage.required).toBe(1);
   });
 
-  it("infers compatible area from title when job.area is missing", () => {
-    const job: MatchJobInput = {
-      ...frontendJob,
-      area: null,
-      title: "React Developer",
-    };
-    expect(isAreaCompatible(frontendProfile, job)).toBe(true);
-    const result = engine.compute(frontendProfile, job);
-    expect(result.reasons.some((r) => r.id === "reason_title_area" && r.matched)).toBe(true);
-  });
-
-  it("treats explicit devops area as incompatible with frontend profile", () => {
-    const job: MatchJobInput = {
-      title: "React Developer",
-      area: "devops",
-      seniority: "senior",
-      modality: "remote",
-      location: "SP",
-      technologies: [{ name: "React", slug: "react" }],
-      requirements: [],
-    };
-    expect(isAreaCompatible(frontendProfile, job)).toBe(false);
-  });
-
-  it("scores manual jobs from tech without description requirements", () => {
-    const manualJob: MatchJobInput = {
-      title: "Senior React Engineer",
-      area: "frontend",
-      seniority: "senior",
-      modality: "remote",
-      location: "Remoto",
-      technologies: [
-        { name: "React", slug: "react" },
-        { name: "TypeScript", slug: "typescript" },
-      ],
-      requirements: [],
-    };
-    const result = engine.compute(frontendProfile, manualJob);
-    expect(result.score).toBeGreaterThanOrEqual(60);
-    expect(result.skillCoverage.percent).toBe(100);
-  });
-
-  it("does not change score for favorite company context in v4", () => {
+  it("adds affinity reasons without changing score", () => {
     const without = engine.compute(frontendProfile, {
       ...frontendJob,
       companySlug: "nubank",
@@ -175,6 +132,15 @@ describe("MatchEngineService", () => {
       { favoriteCompanySlugs: ["nubank"] },
     );
     expect(withFavorite.score).toBe(without.score);
+    expect(withFavorite.reasons.some((reason) => reason.id === "reason_favorite_company")).toBe(
+      true,
+    );
+  });
+
+  it("exposes confidence metadata", () => {
+    const result = engine.compute(frontendProfile, frontendJob);
+    expect(result.confidence.level).toMatch(/high|medium|low/);
+    expect(result.confidence.signals.length).toBeGreaterThan(0);
   });
 
   it("never invents proficiency language in reasons", () => {

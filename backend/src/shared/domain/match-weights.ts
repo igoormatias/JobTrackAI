@@ -1,8 +1,8 @@
 /**
- * Match engine weights — rules-v4 (evidence-based).
- * Core dimensions (sums to 100):
- *   skills 50 · seniority 15 · modality 10 · location 10 · salary 10 · area 5
- * Score is normalized over applicable factors only (missing data does not penalize).
+ * Match engine weights — rules-v5 (group-based, evidence-based).
+ * Groups (affinity is reasons-only, not scored):
+ *   technical 60 · jobFit 25
+ * Sub-weights redistribute within each group over known factors only.
  */
 export const MATCH_WEIGHTS_V1 = {
   skillMatch: 15,
@@ -52,10 +52,27 @@ export const MATCH_WEIGHTS_V4 = {
   area: 5,
 } as const;
 
-/** Active weights — rules-v4 is the current engine. */
-export const MATCH_WEIGHTS = MATCH_WEIGHTS_V4;
+export const MATCH_WEIGHTS_V5 = {
+  groups: {
+    technical: 60,
+    jobFit: 25,
+  },
+  technical: {
+    skills: 50,
+    seniority: 15,
+    area: 10,
+  },
+  jobFit: {
+    modality: 10,
+    salary: 10,
+    location: 5,
+  },
+} as const;
 
-export const MATCH_ENGINE_VERSION = "rules-v4" as const;
+/** Active weights — rules-v5 is the current engine. */
+export const MATCH_WEIGHTS = MATCH_WEIGHTS_V5;
 
-/** Dashboard top-jobs filter. Score distribution changed with v4; adjust here if needed. */
+export const MATCH_ENGINE_VERSION = "rules-v5" as const;
+
+/** Dashboard top-jobs filter. Score distribution changed with v5; adjust here if needed. */
 export const DASHBOARD_TOP_MATCH_THRESHOLD = 70;

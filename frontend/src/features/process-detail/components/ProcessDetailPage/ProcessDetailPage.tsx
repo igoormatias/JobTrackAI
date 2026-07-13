@@ -176,7 +176,7 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
           <Link href="/pipeline" className="text-sm text-muted-foreground hover:text-foreground">
             ← Pipeline
           </Link>
-          <h1 className="mt-2 break-words text-2xl font-bold text-foreground">{tracking.job.title}</h1>
+          <h1 className="mt-2 wrap-break-words text-2xl font-bold text-foreground">{tracking.job.title}</h1>
           <p className="text-muted-foreground">{tracking.job.company.name}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -258,7 +258,7 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
               <CardHeader>
                 <CardTitle className="text-base">Recrutadora</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-1 break-words text-sm text-muted-foreground">
+              <CardContent className="space-y-1 wrap-break-words text-sm text-muted-foreground">
                 {tracking.recruiterName ? <p>{tracking.recruiterName}</p> : null}
                 {tracking.recruiterEmail ? <p>{tracking.recruiterEmail}</p> : null}
                 {tracking.recruiterPhone ? <p>{tracking.recruiterPhone}</p> : null}
@@ -304,7 +304,7 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
                       </a>
                     ) : null}
                     {interview.notes ? (
-                      <p className="mt-1 break-words text-muted-foreground">{interview.notes}</p>
+                      <p className="mt-1 wrap-break-words text-muted-foreground">{interview.notes}</p>
                     ) : null}
                   </div>
                 ))
@@ -373,7 +373,7 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
                 <CardTitle className="text-base">Observações</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="break-words text-sm text-muted-foreground whitespace-pre-wrap">{tracking.notes}</p>
+                <p className="wrap-break-words text-sm text-muted-foreground whitespace-pre-wrap">{tracking.notes}</p>
               </CardContent>
             </Card>
           ) : null}
@@ -384,7 +384,7 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
                 <CardTitle className="text-base">Feedback</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="break-words text-sm text-muted-foreground whitespace-pre-wrap">{tracking.feedback}</p>
+                <p className="wrap-break-words text-sm text-muted-foreground whitespace-pre-wrap">{tracking.feedback}</p>
               </CardContent>
             </Card>
           ) : null}

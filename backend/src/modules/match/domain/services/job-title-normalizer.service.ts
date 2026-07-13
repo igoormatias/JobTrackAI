@@ -23,6 +23,18 @@ const TITLE_ALIASES_BY_AREA: Record<string, string[]> = {
     "react engineer",
     "react developer",
     "ui engineer",
+    "desenvolvedor frontend",
+    "desenvolvedor front end",
+    "desenvolvedor front-end",
+    "desenvolvedor react",
+    "desenvolvedora react",
+    "pessoa desenvolvedora frontend",
+    "pessoa desenvolvedora react",
+    "programador frontend",
+    "programador react",
+    "engenheiro frontend",
+    "dev frontend",
+    "dev react",
   ],
   backend: [
     "python backend developer",
@@ -34,6 +46,16 @@ const TITLE_ALIASES_BY_AREA: Record<string, string[]> = {
     "c# developer",
     "backend engineer",
     "backend developer",
+    "desenvolvedor backend",
+    "desenvolvedor back end",
+    "desenvolvedor back-end",
+    "desenvolvedor node",
+    "desenvolvedor java",
+    "desenvolvedora backend",
+    "pessoa desenvolvedora backend",
+    "programador backend",
+    "engenheiro backend",
+    "dev backend",
   ],
   full_stack: [
     "full stack",
@@ -41,6 +63,13 @@ const TITLE_ALIASES_BY_AREA: Record<string, string[]> = {
     "full-stack",
     "software engineer",
     "software developer",
+    "desenvolvedor full stack",
+    "desenvolvedor fullstack",
+    "desenvolvedor full-stack",
+    "pessoa desenvolvedora full stack",
+    "programador full stack",
+    "engenheiro de software",
+    "desenvolvedor de software",
   ],
   mobile: [
     "react native",
@@ -48,6 +77,11 @@ const TITLE_ALIASES_BY_AREA: Record<string, string[]> = {
     "flutter",
     "android",
     "ios",
+    "desenvolvedor mobile",
+    "desenvolvedor android",
+    "desenvolvedor ios",
+    "desenvolvedor flutter",
+    "desenvolvedor react native",
   ],
   devops: [
     "site reliability engineer",
@@ -57,6 +91,8 @@ const TITLE_ALIASES_BY_AREA: Record<string, string[]> = {
     "cloud engineer",
     "devops engineer",
     "sre",
+    "engenheiro devops",
+    "desenvolvedor devops",
   ],
   qa: [
     "quality assurance",
@@ -64,15 +100,23 @@ const TITLE_ALIASES_BY_AREA: Record<string, string[]> = {
     "test engineer",
     "qa analyst",
     "qa engineer",
+    "analista de qualidade",
+    "analista qa",
   ],
-  product_owner: ["product owner"],
+  product_owner: ["product owner", "product owner", "po "],
   product_manager: [
     "technical product manager",
     "product manager",
+    "gerente de produto",
   ],
   scrum_master: ["scrum master"],
   agile_coach: ["agile coach"],
 };
+
+const FRONTEND_TECH_TOKENS = ["react", "vue", "angular", "next", "frontend", "front end"];
+const BACKEND_TECH_TOKENS = ["node", "java", "python", "dotnet", ".net", "nestjs", "spring", "backend"];
+const MOBILE_TECH_TOKENS = ["react native", "flutter", "android", "ios", "kotlin", "swift"];
+const DEV_ROLE_TOKENS = ["desenvolvedor", "desenvolvedora", "programador", "programadora", "engenheiro", "dev"];
 
 type AliasEntry = { area: ProfessionalArea; alias: string };
 
@@ -101,6 +145,13 @@ export class JobTitleNormalizer {
       if (normalized.includes(entry.alias)) {
         return entry.area;
       }
+    }
+
+    const hasDevRole = DEV_ROLE_TOKENS.some((token) => normalized.includes(token));
+    if (hasDevRole) {
+      if (MOBILE_TECH_TOKENS.some((token) => normalized.includes(token))) return "mobile";
+      if (FRONTEND_TECH_TOKENS.some((token) => normalized.includes(token))) return "frontend";
+      if (BACKEND_TECH_TOKENS.some((token) => normalized.includes(token))) return "backend";
     }
 
     return null;

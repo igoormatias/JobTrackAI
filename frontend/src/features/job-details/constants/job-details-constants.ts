@@ -1,8 +1,8 @@
 export const JOB_DETAILS_LAYOUT = {
   page: "space-y-6 pb-28 lg:pb-6",
-  grid: "grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]",
+  grid: "grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]",
   main: "space-y-4 min-w-0",
-  sidebar: "hidden lg:block lg:sticky lg:top-6 lg:self-start space-y-4",
+  sidebar: "hidden lg:block lg:sticky lg:top-6 lg:self-start space-y-4 min-w-0",
   mobileStack: "space-y-4 lg:hidden",
   bottomBar:
     "fixed bottom-0 inset-x-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur pb-safe p-4 lg:hidden",

@@ -15,6 +15,12 @@ const MATCH_LABEL_PT: Record<Job["matchScore"]["label"], string> = {
   low: "Match Baixo",
 };
 
+const CONFIDENCE_LABEL_PT: Record<"high" | "medium" | "low", string> = {
+  high: "Alta",
+  medium: "Média",
+  low: "Baixa",
+};
+
 const HIGH_PRIORITY_SKILLS = ["Docker", "AWS", "Kafka", "Kubernetes", "GraphQL", "Terraform"];
 
 const categorizeSkill = (name: string): string => {
@@ -86,12 +92,15 @@ export class JobDetailsService {
     const job = await this.jobs.getJobById(userId, id);
     const match = await this.getJobMatch(userId, id);
     const insights: JobInsight[] = [];
-    const matchedReasons = match.matchScore.reasons.filter((reason) => reason.matched);
-    const requirementsMetPercent = job.requirements.length
-      ? Math.round((matchedReasons.length / Math.max(job.requirements.length, 1)) * 100)
-      : match.matchScore.score;
+    const matchScore = match.matchScore;
+    const coverage = matchScore.skillCoverage;
+    const foundSkills = (matchScore.skillEvidence ?? [])
+      .filter((item) => item.present)
+      .map((item) => item.name);
+    const missingSkills = matchScore.missingSkills.map((skill) => skill.name);
+    const confidence = matchScore.confidence;
 
-    if (match.matchScore.score >= 90) {
+    if (matchScore.score >= 90) {
       insights.push({
         id: "insight_high_match",
         title: "Alta compatibilidade",
@@ -100,24 +109,67 @@ export class JobDetailsService {
       });
     }
 
-    insights.push({
-      id: "insight_requirements",
-      title: "Requisitos atendidos",
-      description: `Você já atende aproximadamente ${Math.min(requirementsMetPercent, 100)}% dos requisitos principais.`,
-      variant: requirementsMetPercent >= 70 ? "positive" : "neutral",
-    });
+    if (coverage && coverage.required > 0) {
+      insights.push({
+        id: "insight_requirements",
+        title: "Cobertura de skills",
+        description: `${coverage.matched} de ${coverage.required} skills encontradas (${coverage.percent}%).`,
+        variant: coverage.percent >= 70 ? "positive" : "neutral",
+      });
+    } else {
+      insights.push({
+        id: "insight_requirements",
+        title: "Requisitos atendidos",
+        description: `Match atual de ${matchScore.score}% com base nos fatores conhecidos.`,
+        variant: matchScore.score >= 70 ? "positive" : "neutral",
+      });
+    }
 
-    if (match.matchScore.missingSkills.length > 0) {
+    if (foundSkills.length > 0) {
+      insights.push({
+        id: "insight_found_skills",
+        title: "Skills encontradas",
+        description: foundSkills.slice(0, 6).join(", "),
+        variant: "positive",
+      });
+    }
+
+    if (missingSkills.length > 0) {
       insights.push({
         id: "insight_gaps",
-        title: "Pontos de evolução",
-        description: `Foque em ${match.matchScore.missingSkills
-          .slice(0, 2)
-          .map((skill) => skill.name)
-          .join(" e ")} para aumentar seu match.`,
+        title: "Skills faltantes",
+        description: `Foque em ${missingSkills.slice(0, 3).join(" e ")} para aumentar seu match.`,
         variant: "warning",
       });
     }
+
+    const applicableFactors = (matchScore.factors ?? []).filter((factor) => factor.applicable);
+    if (applicableFactors.length > 0) {
+      insights.push({
+        id: "insight_weights",
+        title: "Pesos considerados",
+        description: applicableFactors
+          .map((factor) => `${factor.label} ${factor.weight}%`)
+          .join(" · "),
+        variant: "neutral",
+      });
+    }
+
+    if (confidence) {
+      insights.push({
+        id: "insight_confidence",
+        title: `Confiança ${CONFIDENCE_LABEL_PT[confidence.level]}`,
+        description: confidence.signals.slice(0, 3).join(" · ") || `Score de confiança ${confidence.score}%.`,
+        variant: confidence.level === "low" ? "warning" : "neutral",
+      });
+    }
+
+    insights.push({
+      id: "insight_engine",
+      title: "Engine utilizada",
+      description: `${match.engineVersion ?? MATCH_ENGINE_VERSION} · atualizado em ${new Date(job.updatedAt).toLocaleDateString("pt-BR")}`,
+      variant: "neutral",
+    });
 
     return insights;
   }

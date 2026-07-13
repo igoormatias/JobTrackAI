@@ -28,7 +28,7 @@ const baseSnapshot = (): AnalysisSnapshot => ({
     score: 80,
     matchedSkills: ["react"],
     missingSkills: ["docker"],
-    engineVersion: "rules-v4",
+    engineVersion: "rules-v5",
     skillCoverage: { matched: 1, required: 2, percent: 50 },
     factors: [],
     skillEvidence: [
@@ -37,8 +37,8 @@ const baseSnapshot = (): AnalysisSnapshot => ({
     ],
   },
   meta: {
-    promptVersion: "career-v2",
-    matchEngineVersion: "rules-v4",
+    promptVersion: "career-v3",
+    matchEngineVersion: "rules-v5",
     model: "gemini-2.5-flash",
   },
 });
@@ -51,7 +51,7 @@ describe("computeAnalysisHash", () => {
 
   it("changes when prompt version changes", () => {
     const a = baseSnapshot();
-    const b = { ...baseSnapshot(), meta: { ...baseSnapshot().meta, promptVersion: "career-v3" } };
+    const b = { ...baseSnapshot(), meta: { ...baseSnapshot().meta, promptVersion: "career-v4" } };
     expect(computeAnalysisHash(a)).not.toBe(computeAnalysisHash(b));
   });
 });

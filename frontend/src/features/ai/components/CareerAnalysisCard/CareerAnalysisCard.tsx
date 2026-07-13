@@ -1,6 +1,8 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { ChevronDown, Copy, MoreHorizontal, RefreshCw, Sparkles } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -8,6 +10,12 @@ import { Skeleton } from "@/components/feedback/Skeleton";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import {
+  Dropdown,
+  DropdownContent,
+  DropdownItem,
+  DropdownTrigger,
+} from "@/components/ui/Dropdown";
 
 import { useCareerAnalysisQuery } from "../../hooks/use-career-analysis-query";
 import { useGenerateCareerAnalysisMutation } from "../../hooks/use-generate-career-analysis-mutation";
@@ -56,6 +64,23 @@ export const CareerAnalysisCard = ({
     [generateMutation, trackingId],
   );
 
+  const handleCopy = useCallback(async () => {
+    if (!analysis) return;
+    const text = [
+      analysis.summary,
+      analysis.matchExplanation,
+      ...(analysis.strengths.length ? ["Pontos fortes:", ...analysis.strengths] : []),
+      ...(analysis.weaknesses.length ? ["Pontos de atenção:", ...analysis.weaknesses] : []),
+      ...(analysis.nextSteps.length ? ["Próximos passos:", ...analysis.nextSteps] : []),
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Análise copiada");
+    } catch {
+      toast.error("Não foi possível copiar a análise");
+    }
+  }, [analysis]);
+
   if (!trackingId) {
     return (
       <Card>
@@ -82,9 +107,8 @@ export const CareerAnalysisCard = ({
   const showResult = expanded || Boolean(analysis);
   const isGenerating = generateMutation.isPending;
   const analyzing = isAnalyzing(aiAnalysisStatus);
-  const isLegacy = !aiAnalyzedAt && !analyzing;
-  const showGenerateButton = isLegacy && !analyzing;
-  const showUpdateButton = Boolean(aiAnalyzedAt || analysis);
+  const hasAnalysis = Boolean(analysis) || Boolean(aiAnalyzedAt);
+  const generatedAt = analysis?.generatedAt ?? aiAnalyzedAt ?? null;
 
   return (
     <Card>
@@ -93,16 +117,22 @@ export const CareerAnalysisCard = ({
           <Sparkles className="h-4 w-4 text-primary" aria-hidden />
           Análise IA
         </CardTitle>
-        {analysis?.cached ? (
-          <Badge variant="outline" className="text-xs">
-            Cache
-          </Badge>
-        ) : null}
-        {analysis?.stale ? (
-          <Badge variant="secondary" className="text-xs">
-            Desatualizada
-          </Badge>
-        ) : null}
+        <div className="flex flex-wrap items-center justify-end gap-1">
+          {generatedAt ? (
+            <Badge variant="outline" className="text-xs">
+              Gerado{" "}
+              {formatDistanceToNow(new Date(generatedAt), {
+                addSuffix: true,
+                locale: ptBR,
+              })}
+            </Badge>
+          ) : null}
+          {analysis?.stale ? (
+            <Badge variant="secondary" className="text-xs">
+              Desatualizada
+            </Badge>
+          ) : null}
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -112,7 +142,7 @@ export const CareerAnalysisCard = ({
 
         {!showResult && !analyzing ? (
           <p className="text-sm text-muted-foreground">
-            Gere insights sobre match, lacunas e preparação para entrevista com base no seu perfil e nesta vaga.
+            Gere insights objetivos sobre match, lacunas e próximos passos.
           </p>
         ) : null}
 
@@ -125,6 +155,11 @@ export const CareerAnalysisCard = ({
         {analysis && showResult ? (
           <div className="space-y-4">
             <p className="text-sm font-medium text-foreground">{analysis.summary}</p>
+            {typeof analysis.confidence === "number" ? (
+              <p className="text-xs text-muted-foreground">
+                Confiança da IA: {Math.round(analysis.confidence * 100)}%
+              </p>
+            ) : null}
             <MatchExplanation
               matchExplanation={analysis.matchExplanation}
               matchScore={matchScore}
@@ -156,37 +191,53 @@ export const CareerAnalysisCard = ({
           </div>
         ) : null}
 
-        <div className="flex flex-wrap gap-2">
-          {showGenerateButton ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {!hasAnalysis ? (
             <Button
               size="sm"
               onClick={() => handleGenerate(false)}
-              disabled={isGenerating}
+              disabled={isGenerating || analyzing}
               aria-busy={isGenerating}
             >
               {isGenerating ? "Gerando…" : "Gerar análise IA"}
             </Button>
-          ) : null}
-          {showUpdateButton ? (
-            <Button
-              size="sm"
-              onClick={() => handleGenerate(false)}
-              disabled={isGenerating || analyzing}
-              aria-busy={isGenerating}
-            >
-              {isGenerating ? "Gerando…" : "Atualizar análise"}
-            </Button>
-          ) : null}
-          {analysis && showResult ? (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => handleGenerate(true)}
-              disabled={isGenerating || analyzing}
-            >
-              Regenerar
-            </Button>
-          ) : null}
+          ) : (
+            <>
+              <Button
+                size="sm"
+                onClick={() => handleGenerate(false)}
+                disabled={isGenerating || analyzing}
+                aria-busy={isGenerating}
+              >
+                {isGenerating ? "Gerando…" : "Atualizar análise"}
+              </Button>
+              <Dropdown>
+                <DropdownTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={isGenerating || analyzing}
+                    aria-label="Mais ações da análise"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownTrigger>
+                <DropdownContent align="end">
+                  <DropdownItem onSelect={() => void handleGenerate(true)}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Regenerar análise
+                  </DropdownItem>
+                  {analysis ? (
+                    <DropdownItem onSelect={() => void handleCopy()}>
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copiar análise
+                    </DropdownItem>
+                  ) : null}
+                </DropdownContent>
+              </Dropdown>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>

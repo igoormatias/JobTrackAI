@@ -8,6 +8,7 @@ export type JobWhyThisJobCardProps = {
 
 export const JobWhyThisJobCard = ({ reasons }: JobWhyThisJobCardProps) => {
   const matched = reasons.filter((reason) => reason.matched);
+  if (matched.length === 0) return null;
 
   return (
     <Card>
@@ -15,15 +16,9 @@ export const JobWhyThisJobCard = ({ reasons }: JobWhyThisJobCardProps) => {
         <CardTitle className="text-base">Por que essa vaga?</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
-        {matched.length > 0 ? (
-          matched.map((reason) => (
-            <Chip key={reason.id}>
-              ✔ {reason.label}
-            </Chip>
-          ))
-        ) : (
-          <p className="text-sm text-muted-foreground">Nenhum motivo de compatibilidade disponível.</p>
-        )}
+        {matched.map((reason) => (
+          <Chip key={reason.id}>✔ {reason.label}</Chip>
+        ))}
       </CardContent>
     </Card>
   );

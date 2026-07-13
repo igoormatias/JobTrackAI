@@ -9,6 +9,10 @@ describe("JobTitleNormalizer", () => {
     expect(normalizer.inferArea("React Developer")).toBe("frontend");
   });
 
+  it("infers frontend from Portuguese Desenvolvedor React title", () => {
+    expect(normalizer.inferArea("Desenvolvedor React - Sênior")).toBe("frontend");
+  });
+
   it("infers frontend from Front-end Engineer", () => {
     expect(normalizer.inferArea("Front-end Engineer")).toBe("frontend");
   });

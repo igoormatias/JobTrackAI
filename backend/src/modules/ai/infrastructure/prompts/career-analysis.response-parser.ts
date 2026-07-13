@@ -6,12 +6,12 @@ import type { CareerAnalysisResult } from "../../domain/entities/career-analysis
 export const careerAnalysisResultSchema = z.object({
   summary: z.string().min(1),
   matchExplanation: z.string().min(1),
-  strengths: z.array(z.string()).max(8),
-  weaknesses: z.array(z.string()).max(8),
-  learningRecommendations: z.array(z.string()).max(8),
-  interviewPreparation: z.array(z.string()).max(8),
-  careerInsights: z.array(z.string()).max(6),
-  nextSteps: z.array(z.string()).max(8),
+  strengths: z.array(z.string()).max(4),
+  weaknesses: z.array(z.string()).max(4),
+  learningRecommendations: z.array(z.string()).max(3),
+  interviewPreparation: z.array(z.string()).max(3),
+  careerInsights: z.array(z.string()).max(2),
+  nextSteps: z.array(z.string()).max(3),
   confidence: z.number().min(0).max(1),
 });
 

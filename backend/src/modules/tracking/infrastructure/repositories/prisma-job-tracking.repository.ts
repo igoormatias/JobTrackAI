@@ -21,6 +21,7 @@ import { toMatchJobInput } from "../../../jobs/infrastructure/mappers/job.mapper
 import { manualJobToCatalogInput } from "../../../job-catalog/infrastructure/mappers/manual-job-to-catalog.mapper.js";
 import { prismaJobCatalogRepository } from "../../../job-catalog/infrastructure/repositories/prisma-job-catalog.repository.js";
 import type {
+  CreateManualJobInput,
   CreateTrackingInput,
   JobTrackingEntity,
   MoveTrackingStageInput,
@@ -358,11 +359,38 @@ export class PrismaJobTrackingRepository {
 
     if (hasJobUpdates) {
       const job = current.job;
-      const jobData: Prisma.JobUpdateInput = {};
-      if (input.companyName !== undefined) jobData.companyName = input.companyName;
-      if (input.title !== undefined) jobData.title = input.title;
-      if (input.sourceUrl !== undefined) jobData.sourceUrl = input.sourceUrl || null;
-      if (input.description !== undefined) jobData.description = input.description;
+      const nextTitle = input.title ?? job.title;
+      const nextDescription =
+        input.description !== undefined ? input.description : job.description;
+      const nextCompanyName = input.companyName ?? job.companyName;
+      const nextSourceUrl =
+        input.sourceUrl !== undefined ? input.sourceUrl || null : job.sourceUrl;
+
+      const catalogInput = manualJobToCatalogInput({
+        companyName: nextCompanyName,
+        title: nextTitle,
+        sourceUrl: nextSourceUrl,
+        description: nextDescription,
+        source: job.source as CreateManualJobInput["source"],
+        area: job.area ?? undefined,
+        modality: job.modality ?? undefined,
+        location: job.location ?? undefined,
+        seniority: job.seniority ?? undefined,
+      });
+
+      const jobData: Prisma.JobUpdateInput = {
+        companyName: nextCompanyName,
+        title: nextTitle,
+        sourceUrl: nextSourceUrl,
+        description: nextDescription,
+        area: catalogInput.area,
+        searchText: catalogInput.searchText,
+        technologyText: catalogInput.technologyText,
+        technologySlugs: catalogInput.technologySlugs,
+        requirementsText: catalogInput.requirementsText,
+        benefitsText: catalogInput.benefitsText,
+        metadata: catalogInput.metadata as Prisma.InputJsonValue,
+      };
 
       const canUpdateInPlace = job.userId === userId;
 
@@ -372,16 +400,16 @@ export class PrismaJobTrackingRepository {
         const forked = await prisma.job.create({
           data: {
             userId,
-            companyName: input.companyName ?? job.companyName,
+            companyName: nextCompanyName,
             companySlug: job.companySlug,
-            title: input.title ?? job.title,
+            title: nextTitle,
             slug: `${job.slug}-fork-${Date.now()}`,
-            description: input.description !== undefined ? input.description : job.description,
-            sourceUrl: input.sourceUrl !== undefined ? input.sourceUrl || null : job.sourceUrl,
+            description: nextDescription,
+            sourceUrl: nextSourceUrl,
             source: job.source,
             externalId: `fork-${job.id}-${userId}-${Date.now()}`,
             contentHash: job.contentHash,
-            area: job.area,
+            area: catalogInput.area,
             seniority: job.seniority,
             modality: job.modality,
             location: job.location,
@@ -391,12 +419,12 @@ export class PrismaJobTrackingRepository {
             status: job.status,
             isCatalog: false,
             publishedAt: job.publishedAt,
-            metadata: job.metadata ?? undefined,
-            searchText: job.searchText,
-            technologyText: job.technologyText,
-            technologySlugs: job.technologySlugs,
-            requirementsText: job.requirementsText,
-            benefitsText: job.benefitsText,
+            metadata: catalogInput.metadata as Prisma.InputJsonValue,
+            searchText: catalogInput.searchText,
+            technologyText: catalogInput.technologyText,
+            technologySlugs: catalogInput.technologySlugs,
+            requirementsText: catalogInput.requirementsText,
+            benefitsText: catalogInput.benefitsText,
             descriptionHtml: job.descriptionHtml,
           },
         });

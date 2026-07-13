@@ -26,8 +26,10 @@ export const toMatchScore = (result: MatchResultDto): MatchScore => ({
   missingSkills: result.missingSkills.map(({ id, name }) => ({ id, name })),
   matchedSkills: result.matchedSkills,
   factors: result.factors,
+  groups: result.groups,
   skillEvidence: result.skillEvidence,
   skillCoverage: result.skillCoverage,
+  confidence: result.confidence,
   engineVersion: result.engineVersion,
 });
 
@@ -133,6 +135,7 @@ export const toMatchJobInput = (record: PrismaJob) => {
     companySlug: record.companySlug,
     salaryMin: record.salaryMin,
     salaryMax: record.salaryMax,
+    description: record.description,
     technologies: meta.technologies ?? [],
     requirements: meta.requirements ?? [],
   };

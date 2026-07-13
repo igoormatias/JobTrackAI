@@ -124,10 +124,13 @@ export const JobDetailsPage = () => {
       </div>
 
       <JobDetailsMobileExtrasWidget
+        match={match}
         insights={insights}
         company={company}
         relatedJobs={relatedJobs}
         timeline={timeline}
+        trackingId={job.trackingId}
+        onAddToPipeline={handleAddToPipeline}
       />
 
       <JobDetailsBottomActions

@@ -11,12 +11,22 @@ export type MatchBreakdownCardProps = {
   className?: string;
 };
 
+const CONFIDENCE_LABEL: Record<"high" | "medium" | "low", string> = {
+  high: "Alta",
+  medium: "Média",
+  low: "Baixa",
+};
+
 export const MatchBreakdownCard = ({ matchScore, className }: MatchBreakdownCardProps) => {
   const skillEvidence = matchScore.skillEvidence ?? [];
   const factors = (matchScore.factors ?? []).filter((factor) => factor.applicable);
   const coverage = matchScore.skillCoverage;
+  const confidence = matchScore.confidence;
+  const foundSkills = skillEvidence.filter((item) => item.present);
+  const missingSkills = skillEvidence.filter((item) => !item.present);
+  const hasCoverage = Boolean(coverage && coverage.required > 0);
 
-  if (skillEvidence.length === 0 && factors.length === 0) {
+  if (skillEvidence.length === 0 && factors.length === 0 && !confidence) {
     return null;
   }
 
@@ -26,22 +36,30 @@ export const MatchBreakdownCard = ({ matchScore, className }: MatchBreakdownCard
         <CardTitle className="text-base">Como calculamos este Match</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {coverage ? (
+        {hasCoverage ? (
           <p className="text-sm text-muted-foreground">
-            Cobertura de skills: {coverage.matched} de {coverage.required} · {coverage.percent}%
+            Cobertura: {coverage!.matched} de {coverage!.required} · {coverage!.percent}%
           </p>
         ) : null}
 
-        {skillEvidence.length > 0 ? (
+        {foundSkills.length > 0 ? (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">Skills exigidas</p>
+            <p className="text-sm font-medium text-foreground">Skills encontradas</p>
             <div className="flex flex-wrap gap-2">
-              {skillEvidence.map((item) => (
-                <Chip
-                  key={item.slug}
-                  className={cn(!item.present && "border-destructive/40 text-destructive")}
-                >
-                  {item.present ? "✔" : "✖"} {item.name}
+              {foundSkills.map((item) => (
+                <Chip key={item.slug}>✔ {item.name}</Chip>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {missingSkills.length > 0 ? (
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-foreground">Não encontradas</p>
+            <div className="flex flex-wrap gap-2">
+              {missingSkills.map((item) => (
+                <Chip key={item.slug} className="border-destructive/40 text-destructive">
+                  ✖ {item.name}
                 </Chip>
               ))}
             </div>
@@ -62,6 +80,13 @@ export const MatchBreakdownCard = ({ matchScore, className }: MatchBreakdownCard
               ))}
             </div>
           </div>
+        ) : null}
+
+        {confidence ? (
+          <p className="text-sm text-muted-foreground">
+            Confiança {CONFIDENCE_LABEL[confidence.level]} ({confidence.score}%)
+            {confidence.signals[0] ? ` · ${confidence.signals[0]}` : ""}
+          </p>
         ) : null}
 
         {matchScore.engineVersion ? (

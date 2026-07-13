@@ -9,6 +9,8 @@ import { skillMatcher } from "./skill-matcher.service.js";
 
 export { DASHBOARD_TOP_MATCH_THRESHOLD };
 
+export type FactorState = "match" | "mismatch" | "unknown";
+
 export type MatchReasonDto = {
   id: string;
   label: string;
@@ -26,10 +28,26 @@ export type MatchFactorDto = {
   label: string;
   weight: number;
   applicable: boolean;
+  state: FactorState;
   ratio: number;
   points: number;
   matched: boolean;
   detail: string;
+};
+
+export type MatchGroupDto = {
+  id: "technical" | "jobFit";
+  label: string;
+  weight: number;
+  applicable: boolean;
+  score: number | null;
+  factorIds: string[];
+};
+
+export type MatchConfidenceDto = {
+  level: "high" | "medium" | "low";
+  score: number;
+  signals: string[];
 };
 
 export type SkillEvidenceDto = {
@@ -51,8 +69,10 @@ export type MatchResultDto = {
   missingSkills: MissingSkillDto[];
   reasons: MatchReasonDto[];
   factors: MatchFactorDto[];
+  groups: MatchGroupDto[];
   skillEvidence: SkillEvidenceDto[];
   skillCoverage: SkillCoverageDto;
+  confidence: MatchConfidenceDto;
   engineVersion: typeof MATCH_ENGINE_VERSION;
 };
 
@@ -81,6 +101,7 @@ export type MatchJobInput = {
   companySlug?: string | null;
   salaryMin?: number | null;
   salaryMax?: number | null;
+  description?: string | null;
   technologies: Array<{ name: string; slug: string }>;
   requirements: string[];
 };
@@ -94,7 +115,7 @@ export type MatchUserContext = {
 };
 
 type FactorEvaluation = {
-  applicable: boolean;
+  state: FactorState;
   ratio: number;
   matched: boolean;
   detail: string;
@@ -142,17 +163,28 @@ const toFactor = (
   weight: number,
   evaluation: FactorEvaluation,
 ): MatchFactorDto => {
-  const points = evaluation.applicable ? evaluation.ratio * weight : 0;
+  const applicable = evaluation.state !== "unknown";
+  const points = applicable ? evaluation.ratio * weight : 0;
   return {
     id,
     label,
     weight,
-    applicable: evaluation.applicable,
-    ratio: evaluation.applicable ? evaluation.ratio : 0,
+    applicable,
+    state: evaluation.state,
+    ratio: applicable ? evaluation.ratio : 0,
     points,
     matched: evaluation.matched,
     detail: evaluation.detail,
   };
+};
+
+const scoreGroup = (factors: MatchFactorDto[]): number | null => {
+  const known = factors.filter((factor) => factor.applicable);
+  if (known.length === 0) return null;
+  const totalWeight = known.reduce((sum, factor) => sum + factor.weight, 0);
+  if (totalWeight <= 0) return null;
+  const weighted = known.reduce((sum, factor) => sum + factor.ratio * factor.weight, 0);
+  return Math.max(0, Math.min(100, Math.round((weighted / totalWeight) * 100)));
 };
 
 export const isAreaCompatible = (
@@ -167,14 +199,14 @@ export const isAreaCompatible = (
   if (inferredArea) {
     return inferredArea === profile.area;
   }
-  return false;
+  return true;
 };
 
 export class MatchEngineService {
   compute(
     profile: MatchProfileInput,
     job: MatchJobInput,
-    _context: MatchUserContext = {},
+    context: MatchUserContext = {},
   ): MatchResultDto {
     const weights = MATCH_WEIGHTS;
     const jobTerms = uniqueJobTermsBySlug(job);
@@ -203,54 +235,76 @@ export class MatchEngineService {
     const skillsFactor = toFactor(
       "factor_skills",
       "Skills",
-      weights.skills,
+      weights.technical.skills,
       this.evaluateSkills(skillCoverage),
     );
     const seniorityFactor = toFactor(
       "factor_seniority",
       "Senioridade",
-      weights.seniority,
+      weights.technical.seniority,
       this.evaluateSeniority(profile, job),
+    );
+    const areaFactor = toFactor(
+      "factor_area",
+      "Área profissional",
+      weights.technical.area,
+      this.evaluateArea(profile, job),
     );
     const modalityFactor = toFactor(
       "factor_modality",
       "Modalidade",
-      weights.modality,
+      weights.jobFit.modality,
       this.evaluateModality(profile, job),
     );
     const locationFactor = toFactor(
       "factor_location",
       "Localização",
-      weights.location,
+      weights.jobFit.location,
       this.evaluateLocation(profile, job),
     );
     const salaryFactor = toFactor(
       "factor_salary",
       "Pretensão salarial",
-      weights.salary,
+      weights.jobFit.salary,
       this.evaluateSalary(profile, job),
     );
-    const areaFactor = toFactor(
-      "factor_area",
-      "Área profissional",
-      weights.area,
-      this.evaluateArea(profile, job),
-    );
 
-    const factors = [
-      skillsFactor,
-      seniorityFactor,
-      modalityFactor,
-      locationFactor,
-      salaryFactor,
-      areaFactor,
+    const technicalFactors = [skillsFactor, seniorityFactor, areaFactor];
+    const jobFitFactors = [modalityFactor, locationFactor, salaryFactor];
+    const factors = [...technicalFactors, ...jobFitFactors];
+
+    const technicalScore = scoreGroup(technicalFactors);
+    const jobFitScore = scoreGroup(jobFitFactors);
+
+    const groups: MatchGroupDto[] = [
+      {
+        id: "technical",
+        label: "Compatibilidade técnica",
+        weight: weights.groups.technical,
+        applicable: technicalScore != null,
+        score: technicalScore,
+        factorIds: technicalFactors.map((factor) => factor.id),
+      },
+      {
+        id: "jobFit",
+        label: "Compatibilidade da vaga",
+        weight: weights.groups.jobFit,
+        applicable: jobFitScore != null,
+        score: jobFitScore,
+        factorIds: jobFitFactors.map((factor) => factor.id),
+      },
     ];
 
-    const applicable = factors.filter((factor) => factor.applicable);
-    const totalWeight = applicable.reduce((sum, factor) => sum + factor.weight, 0);
-    const weighted = applicable.reduce((sum, factor) => sum + factor.ratio * factor.weight, 0);
+    const applicableGroups = groups.filter((group) => group.applicable && group.score != null);
+    const totalGroupWeight = applicableGroups.reduce((sum, group) => sum + group.weight, 0);
+    const weightedGroupScore = applicableGroups.reduce(
+      (sum, group) => sum + (group.score ?? 0) * group.weight,
+      0,
+    );
     const finalScore =
-      totalWeight > 0 ? Math.max(0, Math.min(100, Math.round((weighted / totalWeight) * 100))) : 0;
+      totalGroupWeight > 0
+        ? Math.max(0, Math.min(100, Math.round(weightedGroupScore / totalGroupWeight)))
+        : 50;
 
     const missing = skillEvidence.filter((item) => !item.present).map((item) => item.name);
     const prioritized = [
@@ -258,7 +312,8 @@ export class MatchEngineService {
       ...missing.filter((name) => !COMMON_MISSING_PRIORITY.includes(name)),
     ];
 
-    const reasons = this.buildReasons(factors, skillEvidence, prioritized);
+    const reasons = this.buildReasons(factors, skillEvidence, prioritized, job, context);
+    const confidence = this.buildConfidence(factors, skillCoverage, job);
 
     return {
       score: finalScore,
@@ -271,8 +326,10 @@ export class MatchEngineService {
       })),
       reasons,
       factors,
+      groups,
       skillEvidence,
       skillCoverage,
+      confidence,
       engineVersion: MATCH_ENGINE_VERSION,
     };
   }
@@ -280,7 +337,7 @@ export class MatchEngineService {
   private evaluateSkills(coverage: SkillCoverageDto): FactorEvaluation {
     if (coverage.required === 0) {
       return {
-        applicable: false,
+        state: "unknown",
         ratio: 0,
         matched: false,
         detail: "Vaga sem skills/requisitos identificados",
@@ -289,7 +346,7 @@ export class MatchEngineService {
 
     const ratio = coverage.matched / coverage.required;
     return {
-      applicable: true,
+      state: coverage.matched > 0 ? "match" : "mismatch",
       ratio,
       matched: coverage.matched > 0,
       detail: `${coverage.matched} de ${coverage.required} skills encontradas (${coverage.percent}%)`,
@@ -299,16 +356,16 @@ export class MatchEngineService {
   private evaluateSeniority(profile: MatchProfileInput, job: MatchJobInput): FactorEvaluation {
     if (!profile.seniority || !job.seniority) {
       return {
-        applicable: false,
+        state: "unknown",
         ratio: 0,
         matched: false,
-        detail: "Senioridade não identificada em um dos lados",
+        detail: "Senioridade não identificada",
       };
     }
 
     const compatible = this.isSeniorityCompatible(profile, job);
     return {
-      applicable: true,
+      state: compatible ? "match" : "mismatch",
       ratio: compatible ? 1 : 0,
       matched: compatible,
       detail: compatible ? "Senioridade compatível" : "Senioridade incompatível",
@@ -318,7 +375,7 @@ export class MatchEngineService {
   private evaluateModality(profile: MatchProfileInput, job: MatchJobInput): FactorEvaluation {
     if (!profile.modality) {
       return {
-        applicable: false,
+        state: "unknown",
         ratio: 0,
         matched: false,
         detail: "Modalidade do perfil não identificada",
@@ -327,7 +384,7 @@ export class MatchEngineService {
 
     if (profile.modality === "any") {
       return {
-        applicable: true,
+        state: "match",
         ratio: 1,
         matched: true,
         detail: "Aceita qualquer modalidade",
@@ -336,7 +393,7 @@ export class MatchEngineService {
 
     if (!job.modality) {
       return {
-        applicable: false,
+        state: "unknown",
         ratio: 0,
         matched: false,
         detail: "Modalidade da vaga não identificada",
@@ -345,7 +402,7 @@ export class MatchEngineService {
 
     const compatible = profile.modality === job.modality;
     return {
-      applicable: true,
+      state: compatible ? "match" : "mismatch",
       ratio: compatible ? 1 : 0,
       matched: compatible,
       detail: compatible ? "Modalidade compatível" : "Modalidade incompatível",
@@ -355,7 +412,7 @@ export class MatchEngineService {
   private evaluateLocation(profile: MatchProfileInput, job: MatchJobInput): FactorEvaluation {
     if (job.modality === "remote") {
       return {
-        applicable: true,
+        state: "match",
         ratio: 1,
         matched: true,
         detail: "Vaga remota — localização compatível",
@@ -367,7 +424,7 @@ export class MatchEngineService {
 
     if (!preference && !profile.location) {
       return {
-        applicable: false,
+        state: "unknown",
         ratio: 0,
         matched: false,
         detail: "Preferência de localização não identificada",
@@ -376,7 +433,7 @@ export class MatchEngineService {
 
     if (!jobLocation) {
       return {
-        applicable: false,
+        state: "unknown",
         ratio: 0,
         matched: false,
         detail: "Localização da vaga não identificada",
@@ -385,7 +442,7 @@ export class MatchEngineService {
 
     const compatible = this.isLocationCompatible(profile, job);
     return {
-      applicable: true,
+      state: compatible ? "match" : "mismatch",
       ratio: compatible ? 1 : 0,
       matched: compatible,
       detail: compatible ? "Localização compatível" : "Localização incompatível",
@@ -395,7 +452,7 @@ export class MatchEngineService {
   private evaluateSalary(profile: MatchProfileInput, job: MatchJobInput): FactorEvaluation {
     if (!profile.salaryExpectation || job.salaryMin == null || job.salaryMax == null) {
       return {
-        applicable: false,
+        state: "unknown",
         ratio: 0,
         matched: false,
         detail: "Pretensão salarial ou faixa da vaga não identificada",
@@ -404,7 +461,7 @@ export class MatchEngineService {
 
     const compatible = this.isSalaryCompatible(profile, job);
     return {
-      applicable: true,
+      state: compatible ? "match" : "mismatch",
       ratio: compatible ? 1 : 0,
       matched: compatible,
       detail: compatible ? "Pretensão salarial compatível" : "Pretensão salarial incompatível",
@@ -414,7 +471,7 @@ export class MatchEngineService {
   private evaluateArea(profile: MatchProfileInput, job: MatchJobInput): FactorEvaluation {
     if (!profile.area) {
       return {
-        applicable: false,
+        state: "unknown",
         ratio: 0,
         matched: false,
         detail: "Área do perfil não identificada",
@@ -424,7 +481,7 @@ export class MatchEngineService {
     if (job.area && job.area !== "other") {
       const compatible = job.area === profile.area;
       return {
-        applicable: true,
+        state: compatible ? "match" : "mismatch",
         ratio: compatible ? 1 : 0,
         matched: compatible,
         detail: compatible ? "Área compatível com seu perfil" : "Área incompatível com seu perfil",
@@ -434,16 +491,16 @@ export class MatchEngineService {
     const inferredArea = jobTitleNormalizer.inferArea(job.title ?? "");
     if (!inferredArea) {
       return {
-        applicable: true,
+        state: "unknown",
         ratio: 0,
         matched: false,
-        detail: "Área incompatível com seu perfil",
+        detail: "Área da vaga não identificada",
       };
     }
 
     const compatible = inferredArea === profile.area;
     return {
-      applicable: true,
+      state: compatible ? "match" : "mismatch",
       ratio: compatible ? 1 : 0,
       matched: compatible,
       detail: compatible
@@ -452,10 +509,66 @@ export class MatchEngineService {
     };
   }
 
+  private buildConfidence(
+    factors: MatchFactorDto[],
+    skillCoverage: SkillCoverageDto,
+    job: MatchJobInput,
+  ): MatchConfidenceDto {
+    const signals: string[] = [];
+    let points = 0;
+
+    const knownFactors = factors.filter((factor) => factor.applicable).length;
+    if (knownFactors >= 5) {
+      points += 35;
+      signals.push("Maioria dos fatores conhecidos");
+    } else if (knownFactors >= 3) {
+      points += 20;
+      signals.push("Alguns fatores conhecidos");
+    } else {
+      signals.push("Poucos fatores conhecidos");
+    }
+
+    if (skillCoverage.required >= 4) {
+      points += 25;
+      signals.push("Skills/requisitos extraídos");
+    } else if (skillCoverage.required > 0) {
+      points += 12;
+      signals.push("Algumas skills identificadas");
+    } else {
+      signals.push("Sem tecnologias/requisitos identificados");
+    }
+
+    const descriptionLength = (job.description ?? "").trim().length;
+    if (descriptionLength >= 400) {
+      points += 20;
+      signals.push("Descrição completa");
+    } else if (descriptionLength >= 120) {
+      points += 10;
+      signals.push("Descrição parcial");
+    } else {
+      signals.push("Descrição curta ou ausente");
+    }
+
+    if (job.salaryMin != null && job.salaryMax != null) {
+      points += 10;
+      signals.push("Salário informado");
+    }
+    if (job.modality) {
+      points += 10;
+      signals.push("Modalidade conhecida");
+    }
+
+    const score = Math.max(0, Math.min(100, points));
+    const level = score >= 70 ? "high" : score >= 40 ? "medium" : "low";
+    return { level, score, signals };
+  }
+
   private buildReasons(
     factors: MatchFactorDto[],
     skillEvidence: SkillEvidenceDto[],
     prioritizedMissing: string[],
+    job: MatchJobInput,
+    context: MatchUserContext,
   ): MatchReasonDto[] {
     const reasons: MatchReasonDto[] = [];
 
@@ -463,39 +576,61 @@ export class MatchEngineService {
       if (!factor.applicable) continue;
 
       if (factor.id === "factor_skills") {
-        skillEvidence.forEach((item, index) => {
-          reasons.push({
-            id: `reason_skill_${index}`,
-            label: item.name,
-            matched: item.present,
+        skillEvidence
+          .filter((item) => item.present)
+          .forEach((item, index) => {
+            reasons.push({
+              id: `reason_skill_${index}`,
+              label: `${item.name} encontrado`,
+              matched: true,
+            });
           });
-        });
         continue;
       }
 
+      if (!factor.matched) continue;
+
       const reasonId =
-        factor.id === "factor_area" && !factor.matched
-          ? "reason_area_mismatch"
-          : factor.id === "factor_area" && factor.detail.includes("Cargo")
-            ? "reason_title_area"
-            : factor.id.replace("factor_", "reason_");
+        factor.id === "factor_area" && factor.detail.includes("Cargo")
+          ? "reason_title_area"
+          : factor.id.replace("factor_", "reason_");
 
       reasons.push({
         id: reasonId,
         label: factor.detail,
-        matched: factor.matched,
+        matched: true,
+      });
+    }
+
+    const companySlug = (job.companySlug ?? job.companyName ?? "").toLowerCase();
+    if (companySlug && context.favoriteCompanySlugs?.some((slug) => companySlug.includes(slug))) {
+      reasons.push({
+        id: "reason_favorite_company",
+        label: "Empresa favorita",
+        matched: true,
+      });
+    }
+    if (companySlug && context.pipelineCompanySlugs?.some((slug) => companySlug.includes(slug))) {
+      reasons.push({
+        id: "reason_pipeline_company",
+        label: "Empresa com processo em andamento",
+        matched: true,
+      });
+    }
+    if (companySlug && context.savedJobCompanySlugs?.some((slug) => companySlug.includes(slug))) {
+      reasons.push({
+        id: "reason_saved_company",
+        label: "Empresa já salva",
+        matched: true,
       });
     }
 
     if (prioritizedMissing.length > 0) {
-      const alreadyListed = reasons.some((reason) => reason.id.startsWith("reason_skill_"));
-      if (!alreadyListed) {
-        reasons.push({
-          id: "reason_skills_gap",
-          label: `Competências em falta: ${prioritizedMissing.slice(0, 3).join(", ")}`,
-          matched: false,
-        });
-      }
+      reasons.push({
+        id: "reason_skills_gap",
+        label: `Competências em falta: ${prioritizedMissing.slice(0, 3).join(", ")}`,
+        matched: false,
+      });
     }
 
     return reasons;

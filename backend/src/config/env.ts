@@ -67,7 +67,7 @@ const envSchema = z
       .transform((v) => v === "true"),
     GEMINI_API_KEY: z.string().optional(),
     GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
-    PROMPT_VERSION: z.string().default("career-v2"),
+    PROMPT_VERSION: z.string().default("career-v3"),
     GEMINI_TIMEOUT_MS: z.coerce.number().default(30_000),
     AI_CAREER_DAILY_LIMIT: z.coerce.number().default(5),
     AI_CAREER_DEBOUNCE_MS: z.coerce.number().default(15_000),

@@ -44,12 +44,20 @@ export const JobDetailsSidebarWidget = ({
 );
 
 export const JobDetailsMobileExtrasWidget = ({
+  match,
   insights,
   company,
   relatedJobs,
   timeline,
-}: Omit<JobDetailsSidebarWidgetProps, "match">) => (
+  trackingId,
+  onAddToPipeline,
+}: JobDetailsSidebarWidgetProps) => (
   <div className={JOB_DETAILS_LAYOUT.mobileStack}>
+    <CareerAnalysisCard
+      trackingId={trackingId}
+      matchScore={match?.matchScore.score}
+      onAddToPipeline={onAddToPipeline}
+    />
     {insights.length > 0 ? <JobInsightsCard insights={insights} /> : null}
     {company ? <JobCompanyCard company={company} /> : null}
     <JobRelatedJobsSection jobs={relatedJobs} />

@@ -1,6 +1,7 @@
 import { jobTitleNormalizer } from "../../../match/domain/services/job-title-normalizer.service.js";
 import {
   buildJobSearchFields,
+  extractSectionsFromPlainText,
   inferTechnologiesFromText,
 } from "../../../../shared/utils/job-search-fields.js";
 import type { CreateManualJobInput } from "../../../tracking/domain/entities/job-tracking.entity.js";
@@ -18,7 +19,12 @@ export const manualJobToCatalogInput = (input: CreateManualJobInput): CatalogJob
   const companySlug = slugify(input.companyName);
   const titleSlug = slugify(input.title);
   const description = input.description ?? `${input.title} na ${input.companyName}`;
-  const inferredTech = inferTechnologiesFromText(`${input.title} ${description}`);
+  const sections = extractSectionsFromPlainText(description);
+  const requirements = sections.requirements;
+  const benefits = sections.benefits;
+  const inferredTech = inferTechnologiesFromText(
+    `${input.title} ${description} ${requirements.join(" ")}`,
+  );
   const techMeta = inferredTech.map((name, index) => ({
     id: `tech_${slugify(name)}_${index}`,
     name,
@@ -30,6 +36,9 @@ export const manualJobToCatalogInput = (input: CreateManualJobInput): CatalogJob
     location: input.location,
     description,
     technologies: techMeta,
+    requirements,
+    benefits,
+    responsibilities: sections.responsibilities,
   });
 
   return {
@@ -59,8 +68,9 @@ export const manualJobToCatalogInput = (input: CreateManualJobInput): CatalogJob
     descriptionHtml: searchFields.descriptionHtml,
     metadata: {
       technologies: techMeta,
-      requirements: [],
-      benefits: [],
+      requirements,
+      benefits,
+      responsibilities: sections.responsibilities,
       company: {
         id: `company_${companySlug}`,
         name: input.companyName,

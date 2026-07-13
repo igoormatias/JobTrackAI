@@ -215,6 +215,7 @@ export class CareerAnalysisService {
       location: null,
       salaryMin: null,
       salaryMax: null,
+      description: context.job.description ?? "",
       technologies,
       requirements,
     };

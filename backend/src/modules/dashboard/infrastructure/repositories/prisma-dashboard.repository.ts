@@ -82,6 +82,7 @@ const toMatchJobInput = (job: Job): MatchJobInput => {
     companySlug: job.companySlug,
     salaryMin: job.salaryMin,
     salaryMax: job.salaryMax,
+    description: job.description,
     technologies,
     requirements,
   };
