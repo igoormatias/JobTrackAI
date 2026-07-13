@@ -1,10 +1,7 @@
+import type { MatchScore } from "./job.types.js";
+
 export type JobMatchDto = {
-  matchScore: {
-    score: number;
-    label: "excellent" | "good" | "fair" | "low";
-    reasons: { id: string; label: string; matched: boolean }[];
-    missingSkills: { id: string; name: string }[];
-  };
+  matchScore: MatchScore;
   compatibilityLabel: string;
   engineVersion?: string;
 };
