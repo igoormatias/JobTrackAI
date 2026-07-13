@@ -194,18 +194,25 @@ export class GoogleCalendarProvider implements CalendarProviderPort {
   }
 
   async refreshAccessToken(tokens: CalendarProviderTokens): Promise<CalendarProviderTokens> {
-    const client = this.createOAuthClient(tokens);
-    const { credentials } = await client.refreshAccessToken();
+    try {
+      const client = this.createOAuthClient(tokens);
+      const { credentials } = await client.refreshAccessToken();
 
-    if (!credentials.access_token) {
-      throw new CalendarOAuthError("Não foi possível renovar o token do Google Calendar.", 422);
+      if (!credentials.access_token) {
+        throw new CalendarOAuthError("Não foi possível renovar o token do Google Calendar.", 422);
+      }
+
+      return {
+        accessToken: credentials.access_token,
+        refreshToken: credentials.refresh_token ?? tokens.refreshToken,
+        tokenExpiry: credentials.expiry_date ? new Date(credentials.expiry_date) : null,
+      };
+    } catch (error) {
+      if (error instanceof CalendarOAuthError || error instanceof CalendarConnectionError) {
+        throw error;
+      }
+      throw mapGoogleError(error);
     }
-
-    return {
-      accessToken: credentials.access_token,
-      refreshToken: credentials.refresh_token ?? tokens.refreshToken,
-      tokenExpiry: credentials.expiry_date ? new Date(credentials.expiry_date) : null,
-    };
   }
 
   async createEvent(
@@ -279,7 +286,12 @@ export class GoogleCalendarProvider implements CalendarProviderPort {
     });
 
     return (response.data.items ?? [])
-      .filter((item) => item.id && (item.start?.dateTime || item.start?.date))
+      .filter(
+        (item) =>
+          item.id &&
+          (item.start?.dateTime || item.start?.date) &&
+          (item.end?.dateTime || item.end?.date),
+      )
       .map((item) => mapGoogleEvent(item));
   }
 }

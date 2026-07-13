@@ -1,4 +1,5 @@
 import type { UseCase } from "../../../../shared/application/use-case.js";
+import { logger } from "../../../../config/logger.js";
 import type { CalendarProviderPort } from "../../../calendar/domain/ports/calendar-provider.port.js";
 import type { CalendarIntegrationRepository } from "../../../calendar/domain/repositories/calendar-integration.repository.js";
 import { CareerEventsService } from "../../../calendar/application/services/career-events.service.js";
@@ -20,7 +21,27 @@ export class GetDashboardUseCase implements UseCase<string, DashboardResponseDto
     const data = await this.dashboardRepository.getDashboardData(userId);
     const now = Date.now();
     const horizonEnd = new Date(now + 90 * 86_400_000).toISOString();
-    const allUpcoming = await this.careerEvents.listEvents(userId, new Date(), new Date(horizonEnd));
+
+    let allUpcoming: Awaited<ReturnType<CareerEventsService["listEvents"]>> = [];
+    try {
+      allUpcoming = await this.careerEvents.listEvents(
+        userId,
+        new Date(),
+        new Date(horizonEnd),
+        { degradeOnProviderFailure: true },
+      );
+    } catch (error) {
+      logger.error(
+        {
+          err: error,
+          userId,
+          method: "GetDashboardUseCase.execute.careerEvents",
+        },
+        "Failed to load upcoming career events for dashboard",
+      );
+      allUpcoming = [];
+    }
+
     const futureEvents = allUpcoming
       .filter((event) => new Date(event.start).getTime() >= now)
       .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());

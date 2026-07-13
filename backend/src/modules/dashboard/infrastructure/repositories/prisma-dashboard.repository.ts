@@ -57,6 +57,21 @@ const toMatchProfileInput = (profile: Profile | null): MatchProfileInput => ({
 
 const toMatchJobInput = (job: Job): MatchJobInput => {
   const metadata = parseJobMetadata(job.metadata);
+  const technologies = (metadata.technologies ?? []).filter(
+    (tech): tech is { name: string; slug: string } =>
+      typeof tech === "object" &&
+      tech !== null &&
+      typeof tech.name === "string" &&
+      tech.name.trim().length > 0,
+  ).map((tech) => ({
+    name: tech.name,
+    slug: typeof tech.slug === "string" && tech.slug.trim().length > 0 ? tech.slug : tech.name,
+  }));
+  const requirements = (metadata.requirements ?? []).filter(
+    (requirement): requirement is string =>
+      typeof requirement === "string" && requirement.trim().length > 0,
+  );
+
   return {
     title: job.title,
     area: job.area,
@@ -67,8 +82,8 @@ const toMatchJobInput = (job: Job): MatchJobInput => {
     companySlug: job.companySlug,
     salaryMin: job.salaryMin,
     salaryMax: job.salaryMax,
-    technologies: metadata.technologies ?? [],
-    requirements: metadata.requirements ?? [],
+    technologies,
+    requirements,
   };
 };
 

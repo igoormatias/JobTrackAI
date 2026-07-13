@@ -1,4 +1,5 @@
 import { prisma } from "../../../../database/prisma.js";
+import { logger } from "../../../../config/logger.js";
 import { PIPELINE_STAGE_LABELS, type PipelineStage } from "../../../../shared/domain/pipeline-stage.js";
 import type { CalendarProviderPort } from "../../domain/ports/calendar-provider.port.js";
 import type { CalendarIntegrationRepository } from "../../domain/repositories/calendar-integration.repository.js";
@@ -23,6 +24,10 @@ export type CareerEvent = {
   calendarEventId?: string | null;
 };
 
+export type ListCareerEventsOptions = {
+  degradeOnProviderFailure?: boolean;
+};
+
 export class CareerEventsService {
   private readonly tokenService: CalendarTokenService;
 
@@ -33,7 +38,12 @@ export class CareerEventsService {
     this.tokenService = new CalendarTokenService(repository, provider);
   }
 
-  async listEvents(userId: string, from: Date, to: Date): Promise<CareerEvent[]> {
+  async listEvents(
+    userId: string,
+    from: Date,
+    to: Date,
+    options?: ListCareerEventsOptions,
+  ): Promise<CareerEvent[]> {
     const localInterviews = await prisma.interview.findMany({
       where: {
         tracking: { userId },
@@ -74,35 +84,51 @@ export class CareerEventsService {
       };
     });
 
-    const fresh = await this.tokenService.getFreshTokens(userId);
-    if (!fresh) {
+    try {
+      const fresh = await this.tokenService.getFreshTokens(userId);
+      if (!fresh) {
+        return localEvents;
+      }
+
+      const googleEvents = await this.provider.listEvents(
+        fresh.calendarId,
+        from,
+        to,
+        fresh.tokens,
+        this.tokenService.createRefreshCallback(userId),
+      );
+
+      const remoteEvents: CareerEvent[] = googleEvents
+        .filter((event) => !googleEventIds.has(event.id))
+        .map((event) => ({
+          id: event.id,
+          summary: event.summary,
+          description: event.description ?? null,
+          location: event.location ?? null,
+          htmlLink: event.htmlLink ?? null,
+          start: event.start.toISOString(),
+          end: event.end.toISOString(),
+          source: "google",
+        }));
+
+      return [...localEvents, ...remoteEvents].sort(
+        (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
+      );
+    } catch (error) {
+      if (!options?.degradeOnProviderFailure) {
+        throw error;
+      }
+
+      logger.error(
+        {
+          err: error,
+          userId,
+          method: "CareerEventsService.listEvents",
+        },
+        "Google Calendar enrichment failed; returning local interviews only",
+      );
       return localEvents;
     }
-
-    const googleEvents = await this.provider.listEvents(
-      fresh.calendarId,
-      from,
-      to,
-      fresh.tokens,
-      this.tokenService.createRefreshCallback(userId),
-    );
-
-    const remoteEvents: CareerEvent[] = googleEvents
-      .filter((event) => !googleEventIds.has(event.id))
-      .map((event) => ({
-        id: event.id,
-        summary: event.summary,
-        description: event.description ?? null,
-        location: event.location ?? null,
-        htmlLink: event.htmlLink ?? null,
-        start: event.start.toISOString(),
-        end: event.end.toISOString(),
-        source: "google",
-      }));
-
-    return [...localEvents, ...remoteEvents].sort(
-      (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
-    );
   }
 
   async getUpcomingEvents(userId: string, limit = 5): Promise<CareerEvent[]> {
