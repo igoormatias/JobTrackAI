@@ -6,9 +6,8 @@ import { parseCareerAnalysisResponse } from "./career-analysis.response-parser.j
 const validPayload = {
   summary: "Resumo",
   matchExplanation: "Explicação",
-  strengths: ["React"],
-  weaknesses: ["Docker"],
-  missingSkills: ["Kubernetes"],
+  strengths: ["React encontrado no perfil"],
+  weaknesses: ["Docker não encontrado"],
   learningRecommendations: ["Estudar Docker"],
   interviewPreparation: ["Revisar projetos"],
   careerInsights: ["Boa trilha frontend"],
@@ -17,10 +16,11 @@ const validPayload = {
 };
 
 describe("parseCareerAnalysisResponse", () => {
-  it("parses plain JSON", () => {
+  it("parses plain JSON without missingSkills from the model", () => {
     const result = parseCareerAnalysisResponse(JSON.stringify(validPayload));
     expect(result.summary).toBe("Resumo");
     expect(result.confidence).toBe(0.85);
+    expect(result).not.toHaveProperty("missingSkills");
   });
 
   it("parses fenced JSON", () => {

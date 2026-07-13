@@ -24,6 +24,7 @@ const sampleJob = (id: string): Job => ({
   sourceUrl: "https://example.com",
   status: "active",
   isFavorite: false,
+  isTracked: false,
   engagementState: "new",
   matchScore: { score: 80, label: "good", reasons: [], missingSkills: [] },
   publishedAt: new Date().toISOString(),

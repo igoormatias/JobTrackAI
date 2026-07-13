@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { CareerAnalysisCard } from "@/features/ai/components/CareerAnalysisCard";
+import { MatchBreakdownCard } from "@/features/recommendations/components/MatchBreakdownCard";
 import { ACTION_LABELS } from "@/constants/action-labels";
 import { OpenOriginalJobButton, JobAvailableSources } from "@/features/jobs/components/JobAvailableSources";
 import { formatModality } from "@/features/jobs/utils/job-formatters";
@@ -403,6 +404,7 @@ export const ProcessDetailPage = ({ trackingId }: ProcessDetailPageProps) => {
         </div>
 
         <div className={`${PROCESS_DETAIL_LAYOUT.sidebar} min-w-0 space-y-4`}>
+          <MatchBreakdownCard matchScore={tracking.job.matchScore} />
           <CareerAnalysisCard
             trackingId={tracking.id}
             matchScore={tracking.job.matchScore.score}

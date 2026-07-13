@@ -24,6 +24,11 @@ export const toMatchScore = (result: MatchResultDto): MatchScore => ({
   label: result.label,
   reasons: result.reasons,
   missingSkills: result.missingSkills.map(({ id, name }) => ({ id, name })),
+  matchedSkills: result.matchedSkills,
+  factors: result.factors,
+  skillEvidence: result.skillEvidence,
+  skillCoverage: result.skillCoverage,
+  engineVersion: result.engineVersion,
 });
 
 export const getEngagementState = (

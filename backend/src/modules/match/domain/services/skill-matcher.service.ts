@@ -1,35 +1,20 @@
-import { slugifySkill } from "../../../../shared/domain/skill-slug.js";
-
-/** Alias slug → canonical slug for synchronous match scoring. */
-const SKILL_ALIAS_TO_CANONICAL: Record<string, string> = {
-  reactjs: "react",
-  "react-js": "react",
-  nodejs: "node-js",
-  "node-js": "node-js",
-  ts: "typescript",
-  js: "javascript",
-  nextjs: "next-js",
-  "next-js": "next-js",
-  vuejs: "vue",
-  angularjs: "angular",
-};
+import {
+  canonicalizeSkill,
+  canonicalizeSkills,
+  skillsMatch,
+} from "../../../../shared/domain/skill-normalization.js";
 
 export class SkillMatcher {
   canonicalize(name: string): string {
-    const slug = slugifySkill(name);
-    return SKILL_ALIAS_TO_CANONICAL[slug] ?? slug;
+    return canonicalizeSkill(name);
   }
 
   canonicalizeMany(names: string[]): string[] {
-    return [...new Set(names.map((name) => this.canonicalize(name)))];
+    return canonicalizeSkills(names);
   }
 
   matches(profileSkill: string, jobTerm: string): boolean {
-    const profileSlug = this.canonicalize(profileSkill);
-    const jobSlug = this.canonicalize(jobTerm);
-    if (!profileSlug || !jobSlug) return false;
-    if (profileSlug === jobSlug) return true;
-    return profileSlug.includes(jobSlug) || jobSlug.includes(profileSlug);
+    return skillsMatch(profileSkill, jobTerm);
   }
 
   findMatches(profileSkills: string[], jobTerms: string[]): string[] {
@@ -39,6 +24,10 @@ export class SkillMatcher {
       if (hit) matched.push(skill);
     }
     return matched;
+  }
+
+  profileHasTerm(profileSkills: string[], jobTerm: string): boolean {
+    return profileSkills.some((skill) => this.matches(skill, jobTerm));
   }
 }
 

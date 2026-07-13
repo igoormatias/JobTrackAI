@@ -240,12 +240,13 @@ export class CareerAnalysisService {
         salaryBand: context.profile.salaryBand,
         userSkills:
           userSkills.length > 0
-            ? userSkills
+            ? userSkills.map((skill) => ({
+                skillSlug: skill.skillSlug,
+                skillName: skill.skillName,
+              }))
             : skillNames.map((name) => ({
                 skillSlug: name.toLowerCase(),
                 skillName: name,
-                level: "INTERMEDIATE" as const,
-                status: "OFFICIAL" as const,
               })),
       },
       tracking: {
@@ -263,6 +264,16 @@ export class CareerAnalysisService {
         matchedSkills: match.matchedSkills,
         missingSkills: match.missingSkills.map((s) => s.name),
         engineVersion: match.engineVersion,
+        skillCoverage: match.skillCoverage,
+        factors: match.factors.map((factor) => ({
+          id: factor.id,
+          label: factor.label,
+          weight: factor.weight,
+          applicable: factor.applicable,
+          matched: factor.matched,
+          detail: factor.detail,
+        })),
+        skillEvidence: match.skillEvidence,
       },
       meta: {
         promptVersion: env.PROMPT_VERSION,

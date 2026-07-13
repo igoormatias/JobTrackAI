@@ -27,18 +27,18 @@ const sampleDto: CareerAnalysisResponseDto = {
   provider: "gemini",
   model: "gemini-2.5-flash",
   engineVersion: "ai-career-v1",
-  matchEngineVersion: "rules-v2",
+  matchEngineVersion: "rules-v4",
   cached: false,
 };
 
 const createTestAiRoutes = (getResult: CareerAnalysisResponseDto | null, generateResult?: CareerAnalysisResponseDto) => {
   const getUseCase = {
     execute: async () => getResult,
-  } as GetCareerAnalysisUseCase;
+  } as unknown as GetCareerAnalysisUseCase;
 
   const generateUseCase = {
     execute: async () => generateResult ?? sampleDto,
-  } as GenerateCareerAnalysisUseCase;
+  } as unknown as GenerateCareerAnalysisUseCase;
 
   const router = Router();
   const controller = new AiCareerAnalysisController(getUseCase, generateUseCase);

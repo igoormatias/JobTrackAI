@@ -20,7 +20,7 @@ const baseSnapshot = (): AnalysisSnapshot => ({
     modality: "remote",
     location: "SP",
     salaryBand: "10-15k",
-    userSkills: [{ skillSlug: "react", skillName: "React", level: "ADVANCED", status: "OFFICIAL" }],
+    userSkills: [{ skillSlug: "react", skillName: "React" }],
   },
   tracking: { stage: "applied", notes: null, priority: "MEDIUM" },
   timeline: [],
@@ -28,11 +28,17 @@ const baseSnapshot = (): AnalysisSnapshot => ({
     score: 80,
     matchedSkills: ["react"],
     missingSkills: ["docker"],
-    engineVersion: "rules-v2",
+    engineVersion: "rules-v4",
+    skillCoverage: { matched: 1, required: 2, percent: 50 },
+    factors: [],
+    skillEvidence: [
+      { name: "react", slug: "react", present: true },
+      { name: "docker", slug: "docker", present: false },
+    ],
   },
   meta: {
-    promptVersion: "career-v1",
-    matchEngineVersion: "rules-v2",
+    promptVersion: "career-v2",
+    matchEngineVersion: "rules-v4",
     model: "gemini-2.5-flash",
   },
 });
@@ -45,7 +51,7 @@ describe("computeAnalysisHash", () => {
 
   it("changes when prompt version changes", () => {
     const a = baseSnapshot();
-    const b = { ...baseSnapshot(), meta: { ...baseSnapshot().meta, promptVersion: "career-v2" } };
+    const b = { ...baseSnapshot(), meta: { ...baseSnapshot().meta, promptVersion: "career-v3" } };
     expect(computeAnalysisHash(a)).not.toBe(computeAnalysisHash(b));
   });
 });

@@ -4,6 +4,7 @@ import type { Application } from "@/types";
 
 import { Badge } from "@/components/ui/Badge";
 import { CareerAnalysisCard } from "@/features/ai/components/CareerAnalysisCard";
+import { MatchBreakdownCard } from "@/features/recommendations/components/MatchBreakdownCard";
 import { MatchScoreBadge } from "@/features/recommendations/components/MatchScoreBadge";
 import { formatModality } from "@/features/jobs/utils/job-formatters";
 
@@ -27,6 +28,7 @@ export const PipelineDetailContent = ({ application }: PipelineDetailContentProp
       </div>
 
       <MatchScoreBadge matchScore={job.matchScore} />
+      <MatchBreakdownCard matchScore={job.matchScore} />
 
       <CareerAnalysisCard trackingId={application.id} matchScore={job.matchScore.score} />
 

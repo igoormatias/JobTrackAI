@@ -117,6 +117,7 @@ export class GeminiProvider implements AIProviderPort {
     const parsed = parseCareerAnalysisResponse(result.rawJson);
     return {
       ...parsed,
+      missingSkills: input.snapshot.match.missingSkills,
       promptTokens: result.promptTokens,
       completionTokens: result.completionTokens,
     };

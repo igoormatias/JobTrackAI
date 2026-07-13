@@ -14,7 +14,7 @@ const snapshot = (): AnalysisSnapshot => ({
   },
   profile: {
     location: "SP",
-    userSkills: [],
+    userSkills: [{ skillSlug: "react", skillName: "React" }],
   },
   tracking: { stage: "applied", priority: "MEDIUM" },
   timeline: Array.from({ length: 8 }, (_, i) => ({
@@ -24,13 +24,28 @@ const snapshot = (): AnalysisSnapshot => ({
   })),
   match: {
     score: 70,
-    matchedSkills: ["react"],
-    missingSkills: [],
-    engineVersion: "rules-v2",
+    matchedSkills: ["React"],
+    missingSkills: ["Docker"],
+    engineVersion: "rules-v4",
+    skillCoverage: { matched: 1, required: 2, percent: 50 },
+    factors: [
+      {
+        id: "factor_skills",
+        label: "Skills",
+        weight: 50,
+        applicable: true,
+        matched: true,
+        detail: "1 de 2 skills encontradas (50%)",
+      },
+    ],
+    skillEvidence: [
+      { name: "React", slug: "react", present: true },
+      { name: "Docker", slug: "docker", present: false },
+    ],
   },
   meta: {
-    promptVersion: "career-v1",
-    matchEngineVersion: "rules-v2",
+    promptVersion: "career-v2",
+    matchEngineVersion: "rules-v4",
     model: "gemini-2.5-flash",
   },
 });
@@ -43,9 +58,15 @@ describe("career-analysis prompt builder", () => {
     expect(compressed.timeline.length).toBeLessThanOrEqual(5);
   });
 
-  it("builds prompt with match score", () => {
+  it("builds evidence-based prompt without proficiency levels", () => {
     const prompt = buildCareerAnalysisPrompt(snapshot());
     expect(prompt).toContain("70%");
-    expect(prompt).toContain("rules-v2");
+    expect(prompt).toContain("rules-v4");
+    expect(prompt).toContain("Nunca invente nível de conhecimento");
+    expect(prompt).toContain("Cobertura de skills: 1 de 2 (50%)");
+    expect(prompt).toContain("✔ React");
+    expect(prompt).toContain("✖ Docker");
+    expect(prompt).not.toMatch(/\(INTERMEDIATE\)|\(ADVANCED\)|\(BEGINNER\)|\(EXPERT\)/);
+    expect(prompt).not.toContain('"missingSkills"');
   });
 });

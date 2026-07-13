@@ -1,4 +1,4 @@
-export type SkillLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
+export type SkillLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT" | "UNSPECIFIED";
 export type SkillStatus = "OFFICIAL" | "CUSTOM";
 
 export type SkillRecord = {
@@ -14,6 +14,11 @@ export type UserSkillRecord = {
   skillName: string;
   level: SkillLevel;
   status: SkillStatus;
+};
+
+export type SnapshotSkill = {
+  skillSlug: string;
+  skillName: string;
 };
 
 export type CareerAnalysisResult = {
@@ -48,6 +53,31 @@ export type TimelineSnapshot = {
   occurredAt: string;
 };
 
+export type AnalysisMatchEvidence = {
+  score: number;
+  matchedSkills: string[];
+  missingSkills: string[];
+  engineVersion: string;
+  skillCoverage: {
+    matched: number;
+    required: number;
+    percent: number;
+  };
+  factors: Array<{
+    id: string;
+    label: string;
+    weight: number;
+    applicable: boolean;
+    matched: boolean;
+    detail: string;
+  }>;
+  skillEvidence: Array<{
+    name: string;
+    slug: string;
+    present: boolean;
+  }>;
+};
+
 export type AnalysisSnapshot = {
   job: {
     id: string;
@@ -65,7 +95,7 @@ export type AnalysisSnapshot = {
     modality?: string | null;
     location: string;
     salaryBand?: string | null;
-    userSkills: UserSkillRecord[];
+    userSkills: SnapshotSkill[];
   };
   tracking: {
     stage: string;
@@ -73,12 +103,7 @@ export type AnalysisSnapshot = {
     priority: string;
   };
   timeline: TimelineSnapshot[];
-  match: {
-    score: number;
-    matchedSkills: string[];
-    missingSkills: string[];
-    engineVersion: string;
-  };
+  match: AnalysisMatchEvidence;
   meta: {
     promptVersion: string;
     matchEngineVersion: string;

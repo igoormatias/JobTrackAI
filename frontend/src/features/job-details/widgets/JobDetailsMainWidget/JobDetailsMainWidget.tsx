@@ -9,6 +9,7 @@ import { JobLearningGapsCard } from "../../components/JobLearningGapsCard";
 import { JobMatchScoreCircle } from "../../components/JobMatchScoreCircle";
 import { JobTechnologiesCard } from "../../components/JobTechnologiesCard";
 import { JobWhyThisJobCard } from "../../components/JobWhyThisJobCard";
+import { MatchBreakdownCard } from "@/features/recommendations/components/MatchBreakdownCard";
 import { JOB_DETAILS_LAYOUT } from "../../constants/job-details-constants";
 
 export type JobDetailsMainWidgetProps = {
@@ -26,6 +27,7 @@ export const JobDetailsMainWidget = ({ job, match, gaps }: JobDetailsMainWidgetP
       </div>
     ) : null}
     {match ? <JobWhyThisJobCard reasons={match.matchScore.reasons} /> : null}
+    {match ? <MatchBreakdownCard matchScore={match.matchScore} /> : null}
     <JobLearningGapsCard gaps={gaps} />
     <JobDescriptionCard job={job} />
     <JobTechnologiesCard technologies={job.technologies} />

@@ -25,6 +25,7 @@ const sampleJob = (id: string): Job => ({
   sourceUrl: "https://example.com",
   status: "active",
   isFavorite: false,
+  isTracked: false,
   engagementState: "new",
   matchScore: {
     score: 88,
@@ -49,7 +50,7 @@ describe("JobDetailsService", () => {
 
     expect(match.matchScore.score).toBe(88);
     expect(match.compatibilityLabel).toBeTruthy();
-    expect(match.engineVersion).toBe("rules-v2");
+    expect(match.engineVersion).toBe("rules-v4");
   });
 
   it("returns related jobs from catalog query", async () => {

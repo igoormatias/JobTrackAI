@@ -16,12 +16,27 @@ export const compressAnalysisSnapshot = (snapshot: AnalysisSnapshot): AnalysisSn
 
 export const buildCareerAnalysisPrompt = (snapshot: AnalysisSnapshot): string => {
   const compressed = compressAnalysisSnapshot(snapshot);
+  const coverage = compressed.match.skillCoverage;
+  const applicableFactors = compressed.match.factors.filter((factor) => factor.applicable);
+  const skillChecklist = compressed.match.skillEvidence
+    .map((item) => `${item.present ? "✔" : "✖"} ${item.name}`)
+    .join("\n");
+  const factorChecklist = applicableFactors
+    .map((factor) => `${factor.matched ? "✔" : "✖"} ${factor.label}: ${factor.detail}`)
+    .join("\n");
 
   return `Você é um career coach especializado em tecnologia. Responda em português do Brasil.
 
 REGRAS OBRIGATÓRIAS:
 - O match score (${compressed.match.score}%) já foi calculado pelo engine "${compressed.match.engineVersion}". NÃO recalcule nem altere o score.
-- Explique o match com base nos dados fornecidos.
+- Nunca invente nível de conhecimento, senioridade técnica ou proficiência.
+- Utilize exclusivamente os dados recebidos.
+- Caso uma informação não exista, informe que ela não foi identificada.
+- Nunca faça inferências sobre nível técnico.
+- Nunca use palavras como "básico", "intermediário", "avançado", "especialista", "domínio" ou "pouca/muita experiência" para skills.
+- Pontos fortes: cite apenas skills/fatores marcados como encontrados/compatíveis nos dados.
+- Pontos de atenção: cite apenas skills/fatores marcados como não encontrados/incompatíveis.
+- Recomendações: sugira apenas lacunas listadas em "Skills em falta". Nunca sugerir skills já presentes no perfil.
 - Seja prático, objetivo e acionável.
 - Retorne APENAS JSON válido no schema solicitado.
 
@@ -39,7 +54,7 @@ PERFIL DO USUÁRIO:
 - Senioridade: ${compressed.profile.seniority ?? "não informada"}
 - Modalidade: ${compressed.profile.modality ?? "não informada"}
 - Localização: ${compressed.profile.location}
-- Skills: ${compressed.profile.userSkills.map((s) => `${s.skillName} (${s.level})`).join(", ") || "não informadas"}
+- Skills: ${compressed.profile.userSkills.map((s) => s.skillName).join(", ") || "não informadas"}
 
 PROCESSO SELETIVO:
 - Estágio atual: ${compressed.tracking.stage}
@@ -47,10 +62,15 @@ PROCESSO SELETIVO:
 - Notas: ${compressed.tracking.notes ?? "nenhuma"}
 - Timeline recente: ${compressed.timeline.map((e) => `${e.type}: ${e.title}`).join(" | ") || "vazia"}
 
-MATCH ENGINE (rules-v2):
+MATCH ENGINE (${compressed.match.engineVersion}) — EVIDÊNCIA DETERMINÍSTICA:
 - Score: ${compressed.match.score}%
+- Cobertura de skills: ${coverage.matched} de ${coverage.required} (${coverage.percent}%)
 - Skills compatíveis: ${compressed.match.matchedSkills.join(", ") || "nenhuma"}
 - Skills em falta: ${compressed.match.missingSkills.join(", ") || "nenhuma"}
+- Checklist de skills:
+${skillChecklist || "(vazio)"}
+- Fatores aplicáveis:
+${factorChecklist || "(nenhum)"}
 
 Retorne JSON com:
 {
@@ -58,7 +78,6 @@ Retorne JSON com:
   "matchExplanation": "string",
   "strengths": ["string"],
   "weaknesses": ["string"],
-  "missingSkills": ["string"],
   "learningRecommendations": ["string"],
   "interviewPreparation": ["string"],
   "careerInsights": ["string"],

@@ -19,11 +19,39 @@ export type MissingSkill = {
   name: string;
 };
 
+export type MatchFactor = {
+  id: string;
+  label: string;
+  weight: number;
+  applicable: boolean;
+  ratio: number;
+  points: number;
+  matched: boolean;
+  detail: string;
+};
+
+export type SkillEvidence = {
+  name: string;
+  slug: string;
+  present: boolean;
+};
+
+export type SkillCoverage = {
+  matched: number;
+  required: number;
+  percent: number;
+};
+
 export type MatchScore = {
   score: number;
   label: "excellent" | "good" | "fair" | "low";
   reasons: MatchReason[];
   missingSkills: MissingSkill[];
+  matchedSkills?: string[];
+  factors?: MatchFactor[];
+  skillEvidence?: SkillEvidence[];
+  skillCoverage?: SkillCoverage;
+  engineVersion?: string;
 };
 
 export type JobTechnology = {

@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 import { AppError } from "../../../../shared/errors/app-error.js";
+import type { CareerAnalysisResult } from "../../domain/entities/career-analysis.entity.js";
 
 export const careerAnalysisResultSchema = z.object({
   summary: z.string().min(1),
   matchExplanation: z.string().min(1),
   strengths: z.array(z.string()).max(8),
   weaknesses: z.array(z.string()).max(8),
-  missingSkills: z.array(z.string()).max(12),
   learningRecommendations: z.array(z.string()).max(8),
   interviewPreparation: z.array(z.string()).max(8),
   careerInsights: z.array(z.string()).max(6),
@@ -31,7 +31,7 @@ function extractJsonObject(raw: string): string {
   return trimmed;
 }
 
-export const parseCareerAnalysisResponse = (raw: string): CareerAnalysisResultSchema => {
+export const parseCareerAnalysisResponse = (raw: string): Omit<CareerAnalysisResult, "missingSkills"> => {
   try {
     const jsonText = extractJsonObject(raw);
     const parsed = JSON.parse(jsonText) as unknown;
@@ -41,7 +41,6 @@ export const parseCareerAnalysisResponse = (raw: string): CareerAnalysisResultSc
       matchExplanation: validated.matchExplanation.trim(),
       strengths: validated.strengths.map((s) => s.trim()),
       weaknesses: validated.weaknesses.map((s) => s.trim()),
-      missingSkills: validated.missingSkills.map((s) => s.trim()),
       learningRecommendations: validated.learningRecommendations.map((s) => s.trim()),
       interviewPreparation: validated.interviewPreparation.map((s) => s.trim()),
       careerInsights: validated.careerInsights.map((s) => s.trim()),

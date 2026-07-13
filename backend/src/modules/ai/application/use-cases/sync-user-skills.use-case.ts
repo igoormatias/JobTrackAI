@@ -26,7 +26,7 @@ export class SyncUserSkillsUseCase {
       userId,
       skillIds.map((skillId) => ({
         skillId,
-        level: "INTERMEDIATE",
+        level: "UNSPECIFIED",
         status: "OFFICIAL",
       })),
     );

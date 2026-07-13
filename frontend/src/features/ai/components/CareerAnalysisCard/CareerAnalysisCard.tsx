@@ -125,7 +125,11 @@ export const CareerAnalysisCard = ({
         {analysis && showResult ? (
           <div className="space-y-4">
             <p className="text-sm font-medium text-foreground">{analysis.summary}</p>
-            <MatchExplanation matchExplanation={analysis.matchExplanation} matchScore={matchScore} />
+            <MatchExplanation
+              matchExplanation={analysis.matchExplanation}
+              matchScore={matchScore}
+              matchEngineVersion={analysis.matchEngineVersion}
+            />
             {analysis.strengths.length > 0 ? (
               <div className="space-y-1">
                 <h4 className="text-sm font-semibold text-foreground">Pontos fortes</h4>

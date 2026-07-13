@@ -4,3 +4,4 @@ export * from "./utils";
 export * from "./services/recommendation-service";
 export * from "./components/MatchScoreBadge";
 export * from "./components/MatchReasonsList";
+export * from "./components/MatchBreakdownCard";

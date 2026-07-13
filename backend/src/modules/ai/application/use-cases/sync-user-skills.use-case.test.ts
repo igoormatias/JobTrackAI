@@ -23,7 +23,7 @@ describe("SyncUserSkillsUseCase", () => {
     await useCase.execute("user-1", ["React", "React"]);
 
     expect(userSkills.upsertMany).toHaveBeenCalledWith("user-1", [
-      { skillId: "skill-1", level: "INTERMEDIATE", status: "OFFICIAL" },
+      { skillId: "skill-1", level: "UNSPECIFIED", status: "OFFICIAL" },
     ]);
     expect(userSkills.deleteNotInSkillIds).toHaveBeenCalledWith("user-1", ["skill-1"]);
   });
